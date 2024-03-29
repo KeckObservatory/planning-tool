@@ -1,0 +1,74 @@
+{
+    "title": "Star List Target Params",
+    "description": "This document defines the schema for the Keck Star List Targets",
+    "type": "object",
+    "properties": {
+        "target_name": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9\\s]+$",
+            "description": "Target Name"
+        },
+        "observer_id": {
+            "type": "number",
+            "description": "Keck Observer ID"
+        },
+        "j_mag": {
+            "type": "number",
+            "description": "J Magnitude"
+        },
+        "g_mag": {
+            "type": "number",
+            "description": "G Magnitude"
+        },
+        "epoch": {
+            "type": "string",
+            "description": "Epoch"
+        },
+        "pm_dec": {
+            "type": "number",
+            "description": "Proper Motion in Dec"
+        },
+        "pm_ra": {
+            "type": "number",
+            "description": "Proper Motion in RA"
+        },
+        "ra": {
+            "type": "string",
+            "description": "Right Ascension"
+        },
+        "dec": {
+            "type": "string",
+            "description": "Declination"
+        },
+        "ra_deg": {
+            "type": "number",
+            "description": "Right Ascension in degrees"
+        },
+        "dec_deg": {
+            "type": "number",
+            "description": "Declination in degrees"
+        },
+        "comment": {
+            "type": "string",
+            "description": "Notes/comments"
+        },
+        "id": {
+            "type": "string",
+            "description": "target identifier for table"
+        },
+        "tic_id": {
+            "type": "string",
+            "description": "TIC Identifier"
+        },
+        "gaia_id": {
+            "type": "string",
+            "description": "GAIA Identifier"
+        }
+    },
+    "required": [
+        "target_name",
+        "ra",
+        "dec"
+    ],
+    "additionalProperties": true
+}

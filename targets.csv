@@ -1,0 +1,3 @@
+Target Name,Keck Observer ID,J Magnitude,G Magnitude,Epoch,Proper Motion in Dec,Proper Motion in RA,Right Ascension,Declination,Right Ascension in degrees,Declination in degrees,Notes/comments,target identifier for table,TIC Identifier,GAIA Identifier
+M31,,2.094,,J2000,,,00:42:44.330,+41:16:07.50,10.685,619.03,,8c89a73e-a234-5d9c-a2f3-e1d41e374a22,,
+M33,,5.039,15.114,J2000,0.827,0.707,01:33:50.8965749232,+30:39:36.630403128,23.462,459.903,,7a3d5400-e494-5470-a46a-26a52afb9f79,,
