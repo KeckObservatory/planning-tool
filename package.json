@@ -20,6 +20,7 @@
     "@types/react-plotly.js": "^2.6.3",
     "@types/suncalc": "^1.9.2",
     "ajv": "^8.12.0",
+    "aladin-lite": "^3.3.2",
     "axios": "^1.6.5",
     "dayjs": "^1.11.10",
     "ls": "^0.2.1",

@@ -7,6 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import Tooltip from '@mui/material/Tooltip';
 import { Target } from '../App';
 import TwoDView from './two_d_view';
+import Aladin from '../aladin';
 
 
 export interface VTDProps {
@@ -29,6 +30,7 @@ function ViewTargetsDialog(props: VTDProps) {
       <DialogTitle>Selected Target Charts</DialogTitle>
       <DialogContent>
         <TwoDView targets={props.targets} />
+        <Aladin targets={props.targets} />
       </DialogContent>
     </Dialog>
   );
@@ -51,7 +53,7 @@ export default function ViewTargetsDialogButton(props: Props) {
 
   return (
     <>
-        <Tooltip title="Select for a big wall of text">
+        <Tooltip title="Display charts of selected target">
         <IconButton aria-label="help" color="primary" onClick={handleClickOpen}>
           <MultilineChartIcon/>
         </IconButton>

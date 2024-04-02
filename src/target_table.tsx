@@ -84,7 +84,11 @@ function EditToolbar(props: EditToolbarProps) {
   const handleAddTarget = async () => {
     const id = randomId();
     const newTarget = create_new_target(id)
-    setRows((oldRows) => [newTarget, ...oldRows]);
+
+    setRows((oldRows) => {
+      const newRows = [...oldRows, newTarget];
+      localStorage.setItem('targets', JSON.stringify(newRows));
+      return newRows});
     setRowModesModel((oldModel) => ({
       ...oldModel,
       [id]: { mode: GridRowModes.Edit, fieldToFocus: 'target_name' },
@@ -106,7 +110,8 @@ function EditToolbar(props: EditToolbarProps) {
 }
 
 export default function TargetTable() {
-  const [rows, setRows] = React.useState([] as TargetRow[]);
+  const initTargets = localStorage.getItem('targets') ? JSON.parse(localStorage.getItem('targets') as string) : []
+  const [rows, setRows] = React.useState(initTargets as TargetRow[]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [rowSelectionModel, setRowSelectionModel] =
     React.useState<GridRowSelectionModel>([]);
@@ -131,13 +136,18 @@ export default function TargetTable() {
   const handleDeleteClick = async (id: GridRowId) => {
     const delRow = rows.find((row) => row.id === id);
     console.log('deleting', id, delRow)
-    setRows(rows.filter((row) => row.id !== id));
+    setRows(() => {
+      const newRows = rows.filter((row) => row.id !== id)
+      localStorage.setItem('targets', JSON.stringify(newRows));
+      return newRows});
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {
     //sends to server
     const updatedRow = { ...newRow, isNew: false } as TargetRow;
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+    const newRows = rows.map((row) => (row.id === newRow.id ? updatedRow : row))
+    setRows(newRows);
+    localStorage.setItem('targets', JSON.stringify(newRows))
     return updatedRow;
   };
 
@@ -238,7 +248,7 @@ export default function TargetTable() {
           toolbar: EditToolbar,
         }}
         slotProps={{
-          toolbar: { setRows, setRowModesModel, selectedTargets: rowSelectionModel.map((id) => rows.find((row) => row.id === id))},
+          toolbar: { setRows, setRowModesModel, selectedTargets: rowSelectionModel.map((id) => rows.find((row) => row.id === id)) },
         }}
         initialState={{
           columns: {

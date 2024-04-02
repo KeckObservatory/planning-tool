@@ -9,7 +9,9 @@ export const handleTheme = (darkState: boolean | null | undefined): Theme => {
     palette: {
       mode: palletType,
       primary: {
-        main: '#9b35bd',
+        // main: '#9b35bd',
+        // main: '#ffc000',
+        main: '#de632e',
       },
       secondary: {
         main: '#ffd600',
