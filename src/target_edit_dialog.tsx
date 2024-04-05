@@ -34,8 +34,32 @@ export const TargetEditDialog = (props: TargetEditProps) => {
         setHasSimbad(target.tic_id || target.gaia_id ? true : false)
     }, [target.tic_id, target.gaia_id])
 
+    const raDecFormat = (input: string) => {
+        // Strip all characters from the input digits and keep pos/neg sign
+        const sign = input.length > 0 ? input[0].replace(/[^+-]/, "") : ""
+        input = input.replace(/[^0-9]+/g, "");
+
+        // Based upon the length of the string, we add formatting as necessary
+        var size = input.length;
+        if (size < 3) {
+            input = input;
+        }
+        else if (size < 5) {
+            input = input.substring(0, 2) + ':' + input.substring(2, 4);
+        } else if (size < 7) {
+            input = input.substring(0, 2) + ':' + input.substring(2, 4) + ':' + input.substring(4, 6);
+        } else {
+            input = input.substring(0, 2) + ':' + input.substring(2, 4) + ':' + input.substring(4, 6) + '.' + input.substring(6);
+        }
+        return sign + input;
+    }
+
     const handleTextChange = (key: string, value?: string | number, isNumber = false) => {
         value && isNumber ? value = Number(value) : value
+        if (value && (key === 'ra' || key === 'dec')) {
+            key==='ra' && String(value).replace(/[^+-]/, "")
+            value = raDecFormat(value as string)
+        }
         setTarget((prev: Target) => {
             return { ...prev, [key]: value }
         })

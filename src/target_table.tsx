@@ -22,7 +22,6 @@ import {
 import {
   randomId,
 } from '@mui/x-data-grid-generator';
-
 import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
 import SimbadButton from './simbad_button';
@@ -32,11 +31,10 @@ import { Target } from './App.tsx';
 import TargetEditDialogButton from './target_edit_dialog.tsx';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 
-interface TargetRow extends Target {
+export interface TargetRow extends Target {
   isNew?: boolean;
   id: string;
 }
-
 
 interface EditToolbarProps {
   setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
@@ -86,9 +84,10 @@ function EditToolbar(props: EditToolbarProps) {
     const newTarget = create_new_target(id)
 
     setRows((oldRows) => {
-      const newRows = [...oldRows, newTarget];
+      const newRows = [newTarget, ...oldRows];
       localStorage.setItem('targets', JSON.stringify(newRows));
-      return newRows});
+      return newRows
+    });
     setRowModesModel((oldModel) => ({
       ...oldModel,
       [id]: { mode: GridRowModes.Edit, fieldToFocus: 'target_name' },
@@ -108,6 +107,19 @@ function EditToolbar(props: EditToolbarProps) {
     </GridToolbarContainer>
   );
 }
+
+export interface TargetsContext {
+  targets: TargetRow[];
+  setTargets: React.Dispatch<React.SetStateAction<TargetRow[]>>;
+}
+
+const init_target_context = {
+  targets: [],
+  setTargets: () => { }
+}
+
+const TargetContext = React.createContext<TargetsContext>(init_target_context);
+export const useTargetContext = () => React.useContext(TargetContext);
 
 export default function TargetTable() {
   const initTargets = localStorage.getItem('targets') ? JSON.parse(localStorage.getItem('targets') as string) : []
@@ -139,7 +151,8 @@ export default function TargetTable() {
     setRows(() => {
       const newRows = rows.filter((row) => row.id !== id)
       localStorage.setItem('targets', JSON.stringify(newRows));
-      return newRows});
+      return newRows
+    });
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {
@@ -211,52 +224,54 @@ export default function TargetTable() {
 
   columns = [...addColumns, ...columns];
 
-  const initVisible = ['actions', 'target_name', 'ra', 'dec', 'id']
+  const initVisible = ['actions', 'target_name', 'ra', 'dec' ]
   const visibleColumns = Object.fromEntries(columns.map((col) => {
     const visible = initVisible.includes(col.field)
     return [col.field, visible]
   }));
 
   return (
-    <Box
-      sx={{
-        height: 500,
-        width: '100%',
-        '& .actions': {
-          color: 'text.secondary',
-        },
-        '& .textPrimary': {
-          color: 'text.primary',
-        },
-      }}
-    >
-      <DataGrid
-        disableRowSelectionOnClick
-        checkboxSelection
-        rows={rows}
-        columns={columns}
-        editMode="row"
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={handleRowModesModelChange}
-        onRowEditStop={handleRowEditStop}
-        onRowSelectionModelChange={(newRowSelectionModel) => {
-          console.log('selected', newRowSelectionModel)
-          setRowSelectionModel(newRowSelectionModel);
+    <TargetContext.Provider value={{ targets: rows, setTargets: setRows }}>
+      <Box
+        sx={{
+          height: 500,
+          width: '100%',
+          '& .actions': {
+            color: 'text.secondary',
+          },
+          '& .textPrimary': {
+            color: 'text.primary',
+          },
         }}
-        rowSelectionModel={rowSelectionModel}
-        slots={{
-          toolbar: EditToolbar,
-        }}
-        slotProps={{
-          toolbar: { setRows, setRowModesModel, selectedTargets: rowSelectionModel.map((id) => rows.find((row) => row.id === id)) },
-        }}
-        initialState={{
-          columns: {
-            columnVisibilityModel:
-              visibleColumns
-          }
-        }}
-      />
-    </Box>
+      >
+        <DataGrid
+          disableRowSelectionOnClick
+          checkboxSelection
+          rows={rows}
+          columns={columns}
+          editMode="row"
+          rowModesModel={rowModesModel}
+          onRowModesModelChange={handleRowModesModelChange}
+          onRowEditStop={handleRowEditStop}
+          onRowSelectionModelChange={(newRowSelectionModel) => {
+            console.log('selected', newRowSelectionModel)
+            setRowSelectionModel(newRowSelectionModel);
+          }}
+          rowSelectionModel={rowSelectionModel}
+          slots={{
+            toolbar: EditToolbar,
+          }}
+          slotProps={{
+            toolbar: { setRows, setRowModesModel, selectedTargets: rowSelectionModel.map((id) => rows.find((row) => row.id === id)) },
+          }}
+          initialState={{
+            columns: {
+              columnVisibilityModel:
+                visibleColumns
+            }
+          }}
+        />
+      </Box>
+    </TargetContext.Provider>
   );
 }

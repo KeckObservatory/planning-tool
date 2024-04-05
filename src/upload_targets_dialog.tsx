@@ -11,7 +11,7 @@ import { Target } from './App';
 import target_schema from './target_schema.json'
 
 interface Props {
-    setTargetNames: Function
+    setTargets: Function
 }
 
 interface UploadProps extends Props {
@@ -40,16 +40,24 @@ const parse_csv = (contents: string) => {
 }
 
 const parse_txt = (contents: string) => {
-    const tgts = contents.split('\n').map((row) => {
+    let tgts = [] as Target[]
+    contents.split('\n').forEach((row) => {
+        if (row === '') return
+        if (row.startsWith('#')) return
         const [target_name, rah, ram, ras, dech, decm, decs, epoch, ...opts] = row.replace(/\s\s+/g, ' ').split(' ')
         const tgt = {
             target_name,
-            ra: `${rah}:${ram}:${ras}`,
-            dec: `${dech}:${decm}:${decs}`,
+            ra: `${rah.padStart(2,'0')}:${ram.padStart(2,'0')}:${ras}`,
+            dec: `${dech.padStart(2,'0')}:${decm.padStart(2,'0')}:${decs}`,
             epoch,
             ...opts
-        } as Target;
-        return tgt;
+        } as Partial<Target>;
+        opts.forEach((opt) => {
+            const [key, value] = opt.split('=')
+            // @ts-ignore
+            tgt[key] = value
+        })
+        tgts.push(tgt);
     });
     return tgts
 }
@@ -67,8 +75,9 @@ export function UploadComponent(props: UploadProps) {
         fileReader.onload = e => {
             const contents = e.target?.result as string
             const tgts = ext?.includes('csv') ? parse_csv(contents) : parse_txt(contents)
+            console.log('tgts', tgts)
             props.setOpen && props.setOpen(false)
-            props.setTargetNames(tgts.map(tgt => tgt.target_name))
+            props.setTargets(tgts)
         };
     };
     return (
@@ -129,7 +138,7 @@ export default function UploadDialog(props: Props) {
                         label={label}
                         setLabel={setLabel}
                         setOpen={setOpen}
-                        setTargetNames={props.setTargetNames} />
+                        setTargets={props.setTargets} />
                 </DialogActions>
             </Dialog>
         </div>

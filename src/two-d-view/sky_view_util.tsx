@@ -6,7 +6,7 @@ export const TIMES_START = -7 //hours from nadir
 export const TIMES_END = 7 //hours from nadir
 export const ROUND_MINUTES = 10 //round nadir to nearest ROUND_MINUTES
 
-const KECK_LAT = 19.8260 //[deg]
+// const KECK_LAT = 19.8260 //[deg]
 const KECK_ELEVATION = 4.1449752 // km
 const RADIUS_EARTH = 6378.1000 // km
 const ATMOSPHERE_HEIGHT = 50.000 // km

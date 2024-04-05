@@ -1,0 +1,27 @@
+# standard star
+G191B2B         05 05 30.60 +52 49 52.99 2000.00  rotdest=0.0 rotmode=PA
+Feige34         10 39 36.71 +43 06 10.1  2000.00  rotdest=0.0 rotmode=PA
+# Lensed Quasars
+SDSSJ0903+5028  09 03 35.062  50 28 19.668 2000.0 rotdest=0.0 rotmode=PA
+HS0818+1227     08 21 38.904  12 17 30.876 2000.0 rotdest=0.0 rotmode=PA
+PSJ0630-1201    06 30 09.048 -12 01 19.56 2000.0 rotdest=0.0 rotmode=PA
+# SuGOHI: Strong arcs or mulitple images are evident: (High Priority)
+HSCJ083338      08 33 38.09  03 35 35.5 2000.0 rotdest=0.0 rotmode=PA
+HSCJ084632      08 46 32.59  -01 54 16.9 2000.0 rotdest=0.0 rotmode=PA
+HSCJ084647      08 46 47.45  04 46 4.8 2000.0 rotdest=0.0 rotmode=PA
+HSCJ085046      08 50 46.61  00 39 5.4 2000.0 rotdest=0.0 rotmode=PA
+HSCJ085618      08 56 18.77  00 37 17.0 2000.0 rotdest=0.0 rotmode=PA
+HSCJ091148      09 11 48.92  04 18 52.9 2000.0 rotdest=0.0 rotmode=PA
+# Arp 143
+Arp143b1        07 46 56.44  39 01 13.566 2000.0 rotdest=188.45 rotmode=PA 
+Arp143b2        07 46 53.61  39 01 15.986 2000.0 rotdest=188.11 rotmode=PA
+Arp143b3        07 46 55.19  39 00 16.740 2000.0 rotdest=188.13 rotmode=PA
+Arp143b4        07 46 58.54  39 01 01.773 2000.0 rotdest=278.00 rotmode=PA
+Arp143b5        07 46 53.45  39 00 56.641 2000.0 rotdest=187.90 rotmode=PA
+Arp143r2        07 46 53.87  39 00 05.556 2000.0 rotdest=32.31 rotmode=PA
+Arp143b6        07 46 55.45  39 00 36.690 2000.0 rotdest=187.52 rotmode=PA
+Arp143b7        07 46 56.20  39 00 54.523 2000.0 rotdest=187.60 rotmode=PA
+Arp143b8        07 46 52.94  39 01 43.795 2000.0 rotdest=98.20 rotmode=PA
+Arp143b9        07 46 53.14  39 00 30.645 2000.0 rotdest=98.20 rotmode=PA
+Arp143r2        07 46 54.23  39 02 12.209 2000.0 rotdest=120.29 rotmode=PA
+

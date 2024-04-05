@@ -17,6 +17,10 @@ import Stack from '@mui/material/Stack';
 // import { save_target } from './api/api_root';
 import LinearProgress, { LinearProgressProps } from '@mui/material/LinearProgress';
 import { Target } from './App.tsx'
+import { useTargetContext, TargetRow } from './target_table.tsx';
+import {
+  randomId,
+} from '@mui/x-data-grid-generator';
 
 
 interface Props {
@@ -27,7 +31,7 @@ interface Props {
 
 function LinearProgressWithLabel(props: LinearProgressProps &
 {
-    targetNames: string[]
+    targets: Target[]
     setTargets: Function,
     open: boolean
 }
@@ -36,25 +40,26 @@ function LinearProgressWithLabel(props: LinearProgressProps &
     const [targetName, setTargetName] = React.useState('')
     const [label, setLabel] = React.useState('Create Targets')
 
-    const { targetNames, setTargets, open } = props
+    const { targets, setTargets, open } = props
     const [progress, setProgress] = React.useState(0)
     const generate_targets_from_list = async () => {
         setLabel('Loading Targets')
         const tgts: Target[] = []
-        for (let idx = 0; idx < targetNames.length; idx++) {
-            const tgtName = targetNames[idx]
+        for (let idx = 0; idx < targets.length; idx++) {
+            const tgt= targets[idx]
+            const tgtName = tgt.target_name as string
             setTargetName(tgtName)
-            console.log(tgtName)
             if (!tgtName) continue
             if (!open) break
-            const target = { target_name: tgtName }
-            const simbadData = await get_simbad_data(tgtName)
-            tgts.push({ ...simbadData, ...target } as Target)
-            setProgress(((idx + 1) / targetNames.length) * 100)
+            const simbadData = await get_simbad_data(tgtName) ?? {}
+            console.log('simbadData', simbadData)
+            tgts.push({ ...simbadData, ...tgt } as Target)
+            setProgress(((idx + 1) / targets.length) * 100)
         }
 
         setProgress(100)
         setTargets(tgts)
+        console.log('tgts', tgts)
         setLabel('Targets Created')
     }
     return (
@@ -86,22 +91,25 @@ const TargetStepper = (props: Props) => {
 
     const [activeStep, setActiveStep] = React.useState(0);
     const [label, setLabel] = React.useState("Load Target Names");
-    const [targetNames, setTargetNames] = React.useState([] as string[])
     const [targets, setTargets] = React.useState([] as Target[])
     const [canContinue, setCanContinue] = React.useState(false)
     const [saveMessage, setSaveMessage] = React.useState('All steps completed - Targets are ready to be saved')
-
+    const targetContext = useTargetContext()
 
     React.useEffect(() => {
-        let cont = false
-        if (activeStep === 0) { cont = targetNames.length > 0 }
         if (activeStep === 1) {
-            cont = targets.length > 0
             setSaveMessage('All steps completed - Targets are ready to be saved')
         }
-    }, [targetNames, targets, activeStep])
+    }, [targets, activeStep])
 
-    const save_targets = async () => {
+    const save_targets = () => {
+        console.log('saving targets')
+        const tgts = targets.map((tgt) => {
+            return { ...tgt, id: randomId() } as TargetRow
+        })
+        window.localStorage.setItem('targets', JSON.stringify(tgts))
+        targetContext.setTargets(tgts)
+        props.setOpen(false)
     }
 
     const setTargetsAndContinue = (targets: Target[]) => {
@@ -109,24 +117,18 @@ const TargetStepper = (props: Props) => {
         setCanContinue(true)
     }
 
-    const setTargetNamesAndContinue = (names: string[]) => {
-        setTargetNames(names)
-        setCanContinue(true)
-    }
-
-
     const stepComponents = [
         {
             label: 'Select File',
             component: <UploadComponent
                 setLabel={setLabel}
                 label={label}
-                setTargetNames={setTargetNamesAndContinue} />
+                setTargets={setTargetsAndContinue} />
         },
         {
             label: 'Create Targets',
             component: <LinearProgressWithLabel
-                targetNames={targetNames}
+                targets={targets}
                 setTargets={setTargetsAndContinue}
                 open={props.open} />
         },

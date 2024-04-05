@@ -2,7 +2,6 @@ import Box from "@mui/material/Box";
 import FormLabel from "@mui/material/FormLabel";
 import Slider from "@mui/material/Slider";
 import dayjs from "dayjs";
-import React from "react";
 
 interface Props {
     nadir: Date
@@ -18,7 +17,7 @@ const TimeSlider = (props: Props) => {
         return dte.format('HH:mm')
     }
 
-    const handleHourOffsetChange = (event: Event, value: number | number[]) => {
+    const handleHourOffsetChange = (_: Event, value: number | number[]) => {
         if (typeof (value) === 'number') {
             const dte = new Date(value)
             props.setTime(dte)

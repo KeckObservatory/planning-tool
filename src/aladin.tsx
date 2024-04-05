@@ -2,8 +2,7 @@ import React from "react"
 import { ra_dec_to_deg } from './two-d-view/sky_view_util.tsx'
 import { Target } from "./App"
 import A from 'aladin-lite'
-import { useDebounceCallback } from "./use_debounce_callback.tsx"
-import { Autocomplete, TextField, Tooltip, Typography } from '@mui/material'
+import { Autocomplete, TextField, Tooltip } from '@mui/material'
 
 const FOVlink = 'INSTRUMENTS_FOV.json'
 const instruments = ['KCWI', 'MOSFIRE']
