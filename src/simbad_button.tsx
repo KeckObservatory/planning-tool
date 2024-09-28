@@ -4,6 +4,7 @@ import { IconButton } from '@mui/material';
 import { get_simbad } from './api/api_root.tsx';
 import ModeStandbyIcon from '@mui/icons-material/ModeStandby';
 import { Target } from './App';
+import { ra_dec_to_deg } from './two-d-view/sky_view_util.tsx';
 
 
 export interface Props {
@@ -12,36 +13,37 @@ export interface Props {
     hasSimbad: boolean
 }
 
-export const ra_dec_to_deg = (time: string | number, dec = false): number => {
-    //if float return
-    if (typeof time === 'number') { //already stored as degree
-        return time
-    }
+// export const ra_dec_to_deg = (time: string | number, dec = false): number => {
+//     //if float return
+//     if (typeof time === 'number') { //already stored as degree
+//         return time
+//     }
 
-    let deg = 0;
-    let sigfig = 3;
-    (time as string).includes('+') || (time as string).includes('-') && (dec = true)
-    try {
-        let [hours, min, sec] = (time as string).split(':')
-        sigfig = sec.split('.')[1].length
-        if (dec) {
-            const decDeg = Number(hours)
-            let sign = Math.sign(decDeg)
-            deg = decDeg // dec is already in degrees
-                + sign * Number(min) / 60
-                + sign * Number(sec) / 3600
-        }
+//     let deg = 0;
+//     let sigfig = 3;
+//     (time as string).includes('+') || (time as string).includes('-') && (dec = true)
+//     try {
+//         let [hours, min, sec] = (time as string).split(':')
+//         sigfig = sec.split('.')[1].length
+//         if (dec) {
+//             const decDeg = Number(hours)
+//             let sign = Math.sign(decDeg)
+//             deg = decDeg // dec is already in degrees
+//                 + sign * Number(min) / 60
+//                 + sign * Number(sec) / 3600
+//             console.log('time', time, 'dec', dec, 'sign', sign, 'decDeg', decDeg, 'hours', hours)
+//         }
 
-        else {
-            deg = Number(hours) * 15 // convert hours to deg
-                + Number(min) / 4
-                + Number(sec) / 240
-        }
-    }
-    finally {
-        return Number(deg.toFixed(sigfig))
-    }
-}
+//         else {
+//             deg = Number(hours) * 15 // convert hours to deg
+//                 + Number(min) / 4
+//                 + Number(sec) / 240
+//         }
+//     }
+//     finally {
+//         return Number(deg.toFixed(sigfig))
+//     }
+// }
 
 export interface SimbadTargetData {
     ra?: string,
@@ -74,7 +76,7 @@ export const get_simbad_data = async (targetName: string): Promise<SimbadTargetD
             simbadData['ra'] = line.split(': ')[1].split(' ').slice(0, 3).join(':')
             simbadData['dec'] = line.split(': ')[1].split(' ').slice(4, 7).join(':')
             simbadData['ra'] && (simbadData['ra_deg'] = ra_dec_to_deg(simbadData['ra']))
-            simbadData['dec'] && (simbadData['dec_deg'] = ra_dec_to_deg(simbadData['dec']))
+            simbadData['dec'] && (simbadData['dec_deg'] = ra_dec_to_deg(simbadData['dec'], true))
             simbadData['epoch'] = line.split('=')[1].split(',')[0]
         }
         else if (line.startsWith('Radial Velocity')) {

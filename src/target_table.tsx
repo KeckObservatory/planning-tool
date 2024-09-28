@@ -30,6 +30,7 @@ import { TargetWizardButton } from './target_wizard';
 import { Target } from './App.tsx';
 import TargetEditDialogButton from './target_edit_dialog.tsx';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
+import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 
 export interface TargetRow extends Target {
   isNew?: boolean;
@@ -206,6 +207,7 @@ export default function TargetTable() {
 
         return [
           <SimbadButton hasSimbad={hasSimbad} target={editTarget} setTarget={setEditTarget} />,
+          <TargetVizButton target={editTarget} />,
           <ValidationDialogButton errors={errors} target={editTarget} />,
           <TargetEditDialogButton
             target={editTarget}
@@ -224,7 +226,7 @@ export default function TargetTable() {
 
   columns = [...addColumns, ...columns];
 
-  const initVisible = ['actions', 'target_name', 'ra', 'dec' ]
+  const initVisible = ['actions', 'target_name', 'ra', 'dec', 'ra_deg', 'dec_deg' ]
   const visibleColumns = Object.fromEntries(columns.map((col) => {
     const visible = initVisible.includes(col.field)
     return [col.field, visible]
@@ -262,6 +264,7 @@ export default function TargetTable() {
             toolbar: EditToolbar,
           }}
           slotProps={{
+            //toolbar: { setRows, setRowModesModel, selectedTargets: rows },
             toolbar: { setRows, setRowModesModel, selectedTargets: rowSelectionModel.map((id) => rows.find((row) => row.id === id)) },
           }}
           initialState={{

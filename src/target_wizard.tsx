@@ -46,14 +46,16 @@ function LinearProgressWithLabel(props: LinearProgressProps &
         setLabel('Loading Targets')
         const tgts: Target[] = []
         for (let idx = 0; idx < targets.length; idx++) {
-            const tgt= targets[idx]
+            let tgt= targets[idx]
             const tgtName = tgt.target_name as string
-            setTargetName(tgtName)
+            setTargetName(`on row ${idx} target: ${tgtName}`)
             if (!tgtName) continue
             if (!open) break
-            const simbadData = await get_simbad_data(tgtName) ?? {}
-            console.log('simbadData', simbadData)
-            tgts.push({ ...simbadData, ...tgt } as Target)
+            //const simbadData = await get_simbad_data(tgtName) ?? {}
+            const simbadData = {}
+            //console.log('simbadData', simbadData)
+            tgt = { ...simbadData, ...tgt} as Target
+            tgts.push(tgt)
             setProgress(((idx + 1) / targets.length) * 100)
         }
 

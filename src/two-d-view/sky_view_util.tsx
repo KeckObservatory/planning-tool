@@ -1,13 +1,13 @@
 import * as SunCalc from 'suncalc'
 
+//TODO: Put in cfg file
+export const KECK_LAT = 19.8260 //[deg]
 export const KECK_LONG = 360 - 155.4747 // Keck Observatory longitude west of Greenwich [deg]
 export const STEP_SIZE = 10 / 60 //hours
 export const TIMES_START = -7 //hours from nadir
 export const TIMES_END = 7 //hours from nadir
 export const ROUND_MINUTES = 10 //round nadir to nearest ROUND_MINUTES
-
-// const KECK_LAT = 19.8260 //[deg]
-const KECK_ELEVATION = 4.1449752 // km
+export const KECK_ELEVATION = 4.1449752 // km
 const RADIUS_EARTH = 6378.1000 // km
 const ATMOSPHERE_HEIGHT = 50.000 // km
 
@@ -24,13 +24,13 @@ export const date_to_juld = (date: Date) => {
 }
 
 export const get_gmt = (date?: Date) => {
+    //NOTE: This uses the J2000 Epoch. This is the same as the GMST at 0h UT on 1 January 2000
     if (!date) date = new Date()
     const JD = date_to_juld(date)
     const T = (JD - 2451545) / 36525;
     let ThetaGMST = 67310.54841 + (876600 * 3600 + 8640184.812866) * T 
     + .093104 * (T**2) - ( 6.2 * 10**-6 ) * ( T**3 )
     ThetaGMST = ( ThetaGMST % ( 86400 * ( ThetaGMST / Math.abs(ThetaGMST) ) ) / 240) % 360
-
     return ThetaGMST 
 }
 
@@ -90,28 +90,51 @@ export const add_hours = (date: Date, hours: number): Date => {
     return newDate
 }
 
-export const get_nadir = (lngLatEl: LngLatEl, date?: Date) => {
+export const get_suncalc_times = (lngLatEl: LngLatEl, date?: Date) => {
     if (!date) {
         date = new Date()
     }
     let times = SunCalc.getTimes(date, lngLatEl.lat, lngLatEl.lng)
+    let nextday = new Date(date.setDate(date.getDate() + 1))
     if (date < times.sunrise) { // sun has not risen yet. use yesterday.
         date.setDate(date.getDate() - 1)
         times = SunCalc.getTimes(date, lngLatEl.lat, lngLatEl.lng)
     }
-    return times.nadir
+    let nextdaytimes = SunCalc.getTimes(nextday, lngLatEl.lat, lngLatEl.lng)
+    times.sunrise = nextdaytimes.sunrise
+    times.sunriseEnd = nextdaytimes.sunriseEnd
+    times.nightEnd = nextdaytimes.nightEnd
+    return times
 }
 
-const get_rounded_date = (minutes: number, date: Date) => {
-    const ms = 1000 * 60 * minutes;
-    const roundedDate = new Date(Math.round(date.getTime() / ms ) * ms)
-    return roundedDate
+const round_date = (minutes: number, date: Date) => {
+    const coeff = 1000 * 60 * minutes;
+    return new Date(Math.round(date.getTime() / coeff) * coeff)
 }
 
-export const get_times = (nadir: Date) => {
-    const nLen = Math.round( ( TIMES_END - TIMES_START ) / STEP_SIZE)
-    const deltaNadir = Array.from({ length: nLen }, (_, idx) => TIMES_START + STEP_SIZE * idx )
-    const roundedNadir = get_rounded_date(ROUND_MINUTES, nadir)
+const round_date_up = (date: Date, minutes: number) => {
+    const coeff = 1000 * 60 * minutes
+    return new Date(Math.ceil(date.getTime() / coeff) * coeff)
+}
+
+const round_date_down = (date: Date, minutes: number) => {
+    const coeff = 1000 * 60 * minutes
+    return new Date(Math.floor(date.getTime() / coeff) * coeff)
+}
+
+export const get_day_times = (startDateTime: Date, endDateTime: Date, stepSize=STEP_SIZE) => {
+    //Used for viz chart
+    const start = round_date_up(startDateTime, stepSize) 
+    const end = round_date_down(endDateTime, stepSize)
+    const nLen = Math.round( ( end.getTime() - start.getTime() ) / (stepSize * 60 * 1000) )
+    let times = Array.from({ length: nLen }, (_, idx) => new Date(start.getTime() + stepSize * 60 * 1000 * idx ))
+    return [start, ...times, end] //and start and end
+}
+
+export const get_times_using_nadir = (nadir: Date, roundMin=ROUND_MINUTES, stepSize=STEP_SIZE) => {
+    const nLen = Math.round( ( TIMES_END - TIMES_START ) / stepSize)
+    const deltaNadir = Array.from({ length: nLen }, (_, idx) => TIMES_START + stepSize * idx )
+    const roundedNadir = round_date(roundMin, nadir)
     return deltaNadir.map((hour: number) => {
         return add_hours(roundedNadir, hour)
     })

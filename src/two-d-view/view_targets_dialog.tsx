@@ -7,7 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import Tooltip from '@mui/material/Tooltip';
 import { Target } from '../App';
 import TwoDView from './two_d_view';
-import Aladin from '../aladin';
+import AladinViewer from '../aladin';
 
 
 export interface VTDProps {
@@ -29,7 +29,7 @@ function ViewTargetsDialog(props: VTDProps) {
     >
       <DialogTitle>Selected Target Charts</DialogTitle>
       <DialogContent>
-        <Aladin targets={props.targets} />
+        <AladinViewer targets={props.targets} />
         <TwoDView targets={props.targets} />
       </DialogContent>
     </Dialog>
