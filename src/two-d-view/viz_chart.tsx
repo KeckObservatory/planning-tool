@@ -84,7 +84,6 @@ const alt_az_observable = (alt: number, az: number, dome: DOME) => {
     const reasons: Array<string> = []
     //nasdeck is blocking the target?
     const targetOverlapsDeck = az >= minDeckAz && az <= maxDeckAz
-    console.log('targetOverlapsDeck', targetOverlapsDeck, az, minDeckAz, maxDeckAz)
     const targetBelowDeck = alt >= minAlt && alt <= deckAlt
     const deckBlocking = targetOverlapsDeck && targetBelowDeck
     deckBlocking && reasons.push('Deck Blocking')

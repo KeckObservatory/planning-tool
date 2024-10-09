@@ -11,7 +11,8 @@
         },
         "observer_id": {
             "type": "number",
-            "description": "Keck Observer ID"
+            "description": "Keck Observer ID",
+            "not_editable_by_user": false
         },
         "j_mag": {
             "type": "number",
@@ -27,10 +28,12 @@
         },
         "pm_dec": {
             "type": "number",
+            "short_description": "PM Dec",
             "description": "Proper Motion in Dec"
         },
         "pm_ra": {
             "type": "number",
+            "short_description": "PM RA",
             "description": "Proper Motion in RA"
         },
         "ra": {
@@ -45,10 +48,12 @@
         },
         "ra_deg": {
             "type": "number",
+            "short_description": "RA (deg)",
             "description": "Right Ascension in degrees"
         },
         "dec_deg": {
             "type": "number",
+            "short_description": "Dec (deg)",
             "description": "Declination in degrees"
         },
         "comment": {
@@ -57,14 +62,17 @@
         },
         "id": {
             "type": "string",
-            "description": "target identifier for table"
+            "description": "target identifier for table",
+            "not_editable_by_user": false
         },
         "tic_id": {
             "type": "string",
+            "short_description": "TIC ID",
             "description": "TIC Identifier"
         },
         "gaia_id": {
             "type": "string",
+            "short_description": "GAIA ID",
             "description": "GAIA Identifier"
         }
     },

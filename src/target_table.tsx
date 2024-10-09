@@ -8,17 +8,20 @@ import {
   GridRowsProp,
   GridRowModesModel,
   GridRowModes,
-  DataGrid,
+  DataGridPro,
   GridColDef,
   GridToolbarContainer,
   GridActionsCellItem,
   GridEventListener,
   GridRowId,
   GridRowModel,
-  GridRowEditStopReasons,
   GridToolbar,
+  useGridApiContext,
+  useGridApiEventHandler,
+  GridRowParams,
+  GRID_CHECKBOX_SELECTION_COL_DEF,
   GridRowSelectionModel,
-} from '@mui/x-data-grid';
+} from '@mui/x-data-grid-pro';
 import {
   randomId,
 } from '@mui/x-data-grid-generator';
@@ -27,15 +30,10 @@ import ValidationDialogButton, { validate } from './validation_check_dialog';
 import SimbadButton from './simbad_button';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
 import { TargetWizardButton } from './target_wizard';
-import { Target } from './App.tsx';
+import { Target, useStateContext } from './App.tsx';
 import TargetEditDialogButton from './target_edit_dialog.tsx';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import { TargetVizButton } from './two-d-view/viz_chart.tsx';
-
-export interface TargetRow extends Target {
-  isNew?: boolean;
-  id: string;
-}
 
 interface EditToolbarProps {
   setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
@@ -48,13 +46,13 @@ interface EditToolbarProps {
 function convert_schema_to_columns() {
   const columns: GridColDef[] = []
   Object.entries(target_schema.properties).forEach(([key, value]: [string, any]) => {
-
     let col = {
       field: key,
+      description: value.description,
       type: value.type,
-      headerName: value.description,
-      width: 180,
-      editable: false,
+      headerName: value.short_description ?? value.description,
+      width: 140,
+      editable: value.editable ?? true,
     } as GridColDef
     columns.push(col)
   });
@@ -63,14 +61,14 @@ function convert_schema_to_columns() {
 }
 
 export const create_new_target = (id?: string, target_name?: string) => {
-  let newTarget: Partial<TargetRow> = {}
+  let newTarget: Partial<Target> = {}
   Object.entries(target_schema.properties).forEach(([key, value]: [string, any]) => {
     // @ts-ignore
     newTarget[key] = value.default
   })
   newTarget = {
     ...newTarget,
-    id: id,
+    _id: id,
     target_name: target_name,
   } as Target
   return newTarget
@@ -110,8 +108,8 @@ function EditToolbar(props: EditToolbarProps) {
 }
 
 export interface TargetsContext {
-  targets: TargetRow[];
-  setTargets: React.Dispatch<React.SetStateAction<TargetRow[]>>;
+  targets: Target[];
+  setTargets: React.Dispatch<React.SetStateAction<Target[]>>;
 }
 
 const init_target_context = {
@@ -123,11 +121,25 @@ const TargetContext = React.createContext<TargetsContext>(init_target_context);
 export const useTargetContext = () => React.useContext(TargetContext);
 
 export default function TargetTable() {
-  const initTargets = localStorage.getItem('targets') ? JSON.parse(localStorage.getItem('targets') as string) : []
-  const [rows, setRows] = React.useState(initTargets as TargetRow[]);
+  const context = useStateContext()
+  const [rows, setRows] = React.useState(context.targets as Target[]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [rowSelectionModel, setRowSelectionModel] =
     React.useState<GridRowSelectionModel>([]);
+  const cfg = context.config
+  let columns = convert_schema_to_columns();
+  const sortOrder = cfg.default_table_columns
+  columns = columns.sort((a, b) => {
+    return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);
+  });
+  const visibleColumns = Object.fromEntries(columns.map((col) => {
+    const visible = cfg.default_table_columns.includes(col.field)
+    return [col.field, visible]
+  }));
+  const csvExportColumns = cfg.csv_order
+  let pinnedColumns = cfg.pinned_table_columns
+  const leftPin = [...new Set([GRID_CHECKBOX_SELECTION_COL_DEF.field, ...cfg.pinned_table_columns.left])]
+  pinnedColumns.left = leftPin 
 
   const edit_target = async (target: Target) => {
     console.log('debounced save', target)
@@ -135,22 +147,15 @@ export default function TargetTable() {
 
   const debounced_save = useDebounceCallback(edit_target, 2000)
 
-  const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
-
   const handleEditClick = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
-
   const handleDeleteClick = async (id: GridRowId) => {
-    const delRow = rows.find((row) => row.id === id);
+    const delRow = rows.find((row) => row._id === id);
     console.log('deleting', id, delRow)
     setRows(() => {
-      const newRows = rows.filter((row) => row.id !== id)
+      const newRows = rows.filter((row) => row._id !== id)
       localStorage.setItem('targets', JSON.stringify(newRows));
       return newRows
     });
@@ -158,8 +163,8 @@ export default function TargetTable() {
 
   const processRowUpdate = (newRow: GridRowModel) => {
     //sends to server
-    const updatedRow = { ...newRow, isNew: false } as TargetRow;
-    const newRows = rows.map((row) => (row.id === newRow.id ? updatedRow : row))
+    const updatedRow = { ...newRow } as Target;
+    const newRows = rows.map((row) => (row._id === newRow._id ? updatedRow : row))
     setRows(newRows);
     localStorage.setItem('targets', JSON.stringify(newRows))
     return updatedRow;
@@ -169,9 +174,59 @@ export default function TargetTable() {
     setRowModesModel(newRowModesModel);
   };
 
+  const ActionsCell = (params: GridRowParams<Target>) => {
+    const { id, row } = params;
+    const [editTarget, setEditTarget] = React.useState<Target>(row);
+    const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
+    const [hasSimbad, setHasSimbad] = React.useState(row.tic_id || row.gaia_id ? true : false);
+    validate(row)
+    const [errors, setErrors] = React.useState<ErrorObject<string, Record<string, any>, unknown>[]>(validate.errors ?? []);
+    const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
 
-  let columns = convert_schema_to_columns();
+    React.useEffect(() => { // when targed is edited in target edit dialog or simbad dialog
+      if (count > 0) {
+        console.log('editTarget updated', editTarget, row)
+        processRowUpdate(editTarget)
+        debounced_save(editTarget)?.then((resp) => {
+          console.log('save response', resp)
+        })
+        validate(editTarget)
+        setErrors(validate.errors ? validate.errors : [])
+        editTarget.tic_id || editTarget.gaia_id && setHasSimbad(true)
+        debounced_edit_click(id)
+      }
+      setCount((prev: number) => prev + 1)
+    }, [editTarget])
 
+    const apiRef = useGridApiContext();
+
+    const handleEvent: GridEventListener<'cellEditStop'> = (params) => {
+      setTimeout(() => { //wait for cell to update before setting editTarget
+        const value = apiRef.current.getCellValue(id, params.field);
+        //Following line is a hack to prevent cellEditStop from firing from non-selected shell.
+        //@ts-ignore
+        if (editTarget[params.field] === value) return //no change detected. not going to set target as edited.
+        setEditTarget({ ...editTarget, [params.field]: value })
+      }, 300)
+    }
+    useGridApiEventHandler(apiRef, 'cellEditStop', handleEvent)
+
+    return [
+      <SimbadButton hasSimbad={hasSimbad} target={editTarget} setTarget={setEditTarget} />,
+      <TargetVizButton target={editTarget} />,
+      <ValidationDialogButton errors={errors} target={editTarget} />,
+      <TargetEditDialogButton
+        target={editTarget}
+        setTarget={setEditTarget}
+      />,
+      <GridActionsCellItem
+        icon={<DeleteIcon />}
+        label="Delete"
+        onClick={() => handleDeleteClick(id)}
+        color="inherit"
+      />,
+    ];
+  }
 
   const addColumns: GridColDef[] = [
     {
@@ -179,58 +234,14 @@ export default function TargetTable() {
       type: 'actions',
       editable: false,
       headerName: 'Actions',
-      width: 300,
+      width: 250,
       disableExport: true,
       cellClassName: 'actions',
-      getActions: ({ id, row }) => {
-        const [editTarget, setEditTarget] = React.useState<TargetRow>(row);
-        const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
-        const [hasSimbad, setHasSimbad] = React.useState(row.tic_id | row.gaia_id ? true : false);
-        validate(row)
-        const [errors, setErrors] = React.useState<ErrorObject<string, Record<string, any>, unknown>[]>(validate.errors ?? []);
-        const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
-
-        React.useEffect(() => { // when targed is edited in target edit dialog or simbad dialog
-          if (count > 0) {
-            console.log('editTarget updated', editTarget, row)
-            processRowUpdate(editTarget)
-            debounced_save(editTarget)?.then((resp) => {
-              console.log('save response', resp)
-            })
-            validate(editTarget)
-            setErrors(validate.errors ? validate.errors : [])
-            editTarget.tic_id || editTarget.gaia_id && setHasSimbad(true)
-            debounced_edit_click(id)
-          }
-          setCount((prev: number) => prev + 1)
-        }, [editTarget])
-
-        return [
-          <SimbadButton hasSimbad={hasSimbad} target={editTarget} setTarget={setEditTarget} />,
-          <TargetVizButton target={editTarget} />,
-          <ValidationDialogButton errors={errors} target={editTarget} />,
-          <TargetEditDialogButton
-            target={editTarget}
-            setTarget={setEditTarget}
-          />,
-          <GridActionsCellItem
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={() => handleDeleteClick(id)}
-            color="inherit"
-          />,
-        ];
-      }
+      getActions: ActionsCell,
     }
   ];
 
   columns = [...addColumns, ...columns];
-
-  const initVisible = ['actions', 'target_name', 'ra', 'dec', 'ra_deg', 'dec_deg' ]
-  const visibleColumns = Object.fromEntries(columns.map((col) => {
-    const visible = initVisible.includes(col.field)
-    return [col.field, visible]
-  }));
 
   return (
     <TargetContext.Provider value={{ targets: rows, setTargets: setRows }}>
@@ -246,34 +257,41 @@ export default function TargetTable() {
           },
         }}
       >
-        <DataGrid
-          disableRowSelectionOnClick
-          checkboxSelection
-          rows={rows}
-          columns={columns}
-          editMode="row"
-          rowModesModel={rowModesModel}
-          onRowModesModelChange={handleRowModesModelChange}
-          onRowEditStop={handleRowEditStop}
-          onRowSelectionModelChange={(newRowSelectionModel) => {
-            console.log('selected', newRowSelectionModel)
-            setRowSelectionModel(newRowSelectionModel);
-          }}
-          rowSelectionModel={rowSelectionModel}
-          slots={{
-            toolbar: EditToolbar,
-          }}
-          slotProps={{
-            //toolbar: { setRows, setRowModesModel, selectedTargets: rows },
-            toolbar: { setRows, setRowModesModel, selectedTargets: rowSelectionModel.map((id) => rows.find((row) => row.id === id)) },
-          }}
-          initialState={{
-            columns: {
-              columnVisibilityModel:
-                visibleColumns
-            }
-          }}
-        />
+        {Object.keys(visibleColumns).length > 0 && (
+          <DataGridPro
+            disableRowSelectionOnClick
+            checkboxSelection
+            rows={rows ?? []}
+            columns={columns}
+            rowModesModel={rowModesModel}
+            onRowModesModelChange={handleRowModesModelChange}
+            slots={{
+              //@ts-ignore
+              toolbar: EditToolbar,
+            }}
+            onRowSelectionModelChange={(newRowSelectionModel) => {
+              setRowSelectionModel(newRowSelectionModel);
+            }}
+            rowSelectionModel={rowSelectionModel}
+            slotProps={{
+              toolbar: {
+                setRows,
+                setRowModesModel,
+                csvOptions: { fields: csvExportColumns, allColumns: true, fileName: `MyTargets` },
+                selectedTargets: rowSelectionModel.map((id) => {
+                  return rows.find((row) => row._id === id)
+                }) 
+              },
+            }}
+            pinnedColumns={pinnedColumns}
+            initialState={{
+              columns: {
+                columnVisibilityModel:
+                  visibleColumns
+              }
+            }}
+          />
+        )}
       </Box>
     </TargetContext.Provider>
   );

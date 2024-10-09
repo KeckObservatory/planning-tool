@@ -25,6 +25,8 @@ export interface Props {
 }
 
 const ajv = new AJV2019({allErrors:true})
+ajv.addKeyword("short_description")
+ajv.addKeyword("not_editable_by_user")
 let ts = target_schema as any
 delete ts["$schema"]
 export const validate = ajv.compile(ts)
@@ -45,7 +47,7 @@ function ValidationDialog(props: SimpleDialogProps) {
             msg = `${err.instancePath.substring(1)}: ${err.message}`
             }
             return (
-              <Typography gutterBottom>
+              <Typography key={msg} gutterBottom>
                 {msg}
               </Typography>)
           })

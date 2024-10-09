@@ -152,6 +152,7 @@ const TwoDView = (props: Props) => {
 
 
     let targets_deg: Target[] = []
+    console.log('targets', props.targets)
     props.targets.forEach((s: Target) => {
         if (s.ra && s.dec) {
             let sd = {

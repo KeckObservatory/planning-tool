@@ -1,0 +1,37 @@
+{
+    "default_table_columns": [
+        "actions",
+        "target_name",
+        "ra",
+        "dec",
+        "j_mag",
+        "g_mag",
+        "pm_ra",
+        "pm_dec"
+    ],
+    "csv_order": [
+        "target_name",
+        "ra",
+        "dec",
+        "j_mag",
+        "g_mag",
+        "epoch",
+        "pm_ra",
+        "pm_dec",
+        "comment",
+        "tic_id",
+        "gaia_id",
+        "ra_deg",
+        "dec_deg",
+        "observer_id"
+        
+    ],
+    "pinned_table_columns": {
+        "left": [
+            "selected",
+            "actions",
+            "target_name"
+        ],
+        "right": [ ]
+    }
+}
