@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TargetRow } from "../target_table";
+import { Target } from "../App";
 import { ra_dec_to_deg, KECK_LONG, KECK_LAT, get_day_times, get_suncalc_times, ROUND_MINUTES, KECK_ELEVATION, get_target_traj, ra_dec_to_az_alt, air_mass } from "./sky_view_util";
 import { DATE_TIME_FORMAT, DomeSelect, KECK_GEOMETRY } from "./two_d_view";
 import dayjs, { Dayjs, ManipulateType } from 'dayjs';
@@ -21,7 +21,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 interface ButtonProps {
-    target: TargetRow
+    target: Target
 }
 
 interface Props extends ButtonProps { //TODO: Is extension needed?
@@ -142,7 +142,7 @@ export const TargetVizButton = (props: ButtonProps) => {
     );
 }
 
-interface TargetViz extends TargetRow {
+interface TargetViz extends Target {
     semester: string
     semester_visibility: DayViz[]
 }
@@ -169,7 +169,7 @@ const get_curr_semester = (date: Date) => {
 }
 
 interface TargetVizDialogProps {
-    open: boolean, target: TargetRow, handleClose: () => void
+    open: boolean, target: Target, handleClose: () => void
 }
 
 const TargetVizDialog = (props: TargetVizDialogProps) => {
@@ -324,8 +324,7 @@ export const TargetVizChart = (props: Props) => {
             type: 'scattergl',
             mode: 'markers',
             showlegend: false,
-            // mode: 'lines+markers',
-            name: targetViz.target_name
+            name: targetViz.target_name ?? 'Target'
         }
         return trace
     }) as any
