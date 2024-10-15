@@ -14,7 +14,6 @@ import {
   GridActionsCellItem,
   GridEventListener,
   GridRowId,
-  GridRowModel,
   GridToolbar,
   useGridApiContext,
   useGridApiEventHandler,
@@ -34,9 +33,11 @@ import { Target, useStateContext } from './App.tsx';
 import TargetEditDialogButton from './target_edit_dialog.tsx';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import { TargetVizButton } from './two-d-view/viz_chart.tsx';
+import { delete_target, submit_target } from './api/api_root.tsx';
 
 interface EditToolbarProps {
   setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
+  obsid: number;
   setRowModesModel: (
     newModel: (oldModel: GridRowModesModel) => GridRowModesModel,
   ) => void;
@@ -60,7 +61,7 @@ function convert_schema_to_columns() {
   return columns;
 }
 
-export const create_new_target = (id?: string, target_name?: string) => {
+export const create_new_target = (id?: string, obsid?: number, target_name?: string) => {
   let newTarget: Partial<Target> = {}
   Object.entries(target_schema.properties).forEach(([key, value]: [string, any]) => {
     // @ts-ignore
@@ -68,10 +69,21 @@ export const create_new_target = (id?: string, target_name?: string) => {
   })
   newTarget = {
     ...newTarget,
+    obsid: obsid,
     _id: id,
     target_name: target_name,
   } as Target
   return newTarget
+}
+
+const submit_one_target = async (target: Target) => {
+    const resp = await submit_target([target])
+    if (resp.errors.length > 0) {
+      console.error('errors', resp)
+      throw new Error('error updating target') 
+    }
+    const submittedTarget = resp.targets[0]
+    return submittedTarget
 }
 
 
@@ -80,11 +92,11 @@ function EditToolbar(props: EditToolbarProps) {
 
   const handleAddTarget = async () => {
     const id = randomId();
-    const newTarget = create_new_target(id)
+    const newTarget = create_new_target(id, props.obsid)
+    const submittedTarget = await submit_one_target(newTarget)
 
     setRows((oldRows) => {
-      const newRows = [newTarget, ...oldRows];
-      localStorage.setItem('targets', JSON.stringify(newRows));
+      const newRows = [submittedTarget, ...oldRows];
       return newRows
     });
     setRowModesModel((oldModel) => ({
@@ -143,6 +155,7 @@ export default function TargetTable() {
 
   const edit_target = async (target: Target) => {
     console.log('debounced save', target)
+    return await submit_one_target(target)
   }
 
   const debounced_save = useDebounceCallback(edit_target, 2000)
@@ -154,20 +167,18 @@ export default function TargetTable() {
   const handleDeleteClick = async (id: GridRowId) => {
     const delRow = rows.find((row) => row._id === id);
     console.log('deleting', id, delRow)
+    delete_target([JSON.stringify(id)])
     setRows(() => {
       const newRows = rows.filter((row) => row._id !== id)
-      localStorage.setItem('targets', JSON.stringify(newRows));
       return newRows
     });
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
+  const processRowUpdate = async (newRow: Target) => {
     //sends to server
-    const updatedRow = { ...newRow } as Target;
-    const newRows = rows.map((row) => (row._id === newRow._id ? updatedRow : row))
+    const newRows = rows.map((row) => (row._id === newRow._id ? newRow : row))
     setRows(newRows);
-    localStorage.setItem('targets', JSON.stringify(newRows))
-    return updatedRow;
+    return newRows;
   };
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
@@ -186,9 +197,9 @@ export default function TargetTable() {
     React.useEffect(() => { // when targed is edited in target edit dialog or simbad dialog
       if (count > 0) {
         console.log('editTarget updated', editTarget, row)
-        processRowUpdate(editTarget)
-        debounced_save(editTarget)?.then((resp) => {
-          console.log('save response', resp)
+        debounced_save(editTarget)?.then((newTgt) => {
+          console.log('save response', newTgt)
+          processRowUpdate(newTgt)
         })
         validate(editTarget)
         setErrors(validate.errors ? validate.errors : [])
@@ -203,6 +214,7 @@ export default function TargetTable() {
     const handleEvent: GridEventListener<'cellEditStop'> = (params) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
         const value = apiRef.current.getCellValue(id, params.field);
+        console.log('cellEditStop', params, value)
         //Following line is a hack to prevent cellEditStop from firing from non-selected shell.
         //@ts-ignore
         if (editTarget[params.field] === value) return //no change detected. not going to set target as edited.
@@ -259,6 +271,7 @@ export default function TargetTable() {
       >
         {Object.keys(visibleColumns).length > 0 && (
           <DataGridPro
+            getRowId={(row) => row._id}
             disableRowSelectionOnClick
             checkboxSelection
             rows={rows ?? []}
@@ -277,6 +290,7 @@ export default function TargetTable() {
               toolbar: {
                 setRows,
                 setRowModesModel,
+                obsid: context.obsid, //TODO: allow admin to edit obsid
                 csvOptions: { fields: csvExportColumns, allColumns: true, fileName: `MyTargets` },
                 selectedTargets: rowSelectionModel.map((id) => {
                   return rows.find((row) => row._id === id)

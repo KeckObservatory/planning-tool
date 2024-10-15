@@ -14,13 +14,15 @@ import { UploadComponent } from './upload_targets_dialog';
 import { get_simbad_data } from './simbad_button.tsx';
 import Tooltip from '@mui/material/Tooltip';
 import Stack from '@mui/material/Stack';
+import { useStateContext } from './App.tsx';
 // import { save_target } from './api/api_root';
 import LinearProgress, { LinearProgressProps } from '@mui/material/LinearProgress';
 import { Target } from './App.tsx'
-import { useTargetContext, TargetRow } from './target_table.tsx';
+import { useTargetContext } from './target_table.tsx';
 import {
   randomId,
 } from '@mui/x-data-grid-generator';
+import { submit_target } from './api/api_root.tsx';
 
 
 interface Props {
@@ -39,6 +41,7 @@ function LinearProgressWithLabel(props: LinearProgressProps &
 
     const [targetName, setTargetName] = React.useState('')
     const [label, setLabel] = React.useState('Create Targets')
+    const context = useStateContext()
 
     const { targets, setTargets, open } = props
     const [progress, setProgress] = React.useState(0)
@@ -51,10 +54,8 @@ function LinearProgressWithLabel(props: LinearProgressProps &
             setTargetName(`on row ${idx} target: ${tgtName}`)
             if (!tgtName) continue
             if (!open) break
-            //const simbadData = await get_simbad_data(tgtName) ?? {}
-            const simbadData = {}
-            //console.log('simbadData', simbadData)
-            tgt = { ...simbadData, ...tgt} as Target
+            const simbadData = await get_simbad_data(tgtName) ?? {}
+            tgt = { ...simbadData, ...tgt, obsid: context.obsid} as Target
             tgts.push(tgt)
             setProgress(((idx + 1) / targets.length) * 100)
         }
@@ -104,13 +105,18 @@ const TargetStepper = (props: Props) => {
         }
     }, [targets, activeStep])
 
-    const save_targets = () => {
+    const save_targets = async () => {
         console.log('saving targets')
         const tgts = targets.map((tgt) => {
-            return { ...tgt, id: randomId() } as TargetRow
+            return { ...tgt, _id: randomId() } as Target
         })
-        window.localStorage.setItem('targets', JSON.stringify(tgts))
-        targetContext.setTargets(tgts)
+
+        const resp = await submit_target(tgts)
+        if (resp.errors) {
+        console.error('errors', resp.errors)
+        }
+
+        targetContext.setTargets((curTgts) => [...tgts, ...curTgts])
         props.setOpen(false)
     }
 

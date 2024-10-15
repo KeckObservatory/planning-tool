@@ -14,6 +14,7 @@ import Alert from '@mui/material/Alert';
 import { LicenseInfo } from '@mui/x-license';
 import licenseKey from './license.json'
 import Skeleton from '@mui/material/Skeleton';
+import { get_targets } from './api/api_root.tsx';
 
 const CONFIG_PATH = './config.json'
 
@@ -136,28 +137,11 @@ function App() {
     return json
   }
 
-  const get_targets = async (): Promise<Target[]> => {
-    // const url = "/get_targets"
-    // const response = await fetch(url); //TODO: enable when ready to release
-    //Mock response for development
-    let initTargets = localStorage.getItem('targets') ? JSON.parse(localStorage.getItem('targets') as string) : []
-    const response = {
-      ok: true,
-      status: 200,
-      json: () => Promise.resolve(initTargets as Target[])
-    }
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
-    const json = await response.json();
-    return json
-  }
-
-
   useEffect(() => {
     const fetch_data = async () => {
       const userinfo = await get_userinfo();
-      const targets = await get_targets()
+      const targets = await get_targets(userinfo.Id)
+      console.log('targets', targets)
       const config = await get_config()
       const title = userinfo.Title ? userinfo.Title + ' ' : ''
       const username = `${title}${userinfo.FirstName} ${userinfo.LastName}`;

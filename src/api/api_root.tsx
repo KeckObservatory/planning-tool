@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 import { handleResponse, handleError, intResponse, intError } from './response.tsx';
+import { Target } from '../App.tsx';
 const SIMBAD_ADDR = "https://simbad.u-strasbg.fr/simbad/sim-id?NbIdent=1&submit=submit+id&output.format=ASCII&obj.bibsel=off&Ident="
+const BASE_URL = "http://carby:45682"
 
 
 export interface UserInfo {
@@ -66,3 +68,33 @@ export const get_userinfo = (): Promise<UserInfo> => {
         .then(handleResponse)
         .catch(handleError)
 }
+
+export const delete_target = (target_ids: string[]): Promise<string> => {
+    const url = BASE_URL + "/planning_tool/deleteTarget?"
+    return axiosInstance.put(url, target_ids)
+        .then(handleResponse)
+        .catch(handleError)
+}
+
+export const get_targets = (obsid?: number, target_id?: string): Promise<Target[]> => {
+    let url = BASE_URL + "/planning_tool/getTarget?"
+    url += obsid ? "obsid=" + obsid: ""
+    url += target_id ? "&target_id=" + target_id: ""
+
+    return axiosInstance.get(url)
+        .then(handleResponse)
+        .catch(handleError)
+}
+
+export interface SubmitTargetResponse {
+    targets: Target[] 
+    errors: string[] 
+}
+
+export const submit_target = (targets: Target[]): Promise<SubmitTargetResponse> => {
+    const url = BASE_URL + "/planning_tool/submitTarget"
+    return axiosInstance.post(url, targets)
+        .then(handleResponse)
+        .catch(handleError)
+}
+
