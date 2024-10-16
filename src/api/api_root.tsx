@@ -51,14 +51,14 @@ export const get_userinfo = (): Promise<UserInfo> => {
 }
 
 export const delete_target = (target_ids: string[]): Promise<string> => {
-    const url = BASE_URL + "/planning_tool/deleteTarget?&target_ids=" + target_ids.join(",")
+    const url = BASE_URL + "/planning_tool/deletePlanningToolTarget?&target_ids=" + target_ids.join(",")
     return axiosInstance.put(url, target_ids)
         .then(handleResponse)
         .catch(handleError)
 }
 
 export const get_targets = (obsid?: number, target_id?: string): Promise<Target[]> => {
-    let url = BASE_URL + "/planning_tool/getTarget?"
+    let url = BASE_URL + "/planning_tool/getPlanningToolTarget?"
     url += obsid ? "obsid=" + obsid: ""
     url += target_id ? "&target_id=" + target_id: ""
 
@@ -73,7 +73,7 @@ export interface SubmitTargetResponse {
 }
 
 export const submit_target = (targets: Target[]): Promise<SubmitTargetResponse> => {
-    const url = BASE_URL + "/planning_tool/submitTarget"
+    const url = BASE_URL + "/planning_tool/submitPlanningToolTarget"
     return axiosInstance.post(url, targets)
         .then(handleResponse)
         .catch(handleError)
