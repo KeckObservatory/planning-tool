@@ -225,7 +225,7 @@ export const TargetVizChart = (props: Props) => {
     const default_semester = get_curr_semester(new Date())
     const [semester, _] = useQueryParam('semester', withDefault(StringParam, default_semester))
     const regexp = new RegExp("^[12][0-9]{3}[AB]$")
-    const init_target_viz = {semester, dome, ...props.target, semester_visibility: []}
+    const init_target_viz = { semester, dome, ...props.target, semester_visibility: [] }
     const [targetViz, setTargetViz] = useState<TargetViz>(init_target_viz)
 
     useEffect(() => {
@@ -261,7 +261,7 @@ export const TargetVizChart = (props: Props) => {
             }, 0)
 
             const visible_hours = vizSum * ROUND_MINUTES / 60
-            
+
             return { date: date.toDate(), ...suncalc_times, visibility, visible_hours }
         })
 
@@ -269,7 +269,7 @@ export const TargetVizChart = (props: Props) => {
     }, [props.target, semester, dome])
 
     const reason_to_color_mapping = (reasons: string[]) => {
-        
+
 
         const colors = {
             'Deck Blocking': '#7570b3',
@@ -285,7 +285,7 @@ export const TargetVizChart = (props: Props) => {
         let y: Date[] = []
         let color: string[] = []
         //let color: number[] = []
-        dayViz.visibility.forEach((viz: VizRow) => { 
+        dayViz.visibility.forEach((viz: VizRow) => {
             let txt = ""
             txt += `Az: ${viz.az.toFixed(2)}<br>`
             txt += `El: ${viz.alt.toFixed(2)}<br>`
@@ -303,7 +303,7 @@ export const TargetVizChart = (props: Props) => {
             return txt
         })
         const ydate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
-        const x = Array.from( {length: y.length}, () => ydate )
+        const x = Array.from({ length: y.length }, () => ydate)
 
         const trace = {
             x,
@@ -345,19 +345,16 @@ export const TargetVizChart = (props: Props) => {
             title: 'Date',
             type: 'date',
             tickformat: '%Y-%m-%d',
-            tickmode: 'auto', 
+            tickmode: 'auto',
             nticks: 0
         },
         hovermode: "closest",
     }
 
     return (
-        <>
-            <div>ChartGoHere</div>
-            <Plot
-                data={traces}
-                layout={layout}
-            />
-        </>
+        <Plot
+            data={traces}
+            layout={layout}
+        />
     )
 }
