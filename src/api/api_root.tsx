@@ -3,7 +3,7 @@ import axios from 'axios';
 import { handleResponse, handleError, intResponse, intError } from './response.tsx';
 import { Target } from '../App.tsx';
 const SIMBAD_ADDR = "https://simbad.u-strasbg.fr/simbad/sim-id?NbIdent=1&submit=submit+id&output.format=ASCII&obj.bibsel=off&Ident="
-const BASE_URL = "http://vm-dev-appserver/api/proposals"
+const BASE_URL = "https://vm-dev-appserver/api/proposals"
 
 
 export interface UserInfo {
