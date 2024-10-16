@@ -3,36 +3,16 @@ import axios from 'axios';
 import { handleResponse, handleError, intResponse, intError } from './response.tsx';
 import { Target } from '../App.tsx';
 const SIMBAD_ADDR = "https://simbad.u-strasbg.fr/simbad/sim-id?NbIdent=1&submit=submit+id&output.format=ASCII&obj.bibsel=off&Ident="
-const BASE_URL = "http://carby:45682"
-const USER_API = "https://www3.keck.hawaii.edu/userinfo"
+const BASE_URL = "http://vm-dev-appserver/api/proposals"
 
 
 export interface UserInfo {
-    status: string;
     Id: number;
-    Title: string;
     FirstName: string;
-    MiddleName: string;
     LastName: string;
-    Email: string;
     Affiliation: string;
-    WorkArea: string;
-    Interests: string;
-    Street: string;
-    City: string;
-    State: string;
-    Country: string;
-    Zip: string;
-    Phone: string;
-    Fax: string;
-    URL: string;
-    ModDate: string;
-    Exposed: string;
-    username: string;
-    resetcode: number;
     AllocInst: string;
-    BadEmail: string;
-    Category: string;
+    is_admin?: boolean; //added by backend
 }
 
 
@@ -64,7 +44,8 @@ export const get_simbad = (obj: string): Promise<string> => {
 }
 
 export const get_userinfo = (): Promise<UserInfo> => {
-    return axiosInstance.get(USER_API)
+    const url = BASE_URL + '/planning_tool/userinfo'
+    return axiosInstance.get(url)
         .then(handleResponse)
         .catch(handleError)
 }

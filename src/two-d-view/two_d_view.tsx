@@ -136,7 +136,7 @@ const TwoDView = (props: Props) => {
 
     const today = dayjs(new Date()).tz(TIMEZONE).toDate()
     const [date, setDate] = useQueryParam('date', withDefault(DateParam, today))
-    const [dome, setDome] = useQueryParam('dome', withDefault(StringParam, "K2"))
+    const [dome, _] = useQueryParam('dome', withDefault(StringParam, "K2"))
     const [showMoon, setShowMoon] = useQueryParam('show_moon', withDefault(BooleanParam, true))
     const [showCurrLoc, setShowCurrLoc] = useQueryParam('show_current_location', withDefault(BooleanParam, true))
     const [nadir, setNadir] = React.useState(util.get_suncalc_times(keckLngLat, date).nadir)

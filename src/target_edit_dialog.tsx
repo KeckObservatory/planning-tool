@@ -13,8 +13,8 @@ import {
 } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit';
 import SimbadButton from './simbad_button';
-import { useStateContext, Target } from './App';
 import target_schema from './target_schema.json'
+import { Target } from './App';
 
 interface Props {
     target: Target
@@ -72,7 +72,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
 
     const { target, setTarget } = props
     const [hasSimbad, setHasSimbad] = React.useState(target.tic_id || target.gaia_id ? true : false)
-    const context = useStateContext()
 
     React.useEffect(() => {
         setHasSimbad(target.tic_id || target.gaia_id ? true : false)

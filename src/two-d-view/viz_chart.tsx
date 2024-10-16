@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Target } from "../App";
-import { ra_dec_to_deg, KECK_LONG, KECK_LAT, get_day_times, get_suncalc_times, ROUND_MINUTES, KECK_ELEVATION, get_target_traj, ra_dec_to_az_alt, air_mass } from "./sky_view_util";
+import { ra_dec_to_deg, KECK_LONG, KECK_LAT, get_day_times, get_suncalc_times, ROUND_MINUTES, KECK_ELEVATION, ra_dec_to_az_alt, air_mass } from "./sky_view_util";
 import { DATE_TIME_FORMAT, DomeSelect, KECK_GEOMETRY } from "./two_d_view";
 import dayjs, { Dayjs, ManipulateType } from 'dayjs';
 import utc from 'dayjs/plugin/utc'

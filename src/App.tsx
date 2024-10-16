@@ -114,29 +114,6 @@ function App() {
   const [state, setState] = useState<State>({} as State);
   const theme = handleTheme(darkState)
 
-  const get_userinfo_mock = async (): Promise<UserInfo> => {
-    // const url = "/userinfo"
-    // const response = await fetch(url); //TODO: enable when ready to release
-    //Mock response for development
-    const response = {
-      ok: true,
-      status: 200,
-      json: () => Promise.resolve({
-        "status": "success",
-        "Id": 1234,
-        "Title": "Dr.",
-        "FirstName": "Observer",
-        "LastName": "Observerson",
-        "Email": ""
-      } as UserInfo)
-    }
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
-    const json = await response.json();
-    return json
-  }
-
   useEffect(() => {
     const fetch_data = async () => {
       // const userinfo = await get_userinfo_mock();
@@ -144,10 +121,9 @@ function App() {
       const targets = await get_targets(userinfo.Id)
       console.log('targets', targets)
       const config = await get_config()
-      const title = userinfo.Title ? userinfo.Title + ' ' : ''
-      const username = `${title}${userinfo.FirstName} ${userinfo.LastName}`;
+      const username = `${userinfo.FirstName} ${userinfo.LastName}`;
       console.log('setting state', userinfo, targets)
-      setState({ config, username, obsid: userinfo.Id, is_admin: userinfo.is_admin, targets })
+      setState({ config, username, obsid: userinfo.Id, is_admin: userinfo.is_admin ?? false, targets })
     }
     fetch_data()
     console.log('App mounted')
