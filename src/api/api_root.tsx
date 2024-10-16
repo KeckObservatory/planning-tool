@@ -44,21 +44,21 @@ export const get_simbad = (obj: string): Promise<string> => {
 }
 
 export const get_userinfo = (): Promise<UserInfo> => {
-    const url = BASE_URL + '/planning_tool/userinfo'
+    const url = BASE_URL + '/userinfo'
     return axiosInstance.get(url)
         .then(handleResponse)
         .catch(handleError)
 }
 
 export const delete_target = (target_ids: string[]): Promise<string> => {
-    const url = BASE_URL + "/planning_tool/deletePlanningToolTarget?&target_ids=" + target_ids.join(",")
+    const url = BASE_URL + "/deletePlanningToolTarget?&target_ids=" + target_ids.join(",")
     return axiosInstance.put(url, target_ids)
         .then(handleResponse)
         .catch(handleError)
 }
 
 export const get_targets = (obsid?: number, target_id?: string): Promise<Target[]> => {
-    let url = BASE_URL + "/planning_tool/getPlanningToolTarget?"
+    let url = BASE_URL + "/getPlanningToolTarget?"
     url += obsid ? "obsid=" + obsid: ""
     url += target_id ? "&target_id=" + target_id: ""
 
@@ -73,7 +73,7 @@ export interface SubmitTargetResponse {
 }
 
 export const submit_target = (targets: Target[]): Promise<SubmitTargetResponse> => {
-    const url = BASE_URL + "/planning_tool/submitPlanningToolTarget"
+    const url = BASE_URL + "/submitPlanningToolTarget"
     return axiosInstance.post(url, targets)
         .then(handleResponse)
         .catch(handleError)
