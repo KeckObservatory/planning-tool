@@ -222,7 +222,8 @@ const date_normalize = (date: Date) => {
 export const TargetVizChart = (props: Props) => {
     //get dates:
     const [dome] = useQueryParam('dome', withDefault(StringParam, "K2"))
-    const [semester] = useQueryParam<string>('semester')
+    const default_semester = get_curr_semester(new Date())
+    const [semester, _] = useQueryParam('semester', withDefault(StringParam, default_semester))
     const regexp = new RegExp("^[12][0-9]{3}[AB]$")
     const init_target_viz = {semester, dome, ...props.target, semester_visibility: []}
     const [targetViz, setTargetViz] = useState<TargetViz>(init_target_viz)
