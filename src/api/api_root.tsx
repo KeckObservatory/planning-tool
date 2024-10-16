@@ -4,6 +4,7 @@ import { handleResponse, handleError, intResponse, intError } from './response.t
 import { Target } from '../App.tsx';
 const SIMBAD_ADDR = "https://simbad.u-strasbg.fr/simbad/sim-id?NbIdent=1&submit=submit+id&output.format=ASCII&obj.bibsel=off&Ident="
 const BASE_URL = "http://carby:45682"
+const USER_API = "https://www3.keck.hawaii.edu/userinfo"
 
 
 export interface UserInfo {
@@ -63,14 +64,13 @@ export const get_simbad = (obj: string): Promise<string> => {
 }
 
 export const get_userinfo = (): Promise<UserInfo> => {
-    const url = "/userinfo"
-    return axiosInstance.get(url)
+    return axiosInstance.get(USER_API)
         .then(handleResponse)
         .catch(handleError)
 }
 
 export const delete_target = (target_ids: string[]): Promise<string> => {
-    const url = BASE_URL + "/planning_tool/deleteTarget?"
+    const url = BASE_URL + "/planning_tool/deleteTarget?&target_ids=" + target_ids.join(",")
     return axiosInstance.put(url, target_ids)
         .then(handleResponse)
         .catch(handleError)

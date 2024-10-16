@@ -14,7 +14,7 @@ import Alert from '@mui/material/Alert';
 import { LicenseInfo } from '@mui/x-license';
 import licenseKey from './license.json'
 import Skeleton from '@mui/material/Skeleton';
-import { get_targets } from './api/api_root.tsx';
+import { get_targets, get_userinfo } from './api/api_root.tsx';
 
 const CONFIG_PATH = './config.json'
 
@@ -114,7 +114,7 @@ function App() {
   const [state, setState] = useState<State>({} as State);
   const theme = handleTheme(darkState)
 
-  const get_userinfo = async (): Promise<UserInfo> => {
+  const get_userinfo_mock = async (): Promise<UserInfo> => {
     // const url = "/userinfo"
     // const response = await fetch(url); //TODO: enable when ready to release
     //Mock response for development
@@ -139,6 +139,7 @@ function App() {
 
   useEffect(() => {
     const fetch_data = async () => {
+      // const userinfo = await get_userinfo_mock();
       const userinfo = await get_userinfo();
       const targets = await get_targets(userinfo.Id)
       console.log('targets', targets)
