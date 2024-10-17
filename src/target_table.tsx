@@ -197,10 +197,10 @@ export default function TargetTable() {
     React.useEffect(() => { // when targed is edited in target edit dialog or simbad dialog
       if (count > 0) {
         console.log('editTarget updated', editTarget, row)
-        debounced_save(editTarget)?.then((newTgt) => {
-          console.log('save response', newTgt)
-          processRowUpdate(newTgt)
-        })
+        debounced_save(editTarget)
+
+        //does not wait for target to be saved before updating
+        processRowUpdate(editTarget)
         validate(editTarget)
         setErrors(validate.errors ? validate.errors : [])
         editTarget.tic_id || editTarget.gaia_id && setHasSimbad(true)
@@ -211,16 +211,18 @@ export default function TargetTable() {
 
     const apiRef = useGridApiContext();
 
+
     const handleEvent: GridEventListener<'cellEditStop'> = (params) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
         const value = apiRef.current.getCellValue(id, params.field);
-        console.log('cellEditStop', params, value)
         //Following line is a hack to prevent cellEditStop from firing from non-selected shell.
         //@ts-ignore
         if (editTarget[params.field] === value) return //no change detected. not going to set target as edited.
+        console.log('cellEditStop', params, value)
         setEditTarget({ ...editTarget, [params.field]: value })
       }, 300)
     }
+
     useGridApiEventHandler(apiRef, 'cellEditStop', handleEvent)
 
     return [

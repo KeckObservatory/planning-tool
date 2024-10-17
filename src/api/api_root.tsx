@@ -45,15 +45,16 @@ export const get_simbad = (obj: string): Promise<string> => {
 
 export const get_userinfo = (): Promise<UserInfo> => {
     let url = BASE_URL + '/userinfo'
-    const obsid = Cookies.get('observer')
-    return axiosInstance.post(url, { obsid })
+    const obsid_cookie = Cookies.get('observer')
+    return axiosInstance.post(url, { obsid_cookie })
         .then(handleResponse)
         .catch(handleError)
 }
 
 export const delete_target = (target_ids: string[]): Promise<string> => {
-    const url = BASE_URL + "/deletePlanningToolTarget?&target_ids=" + target_ids.join(",")
-    return axiosInstance.put(url, target_ids)
+    const url = BASE_URL + "/deletePlanningToolTarget"
+    const obsid_cookie = Cookies.get('observer')
+    return axiosInstance.put(url, {obsid_cookie, target_ids})
         .then(handleResponse)
         .catch(handleError)
 }
@@ -62,8 +63,8 @@ export const get_targets = (obsid?: number, target_id?: string): Promise<Target[
     let url = BASE_URL + "/getPlanningToolTarget?"
     url += obsid ? "obsid=" + obsid: ""
     url += target_id ? "&target_id=" + target_id: ""
-
-    return axiosInstance.get(url)
+    const obsid_cookie = Cookies.get('observer')
+    return axiosInstance.put(url, {obsid_cookie})
         .then(handleResponse)
         .catch(handleError)
 }
