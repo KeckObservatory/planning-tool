@@ -64,7 +64,7 @@ export const get_targets = (obsid?: number, target_id?: string): Promise<Target[
     url += obsid ? "obsid=" + obsid: ""
     url += target_id ? "&target_id=" + target_id: ""
     const obsid_cookie = Cookies.get('observer')
-    return axiosInstance.put(url, {obsid_cookie})
+    return axiosInstance.put(url, { obsid_cookie })
         .then(handleResponse)
         .catch(handleError)
 }
@@ -76,7 +76,8 @@ export interface SubmitTargetResponse {
 
 export const submit_target = (targets: Target[]): Promise<SubmitTargetResponse> => {
     const url = BASE_URL + "/submitPlanningToolTarget"
-    return axiosInstance.post(url, { targets } )
+    const obsid_cookie = Cookies.get('observer')
+    return axiosInstance.post(url, { targets, obsid_cookie } )
         .then(handleResponse)
         .catch(handleError)
 }
