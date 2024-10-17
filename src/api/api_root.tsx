@@ -76,7 +76,7 @@ export interface SubmitTargetResponse {
 
 export const submit_target = (targets: Target[]): Promise<SubmitTargetResponse> => {
     const url = BASE_URL + "/submitPlanningToolTarget"
-    return axiosInstance.post(url, targets)
+    return axiosInstance.post(url, { targets } )
         .then(handleResponse)
         .catch(handleError)
 }
