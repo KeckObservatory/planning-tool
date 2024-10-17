@@ -25,6 +25,7 @@
     "aladin-lite": "^3.3.2",
     "axios": "^1.6.5",
     "dayjs": "^1.11.10",
+    "js-cookie": "^3.0.5",
     "ls": "^0.2.1",
     "mui-datatables": "^4.3.0",
     "react": "^18.2.0",
@@ -37,6 +38,7 @@
     "usehooks-ts": "^2.15.1"
   },
   "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
     "@types/lodash.debounce": "^4.0.9",
     "@types/mui-datatables": "^4.3.12",
     "@types/node": "^20.11.5",

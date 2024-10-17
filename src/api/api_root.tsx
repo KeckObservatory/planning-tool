@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Cookies from 'js-cookie'
 
 import { handleResponse, handleError, intResponse, intError } from './response.tsx';
 import { Target } from '../App.tsx';
@@ -15,10 +16,13 @@ export interface UserInfo {
     is_admin?: boolean; //added by backend
 }
 
+console.log('Cookies.get', Cookies.get('observer'))
+
 
 const axiosInstance = axios.create({
     withCredentials: true,
     headers: {
+        'Cookie': `observer=${Cookies.get('observer')}`,
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'withCredentials': true,
