@@ -45,8 +45,8 @@ export const get_simbad = (obj: string): Promise<string> => {
 
 export const get_userinfo = (): Promise<UserInfo> => {
     let url = BASE_URL + '/userinfo'
-    url += '?obsid=' + Cookies.get('observer')
-    return axiosInstance.get(url)
+    const obsid = Cookies.get('observer')
+    return axiosInstance.post(url, { obsid })
         .then(handleResponse)
         .catch(handleError)
 }
