@@ -17,10 +17,10 @@ export interface UserInfo {
 
 
 const axiosInstance = axios.create({
-    withCredentials: false,
+    withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
-        'withCredentials': false,
+        'withCredentials': true,
     }
 })
 axiosInstance.interceptors.response.use(intResponse, intError);
