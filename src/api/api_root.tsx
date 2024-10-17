@@ -16,16 +16,11 @@ export interface UserInfo {
     is_admin?: boolean; //added by backend
 }
 
-console.log('Cookies.get', Cookies.get('observer'))
-
 
 const axiosInstance = axios.create({
     withCredentials: true,
     headers: {
-        'Cookie': `observer=${Cookies.get('observer')}`,
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'withCredentials': true,
     }
 })
 axiosInstance.interceptors.response.use(intResponse, intError);
@@ -49,7 +44,8 @@ export const get_simbad = (obj: string): Promise<string> => {
 }
 
 export const get_userinfo = (): Promise<UserInfo> => {
-    const url = BASE_URL + '/userinfo'
+    let url = BASE_URL + '/userinfo'
+    url += '?obisd=' + Cookies.get('observer')
     return axiosInstance.get(url)
         .then(handleResponse)
         .catch(handleError)
