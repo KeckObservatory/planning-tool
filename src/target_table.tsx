@@ -197,14 +197,14 @@ export default function TargetTable() {
     React.useEffect(() => { // when targed is edited in target edit dialog or simbad dialog
       if (count > 0) {
         console.log('editTarget updated', editTarget, row)
-        debounced_save(editTarget)
-
-        //does not wait for target to be saved before updating
-        processRowUpdate(editTarget)
-        validate(editTarget)
-        setErrors(validate.errors ? validate.errors : [])
-        editTarget.tic_id || editTarget.gaia_id && setHasSimbad(true)
-        debounced_edit_click(id)
+        debounced_save(editTarget)?.then((newTgt) => {
+          console.log('save response', newTgt, editTarget)
+          processRowUpdate(editTarget)
+          validate(editTarget)
+          setErrors(validate.errors ? validate.errors : [])
+          editTarget.tic_id || editTarget.gaia_id && setHasSimbad(true)
+          debounced_edit_click(id)
+        })
       }
       setCount((prev: number) => prev + 1)
     }, [editTarget])
