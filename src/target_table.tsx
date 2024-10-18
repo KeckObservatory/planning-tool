@@ -49,23 +49,23 @@ interface EditToolbarProps {
 function convert_schema_to_columns() {
   const columns: GridColDef[] = []
   Object.entries(target_schema.properties).forEach(([key, valueProps]: [string, any]) => {
-      // format value for display
-      const valueParser: GridValueParser = (value: any) => {
-        if (['number', 'integer'].includes(valueProps.type)) {
-          return Number(value)
-        }
-        if (value && ['ra', 'dec'].includes(key)) {
-          key === 'ra' && String(value).replace(/[^+-]/, "")
-          value = raDecFormat(value as string)
-        }
-        return value
+    // format value for display
+    const valueParser: GridValueParser = (value: any) => {
+      if (['number', 'integer'].includes(valueProps.type)) {
+        return Number(value)
       }
+      if (value && ['ra', 'dec'].includes(key)) {
+        key === 'ra' && String(value).replace(/[^+-]/, "")
+        value = raDecFormat(value as string)
+      }
+      return value
+    }
 
-      //use to update other values when this value is changed (e.g. ra/dec change -> degRa/degDec update)
-      const valueSetter: GridValueSetter<Target> = (value: any, tgt: Target) => {
-        tgt = { ...tgt, [key]: value }
-        return tgt
-      }
+    //use to update other values when this value is changed (e.g. ra/dec change -> degRa/degDec update)
+    const valueSetter: GridValueSetter<Target> = (value: any, tgt: Target) => {
+      tgt = { ...tgt, [key]: value }
+      return tgt
+    }
     let col = {
       field: key,
       valueParser,
@@ -240,11 +240,13 @@ export default function TargetTable() {
       setTimeout(() => { //wait for cell to update before setting editTarget
         const value = apiRef.current.getCellValue(id, params.field);
         console.log('cellEditStop', params.field, value, id, params)
-        if (editTarget._id !== id) return // ignore if not the target being edited
-        //Following line is a hack to prevent cellEditStop from firing from non-selected shell.
-        //@ts-ignore
-        // if (editTarget[params.field] === value) return //no change detected. not going to set target as edited.
-        setEditTarget({ ...editTarget, [params.field]: value })
+        const isSelectedCell = editTarget._id === id
+        const changeDetected = editTarget[params.field as keyof Target] !== value
+        if (isSelectedCell && changeDetected) {
+          console.log('cellEditStop', params.field, value, id, params)
+          setEditTarget({ ...editTarget, [params.field]: value })
+        }
+
       }, 300)
     }
 
