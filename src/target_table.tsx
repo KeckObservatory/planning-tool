@@ -89,11 +89,13 @@ const submit_one_target = async (target: Target) => {
 
 function EditToolbar(props: EditToolbarProps) {
   const { setRows, setRowModesModel } = props;
+  const context = useStateContext()
 
   const handleAddTarget = async () => {
     const id = randomId();
     const newTarget = create_new_target(id, props.obsid)
     const submittedTarget = await submit_one_target(newTarget)
+    context.setTargets((oldTargets) => [submittedTarget, ...oldTargets]);
 
     setRows((oldRows) => {
       const newRows = [submittedTarget, ...oldRows];
@@ -216,9 +218,9 @@ export default function TargetTable() {
       setTimeout(() => { //wait for cell to update before setting editTarget
         const value = apiRef.current.getCellValue(id, params.field);
         //Following line is a hack to prevent cellEditStop from firing from non-selected shell.
-        console.log('cellEditStop', params, value)
         //@ts-ignore
         if (editTarget[params.field] === value) return //no change detected. not going to set target as edited.
+        console.log('cellEditStop', params, value)
         setEditTarget({ ...editTarget, [params.field]: value })
       }, 300)
     }

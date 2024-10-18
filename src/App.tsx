@@ -71,8 +71,12 @@ interface State {
   username: string;
   obsid: number;
   is_admin: boolean;
-  targets: Target[];
   config: ConfigFile; 
+}
+
+interface StateContextProps extends State{
+  targets: Target[];
+  setTargets: React.Dispatch<React.SetStateAction<Target[]>>; 
 }
 
 export interface UserInfo {
@@ -104,7 +108,7 @@ export interface UserInfo {
   is_admin: boolean; //added by backend
 }
 
-const StateContext = React.createContext<State>({} as State)
+const StateContext = React.createContext<StateContextProps>({} as StateContextProps)
 export const useStateContext = () => React.useContext(StateContext)
 
 function App() {
@@ -113,17 +117,19 @@ function App() {
   const [snackbarMessage, setSnackbarMessage] = useState<SnackbarMessage>({ message: 'default message' })
   const [state, setState] = useState<State>({} as State);
   const theme = handleTheme(darkState)
+  const [targets, setTargets] = useState<Target[]>([])
 
   useEffect(() => {
     const fetch_data = async () => {
       // const userinfo = await get_userinfo_mock();
       const userinfo = await get_userinfo();
-      const targets = await get_targets(userinfo.Id)
-      console.log('targets', targets)
+      const init_targets = await get_targets(userinfo.Id)
+      console.log('targets', init_targets)
       const config = await get_config()
       const username = `${userinfo.FirstName} ${userinfo.LastName}`;
-      console.log('setting state', userinfo, targets)
-      setState({ config, username, obsid: userinfo.Id, is_admin: userinfo.is_admin ?? false, targets })
+      console.log('setting state', userinfo, init_targets)
+      setState({ config, username, obsid: userinfo.Id, is_admin: userinfo.is_admin ?? false })
+      setTargets(init_targets)
     }
     fetch_data()
     console.log('App mounted')
@@ -136,7 +142,7 @@ function App() {
   return (
     <ThemeProvider theme={theme} >
       <CssBaseline />
-      <StateContext.Provider value={state}>
+      <StateContext.Provider value={{...state, targets, setTargets}}>
         <SnackbarContext.Provider value={{
           snackbarOpen: openSnackbar,
           setSnackbarOpen: setOpenSnackbar,

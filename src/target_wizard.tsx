@@ -98,6 +98,7 @@ const TargetStepper = (props: Props) => {
     const [canContinue, setCanContinue] = React.useState(false)
     const [saveMessage, setSaveMessage] = React.useState('All steps completed - Targets are ready to be saved')
     const targetContext = useTargetContext()
+    const context = useStateContext()
 
     React.useEffect(() => {
         if (activeStep === 1) {
@@ -108,7 +109,7 @@ const TargetStepper = (props: Props) => {
     const save_targets = async () => {
         console.log('saving targets')
         const tgts = targets.map((tgt) => {
-            return { ...tgt, _id: randomId() } as Target
+            return { ...tgt, _id: randomId(), obsid: context.obsid } as Target
         })
 
         const resp = await submit_target(tgts)
