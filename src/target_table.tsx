@@ -247,8 +247,8 @@ export default function TargetTable() {
     const handleEvent: GridEventListener<'cellEditStop'> = (params) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
         const value = apiRef.current.getCellValue(id, params.field);
-        console.log('cellEditStop', editTarget._id === id, params.field, value)
-        // const isSelectedCell = editTarget._id === id
+        console.log('cellEditStop', params.field, value)
+        console.log('apiref', apiRef.current)
         // const keyExists = Object.keys(editTarget).includes(params.field)
         // const changeDetected = editTarget[params.field as keyof Target] !== value && value !== undefined
         // if ((isSelectedCell && changeDetected) || (!keyExists && isSelectedCell)) {
