@@ -22,6 +22,7 @@ import {
   GridRowSelectionModel,
   GridValueParser,
   GridValueSetter,
+  GridCellEditStopParams,
 } from '@mui/x-data-grid-pro';
 import {
   randomId,
@@ -244,10 +245,11 @@ export default function TargetTable() {
 
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
-    const handleEvent: GridEventListener<'cellEditStop'> = (params) => {
+    const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
         const value = apiRef.current.getCellValue(id, params.field);
         console.log('cellEditStop', params.field, value)
+        if (value === undefined) console.log('params', params) 
         console.log('apiref', apiRef.current)
         // const keyExists = Object.keys(editTarget).includes(params.field)
         // const changeDetected = editTarget[params.field as keyof Target] !== value && value !== undefined
