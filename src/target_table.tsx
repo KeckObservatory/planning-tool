@@ -199,10 +199,10 @@ export default function TargetTable() {
         console.log('editTarget updated', editTarget, row)
         debounced_save(editTarget)?.then((newTgt) => {
           console.log('save response', newTgt, editTarget)
-          processRowUpdate(editTarget)
-          validate(editTarget)
+          processRowUpdate(newTgt)
+          validate(newTgt)
           setErrors(validate.errors ? validate.errors : [])
-          editTarget.tic_id || editTarget.gaia_id && setHasSimbad(true)
+          newTgt.tic_id || newTgt.gaia_id && setHasSimbad(true)
           debounced_edit_click(id)
         })
       }
@@ -216,9 +216,9 @@ export default function TargetTable() {
       setTimeout(() => { //wait for cell to update before setting editTarget
         const value = apiRef.current.getCellValue(id, params.field);
         //Following line is a hack to prevent cellEditStop from firing from non-selected shell.
+        console.log('cellEditStop', params, value)
         //@ts-ignore
         if (editTarget[params.field] === value) return //no change detected. not going to set target as edited.
-        console.log('cellEditStop', params, value)
         setEditTarget({ ...editTarget, [params.field]: value })
       }, 300)
     }
