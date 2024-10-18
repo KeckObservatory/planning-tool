@@ -201,7 +201,7 @@ export default function TargetTable() {
   };
 
   const processRowUpdate = async (newRow: GridRowModel<Target>) => {
-    //sends to server
+    //row is sent to DataGrid rows. Used to match row with what was edited.
     const updatedRow = {...newRow, isNew: false}
     const newRows = rows.map((row) => (row._id === newRow._id ? updatedRow : row))
     setRows(newRows);
@@ -227,10 +227,10 @@ export default function TargetTable() {
         console.log('editTarget updated', editTarget, row)
         let newTgt: Target | undefined = undefined
         const isEdited = editTarget.status?.includes('EDITED')
+        processRowUpdate(editTarget)
         if (isEdited) newTgt = await debounced_save(editTarget)
         if (newTgt) {
           console.log('save response', newTgt, editTarget)
-          processRowUpdate(newTgt)
           validate(newTgt)
           const newErrors = validate.errors ? validate.errors : []
           setErrors(newErrors)
