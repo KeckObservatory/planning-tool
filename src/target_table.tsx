@@ -241,8 +241,9 @@ export default function TargetTable() {
         const value = apiRef.current.getCellValue(id, params.field);
         console.log('cellEditStop', params.field, value, id, params)
         const isSelectedCell = editTarget._id === id
-        const changeDetected = editTarget[params.field as keyof Target] !== value
-        if (isSelectedCell && changeDetected) {
+        const keyExists = Object.keys(editTarget).includes(params.field)
+        const changeDetected = editTarget[params.field as keyof Target] !== value && value !== undefined
+        if ((isSelectedCell && changeDetected) || (!keyExists && isSelectedCell)) {
           console.log('cellEditStop', params.field, value, id, params)
           setEditTarget({ ...editTarget, [params.field]: value })
         }
