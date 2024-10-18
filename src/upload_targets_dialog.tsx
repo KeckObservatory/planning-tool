@@ -7,8 +7,9 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { Tooltip } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
-import { Target } from './App';
+import { Target, useStateContext } from './App';
 import target_schema from './target_schema.json'
+import { randomId } from '@mui/x-data-grid-generator';
 
 interface Props {
     setTargets: Function
@@ -39,19 +40,21 @@ const parse_csv = (contents: string) => {
     return tgts
 }
 
-const parse_txt = (contents: string) => {
+const parse_txt = (contents: string, obsid: number) => {
     let tgts = [] as Target[]
     contents.split('\n').forEach((row) => {
         if (row === '') return
         if (row.startsWith('#')) return
         const [target_name, rah, ram, ras, dech, decm, decs, epoch, ...opts] = row.replace(/\s\s+/g, ' ').split(' ')
-        const tgt = {
+        const tgt: Target = {
+            _id: randomId(),
             target_name,
+            obsid: obsid,
             ra: `${rah.padStart(2,'0')}:${ram.padStart(2,'0')}:${ras}`,
             dec: `${dech.padStart(2,'0')}:${decm.padStart(2,'0')}:${decs}`,
             epoch,
             ...opts
-        } as Partial<Target>;
+        };
         opts.forEach((opt) => {
             const [key, value] = opt.split('=')
             // @ts-ignore
@@ -64,6 +67,8 @@ const parse_txt = (contents: string) => {
 
 export function UploadComponent(props: UploadProps) {
 
+    const context = useStateContext()
+
     const fileLoad = (evt: React.ChangeEvent<HTMLInputElement>) => {
         let file: File = new File([], 'empty')
         evt.target?.files && (file = evt.target?.files[0])
@@ -74,7 +79,7 @@ export function UploadComponent(props: UploadProps) {
         fileReader.readAsText(file, "UTF-8");
         fileReader.onload = e => {
             const contents = e.target?.result as string
-            const tgts = ext?.includes('csv') ? parse_csv(contents) : parse_txt(contents)
+            const tgts = ext?.includes('csv') ? parse_csv(contents) : parse_txt(contents, context.obsid)
             console.log('tgts', tgts)
             props.setOpen && props.setOpen(false)
             props.setTargets(tgts)
