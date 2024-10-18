@@ -63,7 +63,7 @@ export const raDecFormat = (input: string) => {
 }
 
 export const rowSetter = (tgt: Target, key: string, value?: string | number | boolean) => {
-    tgt = { ...tgt, [key]: value }
+    tgt = { ...tgt, [key]: value, status: 'EDITED' }
     return tgt
 }
 
@@ -98,7 +98,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
 
     const handleSimbadChange = (tgt: Target) => {
         setTarget((prev: Target) => {
-            tgt = { ...prev, ...tgt }
+            tgt = { ...prev, ...tgt, status: 'EDITED' }
             return tgt
         })
         setHasSimbad(tgt.tic_id || tgt.gaia_id ? true : false)

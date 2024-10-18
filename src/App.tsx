@@ -31,12 +31,15 @@ export const get_config = async () => {
   return json
 }
 
+export type Status = "EDITED" | "CREATED"
+
 export interface Target extends SimbadTargetData {
   _id?: string,
   target_name?: string,
   j_mag?: number,
   t_eff?: number,
   comment?: string,
+  status?: Status //used to track row/form edits and updates them accordingly.
 }
 
 export interface SnackbarMessage {

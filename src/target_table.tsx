@@ -85,14 +85,14 @@ function convert_schema_to_columns() {
 export const create_new_target = (id?: string, obsid?: number, target_name?: string) => {
   let newTarget: Partial<Target> = {}
   Object.entries(target_schema.properties).forEach(([key, value]: [string, any]) => {
-    // @ts-ignore
-    newTarget[key] = value.default
+    newTarget[key as keyof Target] = value.default
   })
   newTarget = {
     ...newTarget,
     obsid: obsid,
     _id: id,
     target_name: target_name,
+    status: 'CREATED'
   } as Target
   return newTarget
 }
@@ -216,38 +216,48 @@ export default function TargetTable() {
     validate(row)
     const [errors, setErrors] = React.useState<ErrorObject<string, Record<string, any>, unknown>[]>(validate.errors ?? []);
     const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
+    const apiRef = useGridApiContext();
 
-    React.useEffect(() => { // when targed is edited in target edit dialog or simbad dialog
+    const handleRowChange = async () => {
       if (count > 0) {
         console.log('editTarget updated', editTarget, row)
-        debounced_save(editTarget)?.then((newTgt) => {
+        let newTgt: Target | undefined = undefined
+        const isEdited = editTarget.status?.includes('EDITED')
+        if (isEdited) newTgt = await debounced_save(editTarget)
+        if (newTgt) {
           console.log('save response', newTgt, editTarget)
           processRowUpdate(newTgt)
           validate(newTgt)
-          setErrors(validate.errors ? validate.errors : [])
+          const newErrors = validate.errors ? validate.errors : []
+          setErrors(newErrors)
           newTgt.tic_id || newTgt.gaia_id && setHasSimbad(true)
           debounced_edit_click(id)
-        })
+        }
       }
+    }
+
+    React.useEffect(() => { // when targed is edited in target edit dialog or simbad dialog
+      handleRowChange()
       setCount((prev: number) => prev + 1)
     }, [editTarget])
 
-    const apiRef = useGridApiContext();
 
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
     const handleEvent: GridEventListener<'cellEditStop'> = (params) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
         const value = apiRef.current.getCellValue(id, params.field);
-        console.log('cellEditStop', params.field, value, id)
-        const isSelectedCell = editTarget._id === id
-        const keyExists = Object.keys(editTarget).includes(params.field)
-        const changeDetected = editTarget[params.field as keyof Target] !== value && value !== undefined
-        if ((isSelectedCell && changeDetected) || (!keyExists && isSelectedCell)) {
+        console.log('cellEditStop', editTarget._id === id, params.field, value)
+        // const isSelectedCell = editTarget._id === id
+        // const keyExists = Object.keys(editTarget).includes(params.field)
+        // const changeDetected = editTarget[params.field as keyof Target] !== value && value !== undefined
+        // if ((isSelectedCell && changeDetected) || (!keyExists && isSelectedCell)) {
+        const changeDetected = editTarget[params.field as keyof Target] !== value
+        if (changeDetected) {
           console.log('target setting', params.field, value, id, params)
-          setEditTarget({ ...editTarget, [params.field]: value })
+          setEditTarget({ ...editTarget, 'status': 'EDITED', [params.field]: value })
         }
-      }, 500)
+      }, 300)
     }
 
     useGridApiEventHandler(apiRef, 'cellEditStop', handleEvent)

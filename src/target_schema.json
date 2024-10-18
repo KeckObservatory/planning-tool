@@ -74,6 +74,14 @@
             "type": "string",
             "short_description": "GAIA ID",
             "description": "GAIA Identifier"
+        },
+        "status": {
+            "type": "string",
+            "description": "Status of the target. Used to track row edits vs form edits",
+            "enum": [
+                "EDITED",
+                "CREATED"
+            ]
         }
     },
     "required": [
