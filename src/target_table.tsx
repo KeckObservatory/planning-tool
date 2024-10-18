@@ -77,13 +77,13 @@ export const create_new_target = (id?: string, obsid?: number, target_name?: str
 }
 
 const submit_one_target = async (target: Target) => {
-    const resp = await submit_target([target])
-    if (resp.errors.length > 0) {
-      console.error('errors', resp)
-      throw new Error('error updating target') 
-    }
-    const submittedTarget = resp.targets[0]
-    return submittedTarget
+  const resp = await submit_target([target])
+  if (resp.errors.length > 0) {
+    console.error('errors', resp)
+    throw new Error('error updating target')
+  }
+  const submittedTarget = resp.targets[0]
+  return submittedTarget
 }
 
 
@@ -151,7 +151,7 @@ export default function TargetTable() {
   const csvExportColumns = cfg.csv_order
   let pinnedColumns = cfg.pinned_table_columns
   const leftPin = [...new Set([GRID_CHECKBOX_SELECTION_COL_DEF.field, ...cfg.pinned_table_columns.left])]
-  pinnedColumns.left = leftPin 
+  pinnedColumns.left = leftPin
 
   const edit_target = async (target: Target) => {
     console.log('debounced save', target)
@@ -167,7 +167,7 @@ export default function TargetTable() {
   const handleDeleteClick = async (id: GridRowId) => {
     const delRow = rows.find((row) => row._id === id);
     console.log('deleting', id, delRow)
-    delete_target([JSON.stringify(id)])
+    delRow && delete_target([delRow._id as string])
     setRows(() => {
       const newRows = rows.filter((row) => row._id !== id)
       return newRows
@@ -296,7 +296,7 @@ export default function TargetTable() {
                 csvOptions: { fields: csvExportColumns, allColumns: true, fileName: `MyTargets` },
                 selectedTargets: rowSelectionModel.map((id) => {
                   return rows.find((row) => row._id === id)
-                }) 
+                })
               },
             }}
             pinnedColumns={pinnedColumns}
