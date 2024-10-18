@@ -238,10 +238,11 @@ export default function TargetTable() {
     const handleEvent: GridEventListener<'cellEditStop'> = (params) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
         const value = apiRef.current.getCellValue(id, params.field);
+        console.log('cellEditStop', params.field, value, id, params)
+        if (editTarget._id !== id) return // ignore if not the target being edited
         //Following line is a hack to prevent cellEditStop from firing from non-selected shell.
-        console.log('cellEditStop', params, value)
         //@ts-ignore
-        if (editTarget[params.field] === value) return //no change detected. not going to set target as edited.
+        // if (editTarget[params.field] === value) return //no change detected. not going to set target as edited.
         setEditTarget({ ...editTarget, [params.field]: value })
       }, 300)
     }
