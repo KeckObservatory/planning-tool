@@ -20,6 +20,8 @@ import {
   GridRowParams,
   GRID_CHECKBOX_SELECTION_COL_DEF,
   GridRowSelectionModel,
+  GridValueParser,
+  GridValueSetter,
 } from '@mui/x-data-grid-pro';
 import {
   randomId,
@@ -30,7 +32,7 @@ import SimbadButton from './simbad_button';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
 import { TargetWizardButton } from './target_wizard';
 import { Target, useStateContext } from './App.tsx';
-import TargetEditDialogButton from './target_edit_dialog.tsx';
+import TargetEditDialogButton, { raDecFormat } from './target_edit_dialog.tsx';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
@@ -46,14 +48,33 @@ interface EditToolbarProps {
 
 function convert_schema_to_columns() {
   const columns: GridColDef[] = []
-  Object.entries(target_schema.properties).forEach(([key, value]: [string, any]) => {
+  Object.entries(target_schema.properties).forEach(([key, valueProps]: [string, any]) => {
+      // format value for display
+      const valueParser: GridValueParser = (value: any) => {
+        if (['number', 'integer'].includes(valueProps.type)) {
+          return Number(value)
+        }
+        if (value && ['ra', 'dec'].includes(key)) {
+          key === 'ra' && String(value).replace(/[^+-]/, "")
+          value = raDecFormat(value as string)
+        }
+        return value
+      }
+
+      //use to update other values when this value is changed (e.g. ra/dec change -> degRa/degDec update)
+      const valueSetter: GridValueSetter<Target> = (value: any, tgt: Target) => {
+        tgt = { ...tgt, [key]: value }
+        return tgt
+      }
     let col = {
       field: key,
-      description: value.description,
-      type: value.type,
-      headerName: value.short_description ?? value.description,
+      valueParser,
+      valueSetter,
+      description: valueProps.description,
+      type: valueProps.type,
+      headerName: valueProps.short_description ?? valueProps.description,
       width: 140,
-      editable: value.editable ?? true,
+      editable: valueProps.editable ?? true,
     } as GridColDef
     columns.push(col)
   });
@@ -276,7 +297,7 @@ export default function TargetTable() {
         {Object.keys(visibleColumns).length > 0 && (
           <DataGridPro
             getRowId={(row) => row._id}
-            disableRowSelectionOnClick
+            //disableRowSelectionOnClick // turned off for now to allow row edit
             checkboxSelection
             rows={rows ?? []}
             columns={columns}
