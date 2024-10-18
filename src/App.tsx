@@ -34,7 +34,8 @@ export const get_config = async () => {
 export type Status = "EDITED" | "CREATED"
 
 export interface Target extends SimbadTargetData {
-  _id?: string,
+  _id: string,
+  obsid: number,
   target_name?: string,
   j_mag?: number,
   t_eff?: number,

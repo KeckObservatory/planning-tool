@@ -23,6 +23,8 @@ import {
   GridValueParser,
   GridValueSetter,
   GridCellEditStopParams,
+  GridRowModel,
+  GridCsvExportOptions,
 } from '@mui/x-data-grid-pro';
 import {
   randomId,
@@ -41,9 +43,8 @@ import { delete_target, submit_target } from './api/api_root.tsx';
 interface EditToolbarProps {
   setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
   obsid: number;
-  setRowModesModel: (
-    newModel: (oldModel: GridRowModesModel) => GridRowModesModel,
-  ) => void;
+  processRowUpdate: (newRow: GridRowModel<Target>) => Promise<GridRowModel<Target>>;
+  csvOptions: GridCsvExportOptions
   selectedTargets: Target[]
 }
 
@@ -94,8 +95,8 @@ export const create_new_target = (id?: string, obsid?: number, target_name?: str
     _id: id,
     target_name: target_name,
     status: 'CREATED'
-  } as Target
-  return newTarget
+  }
+  return newTarget as Target
 }
 
 const submit_one_target = async (target: Target) => {
@@ -110,23 +111,24 @@ const submit_one_target = async (target: Target) => {
 
 
 function EditToolbar(props: EditToolbarProps) {
-  const { setRows, setRowModesModel } = props;
+  const { setRows, processRowUpdate } = props;
   const context = useStateContext()
 
   const handleAddTarget = async () => {
     const id = randomId();
     const newTarget = create_new_target(id, props.obsid)
     const submittedTarget = await submit_one_target(newTarget)
+    if (!submittedTarget) {
+      console.error('error submitting target')
+      return
+    }
     context.setTargets((oldTargets) => [submittedTarget, ...oldTargets]);
+    processRowUpdate(submittedTarget)
 
     setRows((oldRows) => {
       const newRows = [submittedTarget, ...oldRows];
       return newRows
     });
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'target_name' },
-    }));
   };
 
   return (
@@ -198,11 +200,12 @@ export default function TargetTable() {
     });
   };
 
-  const processRowUpdate = async (newRow: Target) => {
+  const processRowUpdate = async (newRow: GridRowModel<Target>) => {
     //sends to server
-    const newRows = rows.map((row) => (row._id === newRow._id ? newRow : row))
+    const updatedRow = {...newRow, isNew: false}
+    const newRows = rows.map((row) => (row._id === newRow._id ? updatedRow : row))
     setRows(newRows);
-    return newRows;
+    return updatedRow;
   };
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
@@ -248,9 +251,9 @@ export default function TargetTable() {
     const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
         const value = apiRef.current.getCellValue(id, params.field);
-        console.log('cellEditStop', params.field, value)
-        if (value === undefined) console.log('params', params) 
-        console.log('apiref', apiRef.current)
+        // console.log('cellEditStop', params.field, value)
+        // if (value === undefined) console.log('params', params) 
+        // console.log('apiref', apiRef.current)
         // const keyExists = Object.keys(editTarget).includes(params.field)
         // const changeDetected = editTarget[params.field as keyof Target] !== value && value !== undefined
         // if ((isSelectedCell && changeDetected) || (!keyExists && isSelectedCell)) {
@@ -314,6 +317,7 @@ export default function TargetTable() {
           <DataGridPro
             getRowId={(row) => row._id}
             //disableRowSelectionOnClick // turned off for now to allow row edit
+            processRowUpdate={processRowUpdate}
             checkboxSelection
             rows={rows ?? []}
             columns={columns}
@@ -330,6 +334,7 @@ export default function TargetTable() {
             slotProps={{
               toolbar: {
                 setRows,
+                processRowUpdate,
                 setRowModesModel,
                 obsid: context.obsid, //TODO: allow admin to edit obsid
                 csvOptions: { fields: csvExportColumns, allColumns: true, fileName: `MyTargets` },
