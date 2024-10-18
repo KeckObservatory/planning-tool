@@ -235,6 +235,7 @@ export default function TargetTable() {
     const apiRef = useGridApiContext();
 
 
+    //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
     const handleEvent: GridEventListener<'cellEditStop'> = (params) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
         const value = apiRef.current.getCellValue(id, params.field);
