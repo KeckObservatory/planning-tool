@@ -72,8 +72,8 @@ export default function AladinViewer(props: Props) {
     const [fov, setFOV] = React.useState([] as [number, number][][])
     const [instrument, setInstrument] = React.useState('KCWI')
     const [aladin, setAladin] = React.useState<null | any>(null)
-    const [zoom, setZoom] = React.useState(360)
-    //const [zoom, setZoom] = React.useState(2)
+    //const [zoom, setZoom] = React.useState(360) //for whole sky
+    const [zoom, setZoom] = React.useState(2)
 
         // define custom draw function
         const drawFunction = function(source: any, canvasCtx: any) {
