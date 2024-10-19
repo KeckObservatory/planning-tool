@@ -19,8 +19,6 @@ export interface VTDProps {
 function ViewTargetsDialog(props: VTDProps) {
   const { open, handleClose } = props;
 
-
-
   return (
     <Dialog 
     onClose={() => handleClose()} 
