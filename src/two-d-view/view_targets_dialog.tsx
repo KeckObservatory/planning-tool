@@ -17,7 +17,8 @@ export interface VTDProps {
 }
 
 function ViewTargetsDialog(props: VTDProps) {
-  const { open, handleClose } = props;
+  const { open, handleClose, targets } = props;
+  console.log('view targets dialog init', targets)
 
   return (
     <Dialog 
@@ -27,8 +28,8 @@ function ViewTargetsDialog(props: VTDProps) {
     >
       <DialogTitle>Selected Target Charts</DialogTitle>
       <DialogContent>
-        <AladinViewer targets={props.targets} />
-        <TwoDView targets={props.targets} />
+        <AladinViewer targets={targets} />
+        <TwoDView targets={targets} />
       </DialogContent>
     </Dialog>
   );

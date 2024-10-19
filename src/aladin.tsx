@@ -68,6 +68,7 @@ const get_fov = async (aladin: any, instrument: string) => {
 
 
 export default function AladinViewer(props: Props) {
+    console.log('aladin viewer init', props)
 
     const [fov, setFOV] = React.useState([] as [number, number][][])
     const [instrument, setInstrument] = React.useState('KCWI')
@@ -85,8 +86,6 @@ export default function AladinViewer(props: Props) {
             canvasCtx.lineWidth = 1
             canvasCtx.stroke();
             canvasCtx.fill();
-    
-    
         };
 
     const add_catalog = (alad: any, targets: Target[], name='Targets') => {
@@ -147,18 +146,16 @@ export default function AladinViewer(props: Props) {
             setAladin(alad)
             setFOV(await get_fov(alad, instrument))
 
-            //@ts-ignore
-            const result = Object.groupBy(props.targets, ({ target_name}) => target_name);
-
-            console.log('adding catalog')
-
-            for (const [key, value] of Object.entries(result)) {
-                console.log(`${key}`);
-                add_catalog(alad, value as Target[], key)
-            }
+            // //@ts-ignore
+            // const result = Object.groupBy(props.targets, ({ target_name}) => target_name);
+            // console.log('adding catalog')
+            // for (const [key, value] of Object.entries(result)) {
+            //     console.log(`${key}`);
+            //     add_catalog(alad, value as Target[], key)
+            // }
             
-            // console.log('adding catalog', props.targets)
-            // add_catalog(alad, props.targets)
+            console.log('adding catalog', props.targets)
+            add_catalog(alad, props.targets)
         })
     }
 
