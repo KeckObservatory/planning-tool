@@ -128,6 +128,7 @@ export const DomeSelect = () => {
 
 const TwoDView = (props: Props) => {
 
+    console.log('init t2view', props.targets)
     const keckLngLat: LngLatEl = {
         lng: KECK_LONG,
         lat: KECK_LAT,
@@ -156,7 +157,6 @@ const TwoDView = (props: Props) => {
 
 
     let targets_deg: Target[] = []
-    // console.log('targets', props.targets)
     props.targets.forEach((s: Target) => {
         if (s.ra && s.dec) {
             let sd = {
