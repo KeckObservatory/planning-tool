@@ -150,9 +150,13 @@ const TwoDView = (props: Props) => {
         setTime(newNadir)
     }, [date])
 
+    React.useEffect(() => {
+        console.log('targets changed', props.targets)
+    }, [props.targets])
+
 
     let targets_deg: Target[] = []
-    console.log('targets', props.targets)
+    // console.log('targets', props.targets)
     props.targets.forEach((s: Target) => {
         if (s.ra && s.dec) {
             let sd = {
