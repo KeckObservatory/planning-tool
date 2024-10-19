@@ -24,7 +24,6 @@
         "ra_deg",
         "dec_deg",
         "observer_id"
-        
     ],
     "pinned_table_columns": {
         "left": [
@@ -32,6 +31,7 @@
             "actions",
             "target_name"
         ],
-        "right": [ ]
-    }
+        "right": []
+    },
+    "help_msg_filename": "/helpMsg.md"
 }

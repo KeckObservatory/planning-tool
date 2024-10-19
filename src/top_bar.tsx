@@ -1,11 +1,15 @@
 import AppBar from '@mui/material/AppBar';
+import HelpIcon from '@mui/icons-material/Help';
 import Switch from "@mui/material/Switch"
 import Tooltip from '@mui/material/Tooltip';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography'
 import LogoutIcon from '@mui/icons-material/Logout';
 import IconButton from '@mui/material/IconButton';
-import HelpDialogButton from './help_dialog.tsx';
+import { observer_logout } from './api/api_root.tsx';
+import MarkdownDialogButton from './markdown_dialog.tsx';
+import React from 'react';
+import { get_config } from './App.tsx';
 
 interface Props {
   username?: string,
@@ -14,6 +18,29 @@ interface Props {
 }
 
 export function TopBar(props: Props) {
+
+  const [helpMsg, setHelpMsg] = React.useState('')
+
+  React.useEffect(() => {
+    const init_msgs = async () => {
+
+      const config = await get_config()
+      const welcomeResp = await fetch(config.help_message_filename)
+      console.log(config.help_msg_filename, 'welcomeResp', welcomeResp)
+      const wtxt = await welcomeResp.text()
+      console.log(config, 'wtxt', wtxt)
+      setHelpMsg(wtxt)
+    }
+
+    init_msgs()
+  }, [])
+
+  const handleLogout = async () => {
+    await observer_logout()
+    window.location.reload()
+  }
+
+  const color = props.darkState ? 'primary' : 'secondary'
 
 
   return (
@@ -37,7 +64,7 @@ export function TopBar(props: Props) {
             flexGrow: 1,
           }}
         >
-          Planning Tool 
+          Planning Tool
         </Typography>
         <Typography
           component="h3"
@@ -52,11 +79,16 @@ export function TopBar(props: Props) {
           Welcome {props.username}
         </Typography>
         <Tooltip title="Select to logout via observer portal">
-          <IconButton aria-label="logout" color="primary">
+          <IconButton color={color} onClick={handleLogout} aria-label="logout">
             <LogoutIcon />
           </IconButton>
         </Tooltip>
-          <HelpDialogButton />
+        <MarkdownDialogButton
+          header='Help'
+          icon={<HelpIcon color={color} />}
+          msg={helpMsg}
+          tooltipMsg='Select to view help message'
+        />
         <Tooltip title="Toggle on for dark mode">
           <Switch
             checked={props.darkState}

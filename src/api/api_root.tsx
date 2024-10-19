@@ -59,6 +59,13 @@ export const delete_target = (target_ids: string[]): Promise<string> => {
         .catch(handleError)
 }
 
+export const observer_logout = (): Promise<string> => {
+    const url = BASE_URL + "/logout"
+    return axiosInstance.get(url)
+        .then(handleResponse)
+        .catch(handleError)
+}
+
 export const get_targets = (obsid?: number, target_id?: string): Promise<Target[]> => {
     let url = BASE_URL + "/getPlanningToolTarget?"
     url += obsid ? "obsid=" + obsid: ""

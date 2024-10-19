@@ -111,7 +111,7 @@ const submit_one_target = async (target: Target) => {
 
 
 function EditToolbar(props: EditToolbarProps) {
-  const { setRows, processRowUpdate } = props;
+  const { setRows, processRowUpdate, csvOptions } = props;
   const context = useStateContext()
 
   const handleAddTarget = async () => {
@@ -138,7 +138,7 @@ function EditToolbar(props: EditToolbarProps) {
       </Button>
       <ViewTargetsDialogButton targets={props.selectedTargets} />
       <GridToolbar
-        csvOptions={{ allColumns: true }}
+        csvOptions={csvOptions}
       />
       <TargetWizardButton />
     </GridToolbarContainer>
@@ -227,7 +227,7 @@ export default function TargetTable() {
         console.log('editTarget updated', editTarget, row)
         let newTgt: Target | undefined = undefined
         const isEdited = editTarget.status?.includes('EDITED')
-        processRowUpdate(editTarget)
+        processRowUpdate(editTarget) //TODO: May want to wait till save is successful
         if (isEdited) newTgt = await debounced_save(editTarget)
         if (newTgt) {
           console.log('save response', newTgt, editTarget)
