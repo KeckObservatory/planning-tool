@@ -25,7 +25,7 @@ export function TopBar(props: Props) {
     const init_msgs = async () => {
 
       const config = await get_config()
-      const welcomeResp = await fetch(config.help_message_filename)
+      const welcomeResp = await fetch(config.help_msg_filename)
       console.log(config.help_msg_filename, 'welcomeResp', welcomeResp)
       const wtxt = await welcomeResp.text()
       console.log(config, 'wtxt', wtxt)
