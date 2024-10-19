@@ -26,9 +26,7 @@ export function TopBar(props: Props) {
 
       const config = await get_config()
       const welcomeResp = await fetch(config.help_msg_filename)
-      console.log(config.help_msg_filename, 'welcomeResp', welcomeResp)
       const wtxt = await welcomeResp.text()
-      console.log(config, 'wtxt', wtxt)
       setHelpMsg(wtxt)
     }
 
@@ -36,7 +34,9 @@ export function TopBar(props: Props) {
   }, [])
 
   const handleLogout = async () => {
-    await observer_logout()
+    console.log('logging out')
+    const resp = await observer_logout()
+    console.log('resp', resp)
     window.location.reload()
   }
 

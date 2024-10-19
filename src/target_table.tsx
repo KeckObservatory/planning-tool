@@ -224,13 +224,11 @@ export default function TargetTable() {
 
     const handleRowChange = async () => {
       if (count > 0) {
-        console.log('editTarget updated', editTarget, row)
         let newTgt: Target | undefined = undefined
         const isEdited = editTarget.status?.includes('EDITED')
         processRowUpdate(editTarget) //TODO: May want to wait till save is successful
         if (isEdited) newTgt = await debounced_save(editTarget)
         if (newTgt) {
-          console.log('save response', newTgt, editTarget)
           validate(newTgt)
           const newErrors = validate.errors ? validate.errors : []
           setErrors(newErrors)
@@ -251,15 +249,8 @@ export default function TargetTable() {
     const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
         const value = apiRef.current.getCellValue(id, params.field);
-        // console.log('cellEditStop', params.field, value)
-        // if (value === undefined) console.log('params', params) 
-        // console.log('apiref', apiRef.current)
-        // const keyExists = Object.keys(editTarget).includes(params.field)
-        // const changeDetected = editTarget[params.field as keyof Target] !== value && value !== undefined
-        // if ((isSelectedCell && changeDetected) || (!keyExists && isSelectedCell)) {
         const changeDetected = editTarget[params.field as keyof Target] !== value
         if (changeDetected) {
-          console.log('target setting', params.field, value, id, params)
           setEditTarget({ ...editTarget, 'status': 'EDITED', [params.field]: value })
         }
       }, 300)
