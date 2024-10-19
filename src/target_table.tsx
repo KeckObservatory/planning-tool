@@ -162,8 +162,7 @@ export default function TargetTable() {
   const context = useStateContext()
   const [rows, setRows] = React.useState(context.targets as Target[]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
-  const [rowSelectionModel, setRowSelectionModel] =
-    React.useState<GridRowSelectionModel>([]);
+  const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
   const cfg = context.config
   let columns = convert_schema_to_columns();
   const sortOrder = cfg.default_table_columns
@@ -202,10 +201,9 @@ export default function TargetTable() {
 
   const processRowUpdate = async (newRow: GridRowModel<Target>) => {
     //row is sent to DataGrid rows. Used to match row with what was edited.
-    const updatedRow = {...newRow, isNew: false}
-    const newRows = rows.map((row) => (row._id === newRow._id ? updatedRow : row))
+    const newRows = rows.map((row) => (row._id === newRow._id ? newRow: row))
     setRows(newRows);
-    return updatedRow;
+    return newRow;
   };
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
@@ -251,6 +249,7 @@ export default function TargetTable() {
         const value = apiRef.current.getCellValue(id, params.field);
         const changeDetected = editTarget[params.field as keyof Target] !== value
         if (changeDetected) {
+          console.log('target setting', params.field, value, id, params)
           setEditTarget({ ...editTarget, 'status': 'EDITED', [params.field]: value })
         }
       }, 300)
@@ -319,6 +318,7 @@ export default function TargetTable() {
               toolbar: EditToolbar,
             }}
             onRowSelectionModelChange={(newRowSelectionModel) => {
+              console.log('row selection', newRowSelectionModel)
               setRowSelectionModel(newRowSelectionModel);
             }}
             rowSelectionModel={rowSelectionModel}
