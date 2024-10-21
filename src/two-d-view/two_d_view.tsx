@@ -368,8 +368,8 @@ const TwoDView = (props: Props) => {
     }
 
 
-    const handleDateChange = (date: Dayjs | null) => {
-        if (date) setDate(date.tz(TIMEZONE).toDate())
+    const handleDateChange = (newDate: Dayjs | null) => {
+        if (newDate && !newDate.isSame(dayjs(date))) setDate(newDate.tz(TIMEZONE).toDate())
     }
 
 
