@@ -7,7 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import Tooltip from '@mui/material/Tooltip';
 import { Target } from '../App';
 import TwoDView from './two_d_view';
-// import AladinViewer from '../aladin';
+import AladinViewer from '../aladin';
 
 
 export interface VTDProps {
@@ -28,8 +28,9 @@ function ViewTargetsDialog(props: VTDProps) {
     >
       <DialogTitle>Selected Target Charts</DialogTitle>
       <DialogContent>
-        {/* <AladinViewer targets={targets} /> TODO: see if this is causing loops to update*/}
-        <TwoDView targets={targets} />
+        <AladinViewer targets={targets} /> 
+        {/* <TwoDView targets={targets} /> */}
+        <TwoDView targets={[]} />
       </DialogContent>
     </Dialog>
   );

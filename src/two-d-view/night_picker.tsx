@@ -27,6 +27,3 @@ export default function NightPicker(props: Props) {
         </LocalizationProvider>
     );
 }
-
-NightPicker.defaultProps = { date: new Date() }
-
