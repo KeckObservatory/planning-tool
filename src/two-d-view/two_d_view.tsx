@@ -140,19 +140,14 @@ const TwoDView = (props: Props) => {
         el: KECK_ELEVATION * 1_000 // convert km to meters
     }
 
-    const [obsdate, setObsdate] = React.useState<Date | undefined>(undefined)
+    const today = dayjs(new Date()).tz(TIMEZONE).toDate()
+    const [obsdate, setObsdate] = React.useState<Date>(today)
     const [dome, setDome] = React.useState<Dome>("K2") 
     const [showMoon, setShowMoon] = React.useState(true) 
     const [showCurrLoc, setShowCurrLoc] = React.useState(true) 
     const [nadir, setNadir] = React.useState(util.get_suncalc_times(keckLngLat, obsdate).nadir)
     const [times, setTimes] = React.useState(util.get_times_using_nadir(nadir))
     const [time, setTime] = React.useState(nadir)
-
-    React.useEffect(() => {
-        const today = dayjs(new Date()).tz(TIMEZONE).toDate()
-        console.log('init date', today)
-        setObsdate(today)
-    }, [])
 
     React.useEffect(() => {
         const newNadir = util.get_suncalc_times(keckLngLat, obsdate).nadir
@@ -162,9 +157,6 @@ const TwoDView = (props: Props) => {
         setTime(newNadir)
     }, [obsdate])
 
-    React.useEffect(() => {
-        console.log('targets changed', props.targets)
-    }, [props.targets])
 
 
     let targets_deg: Target[] = []
@@ -386,7 +378,7 @@ const TwoDView = (props: Props) => {
 
     return (
         <React.Fragment>
-            {obsdate && (<NightPicker date={obsdate} handleDateChange={handleDateChange} />)}
+            <NightPicker date={obsdate} handleDateChange={handleDateChange} />
             <TimeSlider
                 nadir={nadir}
                 times={times}
