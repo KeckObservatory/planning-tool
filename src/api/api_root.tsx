@@ -19,7 +19,7 @@ export interface UserInfo {
 
 
 const axiosInstance = axios.create({
-    withCredentials: true,
+    withCredentials: false,
     headers: {
         'Content-Type': 'application/json',
         'withCredentials': false,
