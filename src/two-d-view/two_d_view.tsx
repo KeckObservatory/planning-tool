@@ -1,4 +1,4 @@
-import React from 'react';
+import React  from 'react';
 import * as util from './sky_view_util.tsx'
 import Plot from 'react-plotly.js';
 import { KECK_LAT, KECK_LONG, KECK_ELEVATION, LngLatEl } from './sky_view_util.tsx';
@@ -7,7 +7,6 @@ import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import * as SunCalc from 'suncalc'
-import { BooleanParam, DateParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
 import { FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Switch } from '@mui/material';
 import TimeSlider from './time_slider';
 import { Target } from '../App.tsx';
@@ -101,12 +100,18 @@ const make_disk_polar = (r1: number, r2: number, th1: number, th2: number) => {
     return pTrace
 }
 
-export const DomeSelect = () => {
+type Dome = "K1" | "K2"
 
-    const [dome, setDome] = useQueryParam('dome', withDefault(StringParam, "K2"))
+interface DomeSelectProps {
+    dome: Dome 
+    setDome: (dome: Dome) => void
+}
+
+export const DomeSelect = (props: DomeSelectProps) => {
+    const {dome, setDome} = props
 
     const handleDomeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setDome(event.target.value)
+        setDome(event.target.value as Dome)
     }
 
     return (
@@ -135,21 +140,27 @@ const TwoDView = (props: Props) => {
         el: KECK_ELEVATION * 1_000 // convert km to meters
     }
 
-    const today = dayjs(new Date()).tz(TIMEZONE).toDate()
-    const [date, setDate] = useQueryParam('date', withDefault(DateParam, today))
-    const [dome, _] = useQueryParam('dome', withDefault(StringParam, "K2"))
-    const [showMoon, setShowMoon] = useQueryParam('show_moon', withDefault(BooleanParam, true))
-    const [showCurrLoc, setShowCurrLoc] = useQueryParam('show_current_location', withDefault(BooleanParam, true))
-    const [nadir, setNadir] = React.useState(util.get_suncalc_times(keckLngLat, date).nadir)
+    const [obsdate, setObsdate] = React.useState<Date | undefined>(undefined)
+    const [dome, setDome] = React.useState<Dome>("K2") 
+    const [showMoon, setShowMoon] = React.useState(true) 
+    const [showCurrLoc, setShowCurrLoc] = React.useState(true) 
+    const [nadir, setNadir] = React.useState(util.get_suncalc_times(keckLngLat, obsdate).nadir)
     const [times, setTimes] = React.useState(util.get_times_using_nadir(nadir))
     const [time, setTime] = React.useState(nadir)
 
     React.useEffect(() => {
-        const newNadir = util.get_suncalc_times(keckLngLat, date).nadir
+        const today = dayjs(new Date()).tz(TIMEZONE).toDate()
+        console.log('init date', today)
+        setObsdate(today)
+    }, [])
+
+    React.useEffect(() => {
+        const newNadir = util.get_suncalc_times(keckLngLat, obsdate).nadir
+        const newTimes = util.get_times_using_nadir(newNadir)
         setNadir(newNadir)
-        setTimes(() => util.get_times_using_nadir(newNadir))
+        setTimes(newTimes)
         setTime(newNadir)
-    }, [date])
+    }, [obsdate])
 
     React.useEffect(() => {
         console.log('targets changed', props.targets)
@@ -369,20 +380,20 @@ const TwoDView = (props: Props) => {
 
 
     const handleDateChange = (newDate: Dayjs | null) => {
-        if (newDate && !newDate.isSame(dayjs(date))) setDate(newDate.tz(TIMEZONE).toDate())
+        if (newDate && !newDate.isSame(dayjs(obsdate))) setObsdate(newDate.tz(TIMEZONE).toDate())
     }
 
 
     return (
         <React.Fragment>
-            <NightPicker date={date} handleDateChange={handleDateChange} />
+            {obsdate && (<NightPicker date={obsdate} handleDateChange={handleDateChange} />)}
             <TimeSlider
                 nadir={nadir}
                 times={times}
                 time={time}
                 setTime={setTime}
             />
-            <DomeSelect />
+            <DomeSelect dome={dome} setDome={setDome} />
             <FormControlLabel
                 label="Show Current Location"
                 value={showCurrLoc}

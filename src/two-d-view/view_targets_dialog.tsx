@@ -29,8 +29,7 @@ function ViewTargetsDialog(props: VTDProps) {
       <DialogTitle>Selected Target Charts</DialogTitle>
       <DialogContent>
         <AladinViewer targets={targets} /> 
-        {/* <TwoDView targets={targets} /> */}
-        <TwoDView targets={[]} />
+        <TwoDView targets={targets} />
       </DialogContent>
     </Dialog>
   );
