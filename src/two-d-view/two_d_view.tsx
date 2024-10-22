@@ -100,7 +100,7 @@ const make_disk_polar = (r1: number, r2: number, th1: number, th2: number) => {
     return pTrace
 }
 
-type Dome = "K1" | "K2"
+export type Dome = "K1" | "K2"
 
 interface DomeSelectProps {
     dome: Dome 
