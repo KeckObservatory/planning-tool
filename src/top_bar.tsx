@@ -5,6 +5,7 @@ import Tooltip from '@mui/material/Tooltip';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography'
 import LogoutIcon from '@mui/icons-material/Logout';
+import DoorFrontIcon from '@mui/icons-material/DoorFront';
 import IconButton from '@mui/material/IconButton';
 import { observer_logout } from './api/api_root.tsx';
 import MarkdownDialogButton from './markdown_dialog.tsx';
@@ -20,6 +21,7 @@ interface Props {
 export function TopBar(props: Props) {
 
   const [helpMsg, setHelpMsg] = React.useState('')
+  const [piPortal, setPiPortal] = React.useState('')
 
   React.useEffect(() => {
     const init_msgs = async () => {
@@ -28,16 +30,22 @@ export function TopBar(props: Props) {
       const welcomeResp = await fetch(config.help_msg_filename)
       const wtxt = await welcomeResp.text()
       setHelpMsg(wtxt)
+      setPiPortal(config.pi_portal_url)
     }
 
     init_msgs()
   }, [])
 
-  const handleLogout = async () => {
-    console.log('logging out')
-    const resp = await observer_logout()
-    console.log('resp', resp)
-    window.location.reload()
+  //TODO: Implement logout when observer portal is ready
+  // const handleLogout = async () => {
+  //   console.log('logging out')
+  //   const resp = await observer_logout()
+  //   console.log('resp', resp)
+  //   window.location.reload()
+  // }
+
+  const handlePortalClick = () => {
+    window.open(piPortal, "_self")
   }
 
   const color = props.darkState ? 'primary' : 'secondary'
@@ -78,9 +86,17 @@ export function TopBar(props: Props) {
         >
           Welcome {props.username}
         </Typography>
-        <Tooltip title="Select to logout via observer portal">
+        {/* <Tooltip title="Select to logout via observer portal">
           <IconButton color={color} onClick={handleLogout} aria-label="logout">
             <LogoutIcon />
+          </IconButton>
+        </Tooltip> */}
+        <Tooltip title="Return to Observer Portal">
+          <IconButton
+            aria-label="open drawer"
+            onClick={handlePortalClick}
+          >
+            <DoorFrontIcon id="observer-portal-icon" />
           </IconButton>
         </Tooltip>
         <MarkdownDialogButton

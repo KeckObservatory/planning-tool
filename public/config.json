@@ -33,5 +33,8 @@
         ],
         "right": []
     },
-    "help_msg_filename": "helpMsg.md"
+    "help_msg_filename": "helpMsg.md",
+    "pi_logout_url": "https://www2.keck.hawaii.edu/koa/public/koa.php",
+    "pi_portal_url": "https://www2.keck.hawaii.edu/koa/public/koa.php"
+
 }
