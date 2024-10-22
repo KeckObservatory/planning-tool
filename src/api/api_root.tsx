@@ -22,6 +22,7 @@ const axiosInstance = axios.create({
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
+        'withCredentials': false,
     }
 })
 axiosInstance.interceptors.response.use(intResponse, intError);
