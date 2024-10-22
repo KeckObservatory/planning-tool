@@ -4,10 +4,8 @@ import Switch from "@mui/material/Switch"
 import Tooltip from '@mui/material/Tooltip';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography'
-import LogoutIcon from '@mui/icons-material/Logout';
 import DoorFrontIcon from '@mui/icons-material/DoorFront';
 import IconButton from '@mui/material/IconButton';
-import { observer_logout } from './api/api_root.tsx';
 import MarkdownDialogButton from './markdown_dialog.tsx';
 import React from 'react';
 import { get_config } from './App.tsx';
