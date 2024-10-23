@@ -32,7 +32,6 @@ interface ButtonProps {
 interface Props extends ButtonProps { //TODO: Is extension needed?
 }
 
-type DOME = 'K1' | 'K2'
 
 interface SemesterDates {
     start_day: number

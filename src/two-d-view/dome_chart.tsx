@@ -3,7 +3,7 @@ import * as SunCalc from 'suncalc'
 import * as util from './sky_view_util.tsx'
 import { Dome, TargetViz } from "./two_d_view"
 import Plot from "react-plotly.js"
-import { GeoModel, KeckGeoModel, useStateContext } from "../App.tsx"
+import { GeoModel, useStateContext } from "../App.tsx"
 
 interface DomeChartProps {
     targetViz: TargetViz[]
