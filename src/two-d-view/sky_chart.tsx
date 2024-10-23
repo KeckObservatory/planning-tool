@@ -1,4 +1,3 @@
-import React from "react";
 import Plot from "react-plotly.js";
 import * as util from './sky_view_util.tsx'
 import { Dome, TargetViz } from "./two_d_view";
@@ -48,10 +47,15 @@ const get_chart_data = (targetViz: TargetViz, times: Date[], chartType: SkyChart
 
 
 export const SkyChart = (props: Props) => {
-    const { targetViz, chartType, showMoon, showCurrLoc, times, time, dome } = props
+    //const { targetViz, chartType, showMoon, showCurrLoc, times, time, dome } = props
+    const { targetViz, chartType } = props
     const context = useStateContext()
 
-    const lngLatEl: util.LngLatEl = {lng: context.config.keck_long, lat: context.config.keck_lat, el: context.config.keck_elevation}
+    const lngLatEl: util.LngLatEl = {
+        lng: context.config.keck_long, 
+        lat: context.config.keck_lat, 
+        el: context.config.keck_elevation
+    }
 
     let traces = targetViz.map((tgtv: TargetViz) => {
 
