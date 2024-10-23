@@ -100,7 +100,6 @@ export default function AladinViewer(props: Props) {
         })
 
         alad.on('zoomChanged', function (zoom: number) {
-            console.log('zoomChanged', zoom)
             setZoom(zoom)
         })
 
@@ -154,13 +153,11 @@ export default function AladinViewer(props: Props) {
             //     add_catalog(alad, value as Target[], key)
             // }
             
-            console.log('adding catalog', props.targets)
             add_catalog(alad, props.targets)
         })
     }
 
     React.useEffect(() => {
-        console.log('init aladin', props)
         scriptloaded()
     }, [])
 

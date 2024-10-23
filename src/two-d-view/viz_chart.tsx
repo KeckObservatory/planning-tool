@@ -46,6 +46,7 @@ interface SemesterRange {
     'B': SemesterDates
 }
 
+//TODO: add to config
 const SEMESTER_RANGES: SemesterRange = {
     'A': {
         start_day: 1,

@@ -111,7 +111,6 @@ const submit_one_target = async (target: Target) => {
 
 
 function EditToolbar(props: EditToolbarProps) {
-  console.log('edit toolbar init', props)
   const { setRows, processRowUpdate, csvOptions } = props;
   const context = useStateContext()
 

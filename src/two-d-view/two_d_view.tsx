@@ -97,9 +97,6 @@ export const DomeSelect = (props: DomeSelectProps) => {
 
 
 const TwoDView = (props: Props) => {
-
-    console.log('init t2view', props.targets)
-
     const context = useStateContext()
     const today = dayjs(new Date()).tz(context.config.timezone).toDate()
     const [obsdate, setObsdate] = React.useState<Date>(today)
@@ -115,6 +112,28 @@ const TwoDView = (props: Props) => {
     const [nadir, setNadir] = React.useState(util.get_suncalc_times(keckLngLat, obsdate).nadir)
     const [times, setTimes] = React.useState(util.get_times_using_nadir(nadir))
     const [time, setTime] = React.useState(nadir)
+    const [targetViz, setTargetViz] = React.useState<TargetViz[]>([])
+
+    React.useEffect(() => {
+        const tviz = targetViz
+        props.targets.forEach((tgt: Target) => {
+            if (tgt.ra && tgt.dec) {
+                const ra_deg = util.ra_dec_to_deg(tgt.ra as string, false)
+                const dec_deg = util.ra_dec_to_deg(tgt.dec as string, true)
+                const azEl = util.get_target_traj(ra_deg, dec_deg, times, keckLngLat) as [number, number][]
+                let tgtv: TargetViz = {
+                    ...tgt,
+                    dome,
+                    times,
+                    ra_deg,
+                    dec_deg,
+                    azEl
+                }
+                tviz.push(tgtv)
+            }
+        })
+        setTargetViz(tviz)
+    }, [props.targets])
 
     React.useEffect(() => {
         const newNadir = util.get_suncalc_times(keckLngLat, obsdate).nadir
@@ -124,24 +143,6 @@ const TwoDView = (props: Props) => {
         setTime(newNadir)
     }, [obsdate])
 
-    let targetViz: TargetViz[] = []
-    props.targets.forEach((tgt: Target) => {
-        if (tgt.ra && tgt.dec) {
-            const ra_deg = util.ra_dec_to_deg(tgt.ra as string, false)
-            const dec_deg = util.ra_dec_to_deg(tgt.dec as string, true)
-            const azEl = util.get_target_traj(ra_deg, dec_deg, times, keckLngLat) as [number, number][]
-            let tgtv: TargetViz = {
-                ...tgt,
-                dome,
-                times,
-                ra_deg,
-                dec_deg,
-                azEl
-            }
-            targetViz.push(tgtv)
-        }
-
-    })
 
 
 
