@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Target } from "../App";
-import { ra_dec_to_deg, KECK_LONG, KECK_LAT, get_day_times, get_suncalc_times, ROUND_MINUTES, KECK_ELEVATION, ra_dec_to_az_alt, air_mass } from "./sky_view_util";
-import { DATE_TIME_FORMAT, DomeSelect, Dome, KECK_GEOMETRY } from "./two_d_view";
+import { GeoModel, Target, useStateContext } from "../App";
+import { ra_dec_to_deg, 
+    KECK_LONG, 
+    KECK_LAT, 
+    get_day_times, 
+    get_suncalc_times, 
+    ROUND_MINUTES, 
+    KECK_ELEVATION, 
+    ra_dec_to_az_alt, 
+    air_mass } from "./sky_view_util";
+import { DomeSelect, Dome } from "./two_d_view";
 import dayjs, { Dayjs, ManipulateType } from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -72,8 +80,7 @@ const get_semester_dates = (semester: string) => {
     return ranges
 }
 
-const alt_az_observable = (alt: number, az: number, dome: DOME) => {
-    const KG = KECK_GEOMETRY[dome as 'K1' | 'K2']
+const alt_az_observable = (alt: number, az: number, KG: GeoModel) => {
     const minDeckAz = KG.t2
     const maxDeckAz = KG.t3
     const minAlt = KG.r1
@@ -228,6 +235,9 @@ export const TargetVizChart = (props: Props) => {
     const regexp = new RegExp("^[12][0-9]{3}[AB]$")
     const init_target_viz = { semester, dome, ...props.target, semester_visibility: [] }
     const [targetViz, setTargetViz] = useState<TargetViz>(init_target_viz)
+    const context = useStateContext()
+
+    const KG = context.config.keck_geometry[dome as Dome]
 
     useEffect(() => {
         const validSemester = regexp.test(semester)
@@ -252,7 +262,7 @@ export const TargetVizChart = (props: Props) => {
             const times = get_day_times(startTime, endTime, ROUND_MINUTES)
             const visibility = times.map((time: Date) => {
                 const [az, alt] = ra_dec_to_az_alt(ra, dec, time, latLngEl)
-                const vis: VizRow = { az, alt, ...alt_az_observable(alt, az, dome as DOME), datetime: time }
+                const vis: VizRow = { az, alt, ...alt_az_observable(alt, az, KG), datetime: time }
                 return vis
             })
 
@@ -291,7 +301,7 @@ export const TargetVizChart = (props: Props) => {
             txt += `Az: ${viz.az.toFixed(2)}<br>`
             txt += `El: ${viz.alt.toFixed(2)}<br>`
             txt += `Airmass: ${air_mass(viz.alt).toFixed(2)}<br>`
-            txt += `HT: ${dayjs(viz.datetime).format(DATE_TIME_FORMAT)}<br>`
+            txt += `HT: ${dayjs(viz.datetime).format(context.config.date_time_format)}<br>`
             txt += `Visible for: ${dayViz.visible_hours.toFixed(2)} hours<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
             texts.push(txt)

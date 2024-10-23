@@ -65,10 +65,35 @@ const init_snackbar_context: SnackbarContextProps = {
 const SnackbarContext = React.createContext<SnackbarContextProps>(init_snackbar_context);
 export const useSnackbarContext = () => React.useContext(SnackbarContext);
 
+export interface KeckGeoModel {
+    K1: GeoModel
+    K2: GeoModel
+}
+
+export interface GeoModel {
+    r0: number,
+    r1: number,
+    r2: number,
+    r3: number,
+    t0: number,
+    t1: number,
+    t2: number,
+    t3: number,
+    trackLimit: number
+}
+
+
 interface ConfigFile {
   default_table_columns: string[];
   csv_order: string[];
   pinned_table_columns: { 'left': string[], 'right': string[] };
+  timezone: string,
+  time_format: string,
+  date_time_format: string,
+  keck_geometry: KeckGeoModel 
+  keck_lat: number, //deg
+  keck_long: number, // Keck Observatory longitude west of Greenwich [deg]
+  keck_elevation: number, // km
 }
 
 interface State {

@@ -1,13 +1,10 @@
 import * as SunCalc from 'suncalc'
 
 //TODO: Put in cfg file
-export const KECK_LAT = 19.8260 //[deg]
-export const KECK_LONG = 360 - 155.4747 // Keck Observatory longitude west of Greenwich [deg]
 export const STEP_SIZE = 10 / 60 //hours
 export const TIMES_START = -7 //hours from nadir
 export const TIMES_END = 7 //hours from nadir
 export const ROUND_MINUTES = 10 //round nadir to nearest ROUND_MINUTES
-export const KECK_ELEVATION = 4.1449752 // km
 const RADIUS_EARTH = 6378.1000 // km
 const ATMOSPHERE_HEIGHT = 50.000 // km
 
@@ -149,12 +146,12 @@ export const get_target_traj = (ra: number, dec: number, times: Date[], lngLatEl
     return traj
 }
 
-export const air_mass = (alt: number) => { // Homogeneous spherical atmosphsere with elevated observer
-    const y = KECK_ELEVATION / ATMOSPHERE_HEIGHT
+export const air_mass = (alt: number, el: number) => { // Homogeneous spherical atmosphsere with elevated observer
+    const y = el / ATMOSPHERE_HEIGHT
     const z = RADIUS_EARTH / ATMOSPHERE_HEIGHT
     const a2 = ATMOSPHERE_HEIGHT * ATMOSPHERE_HEIGHT
-    const r = RADIUS_EARTH + KECK_ELEVATION
-    const g = ATMOSPHERE_HEIGHT - KECK_ELEVATION
+    const r = RADIUS_EARTH + el 
+    const g = ATMOSPHERE_HEIGHT - el 
     const zenith = 90 - alt
     const firstTerm = (r * r) * cosd(zenith) * cosd(zenith) / ( a2 )
     const secondTerm = 2 * RADIUS_EARTH * (g) / a2
@@ -170,7 +167,7 @@ export const get_air_mass = (ra: number, dec: number, times: Date[], lngLatEl: L
     //     const zenith = 90 - a[1]
     //     return 1/cosd(zenith) 
     // })
-    const airmass = azAlt.map((a: [number, number]) => { return air_mass(a[1]) })
+    const airmass = azAlt.map((a: [number, number]) => { return air_mass(a[1], lngLatEl.el) })
     return airmass
 }
 
