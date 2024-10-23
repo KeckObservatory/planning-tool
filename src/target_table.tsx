@@ -37,7 +37,7 @@ import { TargetWizardButton } from './target_wizard';
 import { Target, useStateContext } from './App.tsx';
 import TargetEditDialogButton, { raDecFormat } from './target_edit_dialog.tsx';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
-import { TargetViewButton } from './two-d-view/viz_chart.tsx';
+import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 
 interface EditToolbarProps {
@@ -259,7 +259,7 @@ export default function TargetTable() {
 
     return [
       <SimbadButton hasSimbad={hasSimbad} target={editTarget} setTarget={setEditTarget} />,
-      <TargetViewButton target={editTarget} />,
+      <TargetVizButton target={editTarget} />,
       <ValidationDialogButton errors={errors} target={editTarget} />,
       <TargetEditDialogButton
         target={editTarget}
