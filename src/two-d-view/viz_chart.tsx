@@ -238,7 +238,7 @@ export const TargetVizChart = (props: Props) => {
     console.log('TargetVizChart init', target, semester, dome)
     const regexp = new RegExp("^[12][0-9]{3}[AB]$")
     const init_target_viz = { semester, dome, ...target, semester_visibility: [] }
-    const [targetViz, setTargetViz] = useState<TargetViz>(init_target_viz)
+    const [targetViz, setTargetView] = useState<TargetViz>(init_target_viz)
     const context = useStateContext()
 
     const KG = context.config.keck_geometry[dome as Dome]
@@ -284,7 +284,7 @@ export const TargetVizChart = (props: Props) => {
             return { date: date.toDate(), ...suncalc_times, visibility, visible_hours }
         })
 
-        setTargetViz(tViz as TargetViz)
+        setTargetView(tViz as TargetViz)
     }, [target, semester, dome])
 
     const reason_to_color_mapping = (reasons: string[]) => {

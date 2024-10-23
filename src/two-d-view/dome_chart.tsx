@@ -1,12 +1,12 @@
 import dayjs from "dayjs"
 import * as SunCalc from 'suncalc'
 import * as util from './sky_view_util.tsx'
-import { Dome, TargetViz } from "./two_d_view"
+import { Dome, TargetView } from "./two_d_view"
 import Plot from "react-plotly.js"
 import { GeoModel, useStateContext } from "../App.tsx"
 
 interface DomeChartProps {
-    targetViz: TargetViz[]
+    targetView: TargetView[]
     showMoon: boolean
     showCurrLoc: boolean
     times: Date[]
@@ -49,10 +49,10 @@ const make_disk_polar = (r1: number, r2: number, th1: number, th2: number) => {
     return pTrace
 }
 
-const make_2d_traces = (targetViz: TargetViz[], showMoon: boolean, showCurrLoc: boolean, times: Date[], time: Date, 
+const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc: boolean, times: Date[], time: Date, 
 time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl 
 ): any[] => {
-    let traces: any[] = targetViz.map((tgtv: TargetViz) => {
+    let traces: any[] = targetView.map((tgtv: TargetView) => {
         let [rr, tt] = [[] as number[], [] as number[]]
         const texts: string[] = []
         tgtv.azEl.forEach((ae: [number, number], idx: number) => {
@@ -144,7 +144,7 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
                 texts.push(txt)
             }
         }
-        targetViz.forEach((tgtv: TargetViz) => { //add current location trace
+        targetView.forEach((tgtv: TargetView) => { //add current location trace
             const ra = tgtv.ra_deg as number
             const dec = tgtv.dec_deg as number
             const azEl = util.get_target_traj(ra, dec, [time], lngLatEl) as [number, number][]
@@ -200,7 +200,7 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
 }
 
 export const DomeChart = (props: DomeChartProps) => {
-    const { targetViz, showMoon, showCurrLoc, times, time, dome } = props
+    const { targetView, showMoon, showCurrLoc, times, time, dome } = props
     const context = useStateContext()
     const KG = context.config.keck_geometry[dome]
     const lngLatEl: util.LngLatEl = {
@@ -209,7 +209,7 @@ export const DomeChart = (props: DomeChartProps) => {
         el: context.config.keck_elevation * 1_000 // convert km to meters
     }
 
-    const traces = make_2d_traces(targetViz, 
+    const traces = make_2d_traces(targetView, 
         showMoon, 
         showCurrLoc, 
         times, 

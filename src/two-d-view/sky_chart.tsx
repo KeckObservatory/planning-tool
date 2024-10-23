@@ -1,12 +1,12 @@
 import Plot from "react-plotly.js";
 import * as util from './sky_view_util.tsx'
-import { Dome, TargetViz } from "./two_d_view";
+import { Dome, TargetView } from "./two_d_view";
 import { useStateContext } from "../App";
 
 export type SkyChart = "Airmass" | "Elevation" | "Parallactic" | "Lunar Angle"
 
 interface Props {
-    targetViz: TargetViz[]
+    targetView: TargetView[]
     chartType: SkyChart 
     showMoon: boolean
     showCurrLoc: boolean
@@ -15,10 +15,10 @@ interface Props {
     dome: Dome
 }
 
-const get_chart_data = (targetViz: TargetViz, times: Date[], chartType: SkyChart, lngLatEl: util.LngLatEl): number[] => {
+const get_chart_data = (targetView: TargetView, times: Date[], chartType: SkyChart, lngLatEl: util.LngLatEl): number[] => {
     let val;
-    const ra = targetViz.ra_deg as number
-    const dec = targetViz.dec_deg as number
+    const ra = targetView.ra_deg as number
+    const dec = targetView.dec_deg as number
     switch (chartType) {
         case 'Elevation': {
             val = util.get_target_traj(ra, dec, times, lngLatEl)
@@ -47,8 +47,8 @@ const get_chart_data = (targetViz: TargetViz, times: Date[], chartType: SkyChart
 
 
 export const SkyChart = (props: Props) => {
-    //const { targetViz, chartType, showMoon, showCurrLoc, times, time, dome } = props
-    const { targetViz, chartType } = props
+    //const { targetView, chartType, showMoon, showCurrLoc, times, time, dome } = props
+    const { targetView, chartType } = props
     const context = useStateContext()
 
     const lngLatEl: util.LngLatEl = {
@@ -57,7 +57,7 @@ export const SkyChart = (props: Props) => {
         el: context.config.keck_elevation
     }
 
-    let traces = targetViz.map((tgtv: TargetViz) => {
+    let traces = targetView.map((tgtv: TargetView) => {
 
         const y = get_chart_data(tgtv, tgtv.times, chartType, lngLatEl)
         const texts = undefined

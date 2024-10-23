@@ -23,8 +23,9 @@ export type Dome = "K1" | "K2"
 
 
 
-export interface TargetViz extends Target {
+export interface TargetView extends Target {
     dome: Dome,
+    date: Date,
     times: Date[],
     ra_deg: number,
     dec_deg: number,
@@ -112,17 +113,18 @@ const TwoDView = ({targets}: Props) => {
     const [nadir, setNadir] = React.useState(util.get_suncalc_times(keckLngLat, obsdate).nadir)
     const [times, setTimes] = React.useState(util.get_times_using_nadir(nadir))
     const [time, setTime] = React.useState(nadir)
-    const [targetViz, setTargetViz] = React.useState<TargetViz[]>([])
+    const [targetView, setTargetView] = React.useState<TargetView[]>([])
 
     React.useEffect(() => {
-        const tviz = targetViz
+        const tviz = targetView
         targets.forEach((tgt: Target) => {
             if (tgt.ra && tgt.dec) {
                 const ra_deg = tgt.ra_deg ?? util.ra_dec_to_deg(tgt.ra as string, false)
                 const dec_deg = tgt.dec_deg ?? util.ra_dec_to_deg(tgt.dec as string, true)
                 const azEl = util.get_target_traj(ra_deg, dec_deg, times, keckLngLat) as [number, number][]
-                const tgtv: TargetViz = {
+                const tgtv: TargetView = {
                     ...tgt,
+                    date: obsdate,
                     dome,
                     times,
                     ra_deg,
@@ -132,8 +134,8 @@ const TwoDView = ({targets}: Props) => {
                 tviz.push(tgtv)
             }
         })
-        console.log('setting targetViz', tviz)
-        setTargetViz(tviz)
+        console.log('setting targetView', tviz)
+        setTargetView(tviz)
     }, [targets])
 
     React.useEffect(() => {
@@ -176,7 +178,7 @@ const TwoDView = ({targets}: Props) => {
                 onChange={(_, checked) => setShowMoon(checked)}
             />
             <DomeChart
-                targetViz={targetViz}
+                targetView={targetView}
                 showMoon={showMoon}
                 showCurrLoc={showCurrLoc}
                 times={times}
@@ -186,7 +188,7 @@ const TwoDView = ({targets}: Props) => {
             <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
             <SkyChart
                 chartType={skyChart}
-                targetViz={targetViz}
+                targetView={targetView}
                 showMoon={showMoon}
                 showCurrLoc={showCurrLoc}
                 times={times}
