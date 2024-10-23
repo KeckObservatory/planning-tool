@@ -30,6 +30,8 @@ interface ButtonProps {
 }
 
 interface Props extends ButtonProps { //TODO: Is extension needed?
+    dome: Dome
+    semester: string
 }
 
 
@@ -178,6 +180,8 @@ interface TargetVizDialogProps {
 
 const TargetVizDialog = (props: TargetVizDialogProps) => {
     const [dome, setDome] = useState<Dome>("K2")
+    const default_semester = get_curr_semester(new Date())
+    const [semester, setSemester] = useQueryParam('semester', withDefault(StringParam, default_semester))
     return (
         <Dialog
             maxWidth="lg"
@@ -190,17 +194,21 @@ const TargetVizDialog = (props: TargetVizDialogProps) => {
                 </>
             </DialogTitle>
             <DialogContent >
-                <SemesterSelect />
+                <SemesterSelect semester={semester} setSemester={setSemester}/>
                 <DomeSelect dome={dome} setDome={setDome}/>
-                <TargetVizChart target={props.target} />
+                <TargetVizChart target={props.target} semester={semester} dome={dome} />
             </DialogContent>
         </Dialog>
     )
 }
 
-export const SemesterSelect = () => {
-    const default_semester = get_curr_semester(new Date())
-    const [semester, setSemester] = useQueryParam('semester', withDefault(StringParam, default_semester))
+interface SemesterSelectProps {
+    semester: string
+    setSemester: (semester: string) => void
+}
+
+export const SemesterSelect = (props: SemesterSelectProps) => {
+    const { semester, setSemester } = props
     const handleSemesterChange = (semester?: string) => {
         if (semester) setSemester(semester)
     }
@@ -226,12 +234,10 @@ const date_normalize = (date: Date) => {
 }
 
 export const TargetVizChart = (props: Props) => {
-    //get dates:
-    const [dome] = useQueryParam('dome', withDefault(StringParam, "K2"))
-    const default_semester = get_curr_semester(new Date())
-    const [semester, _] = useQueryParam('semester', withDefault(StringParam, default_semester))
+    const { target, semester, dome } = props 
+    console.log('TargetVizChart init', target, semester, dome)
     const regexp = new RegExp("^[12][0-9]{3}[AB]$")
-    const init_target_viz = { semester, dome, ...props.target, semester_visibility: [] }
+    const init_target_viz = { semester, dome, ...target, semester_visibility: [] }
     const [targetViz, setTargetViz] = useState<TargetViz>(init_target_viz)
     const context = useStateContext()
 
@@ -249,14 +255,14 @@ export const TargetVizChart = (props: Props) => {
         }
         const dates = get_semester_dates(semester)
         let tViz: TargetViz = {
-            ...props.target,
+            ...target,
             semester: semester,
             semester_visibility: [],
         }
 
 
-        const ra = props.target.ra_deg ?? ra_dec_to_deg(props.target.ra as string)
-        const dec = props.target.dec_deg ?? ra_dec_to_deg(props.target.dec as string, true)
+        const ra = target.ra_deg ?? ra_dec_to_deg(target.ra as string)
+        const dec = target.dec_deg ?? ra_dec_to_deg(target.dec as string, true)
         tViz.semester_visibility = dates.map((date: Dayjs) => {
             let suncalc_times = get_suncalc_times(lngLatEl, date.toDate())
             const startTime = suncalc_times.sunset
@@ -279,7 +285,7 @@ export const TargetVizChart = (props: Props) => {
         })
 
         setTargetViz(tViz as TargetViz)
-    }, [props.target, semester, dome])
+    }, [target, semester, dome])
 
     const reason_to_color_mapping = (reasons: string[]) => {
 
@@ -345,7 +351,7 @@ export const TargetVizChart = (props: Props) => {
     const layout: Partial<Plotly.Layout> = {
         width: 1200,
         height: 400,
-        title: `${props.target.target_name ?? 'Target'} Visibility`,
+        title: `${target.target_name ?? 'Target'} Visibility`,
         yaxis: {
             title: 'Time',
             type: 'date',

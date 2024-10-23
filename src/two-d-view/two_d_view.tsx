@@ -96,7 +96,7 @@ export const DomeSelect = (props: DomeSelectProps) => {
 }
 
 
-const TwoDView = (props: Props) => {
+const TwoDView = ({targets}: Props) => {
     const context = useStateContext()
     const today = dayjs(new Date()).tz(context.config.timezone).toDate()
     const [obsdate, setObsdate] = React.useState<Date>(today)
@@ -116,12 +116,12 @@ const TwoDView = (props: Props) => {
 
     React.useEffect(() => {
         const tviz = targetViz
-        props.targets.forEach((tgt: Target) => {
+        targets.forEach((tgt: Target) => {
             if (tgt.ra && tgt.dec) {
-                const ra_deg = util.ra_dec_to_deg(tgt.ra as string, false)
-                const dec_deg = util.ra_dec_to_deg(tgt.dec as string, true)
+                const ra_deg = tgt.ra_deg ?? util.ra_dec_to_deg(tgt.ra as string, false)
+                const dec_deg = tgt.dec_deg ?? util.ra_dec_to_deg(tgt.dec as string, true)
                 const azEl = util.get_target_traj(ra_deg, dec_deg, times, keckLngLat) as [number, number][]
-                let tgtv: TargetViz = {
+                const tgtv: TargetViz = {
                     ...tgt,
                     dome,
                     times,
@@ -132,8 +132,9 @@ const TwoDView = (props: Props) => {
                 tviz.push(tgtv)
             }
         })
+        console.log('setting targetViz', tviz)
         setTargetViz(tviz)
-    }, [props.targets])
+    }, [targets])
 
     React.useEffect(() => {
         const newNadir = util.get_suncalc_times(keckLngLat, obsdate).nadir

@@ -18,7 +18,6 @@ export interface VTDProps {
 
 function ViewTargetsDialog(props: VTDProps) {
   const { open, handleClose, targets } = props;
-  console.log('view targets dialog init', targets)
 
   return (
     <Dialog 
