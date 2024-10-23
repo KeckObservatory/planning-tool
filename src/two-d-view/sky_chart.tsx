@@ -16,7 +16,7 @@ interface Props {
     dome: Dome
 }
 
-const get_chart_data = (targetViz: TargetViz, times: Date[], chartType: SkyChart, lngLatEl: LngLatEl): number[] => {
+const get_chart_data = (targetViz: TargetViz, times: Date[], chartType: SkyChart, lngLatEl: util.LngLatEl): number[] => {
     let val;
     const ra = targetViz.ra_deg as number
     const dec = targetViz.dec_deg as number
@@ -51,23 +51,29 @@ export const SkyChart = (props: Props) => {
     const { targetViz, chartType, showMoon, showCurrLoc, times, time, dome } = props
     const context = useStateContext()
 
+    const lngLatEl: util.LngLatEl = {lng: context.config.keck_long, lat: context.config.keck_lat, el: context.config.keck_elevation}
+
     let traces = targetViz.map((tgtv: TargetViz) => {
 
-        const y = get_chart_data(tgtv, tgtv.times, chartType, context.config.)
+        const y = get_chart_data(tgtv, tgtv.times, chartType, lngLatEl)
         const texts = undefined
 
-        const trace = {
+        const trace: Plotly.Data = {
             x: tgtv.times,
             y: y,
             text: texts,
-            hovorinfo: 'text',
+            // hovorinfo: 'text',
             hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+            marker: {
+                color: 'rgb(142, 124, 195)',
+                size: 12
+              },
             line: {
                 width: 10
             },
             textposition: 'top left',
             type: 'scatter',
-            mode: 'lines',
+            mode: 'lines+markers',
             name: tgtv.target_name
         }
         return trace
