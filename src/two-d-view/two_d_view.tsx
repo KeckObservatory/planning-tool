@@ -64,7 +64,7 @@ export const SkyChartSelect = (props: SkyChartSelectProps) => {
                 <FormControlLabel value="Elevation" control={<Radio />} label="Elevation" />
                 <FormControlLabel value="Airmass" control={<Radio />} label="Airmass" />
                 <FormControlLabel value="Parallactic" control={<Radio />} label="Parallactic Angle" />
-                <FormControlLabel value="LunarAngle" control={<Radio />} label="Lunar Angle" />
+                <FormControlLabel value="Lunar Angle" control={<Radio />} label="Lunar Angle" />
             </RadioGroup>
         </FormControl>
     )
