@@ -138,7 +138,7 @@ const TwoDView = ({targets}: Props) => {
         })
         console.log('setting targetView', tviz)
         setTargetView(tviz)
-    }, [targets])
+    }, [targets, times])
 
     React.useEffect(() => {
         const newNadir = util.get_suncalc_times(keckLngLat, obsdate).nadir
