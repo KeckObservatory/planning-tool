@@ -99,7 +99,7 @@ export const SkyChart = (props: Props) => {
             hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
             marker: {
                 color: color,
-                size: 12
+                size: 4 
               },
             line: {
                 width: 10
