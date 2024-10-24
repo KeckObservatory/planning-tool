@@ -4,7 +4,6 @@ import { Dome, TargetView } from "./two_d_view";
 import { useStateContext } from "../App";
 import { alt_az_observable, reason_to_color_mapping, VizRow } from "./viz_chart.tsx";
 import dayjs from "dayjs";
-import { trace } from "console";
 
 export type SkyChart = "Airmass" | "Elevation" | "Parallactic" | "Lunar Angle"
 
