@@ -183,7 +183,14 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
             textposition: 'top left',
             type: 'scatterpolar',
             mode: 'markers',
-            marker: { size: 12, color: 'red' },
+            marker: { 
+                size: 12,
+                color: 'red',
+                line: {
+                    color: 'black',
+                    width: 6
+                  }
+             },
             namelength: -1,
             name: 'Current location'
         }
