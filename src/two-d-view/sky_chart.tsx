@@ -49,7 +49,6 @@ const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType: SkyCha
 
 
 export const SkyChart = (props: Props) => {
-    //const { targetView, chartType, showMoon, showCurrLoc, times, time, dome } = props
     const { targetView, chartType, time, showCurrLoc } = props
     const context = useStateContext()
 
@@ -81,8 +80,9 @@ export const SkyChart = (props: Props) => {
         })
 
 
+
         const trace: Plotly.Data = {
-            x: tgtv.times,
+            x: tgtv.visibility.map((viz: VizRow) => viz.datetime),
             y: y,
             text: texts,
             // hovorinfo: 'text',

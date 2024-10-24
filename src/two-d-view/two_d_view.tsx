@@ -27,10 +27,8 @@ export type Dome = "K1" | "K2"
 export interface TargetView extends Target {
     dome: Dome,
     date: Date,
-    times: Date[],
     ra_deg: number,
     dec_deg: number,
-    azEl: [number, number][],
     visibility: VizRow[],
     visibilitySum: number
 }
@@ -131,7 +129,7 @@ const TwoDView = ({targets}: Props) => {
                 const azEl: [number, number][] = []
                // util.get_target_traj(ra_deg, dec_deg, newTimes, keckLngLat) as [number, number][]
                 const visibility: VizRow[] = []
-                times.forEach((datetime: Date) => {
+                newTimes.forEach((datetime: Date) => {
                     const [az, alt] = util.ra_dec_to_az_alt(tgtv.ra_deg, tgtv.dec_deg, datetime, lngLatEl)
                     //const air_mass_val = util.air_mass(alt, lngLatEl.el)
                     const air_mass_val = util.air_mass(alt)
@@ -147,10 +145,8 @@ const TwoDView = ({targets}: Props) => {
                     ...tgt,
                     date: obsdate,
                     dome,
-                    times: newTimes,
                     ra_deg,
                     dec_deg,
-                    azEl,
                     visibility,
                     visibilitySum: vizSum
                 }
