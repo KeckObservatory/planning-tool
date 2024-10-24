@@ -130,7 +130,7 @@ const TwoDView = ({targets}: Props) => {
                // util.get_target_traj(ra_deg, dec_deg, newTimes, keckLngLat) as [number, number][]
                 const visibility: VizRow[] = []
                 newTimes.forEach((datetime: Date) => {
-                    const [az, alt] = util.ra_dec_to_az_alt(tgtv.ra_deg, tgtv.dec_deg, datetime, lngLatEl)
+                    const [az, alt] = util.ra_dec_to_az_alt(ra_deg, dec_deg, datetime, lngLatEl)
                     //const air_mass_val = util.air_mass(alt, lngLatEl.el)
                     const air_mass_val = util.air_mass(alt)
                     const vis: VizRow = { az, alt, ...alt_az_observable(alt, az, KG), datetime, air_mass: air_mass_val }
