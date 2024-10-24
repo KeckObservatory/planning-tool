@@ -118,17 +118,20 @@ const TwoDView = ({targets}: Props) => {
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
 
     React.useEffect(() => {
+        const newNadir = util.get_suncalc_times(keckLngLat, obsdate).nadir
+        const newTimes = util.get_times_using_nadir(newNadir)
+        console.log('new obsdate', obsdate, 'newNadir', newNadir)
         const tviz = targetView
         targets.forEach((tgt: Target) => {
             if (tgt.ra && tgt.dec) {
                 const ra_deg = tgt.ra_deg ?? util.ra_dec_to_deg(tgt.ra as string, false)
                 const dec_deg = tgt.dec_deg ?? util.ra_dec_to_deg(tgt.dec as string, true)
-                const azEl = util.get_target_traj(ra_deg, dec_deg, times, keckLngLat) as [number, number][]
+                const azEl = util.get_target_traj(ra_deg, dec_deg, newTimes, keckLngLat) as [number, number][]
                 const tgtv: TargetView = {
                     ...tgt,
                     date: obsdate,
                     dome,
-                    times,
+                    times: newTimes,
                     ra_deg,
                     dec_deg,
                     azEl
@@ -138,20 +141,10 @@ const TwoDView = ({targets}: Props) => {
         })
         console.log('setting targetView', tviz)
         setTargetView(tviz)
-    }, [targets, times])
-
-    React.useEffect(() => {
-        const newNadir = util.get_suncalc_times(keckLngLat, obsdate).nadir
-        const newTimes = util.get_times_using_nadir(newNadir)
-        console.log('new obsdate', obsdate, 'newNadir', newNadir)
         setNadir(newNadir)
         setTimes(newTimes)
         setTime(newNadir)
-    }, [obsdate])
-
-
-
-
+    }, [obsdate, targets, times])
 
     const handleDateChange = (newDate: Dayjs | null) => {
         console.log('newDate', newDate, newDate?.tz(context.config.timezone))
