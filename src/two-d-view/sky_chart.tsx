@@ -59,8 +59,8 @@ export const SkyChart = (props: Props) => {
     let traces = targetView.map((tgtv: TargetView) => {
 
         const visibility = tgtv.times.map((datetime: Date) => {
-            const [az, alt] = util.ra_dec_to_az_alt(tgtv.ra_deg, tgtv.dec_deg, time, lngLatEl)
-            const vis: VizRow = { az, alt, ...alt_az_observable(alt, az, KG), datetime: datetime }
+            const [az, alt] = util.ra_dec_to_az_alt(tgtv.ra_deg, tgtv.dec_deg, datetime, lngLatEl)
+            const vis: VizRow = { az, alt, ...alt_az_observable(alt, az, KG), datetime }
             return vis
         })
 
@@ -112,34 +112,34 @@ export const SkyChart = (props: Props) => {
 
     //get curr marker
     if (showCurrLoc) {
-    targetView.forEach((tgtv: TargetView) => { //add current location trace
-        const ra = tgtv.ra_deg as number
-        const dec = tgtv.dec_deg as number
-        const azEl = util.ra_dec_to_az_alt(ra, dec, time, lngLatEl)
-        const datum = get_chart_datum(ra, dec, azEl[1], time, chartType, lngLatEl)
-        let text = ""
-        text += `Az: ${azEl[0].toFixed(2)}<br>`
-        text += `El: ${azEl[1].toFixed(2)}<br>`
-        text += `Airmass: ${util.air_mass(azEl[1], lngLatEl.el).toFixed(2)}<br>`
-        text += `HT: ${dayjs(time).format(context.config.time_format)}`
+        targetView.forEach((tgtv: TargetView) => { //add current location trace
+            const ra = tgtv.ra_deg as number
+            const dec = tgtv.dec_deg as number
+            const azEl = util.ra_dec_to_az_alt(ra, dec, time, lngLatEl)
+            const datum = get_chart_datum(ra, dec, azEl[1], time, chartType, lngLatEl)
+            let text = ""
+            text += `Az: ${azEl[0].toFixed(2)}<br>`
+            text += `El: ${azEl[1].toFixed(2)}<br>`
+            text += `Airmass: ${util.air_mass(azEl[1], lngLatEl.el).toFixed(2)}<br>`
+            text += `HT: ${dayjs(time).format(context.config.time_format)}`
 
-        const trace: Plotly.Data = {
-            x: [time],
-            y: [datum],
-            text: [text],
-            // hovorinfo: 'text',
-            hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
-            marker: {
-                color: 'red',
-                size: 8 
-              },
-            textposition: 'top left',
-            type: 'scatter',
-            mode: 'markers',
-            name: tgtv.target_name
-        }
-        traces.push(trace)
-        })
+            const trace: Plotly.Data = {
+                x: [time],
+                y: [datum],
+                text: [text],
+                // hovorinfo: 'text',
+                hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+                marker: {
+                    color: 'red',
+                    size: 8 
+                },
+                textposition: 'top left',
+                type: 'scatter',
+                mode: 'markers',
+                name: tgtv.target_name
+            }
+            traces.push(trace)
+            })
     }
 
     const layout: Partial<Plotly.Layout> = {
