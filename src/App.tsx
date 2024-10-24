@@ -156,8 +156,9 @@ function App() {
       console.log('targets', init_targets)
       const config = await get_config()
       const username = `${userinfo.FirstName} ${userinfo.LastName}`;
-      console.log('setting state', userinfo, init_targets)
-      setState({ config, username, obsid: userinfo.Id, is_admin: userinfo.is_admin ?? false })
+      const init_state = { config, username, obsid: userinfo.Id, is_admin: userinfo.is_admin ?? false }
+      console.log('setting state', init_state)
+      setState(init_state)
       setTargets(init_targets)
     }
     fetch_data()

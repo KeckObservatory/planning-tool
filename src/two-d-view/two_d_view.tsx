@@ -100,6 +100,7 @@ export const DomeSelect = (props: DomeSelectProps) => {
 const TwoDView = ({targets}: Props) => {
     const context = useStateContext()
     const today = dayjs(new Date()).tz(context.config.timezone).toDate()
+    console.log('today', today)
     const [obsdate, setObsdate] = React.useState<Date>(today)
     const [dome, setDome] = React.useState<Dome>("K2")
     const [skyChart, setSkyChart] = React.useState<SkyChart>("Elevation")
@@ -111,6 +112,7 @@ const TwoDView = ({targets}: Props) => {
         el: context.config.keck_elevation * 1_000 // convert km to meters
     }
     const [nadir, setNadir] = React.useState(util.get_suncalc_times(keckLngLat, obsdate).nadir)
+    console.log('nadir', nadir)
     const [times, setTimes] = React.useState(util.get_times_using_nadir(nadir))
     const [time, setTime] = React.useState(nadir)
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
