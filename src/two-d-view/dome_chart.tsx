@@ -217,10 +217,10 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
     traces.push(shape)
 
     //add tracking limits
-    const rt1 = 90
-    const rt2 = 85
+    const rt1 = 0 
+    const rt2 = 5 
     const tt0 = 0
-    const tt1 = 360
+    const tt1 = 361
     const d3 = make_disk_polar(rt1, rt2, tt0, tt1)
     const trackingshape = {
         ...d3,
