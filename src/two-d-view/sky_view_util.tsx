@@ -133,7 +133,6 @@ export const get_times_using_nadir = (nadir: Date, roundMin=ROUND_MINUTES, stepS
     const nLen = Math.round( ( TIMES_END - TIMES_START ) / stepSize)
     const deltaNadir = Array.from({ length: nLen }, (_, idx) => TIMES_START + stepSize * idx )
     const roundedNadir = round_date(roundMin, nadir)
-    console.log('nadir', nadir, 'roundedNadir', roundedNadir)
     return deltaNadir.map((hour: number) => {
         return add_hours(roundedNadir, hour)
     })

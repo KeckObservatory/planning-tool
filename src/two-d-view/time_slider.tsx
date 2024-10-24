@@ -19,7 +19,6 @@ const TimeSlider = (props: Props) => {
     const handleHourOffsetChange = (_: Event, value: number | number[]) => {
         if (typeof (value) === 'number') {
             const newtime = new Date(value)
-            console.log('time slider newtime', newtime)
             props.setTime(newtime)
         }
     }

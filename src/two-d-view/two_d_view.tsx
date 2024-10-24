@@ -104,7 +104,6 @@ export const hidate = (date: Date, timezone: string) => {
 const TwoDView = ({targets}: Props) => {
     const context = useStateContext()
     const today = hidate(new Date(), context.config.timezone).toDate()
-    console.log('today', today)
     const [obsdate, setObsdate] = React.useState<Date>(today)
     const [dome, setDome] = React.useState<Dome>("K2")
     const [skyChart, setSkyChart] = React.useState<SkyChart>("Elevation")
@@ -116,7 +115,6 @@ const TwoDView = ({targets}: Props) => {
         el: context.config.keck_elevation * 1_000 // convert km to meters
     }
     const [nadir, setNadir] = React.useState(util.get_suncalc_times(keckLngLat, obsdate).nadir)
-    console.log('nadir', nadir)
     const [times, setTimes] = React.useState(util.get_times_using_nadir(nadir))
     const [time, setTime] = React.useState(nadir)
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
@@ -124,7 +122,6 @@ const TwoDView = ({targets}: Props) => {
     React.useEffect(() => {
         const newNadir = util.get_suncalc_times(keckLngLat, obsdate).nadir
         const newTimes = util.get_times_using_nadir(newNadir)
-        console.log('new obsdate', obsdate, 'newNadir', newNadir)
         const tviz: TargetView[] = [] 
         targets.forEach((tgt: Target) => {
             if (tgt.ra && tgt.dec) {
@@ -143,7 +140,6 @@ const TwoDView = ({targets}: Props) => {
                 tviz.push(tgtv)
             }
         })
-        console.log('setting targetView', tviz)
         setTargetView(tviz)
         setNadir(newNadir)
         setTime(newNadir)
@@ -153,7 +149,6 @@ const TwoDView = ({targets}: Props) => {
     const handleDateChange = (newDate: Dayjs | null) => {
         if (!newDate) return
         const newObsDate = hidate(newDate?.toDate(), context.config.timezone).toDate()
-        console.log('newObsDate', newObsDate)
         newDate && setObsdate(newObsDate)
     }
 
