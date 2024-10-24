@@ -14,6 +14,8 @@ interface Props {
 }
 
 export default function NightPicker(props: Props) {
+    const dte = dayjs(props.date)
+    console.log('night picker dte', dte)
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -21,7 +23,7 @@ export default function NightPicker(props: Props) {
                 sx={datePickerStyle}
                 views={['year', 'month', 'day']}
                 label="Date of observation (HT)"
-                value={dayjs(props.date)}
+                value={dte}
                 onChange={props.handleDateChange}
             />
         </LocalizationProvider>
