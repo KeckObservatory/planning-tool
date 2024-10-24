@@ -247,7 +247,6 @@ export const reason_to_color_mapping = (reasons: string[]) => {
 
 export const TargetVizChart = (props: Props) => {
     const { target, semester, dome } = props 
-    console.log('TargetVizChart init', target, semester, dome)
     const regexp = new RegExp("^[12][0-9]{3}[AB]$")
     const init_target_viz = { semester, dome, ...target, semester_visibility: [] }
     const [targetViz, setTargetView] = useState<TargetViz>(init_target_viz)
