@@ -96,10 +96,14 @@ export const DomeSelect = (props: DomeSelectProps) => {
     )
 }
 
+export const hidate = (date: Date, timezone: string) => {
+    return dayjs(date).tz(timezone)
+}
+
 
 const TwoDView = ({targets}: Props) => {
     const context = useStateContext()
-    const today = dayjs(new Date()).tz(context.config.timezone).toDate()
+    const today = hidate(new Date(), context.config.timezone).toDate()
     console.log('today', today)
     const [obsdate, setObsdate] = React.useState<Date>(today)
     const [dome, setDome] = React.useState<Dome>("K2")
@@ -147,8 +151,10 @@ const TwoDView = ({targets}: Props) => {
     }, [obsdate, targets])
 
     const handleDateChange = (newDate: Dayjs | null) => {
-        console.log('newDate', newDate, newDate?.tz(context.config.timezone))
-        newDate && setObsdate(newDate.tz(context.config.timezone).toDate())
+        if (!newDate) return
+        const newObsDate = hidate(newDate?.toDate(), context.config.timezone).toDate()
+        console.log('newObsDate', newObsDate)
+        newDate && setObsdate(newObsDate)
     }
 
 

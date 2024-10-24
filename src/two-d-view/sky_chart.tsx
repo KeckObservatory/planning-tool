@@ -1,6 +1,6 @@
 import Plot from "react-plotly.js";
 import * as util from './sky_view_util.tsx'
-import { Dome, TargetView } from "./two_d_view";
+import { Dome, hidate, TargetView } from "./two_d_view";
 import { useStateContext } from "../App";
 import { alt_az_observable, reason_to_color_mapping, VizRow } from "./viz_chart.tsx";
 import dayjs from "dayjs";
@@ -101,6 +101,7 @@ export const SkyChart = (props: Props) => {
             hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
             marker: {
                 color: color,
+                opacity: 0,
                 size: 4 
               },
             line: {
@@ -121,7 +122,7 @@ export const SkyChart = (props: Props) => {
             const dec = tgtv.dec_deg as number
             const azEl = util.ra_dec_to_az_alt(ra, dec, time, lngLatEl)
             const datum = get_chart_datum(ra, dec, azEl[1], time, chartType, lngLatEl)
-            const currTime = dayjs(time).tz(context.config.timezone)
+            const currTime = hidate(time, context.config.timezone)
             console.log('currTime', currTime)
             let text = ""
             text += `Az: ${azEl[0].toFixed(2)}<br>`
