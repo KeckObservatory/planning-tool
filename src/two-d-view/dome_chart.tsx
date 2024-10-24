@@ -4,6 +4,7 @@ import * as util from './sky_view_util.tsx'
 import { Dome, TargetView } from "./two_d_view"
 import Plot from "react-plotly.js"
 import { GeoModel, useStateContext } from "../App.tsx"
+import { reason_to_color_mapping, VizRow } from "./viz_chart.tsx"
 
 interface DomeChartProps {
     targetView: TargetView[]
@@ -55,17 +56,20 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
     let traces: any[] = targetView.map((tgtv: TargetView) => {
         let [rr, tt] = [[] as number[], [] as number[]]
         const texts: string[] = []
-        tgtv.azEl.forEach((ae: [number, number], idx: number) => {
-            if (ae[1] >= 0) {
-                rr.push(90 - ae[1])
-                tt.push(ae[0])
-                let txt = ""
-                txt += `Az: ${ae[0].toFixed(2)}<br>`
-                txt += `El: ${ae[1].toFixed(2)}<br>`
-                txt += `Airmass: ${util.air_mass(ae[1], lngLatEl.el).toFixed(2)}<br>`
-                txt += `HT: ${dayjs(tgtv.times[idx]).format(time_format)}`
-                texts.push(txt)
-            }
+        let color: string[] = []
+        tgtv.visibility.forEach((viz: VizRow) => {
+            let txt = ""
+            txt += `Az: ${viz.az.toFixed(2)}<br>`
+            txt += `El: ${viz.alt.toFixed(2)}<br>`
+            txt += `Airmass: ${viz.air_mass.toFixed(2)}<br>`
+            txt += `HT: ${dayjs(viz.datetime).format(time_format)}<br>`
+            txt += `Visible for: ${tgtv.visibilitySum.toFixed(2)} hours<br>`
+            txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
+            texts.push(txt)
+            color.push(reason_to_color_mapping(viz.reasons))
+            rr.push(90 - viz.alt)
+            tt.push(viz.az)
+            return txt
         })
 
         const trace = {
@@ -74,12 +78,17 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
             text: texts,
             hovorinfo: 'text',
             hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+            marker: {
+                color: color,
+                opacity: 0,
+                size: 4
+            },
             line: {
                 width: 10
             },
             textposition: 'top left',
             type: 'scatterpolar',
-            mode: 'lines',
+            mode: 'lines+markers',
             namelength: -1,
             name: tgtv.target_name
         }
@@ -99,7 +108,8 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
                 let txt = ""
                 txt += `Az: ${ae[0].toFixed(2)}<br>`
                 txt += `El: ${ae[1].toFixed(2)}<br>`
-                txt += `Airmass: ${util.air_mass(ae[1], lngLatEl.el).toFixed(2)}<br>`
+                //txt += `Airmass: ${util.air_mass(ae[1], lngLatEl.el).toFixed(2)}<br>`
+                txt += `Airmass: ${util.air_mass(ae[1]).toFixed(2)}<br>`
                 txt += `HT: ${dayjs(times[idx]).format(time_format)}`
                 texts.push(txt)
             }
@@ -139,7 +149,8 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
                 let txt = ""
                 txt += `Az: ${ae[0].toFixed(2)}<br>`
                 txt += `El: ${ae[1].toFixed(2)}<br>`
-                txt += `Airmass: ${util.air_mass(ae[1], lngLatEl.el).toFixed(2)}<br>`
+                //txt += `Airmass: ${util.air_mass(ae[1], lngLatEl.el).toFixed(2)}<br>`
+                txt += `Airmass: ${util.air_mass(ae[1]).toFixed(2)}<br>`
                 txt += `HT: ${dayjs(time).format(time_format)}`
                 texts.push(txt)
             }
@@ -155,7 +166,8 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
                 let txt = ""
                 txt += `Az: ${azEl[0][0].toFixed(2)}<br>`
                 txt += `El: ${azEl[0][1].toFixed(2)}<br>`
-                txt += `Airmass: ${util.air_mass(azEl[0][1], lngLatEl.el).toFixed(2)}<br>`
+                //txt += `Airmass: ${util.air_mass(azEl[0][1], lngLatEl.el).toFixed(2)}<br>`
+                txt += `Airmass: ${util.air_mass(azEl[0][1]).toFixed(2)}<br>`
                 txt += `HT: ${dayjs(time).format(time_format)}`
                 texts.push(txt)
             }

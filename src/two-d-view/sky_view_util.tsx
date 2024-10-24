@@ -147,7 +147,13 @@ export const get_target_traj = (ra: number, dec: number, times: Date[], lngLatEl
     return traj
 }
 
-export const air_mass = (alt: number, el: number) => { // Homogeneous spherical atmosphsere with elevated observer
+export function air_mass(alt: number): number; //secant formula
+export function air_mass(alt: number, el: number): number; // Homogeneous spherical atmosphsere with elevated observer
+export function air_mass(alt: number, el?: number) {
+    if (el === undefined) {
+        const zenith = 90 - alt
+        return 1 / cosd(zenith)
+    }
     const y = el / ATMOSPHERE_HEIGHT
     const z = RADIUS_EARTH / ATMOSPHERE_HEIGHT
     const a2 = ATMOSPHERE_HEIGHT * ATMOSPHERE_HEIGHT
@@ -162,13 +168,11 @@ export const air_mass = (alt: number, el: number) => { // Homogeneous spherical 
     return X
 }
 
+
 export const get_air_mass = (ra: number, dec: number, times: Date[], lngLatEl: LngLatEl) => {
     const azAlt = get_target_traj(ra, dec, times, lngLatEl)
-    // const airmass = azAlt.map((a: [number, number]) => { 
-    //     const zenith = 90 - a[1]
-    //     return 1/cosd(zenith) 
-    // })
-    const airmass = azAlt.map((a: [number, number]) => { return air_mass(a[1], lngLatEl.el) })
+    //const airmass = azAlt.map((a: [number, number]) => { return air_mass(a[1], lngLatEl.el) })
+    const airmass = azAlt.map((a: [number, number]) => { return air_mass(a[1]) })
     return airmass
 }
 

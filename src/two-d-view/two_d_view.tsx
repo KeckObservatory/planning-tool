@@ -10,6 +10,7 @@ import { DomeChart } from './dome_chart.tsx';
 import { SkyChart } from './sky_chart.tsx';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import { alt_az_observable, VizRow } from './viz_chart.tsx';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -30,9 +31,8 @@ export interface TargetView extends Target {
     ra_deg: number,
     dec_deg: number,
     azEl: [number, number][],
-    air_mass?: number,
-    parallactic?: number,
-    lunar_angle?: number
+    visibility: VizRow[],
+    visibilitySum: number
 }
 
 
@@ -109,25 +109,40 @@ const TwoDView = ({targets}: Props) => {
     const [skyChart, setSkyChart] = React.useState<SkyChart>("Elevation")
     const [showMoon, setShowMoon] = React.useState(true)
     const [showCurrLoc, setShowCurrLoc] = React.useState(true)
-    const keckLngLat: LngLatEl = {
+    const lngLatEl: LngLatEl = {
         lng: context.config.keck_longitude,
         lat: context.config.keck_latitude,
         el: context.config.keck_elevation * 1_000 // convert km to meters
     }
-    const [nadir, setNadir] = React.useState(util.get_suncalc_times(keckLngLat, obsdate).nadir)
+    const [nadir, setNadir] = React.useState(util.get_suncalc_times(lngLatEl, obsdate).nadir)
     const [times, setTimes] = React.useState(util.get_times_using_nadir(nadir))
     const [time, setTime] = React.useState(nadir)
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
 
     React.useEffect(() => {
-        const newNadir = util.get_suncalc_times(keckLngLat, obsdate).nadir
+        const newNadir = util.get_suncalc_times(lngLatEl, obsdate).nadir
         const newTimes = util.get_times_using_nadir(newNadir)
         const tviz: TargetView[] = [] 
+        const KG = context.config.keck_geometry[dome]
         targets.forEach((tgt: Target) => {
             if (tgt.ra && tgt.dec) {
                 const ra_deg = tgt.ra_deg ?? util.ra_dec_to_deg(tgt.ra as string, false)
                 const dec_deg = tgt.dec_deg ?? util.ra_dec_to_deg(tgt.dec as string, true)
-                const azEl = util.get_target_traj(ra_deg, dec_deg, newTimes, keckLngLat) as [number, number][]
+                const azEl: [number, number][] = []
+               // util.get_target_traj(ra_deg, dec_deg, newTimes, keckLngLat) as [number, number][]
+                const visibility: VizRow[] = []
+                times.forEach((datetime: Date) => {
+                    const [az, alt] = util.ra_dec_to_az_alt(tgtv.ra_deg, tgtv.dec_deg, datetime, lngLatEl)
+                    //const air_mass_val = util.air_mass(alt, lngLatEl.el)
+                    const air_mass_val = util.air_mass(alt)
+                    const vis: VizRow = { az, alt, ...alt_az_observable(alt, az, KG), datetime, air_mass: air_mass_val }
+                    azEl.push([az, alt])
+                    visibility.push(vis)
+                })
+
+                const vizSum = visibility.reduce((sum: number, viz: VizRow) => {
+                    return viz.observable ? sum + 1 : sum
+                }, 0)
                 const tgtv: TargetView = {
                     ...tgt,
                     date: obsdate,
@@ -135,7 +150,9 @@ const TwoDView = ({targets}: Props) => {
                     times: newTimes,
                     ra_deg,
                     dec_deg,
-                    azEl
+                    azEl,
+                    visibility,
+                    visibilitySum: vizSum
                 }
                 tviz.push(tgtv)
             }
