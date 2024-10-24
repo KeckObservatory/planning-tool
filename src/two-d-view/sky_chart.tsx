@@ -2,6 +2,8 @@ import Plot from "react-plotly.js";
 import * as util from './sky_view_util.tsx'
 import { Dome, TargetView } from "./two_d_view";
 import { useStateContext } from "../App";
+import { alt_az_observable, reason_to_color_mapping, VizRow } from "./viz_chart.tsx";
+import dayjs from "dayjs";
 
 export type SkyChart = "Airmass" | "Elevation" | "Parallactic" | "Lunar Angle"
 
@@ -15,31 +17,27 @@ interface Props {
     dome: Dome
 }
 
-const get_chart_data = (targetView: TargetView, times: Date[], chartType: SkyChart, lngLatEl: util.LngLatEl): number[] => {
+const get_chart_datum = (ra: number, dec: number, alt: number, time: Date, chartType: SkyChart, lngLatEl: util.LngLatEl): number => {
     let val;
-    const ra = targetView.ra_deg as number
-    const dec = targetView.dec_deg as number
     switch (chartType) {
         case 'Elevation': {
-            val = util.get_target_traj(ra, dec, times, lngLatEl)
-            val = val.map((azAlt: any) => azAlt[1]) as number[]
+            val = alt 
             break;
         }
         case 'Airmass': {
-            val = util.get_air_mass(ra, dec, times, lngLatEl)
+            val = util.air_mass(alt, lngLatEl.el)
             break;
         }
         case 'Parallactic': {
-            val = util.get_parallactic_angle(ra, dec, times, lngLatEl)
+            val = util.parallatic_angle(ra, dec, time, lngLatEl)
             break;
         }
         case 'Lunar Angle': {
-            val = util.get_lunar_angle(ra, dec, times, lngLatEl)
+            val = util.lunar_angle(ra, dec, time, lngLatEl)
             break;
         }
         default: {
-            val = util.get_target_traj(ra, dec, times, lngLatEl)
-            val = val.map((azAlt: any) => azAlt[1]) as number[]
+            val = alt 
         }
     }
     return val
@@ -48,7 +46,7 @@ const get_chart_data = (targetView: TargetView, times: Date[], chartType: SkyCha
 
 export const SkyChart = (props: Props) => {
     //const { targetView, chartType, showMoon, showCurrLoc, times, time, dome } = props
-    const { targetView, chartType } = props
+    const { targetView, chartType, dome } = props
     const context = useStateContext()
 
     const lngLatEl: util.LngLatEl = {
@@ -56,11 +54,42 @@ export const SkyChart = (props: Props) => {
         lat: context.config.keck_latitude, 
         el: context.config.keck_elevation
     }
+    const KG = context.config.keck_geometry[dome as Dome]
 
     let traces = targetView.map((tgtv: TargetView) => {
 
-        const y = get_chart_data(tgtv, tgtv.times, chartType, lngLatEl)
-        const texts = undefined
+
+
+        const visibility = tgtv.times.map((time: Date) => {
+            const [az, alt] = util.ra_dec_to_az_alt(tgtv.ra_deg, tgtv.dec_deg, time, lngLatEl)
+            const vis: VizRow = { az, alt, ...alt_az_observable(alt, az, KG), datetime: time }
+            return vis
+        })
+
+        const vizSum = visibility.reduce((sum: number, viz: VizRow) => {
+            return viz.observable ? sum + 1 : sum
+        }, 0)
+
+        const visible_hours = vizSum * util.ROUND_MINUTES / 60
+
+        let texts: string[] = []
+        let y: number[] = []
+        let color: string[] = []
+        visibility.forEach((viz: VizRow) => {
+            let txt = ""
+            txt += `Az: ${viz.az.toFixed(2)}<br>`
+            txt += `El: ${viz.alt.toFixed(2)}<br>`
+            txt += `Airmass: ${util.air_mass(viz.alt, lngLatEl.el).toFixed(2)}<br>`
+            txt += `HT: ${dayjs(viz.datetime).format(context.config.date_time_format)}<br>`
+            txt += `Visible for: ${visible_hours.toFixed(2)} hours<br>`
+            txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
+            texts.push(txt)
+            color.push(reason_to_color_mapping(viz.reasons))
+            const datum = get_chart_datum(tgtv.ra_deg, tgtv.dec_deg, viz.alt, viz.datetime, chartType, lngLatEl)
+            y.push(datum)
+            return txt
+        })
+
 
         const trace: Plotly.Data = {
             x: tgtv.times,
@@ -69,7 +98,7 @@ export const SkyChart = (props: Props) => {
             // hovorinfo: 'text',
             hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
             marker: {
-                color: 'rgb(142, 124, 195)',
+                color: color,
                 size: 12
               },
             line: {

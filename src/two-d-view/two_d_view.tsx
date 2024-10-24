@@ -179,7 +179,9 @@ const TwoDView = ({targets}: Props) => {
                 control={<Switch checked={showMoon} />}
                 onChange={(_, checked) => setShowMoon(checked)}
             />
-            <DomeChart
+            <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
+            <SkyChart
+                chartType={skyChart}
                 targetView={targetView}
                 showMoon={showMoon}
                 showCurrLoc={showCurrLoc}
@@ -187,9 +189,7 @@ const TwoDView = ({targets}: Props) => {
                 time={time}
                 dome={dome}
             />
-            <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
-            <SkyChart
-                chartType={skyChart}
+            <DomeChart
                 targetView={targetView}
                 showMoon={showMoon}
                 showCurrLoc={showCurrLoc}

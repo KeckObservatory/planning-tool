@@ -80,7 +80,7 @@ const get_semester_dates = (semester: string) => {
     return ranges
 }
 
-const alt_az_observable = (alt: number, az: number, KG: GeoModel) => {
+export const alt_az_observable = (alt: number, az: number, KG: GeoModel) => {
     const minDeckAz = KG.t2
     const maxDeckAz = KG.t3
     const minAlt = KG.r1
@@ -159,7 +159,7 @@ interface DayViz extends GetTimesResult {
     visible_hours: number
 }
 
-interface VizRow {
+export interface VizRow {
     datetime: Date
     alt: number
     az: number
@@ -207,6 +207,7 @@ interface SemesterSelectProps {
     setSemester: (semester: string) => void
 }
 
+
 export const SemesterSelect = (props: SemesterSelectProps) => {
     const { semester, setSemester } = props
     const handleSemesterChange = (semester?: string) => {
@@ -231,6 +232,16 @@ const date_normalize = (date: Date) => {
     d.setFullYear(2020, 1, 1)
     //if morning set to next day
     return d.getHours() < 12 ? dayjs(d).add(1, 'day').toDate() : d
+}
+
+export const reason_to_color_mapping = (reasons: string[]) => {
+    const colors = {
+        'Deck Blocking': '#7570b3',
+        'Below Horizon': '#e7298a',
+        'Above Tracking Limits': '#d95f02'
+    }
+    const cols = reasons.map((reason: string) => colors[reason as keyof typeof colors])
+    return cols.length ? cols[0] : '#1b9e77'
 }
 
 export const TargetVizChart = (props: Props) => {
@@ -287,17 +298,6 @@ export const TargetVizChart = (props: Props) => {
         setTargetView(tViz as TargetViz)
     }, [target, semester, dome])
 
-    const reason_to_color_mapping = (reasons: string[]) => {
-
-
-        const colors = {
-            'Deck Blocking': '#7570b3',
-            'Below Horizon': '#e7298a',
-            'Above Tracking Limits': '#d95f02'
-        }
-        const cols = reasons.map((reason: string) => colors[reason as keyof typeof colors])
-        return cols.length ? cols[0] : '#1b9e77'
-    }
 
     const traces = targetViz.semester_visibility.map((dayViz: DayViz) => {
         let texts: string[] = []
