@@ -4,7 +4,6 @@ import Slider from "@mui/material/Slider";
 import dayjs from "dayjs";
 
 interface Props {
-    nadir: Date
     times: Date[]
     time: Date
     setTime: Function

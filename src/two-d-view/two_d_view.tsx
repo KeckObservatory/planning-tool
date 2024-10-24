@@ -163,7 +163,6 @@ const TwoDView = ({targets}: Props) => {
         <React.Fragment>
             <NightPicker date={obsdate} handleDateChange={handleDateChange} />
             <TimeSlider
-                nadir={nadir}
                 times={times}
                 time={time}
                 setTime={setTime}
