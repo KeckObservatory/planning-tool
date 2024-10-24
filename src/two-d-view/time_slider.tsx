@@ -20,7 +20,7 @@ const TimeSlider = (props: Props) => {
         if (typeof (value) === 'number') {
             const newtime = new Date(value)
             console.log('time slider newtime', newtime)
-            props.setTime(newtime)
+            // props.setTime(newtime)
         }
     }
 
