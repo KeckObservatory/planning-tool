@@ -121,7 +121,7 @@ export const SkyChart = (props: Props) => {
             text += `Az: ${azEl[0].toFixed(2)}<br>`
             text += `El: ${azEl[1].toFixed(2)}<br>`
             text += `Airmass: ${util.air_mass(azEl[1], lngLatEl.el).toFixed(2)}<br>`
-            text += `HT: ${dayjs(time).format(context.config.time_format)}`
+            text += `HT: ${dayjs(time).format(context.config.date_time_format)}`
 
             const trace: Plotly.Data = {
                 x: [time],
