@@ -4,6 +4,7 @@ import { Dome, TargetView } from "./two_d_view";
 import { useStateContext } from "../App";
 import { alt_az_observable, reason_to_color_mapping, VizRow } from "./viz_chart.tsx";
 import dayjs from "dayjs";
+import { trace } from "console";
 
 export type SkyChart = "Airmass" | "Elevation" | "Parallactic" | "Lunar Angle"
 
@@ -46,7 +47,7 @@ const get_chart_datum = (ra: number, dec: number, alt: number, time: Date, chart
 
 export const SkyChart = (props: Props) => {
     //const { targetView, chartType, showMoon, showCurrLoc, times, time, dome } = props
-    const { targetView, chartType, dome } = props
+    const { targetView, chartType, dome, time, showCurrLoc } = props
     const context = useStateContext()
 
     const lngLatEl: util.LngLatEl = {
@@ -58,11 +59,9 @@ export const SkyChart = (props: Props) => {
 
     let traces = targetView.map((tgtv: TargetView) => {
 
-
-
-        const visibility = tgtv.times.map((time: Date) => {
+        const visibility = tgtv.times.map((datetime: Date) => {
             const [az, alt] = util.ra_dec_to_az_alt(tgtv.ra_deg, tgtv.dec_deg, time, lngLatEl)
-            const vis: VizRow = { az, alt, ...alt_az_observable(alt, az, KG), datetime: time }
+            const vis: VizRow = { az, alt, ...alt_az_observable(alt, az, KG), datetime: datetime }
             return vis
         })
 
@@ -111,10 +110,52 @@ export const SkyChart = (props: Props) => {
         }
         return trace
     })
-    const layout = {} 
 
-    
+    //get curr marker
+    if (showCurrLoc) {
+    targetView.forEach((tgtv: TargetView) => { //add current location trace
+        const ra = tgtv.ra_deg as number
+        const dec = tgtv.dec_deg as number
+        const azEl = util.ra_dec_to_az_alt(ra, dec, time, lngLatEl)
+        const datum = get_chart_datum(ra, dec, azEl[1], time, chartType, lngLatEl)
+        let text = ""
+        text += `Az: ${azEl[0].toFixed(2)}<br>`
+        text += `El: ${azEl[1].toFixed(2)}<br>`
+        text += `Airmass: ${util.air_mass(azEl[1], lngLatEl.el).toFixed(2)}<br>`
+        text += `HT: ${dayjs(time).format(context.config.time_format)}`
 
+        const trace: Plotly.Data = {
+            x: [time],
+            y: [datum],
+            text: [text],
+            // hovorinfo: 'text',
+            hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+            marker: {
+                color: 'red',
+                size: 8 
+              },
+            textposition: 'top left',
+            type: 'scatter',
+            mode: 'markers',
+            name: tgtv.target_name
+        }
+        traces.push(trace)
+        })
+    }
+
+    const layout: Partial<Plotly.Layout> = {
+        width: 900,
+        height: 800,
+        title: `Target ${chartType} vs Time`,
+        hovermode: "closest",
+        margin: {
+            l: 40,
+            r: 40,
+            b: 40,
+            t: 40,
+            pad: 4
+        },
+    } 
 
     return (
         <Plot
