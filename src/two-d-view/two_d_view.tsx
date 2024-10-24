@@ -107,8 +107,8 @@ const TwoDView = ({targets}: Props) => {
     const [showMoon, setShowMoon] = React.useState(true)
     const [showCurrLoc, setShowCurrLoc] = React.useState(true)
     const keckLngLat: LngLatEl = {
-        lng: context.config.keck_longitudeitude,
-        lat: context.config.keck_latitudeitude,
+        lng: context.config.keck_longitude,
+        lat: context.config.keck_latitude,
         el: context.config.keck_elevation * 1_000 // convert km to meters
     }
     const [nadir, setNadir] = React.useState(util.get_suncalc_times(keckLngLat, obsdate).nadir)
