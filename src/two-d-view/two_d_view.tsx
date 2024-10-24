@@ -3,13 +3,13 @@ import * as util from './sky_view_util.tsx'
 import { LngLatEl } from './sky_view_util.tsx';
 import NightPicker from '../two-d-view/night_picker'
 import dayjs, { Dayjs } from 'dayjs';
-import utc from 'dayjs/plugin/utc'
-import timezone from 'dayjs/plugin/timezone'
 import { FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Switch } from '@mui/material';
 import TimeSlider from './time_slider';
 import { Target, useStateContext } from '../App.tsx';
 import { DomeChart } from './dome_chart.tsx';
 import { SkyChart } from './sky_chart.tsx';
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -153,7 +153,8 @@ const TwoDView = ({targets}: Props) => {
 
 
     const handleDateChange = (newDate: Dayjs | null) => {
-        if (newDate && !newDate.isSame(dayjs(obsdate))) setObsdate(newDate.tz(context.config.timezone).toDate())
+        console.log('newDate', newDate, newDate?.tz(context.config.timezone))
+        newDate && setObsdate(newDate.tz(context.config.timezone).toDate())
     }
 
 

@@ -4,6 +4,10 @@ import { Dome, TargetView } from "./two_d_view";
 import { useStateContext } from "../App";
 import { alt_az_observable, reason_to_color_mapping, VizRow } from "./viz_chart.tsx";
 import dayjs from "dayjs";
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 export type SkyChart = "Airmass" | "Elevation" | "Parallactic" | "Lunar Angle"
 
@@ -117,14 +121,16 @@ export const SkyChart = (props: Props) => {
             const dec = tgtv.dec_deg as number
             const azEl = util.ra_dec_to_az_alt(ra, dec, time, lngLatEl)
             const datum = get_chart_datum(ra, dec, azEl[1], time, chartType, lngLatEl)
+            const currTime = dayjs(time).tz(context.config.timezone)
+            console.log('currTime', currTime)
             let text = ""
             text += `Az: ${azEl[0].toFixed(2)}<br>`
             text += `El: ${azEl[1].toFixed(2)}<br>`
             text += `Airmass: ${util.air_mass(azEl[1], lngLatEl.el).toFixed(2)}<br>`
-            text += `HT: ${dayjs(time).format(context.config.date_time_format)}`
+            text += `HT: ${currTime.format(context.config.date_time_format)}`
 
             const trace: Plotly.Data = {
-                x: [time],
+                x: [currTime.toDate()],
                 y: [datum],
                 text: [text],
                 // hovorinfo: 'text',
