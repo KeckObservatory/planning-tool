@@ -142,9 +142,9 @@ const TwoDView = ({targets}: Props) => {
         console.log('setting targetView', tviz)
         setTargetView(tviz)
         setNadir(newNadir)
-        setTimes(newTimes)
         setTime(newNadir)
-    }, [obsdate, targets, times])
+        setTimes(newTimes)
+    }, [obsdate, targets])
 
     const handleDateChange = (newDate: Dayjs | null) => {
         console.log('newDate', newDate, newDate?.tz(context.config.timezone))
