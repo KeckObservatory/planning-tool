@@ -143,6 +143,7 @@ const TwoDView = ({targets}: Props) => {
     React.useEffect(() => {
         const newNadir = util.get_suncalc_times(keckLngLat, obsdate).nadir
         const newTimes = util.get_times_using_nadir(newNadir)
+        console.log('new obsdate', obsdate, 'newNadir', newNadir)
         setNadir(newNadir)
         setTimes(newTimes)
         setTime(newNadir)
