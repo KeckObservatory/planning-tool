@@ -188,7 +188,7 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
                 color: 'red',
                 line: {
                     color: 'black',
-                    width: 6
+                    width: 2
                   }
              },
             namelength: -1,

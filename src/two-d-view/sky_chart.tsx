@@ -130,7 +130,7 @@ export const SkyChart = (props: Props) => {
                     color: 'red',
                     line: {
                         color: 'black',
-                        width: 6
+                        width: 3
                     }
                 },
                 textposition: 'top left',
