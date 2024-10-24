@@ -21,28 +21,27 @@ interface Props {
     dome: Dome
 }
 
-const get_chart_datum = (ra: number, dec: number, alt: number, time: Date, chartType: SkyChart, lngLatEl: util.LngLatEl): number => {
+const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType: SkyChart, lngLatEl: util.LngLatEl): number => {
     let val;
     switch (chartType) {
         case 'Elevation': {
-            val = alt 
+            val = viz.alt 
             break;
         }
         case 'Airmass': {
-            //val = util.air_mass(alt, lngLatEl.el)
-            val = util.air_mass(alt)
+            val = viz.air_mass
             break;
         }
         case 'Parallactic': {
-            val = util.parallatic_angle(ra, dec, time, lngLatEl)
+            val = util.parallatic_angle(ra, dec, viz.datetime, lngLatEl)
             break;
         }
         case 'Lunar Angle': {
-            val = util.lunar_angle(ra, dec, time, lngLatEl)
+            val = util.lunar_angle(ra, dec, viz.datetime, lngLatEl)
             break;
         }
         default: {
-            val = alt 
+            val = viz.alt 
         }
     }
     return val
@@ -76,7 +75,7 @@ export const SkyChart = (props: Props) => {
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
             texts.push(txt)
             color.push(reason_to_color_mapping(viz.reasons))
-            const datum = get_chart_datum(tgtv.ra_deg, tgtv.dec_deg, viz.alt, viz.datetime, chartType, lngLatEl)
+            const datum = get_chart_datum(tgtv.ra_deg, tgtv.dec_deg, viz, chartType, lngLatEl)
             y.push(datum)
             return txt
         })
@@ -110,7 +109,8 @@ export const SkyChart = (props: Props) => {
             const ra = tgtv.ra_deg as number
             const dec = tgtv.dec_deg as number
             const azEl = util.ra_dec_to_az_alt(ra, dec, time, lngLatEl)
-            const datum = get_chart_datum(ra, dec, azEl[1], time, chartType, lngLatEl)
+            const viz = { az: azEl[0], alt: azEl[1], datetime: time, air_mass: util.air_mass(azEl[1]) }
+            const datum = get_chart_datum(ra, dec, viz as VizRow, chartType, lngLatEl)
             const currTime = hidate(time, context.config.timezone)
             let text = ""
             text += `Az: ${azEl[0].toFixed(2)}<br>`
