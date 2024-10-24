@@ -125,7 +125,7 @@ const TwoDView = ({targets}: Props) => {
         const newNadir = util.get_suncalc_times(keckLngLat, obsdate).nadir
         const newTimes = util.get_times_using_nadir(newNadir)
         console.log('new obsdate', obsdate, 'newNadir', newNadir)
-        const tviz = targetView
+        const tviz: TargetView[] = [] 
         targets.forEach((tgt: Target) => {
             if (tgt.ra && tgt.dec) {
                 const ra_deg = tgt.ra_deg ?? util.ra_dec_to_deg(tgt.ra as string, false)

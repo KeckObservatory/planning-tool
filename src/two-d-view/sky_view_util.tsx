@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import * as SunCalc from 'suncalc'
 
 //TODO: Put in cfg file
@@ -92,11 +93,11 @@ export const get_suncalc_times = (lngLatEl: LngLatEl, date?: Date) => {
         date = new Date()
     }
     let times = SunCalc.getTimes(date, lngLatEl.lat, lngLatEl.lng)
-    let nextday = new Date(date.setDate(date.getDate() + 1))
     if (date < times.sunrise) { // sun has not risen yet. use yesterday.
-        date.setDate(date.getDate() - 1)
-        times = SunCalc.getTimes(date, lngLatEl.lat, lngLatEl.lng)
+        const yesterday = dayjs(date).add(-1, 'day').toDate()
+        times = SunCalc.getTimes(yesterday, lngLatEl.lat, lngLatEl.lng)
     }
+    const nextday = dayjs(date).add(1, 'day').toDate() //be careful not to mutate date
     let nextdaytimes = SunCalc.getTimes(nextday, lngLatEl.lat, lngLatEl.lng)
     times.sunrise = nextdaytimes.sunrise
     times.sunriseEnd = nextdaytimes.sunriseEnd
