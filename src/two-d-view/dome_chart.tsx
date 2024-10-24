@@ -204,8 +204,8 @@ export const DomeChart = (props: DomeChartProps) => {
     const context = useStateContext()
     const KG = context.config.keck_geometry[dome]
     const lngLatEl: util.LngLatEl = {
-        lng: context.config.keck_long,
-        lat: context.config.keck_lat,
+        lng: context.config.keck_longitude,
+        lat: context.config.keck_latitude,
         el: context.config.keck_elevation * 1_000 // convert km to meters
     }
 

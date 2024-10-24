@@ -52,8 +52,8 @@ export const SkyChart = (props: Props) => {
     const context = useStateContext()
 
     const lngLatEl: util.LngLatEl = {
-        lng: context.config.keck_long, 
-        lat: context.config.keck_lat, 
+        lng: context.config.keck_longitude, 
+        lat: context.config.keck_latitude, 
         el: context.config.keck_elevation
     }
 

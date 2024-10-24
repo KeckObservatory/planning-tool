@@ -91,8 +91,8 @@ interface ConfigFile {
   time_format: string,
   date_time_format: string,
   keck_geometry: KeckGeoModel 
-  keck_lat: number, //deg
-  keck_long: number, // Keck Observatory longitude west of Greenwich [deg]
+  keck_latitude: number, //deg
+  keck_longitude: number, // Keck Observatory longitude west of Greenwich [deg]
   keck_elevation: number, // km
 }
 

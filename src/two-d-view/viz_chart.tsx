@@ -243,8 +243,8 @@ export const TargetVizChart = (props: Props) => {
 
     const KG = context.config.keck_geometry[dome as Dome]
     const lngLatEl: LngLatEl = {
-        lng: context.config.keck_long, 
-        lat: context.config.keck_lat, 
+        lng: context.config.keck_longitude, 
+        lat: context.config.keck_latitude, 
         el: context.config.keck_elevation
     }
 
