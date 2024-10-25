@@ -108,9 +108,9 @@ export const TargetEditDialog = (props: TargetEditProps) => {
     }
 
 
-    const rotOptions = targetProps.rotator_mode?.enum.map((s) => { return { label: s } })
+    const rotOptions = targetProps.rotator_mode?.enum?.map((s) => { return { label: s } })
     console.log('rotOptions', rotOptions)
-    const wrapOptions = targetProps.telescope_azimuth_wrap?.enum.map((s) => { return { label: s } })
+    const wrapOptions = targetProps.telescope_azimuth_wrap?.enum?.map((s) => { return { label: s } })
     console.log('wrapOptions', wrapOptions)
 
     return (
