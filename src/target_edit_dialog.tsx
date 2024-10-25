@@ -212,7 +212,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         onChange={(event) => handleTextChange('dec_offset', event.target.value)}
                                     />
                                 </Tooltip>
-                                <Tooltip title={input_label('rotator_mode', true)}>
+                                {/* <Tooltip title={input_label('rotator_mode', true)}>
                                     <Autocomplete
                                         disablePortal
                                         id="rotator-mode"
@@ -222,13 +222,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         // sx={{ width: 300 }}
                                         renderInput={(params) => <TextField {...params} label="RotatorMode" />}
                                     />
-                                    {/* <TextField
-                                        label={input_label('rotator_mode')}
-                                        InputLabelProps={{ shrink: hasSimbad || 'rotator_mode' in target }}
-                                        id="rotator_mode"
-                                        value={target.rotator_mode}
-                                        onChange={(event) => handleTextChange('rotator_mode', event.target.value)}
-                                    /> */}
                                 </Tooltip>
                                 <Tooltip title={input_label('telescope_wrap', true)}>
                                     <Autocomplete
@@ -240,7 +233,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         // sx={{ width: 300 }}
                                         renderInput={(params) => <TextField {...params} label="TelescopeWrap" />}
                                     />
-                                </Tooltip>
+                                </Tooltip> */}
                             </Stack>
                             <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
                                 <Tooltip title={input_label('gaia_id', true)}>
