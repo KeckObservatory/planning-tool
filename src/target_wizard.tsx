@@ -56,7 +56,8 @@ function LinearProgressWithLabel(props: LinearProgressProps &
             setTargetName(`on row ${idx} target: ${tgtName}`)
             if (!tgtName) continue
             if (!open) break
-            const simbadData = await get_simbad_data(tgtName) ?? {}
+            
+            const simbadData = useSimbad ? await get_simbad_data(tgtName) ?? {} : {}
             tgt = { ...simbadData, ...tgt, obsid: context.obsid } as Target
             tgts.push(tgt)
             setProgress(((idx + 1) / targets.length) * 100)
