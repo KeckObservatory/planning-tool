@@ -72,7 +72,7 @@ const getStarlist = (apiRef: React.MutableRefObject<GridApi>) => {
     apiRef.current.getRowModels().forEach((target) => {
       const row = convert_target_to_targetlist_row(target as Target)
       console.log('row', row)
-      rows += row
+      rows += row + '\n'
     })
     return rows
 }
