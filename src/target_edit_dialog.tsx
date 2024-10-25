@@ -34,6 +34,7 @@ export interface TargetProps {
         short_description?: string,
         default?: unknown,
         not_editable_by_user?: boolean,
+        enum?: string[]
     }
 }
 
@@ -105,6 +106,12 @@ export const TargetEditDialog = (props: TargetEditProps) => {
         setHasSimbad(tgt.tic_id || tgt.gaia_id ? true : false)
         handleTextChange('ra', tgt.ra)
     }
+
+
+    const rotOptions = targetProps.rotator_mode?.enum.map((s) => { return { label: s } })
+    console.log('rotOptions', rotOptions)
+    const wrapOptions = targetProps.telescope_azimuth_wrap?.enum.map((s) => { return { label: s } })
+    console.log('wrapOptions', wrapOptions)
 
     return (
         <Dialog
@@ -218,7 +225,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         id="rotator-mode"
                                         value={target.rotator_mode ? { label: target.rotator_mode }: null}
                                         onChange={(_, value) => handleTextChange('rotator_mode', value?.label)}
-                                        options={target_schema.properties.rotator_mode?.enum.map((s) => { return { label: s } })}
+                                        options={rotOptions}
                                         renderInput={(params) => <TextField {...params} label="RotatorMode" />}
                                     />
                                 </Tooltip>
@@ -228,7 +235,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         id="telescope-wrap"
                                         value={target.telescope_wrap ? { label: target.telescope_wrap }: null}
                                         onChange={(_, value) => handleTextChange('telescope_wrap', value?.label)}
-                                        options={target_schema.properties.telescope_azimuth_wrap?.enum.map((s) => { return { label: s } })}
+                                        options={wrapOptions}
                                         renderInput={(params) => <TextField {...params} label="TelescopeWrap" />}
                                     />
                                 </Tooltip>
