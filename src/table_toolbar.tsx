@@ -147,7 +147,7 @@ export function EditToolbar(props: EditToolbarProps) {
         Add Target
       </Button>
       <ViewTargetsDialogButton targets={props.selectedTargets} />
-      <CustomExportButton csvOptions={props.csvOptions}/>
+      <CustomExportButton csvOptions={csvOptions}/>
       {/* <GridToolbar
         csvOptions={csvOptions}
       /> */}
