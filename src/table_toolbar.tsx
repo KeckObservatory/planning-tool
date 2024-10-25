@@ -45,19 +45,32 @@ const getJson = (apiRef: React.MutableRefObject<GridApi>) => {
     return data
 };
 
+const convert_target_to_targetlist_row = (target: Target) => {
+  //required params
+  const name = target.target_name?.slice(0, 14).padEnd(15, " ")
+  const ra = target.ra?.replace(':', ' ')
+  const dec = target.dec?.replace(':', ' ')
+  let row = `${name} ${ra} ${dec}`
+  const valid = target.target_name && target.ra && target.dec
+  row = valid ? row : '# INVALID row: ' + row
+  //optional params
+  row = target.g_mag? row + ` gmag=${target.g_mag}` : row
+  row = target.j_mag? row + ` jmag=${target.j_mag}` : row
+  row = target.epoch? row + ` epoch=${target.epoch}` : row
+  row = target.ra_offset ? row + ` raoffset=${target.ra_offset}` : row
+  row = target.dec_offset ? row + ` decoffset=${target.dec_offset}` : row
+  row = target.rotator_mode ? row + ` rotmode=${target.rotator_mode}` : row
+  row = target.telescope_wrap ? row + ` wrap=${target.telescope_wrap}` : row
+  //comment goes before the row
+  row = target.comment ? `# ${target.comment}\n` + row : row
+  return row
+}
+
 const getStarlist = (apiRef: React.MutableRefObject<GridApi>) => {
     // Select rows and columns
     let rows = ""
     apiRef.current.getRowModels().forEach((target) => {
-      if (Object.keys(target).length ===0) return
-      console.log(target)
-      const invalid = false
-      let row = "" 
-      if (invalid) row = '# ' + row
-      const name = target.target_name.slice(0, 14).padEnd(15, " ")
-      const ra = target.ra.replace(':', ' ')
-      const dec = target.dec.replace(':', ' ')
-      row += name + " " + ra + " " + dec + "\n"
+      const row = convert_target_to_targetlist_row(target as Target)
       console.log('row', row)
       rows += row
     })

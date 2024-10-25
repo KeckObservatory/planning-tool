@@ -9,6 +9,15 @@
             "maxLength": 15,
             "description": "Target Name"
         },
+        "rotator_mode": {
+            "type": "string",
+            "description": "Rotator Mode",
+            "enum": [
+                "pa",
+                "vertical",
+                "stationary"
+            ]
+        },
         "observer_id": {
             "type": "number",
             "description": "Keck Observer ID",
@@ -29,12 +38,20 @@
         "pm_dec": {
             "type": "number",
             "short_description": "PM Dec",
-            "description": "Proper Motion in Dec"
+            "description": "Proper Motion in arcseconds Dec/second"
         },
         "pm_ra": {
             "type": "number",
             "short_description": "PM RA",
-            "description": "Proper Motion in RA"
+            "description": "Proper Motion in arcseconds RA/second"
+        },
+        "ra_offset": {
+            "type": "number",
+            "description": "Right Ascension Offset in arcseconds (positive is east)"
+        },
+        "dec_offset": {
+            "type": "number",
+            "description": "Declination Offset in arcseconds (positive is north)"
         },
         "ra": {
             "type": "string",
@@ -56,14 +73,24 @@
             "short_description": "Dec (deg)",
             "description": "Declination in degrees"
         },
+        "telescope_azimuth_wrap": {
+            "type": "string",
+            "short_description": "Telescope Azimuth Wrap",
+            "description": "Telescope Azimuth Wrap. South is clockwise with az increasing, North is counter clockwise with az decreasing",
+            "enum": [
+                "shortest",
+                "south",
+                "north"
+            ]
+        },
         "comment": {
             "type": "string",
             "description": "Notes/comments"
         },
-        "id": {
+        "_id": {
             "type": "string",
             "description": "target identifier for table",
-            "not_editable_by_user": false
+            "not_editable_by_user": true
         },
         "tic_id": {
             "type": "string",
@@ -78,6 +105,7 @@
         "status": {
             "type": "string",
             "description": "Status of the target. Used to track row edits vs form edits",
+            "not_editable_by_user": true, 
             "enum": [
                 "EDITED",
                 "CREATED"
@@ -85,6 +113,7 @@
         }
     },
     "required": [
+        "_id",
         "target_name",
         "ra",
         "dec"

@@ -8,6 +8,7 @@ import Paper from '@mui/material/Paper'
 import Tooltip from '@mui/material/Tooltip'
 import TextField from '@mui/material/TextField'
 import {
+    Autocomplete,
     Box,
     Typography
 } from '@mui/material'
@@ -189,6 +190,55 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         id="g-magnitude"
                                         value={target.g_mag}
                                         onChange={(event) => handleTextChange('g_mag', event.target.value)}
+                                    />
+                                </Tooltip>
+                            </Stack>
+                            <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
+                                <Tooltip title={input_label('ra_offset', true)}>
+                                    <TextField
+                                        label={input_label('ra_offset')}
+                                        InputLabelProps={{ shrink: hasSimbad || 'ra_offset' in target }}
+                                        id="ra_offset"
+                                        value={target.ra_offset}
+                                        onChange={(event) => handleTextChange('ra_offset', event.target.value)}
+                                    />
+                                </Tooltip>
+                                <Tooltip title={input_label('dec_offset', true)}>
+                                    <TextField
+                                        label={input_label('dec_offset')}
+                                        InputLabelProps={{ shrink: hasSimbad || 'dec_offset' in target }}
+                                        id="dec_offset"
+                                        value={target.dec_offset}
+                                        onChange={(event) => handleTextChange('dec_offset', event.target.value)}
+                                    />
+                                </Tooltip>
+                                <Tooltip title={input_label('rotator_mode', true)}>
+                                    <Autocomplete
+                                        disablePortal
+                                        id="rotator-mode"
+                                        value={target.rotator_mode ? { label: target.rotator_mode }: null}
+                                        onChange={(_, value) => handleTextChange('rotator_mode', value?.label)}
+                                        options={target_schema.properties.rotator_mode.enum.map((s) => { return { label: s } })}
+                                        // sx={{ width: 300 }}
+                                        renderInput={(params) => <TextField {...params} label="RotatorMode" />}
+                                    />
+                                    {/* <TextField
+                                        label={input_label('rotator_mode')}
+                                        InputLabelProps={{ shrink: hasSimbad || 'rotator_mode' in target }}
+                                        id="rotator_mode"
+                                        value={target.rotator_mode}
+                                        onChange={(event) => handleTextChange('rotator_mode', event.target.value)}
+                                    /> */}
+                                </Tooltip>
+                                <Tooltip title={input_label('telescope_wrap', true)}>
+                                    <Autocomplete
+                                        disablePortal
+                                        id="telescope-wrap"
+                                        value={target.telescope_wrap ? { label: target.telescope_wrap}: null}
+                                        onChange={(_, value) => handleTextChange('telescope_wrap', value?.label)}
+                                        options={target_schema.properties.telescope_azimuth_wrap.enum.map((s) => { return { label: s } })}
+                                        // sx={{ width: 300 }}
+                                        renderInput={(params) => <TextField {...params} label="TelescopeWrap" />}
                                     />
                                 </Tooltip>
                             </Stack>

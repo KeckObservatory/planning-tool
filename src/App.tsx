@@ -33,11 +33,17 @@ export const get_config = async () => {
 
 export type Status = "EDITED" | "CREATED"
 
+export type RotatorMode = "pa" | "vertical" | "stationary"
+export type TelescopeWrap = "shortest" | "south" | "north"
+
 export interface Target extends SimbadTargetData {
   _id: string,
   obsid: number,
   target_name?: string,
-  j_mag?: number,
+  ra_offset?: number,
+  dec_offset?: number,
+  rotator_mode?: RotatorMode,
+  telescope_wrap?: TelescopeWrap
   t_eff?: number,
   comment?: string,
   status?: Status //used to track row/form edits and updates them accordingly.
