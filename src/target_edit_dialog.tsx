@@ -225,6 +225,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         value={target.rotator_mode ? { label: target.rotator_mode }: null}
                                         onChange={(_, value) => handleTextChange('rotator_mode', value?.label)}
                                         options={rotOptions ?? []}
+                                        sx={{ width: 150 }}
                                         renderInput={(params) => <TextField {...params} label={input_label('rotator_mode')} />}
                                     />
                                 </Tooltip>
@@ -235,6 +236,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         value={target.telescope_wrap ? { label: target.telescope_wrap }: null}
                                         onChange={(_, value) => handleTextChange('telescope_wrap', value?.label)}
                                         options={wrapOptions ?? []}
+                                        sx={{ width: 150 }}
                                         renderInput={(params) => <TextField {...params} label={input_label('telescope_wrap')} />}
                                     />
                                 </Tooltip>
