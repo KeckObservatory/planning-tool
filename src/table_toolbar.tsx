@@ -18,7 +18,6 @@ import {
     GridApi,
     GridRowsProp,
     GridRowModel,
-    GridToolbar,
 } from '@mui/x-data-grid-pro';
 import MenuItem from '@mui/material/MenuItem';
 import Button, { ButtonProps } from '@mui/material/Button';
@@ -36,6 +35,8 @@ const getJson = (apiRef: React.MutableRefObject<GridApi>) => {
         visibleColumnsField.forEach((field) => {
             row[field] = apiRef.current.getCellParams(id, field).value;
         });
+        //TODO: format types
+        delete row.__check__
         return row;
     });
 
@@ -82,12 +83,15 @@ function JsonExportMenuItem(props: GridExportMenuItemProps<{}>) {
     );
 }
 
-const csvOptions: GridCsvExportOptions = { delimiter: ';' };
 
-function CustomExportButton(props: ButtonProps) {
+interface ExportButtonProps extends ButtonProps {
+  csvOptions: GridCsvExportOptions;
+}
+
+function CustomExportButton(props: ExportButtonProps) {
   return (
     <GridToolbarExportContainer {...props}>
-      <GridCsvExportMenuItem options={csvOptions} />
+      <GridCsvExportMenuItem options={props.csvOptions} />
       <JsonExportMenuItem />
     </GridToolbarExportContainer>
   );
@@ -143,10 +147,10 @@ export function EditToolbar(props: EditToolbarProps) {
         Add Target
       </Button>
       <ViewTargetsDialogButton targets={props.selectedTargets} />
-      <CustomExportButton />
-      <GridToolbar
+      <CustomExportButton csvOptions={props.csvOptions}/>
+      {/* <GridToolbar
         csvOptions={csvOptions}
-      />
+      /> */}
       <TargetWizardButton />
     </GridToolbarContainer>
   );
