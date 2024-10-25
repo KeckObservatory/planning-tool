@@ -9,6 +9,7 @@ export default defineConfig({
   base: './',
   build: {
     chunkSizeWarningLimit: 1000,
+    minify: false,
     outDir: resolve(__dirname, 'dist'),
     rollupOptions: {
       input: {
