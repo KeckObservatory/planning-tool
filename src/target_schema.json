@@ -47,10 +47,12 @@
         },
         "ra_offset": {
             "type": "number",
+            "short_description": "RA Offset",
             "description": "Right Ascension Offset in arcseconds (positive is east)"
         },
         "dec_offset": {
             "type": "number",
+            "short_description": "Dec Offset",
             "description": "Declination Offset in arcseconds (positive is north)"
         },
         "ra": {

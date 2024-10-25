@@ -225,7 +225,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         value={target.rotator_mode ? { label: target.rotator_mode }: null}
                                         onChange={(_, value) => handleTextChange('rotator_mode', value?.label)}
                                         options={rotOptions ?? []}
-                                        sx={{ width: 150 }}
+                                        sx={{ width: 250 }}
                                         renderInput={(params) => <TextField {...params} label={input_label('rotator_mode')} />}
                                     />
                                 </Tooltip>
