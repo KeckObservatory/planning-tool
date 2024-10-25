@@ -42,11 +42,27 @@ const getJson = (apiRef: React.MutableRefObject<GridApi>) => {
           data.push(row)
         }
     });
-
-    // Stringify with some indentation
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#parameters
-    return JSON.stringify(data, null, 2);
+    return data
 };
+
+const getStarlist = (apiRef: React.MutableRefObject<GridApi>) => {
+    // Select rows and columns
+    let rows = ""
+    apiRef.current.getRowModels().forEach((target) => {
+      if (Object.keys(target).length ===0) return
+      console.log(target)
+      const invalid = false
+      let row = "" 
+      if (invalid) row = '# ' + row
+      const name = target.target_name.splice(0, 14).padEnd(15, " ")
+      const ra = target.ra.replace(':', ' ')
+      const dec = target.dec.replace(':', ' ')
+      row += name + " " + ra + " " + dec + "\n"
+      console.log('row')
+      rows += row
+    })
+    return rows
+}
 
 const exportBlob = (blob: Blob, filename: string) => {
     // Save the blob in a json file
@@ -62,6 +78,28 @@ const exportBlob = (blob: Blob, filename: string) => {
     });
 };
 
+function StarListExportMenu(props: GridExportMenuItemProps<{}>) {
+    const apiRef = useGridApiContext();
+
+    const { hideMenu } = props;
+
+    return (
+        <MenuItem
+            onClick={() => {
+                const txt = getStarlist(apiRef);
+                const blob = new Blob([txt], {
+                    type: 'text/json',
+                });
+                exportBlob(blob, 'starlist.txt');
+                // Hide the export menu after the export
+                hideMenu?.();
+            }}
+        >
+            Export JSON
+        </MenuItem>
+    );
+}
+
 
 function JsonExportMenuItem(props: GridExportMenuItemProps<{}>) {
     const apiRef = useGridApiContext();
@@ -71,8 +109,8 @@ function JsonExportMenuItem(props: GridExportMenuItemProps<{}>) {
     return (
         <MenuItem
             onClick={() => {
-                const jsonString = getJson(apiRef);
-                const blob = new Blob([jsonString], {
+                const json = getJson(apiRef);
+                const blob = new Blob([JSON.stringify(json, null, 2)], {
                     type: 'text/json',
                 });
                 exportBlob(blob, 'targets.json');
