@@ -30,14 +30,17 @@ const getJson = (apiRef: React.MutableRefObject<GridApi>) => {
     const visibleColumnsField = gridVisibleColumnFieldsSelector(apiRef);
 
     // Format the data. Here we only keep the value
-    const data = filteredSortedRowIds.map((id) => {
+    let data: Record<string, any> = []
+    filteredSortedRowIds.forEach((id) => {
         const row: Record<string, any> = {};
         visibleColumnsField.forEach((field) => {
             row[field] = apiRef.current.getCellParams(id, field).value;
         });
         //TODO: format types
         delete row.__check__
-        return row;
+        if (Object.keys(row).length > 0) {
+          data.push(row)
+        }
     });
 
     // Stringify with some indentation
