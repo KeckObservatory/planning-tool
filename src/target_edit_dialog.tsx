@@ -212,14 +212,13 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         onChange={(event) => handleTextChange('dec_offset', event.target.value)}
                                     />
                                 </Tooltip>
-                                {/* <Tooltip title={input_label('rotator_mode', true)}>
+                                <Tooltip title={input_label('rotator_mode', true)}>
                                     <Autocomplete
                                         disablePortal
                                         id="rotator-mode"
                                         value={target.rotator_mode ? { label: target.rotator_mode }: null}
                                         onChange={(_, value) => handleTextChange('rotator_mode', value?.label)}
-                                        options={target_schema.properties.rotator_mode.enum.map((s) => { return { label: s } })}
-                                        // sx={{ width: 300 }}
+                                        options={target_schema.properties.rotator_mode?.enum.map((s) => { return { label: s } })}
                                         renderInput={(params) => <TextField {...params} label="RotatorMode" />}
                                     />
                                 </Tooltip>
@@ -227,13 +226,12 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                     <Autocomplete
                                         disablePortal
                                         id="telescope-wrap"
-                                        value={target.telescope_wrap ? { label: target.telescope_wrap}: null}
+                                        value={target.telescope_wrap ? { label: target.telescope_wrap }: null}
                                         onChange={(_, value) => handleTextChange('telescope_wrap', value?.label)}
-                                        options={target_schema.properties.telescope_azimuth_wrap.enum.map((s) => { return { label: s } })}
-                                        // sx={{ width: 300 }}
+                                        options={target_schema.properties.telescope_azimuth_wrap?.enum.map((s) => { return { label: s } })}
                                         renderInput={(params) => <TextField {...params} label="TelescopeWrap" />}
                                     />
-                                </Tooltip> */}
+                                </Tooltip>
                             </Stack>
                             <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
                                 <Tooltip title={input_label('gaia_id', true)}>
