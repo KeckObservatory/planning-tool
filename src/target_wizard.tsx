@@ -20,9 +20,10 @@ import LinearProgress, { LinearProgressProps } from '@mui/material/LinearProgres
 import { Target } from './App.tsx'
 import { useTargetContext } from './target_table.tsx';
 import {
-  randomId,
+    randomId,
 } from '@mui/x-data-grid-generator';
 import { submit_target } from './api/api_root.tsx';
+import { FormControlLabel, FormGroup, Switch } from '@mui/material';
 
 
 interface Props {
@@ -40,6 +41,7 @@ function LinearProgressWithLabel(props: LinearProgressProps &
 ) {
 
     const [targetName, setTargetName] = React.useState('')
+    const [useSimbad, setUseSimbad] = React.useState(true)
     const [label, setLabel] = React.useState('Create Targets')
     const context = useStateContext()
 
@@ -49,13 +51,13 @@ function LinearProgressWithLabel(props: LinearProgressProps &
         setLabel('Loading Targets')
         const tgts: Target[] = []
         for (let idx = 0; idx < targets.length; idx++) {
-            let tgt= targets[idx]
+            let tgt = targets[idx]
             const tgtName = tgt.target_name as string
             setTargetName(`on row ${idx} target: ${tgtName}`)
             if (!tgtName) continue
             if (!open) break
             const simbadData = await get_simbad_data(tgtName) ?? {}
-            tgt = { ...simbadData, ...tgt, obsid: context.obsid} as Target
+            tgt = { ...simbadData, ...tgt, obsid: context.obsid } as Target
             tgts.push(tgt)
             setProgress(((idx + 1) / targets.length) * 100)
         }
@@ -65,8 +67,20 @@ function LinearProgressWithLabel(props: LinearProgressProps &
         console.log('tgts', tgts)
         setLabel('Targets Created')
     }
+    const onSimbadSwitchChange = (event: React.SyntheticEvent<Element, Event>) => {
+        const value = (event.target as HTMLInputElement).checked
+        setUseSimbad(value)
+    }
     return (
         <>
+            <Tooltip title={'Simbad is used to fill in missing target data for a given name (I.E. M31)'}>
+                <FormGroup>
+                    <FormControlLabel
+                        onChange={onSimbadSwitchChange}
+                        control={<Switch checked={useSimbad} />}
+                        label={'Use Simbad target resolver'} />
+                </FormGroup>
+            </Tooltip>
             <Button
                 disabled={label.includes('Loading')}
                 onClick={generate_targets_from_list}>{label}</Button>
@@ -114,7 +128,7 @@ const TargetStepper = (props: Props) => {
 
         const resp = await submit_target(tgts)
         if (resp.errors) {
-        console.error('errors', resp.errors)
+            console.error('errors', resp.errors)
         }
 
         targetContext.setTargets((curTgts) => [...tgts, ...curTgts])
