@@ -92,6 +92,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
     }
 
     const input_label = (param: keyof Target, tooltip = false): string => {
+        console.log('param', param)
         return tooltip ?
             targetProps[param].description
             :
@@ -109,9 +110,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
 
 
     const rotOptions = targetProps.rotator_mode?.enum?.map((s) => { return { label: s } })
-    console.log('rotOptions', rotOptions)
-    const wrapOptions = targetProps.telescope_azimuth_wrap?.enum?.map((s) => { return { label: s } })
-    console.log('wrapOptions', wrapOptions)
+    const wrapOptions = targetProps.telescope_wrap?.enum?.map((s) => { return { label: s } })
 
     return (
         <Dialog

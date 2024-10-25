@@ -73,7 +73,7 @@
             "short_description": "Dec (deg)",
             "description": "Declination in degrees"
         },
-        "telescope_azimuth_wrap": {
+        "telescope_wrap": {
             "type": "string",
             "short_description": "Telescope Azimuth Wrap",
             "description": "Telescope Azimuth Wrap. South is clockwise with az increasing, North is counter clockwise with az decreasing",
