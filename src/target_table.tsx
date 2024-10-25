@@ -1,20 +1,15 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import { ErrorObject } from 'ajv/dist/2019'
 import {
-  GridRowsProp,
   GridRowModesModel,
   GridRowModes,
   DataGridPro,
   GridColDef,
-  GridToolbarContainer,
   GridActionsCellItem,
   GridEventListener,
   GridRowId,
-  GridToolbar,
   useGridApiContext,
   useGridApiEventHandler,
   GridRowParams,
@@ -24,29 +19,16 @@ import {
   GridValueSetter,
   GridCellEditStopParams,
   GridRowModel,
-  GridCsvExportOptions,
 } from '@mui/x-data-grid-pro';
-import {
-  randomId,
-} from '@mui/x-data-grid-generator';
 import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
 import SimbadButton from './simbad_button';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
-import { TargetWizardButton } from './target_wizard';
 import { Target, useStateContext } from './App.tsx';
 import TargetEditDialogButton, { raDecFormat } from './target_edit_dialog.tsx';
-import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 
-interface EditToolbarProps {
-  setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
-  obsid: number;
-  processRowUpdate: (newRow: GridRowModel<Target>) => Promise<GridRowModel<Target>>;
-  csvOptions: GridCsvExportOptions
-  selectedTargets: Target[]
-}
 
 function convert_schema_to_columns() {
   const columns: GridColDef[] = []
@@ -84,22 +66,8 @@ function convert_schema_to_columns() {
   return columns;
 }
 
-export const create_new_target = (id?: string, obsid?: number, target_name?: string) => {
-  let newTarget: Partial<Target> = {}
-  Object.entries(target_schema.properties).forEach(([key, value]: [string, any]) => {
-    newTarget[key as keyof Target] = value.default
-  })
-  newTarget = {
-    ...newTarget,
-    obsid: obsid,
-    _id: id,
-    target_name: target_name,
-    status: 'CREATED'
-  }
-  return newTarget as Target
-}
 
-const submit_one_target = async (target: Target) => {
+export const submit_one_target = async (target: Target) => {
   const resp = await submit_target([target])
   if (resp.errors.length > 0) {
     console.error('errors', resp)
@@ -110,40 +78,6 @@ const submit_one_target = async (target: Target) => {
 }
 
 
-function EditToolbar(props: EditToolbarProps) {
-  const { setRows, processRowUpdate, csvOptions } = props;
-  const context = useStateContext()
-
-  const handleAddTarget = async () => {
-    const id = randomId();
-    const newTarget = create_new_target(id, props.obsid)
-    const submittedTarget = await submit_one_target(newTarget)
-    if (!submittedTarget) {
-      console.error('error submitting target')
-      return
-    }
-    context.setTargets((oldTargets) => [submittedTarget, ...oldTargets]);
-    processRowUpdate(submittedTarget)
-
-    setRows((oldRows) => {
-      const newRows = [submittedTarget, ...oldRows];
-      return newRows
-    });
-  };
-
-  return (
-    <GridToolbarContainer sx={{ justifyContent: 'center' }}>
-      <Button color="primary" startIcon={<AddIcon />} onClick={handleAddTarget}>
-        Add Target
-      </Button>
-      <ViewTargetsDialogButton targets={props.selectedTargets} />
-      <GridToolbar
-        csvOptions={csvOptions}
-      />
-      <TargetWizardButton />
-    </GridToolbarContainer>
-  );
-}
 
 export interface TargetsContext {
   targets: Target[];
