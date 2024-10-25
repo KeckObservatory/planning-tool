@@ -74,7 +74,10 @@ function LinearProgressWithLabel(props: LinearProgressProps &
     }
     return (
         <>
-            <Tooltip title={'Simbad is used to fill in missing target data for a given name (I.E. M31)'}>
+            <Tooltip 
+            title={'Simbad is used to fill in missing target data for a given name (I.E. M31)'}
+            placement="right"
+            >
                 <FormGroup>
                     <FormControlLabel
                         onChange={onSimbadSwitchChange}
