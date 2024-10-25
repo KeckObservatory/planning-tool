@@ -95,7 +95,7 @@ function StarListExportMenu(props: GridExportMenuItemProps<{}>) {
                 hideMenu?.();
             }}
         >
-            Export JSON
+            Export Starlist Text File
         </MenuItem>
     );
 }
@@ -134,6 +134,7 @@ function CustomExportButton(props: ExportButtonProps) {
     <GridToolbarExportContainer {...props}>
       <GridCsvExportMenuItem options={props.csvOptions} />
       <JsonExportMenuItem />
+      <StarListExportMenu />
     </GridToolbarExportContainer>
   );
 }
