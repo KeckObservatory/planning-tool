@@ -2,6 +2,7 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import { ErrorObject } from 'ajv/dist/2019'
+import { EditToolbar } from './table_toolbar.tsx';
 import {
   GridRowModesModel,
   GridRowModes,

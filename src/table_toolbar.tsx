@@ -8,7 +8,6 @@ import { TargetWizardButton } from './target_wizard';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import {
     GridToolbarContainer,
-    GridToolbarContainerProps,
     GridToolbarExportContainer,
     GridCsvExportMenuItem,
     GridCsvExportOptions,
