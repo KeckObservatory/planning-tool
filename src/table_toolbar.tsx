@@ -58,7 +58,7 @@ const getStarlist = (apiRef: React.MutableRefObject<GridApi>) => {
       const ra = target.ra.replace(':', ' ')
       const dec = target.dec.replace(':', ' ')
       row += name + " " + ra + " " + dec + "\n"
-      console.log('row')
+      console.log('row', row)
       rows += row
     })
     return rows
