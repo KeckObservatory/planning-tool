@@ -269,8 +269,8 @@ export default function TargetTable() {
                 })
               },
             }}
-            pinnedColumns={pinnedColumns}
             initialState={{
+              pinnedColumns: pinnedColumns,
               columns: {
                 columnVisibilityModel:
                   visibleColumns
