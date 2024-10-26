@@ -85,12 +85,15 @@ const parse_csv = (contents: string) => {
     return tgts
 }
 
+const split_at = (index: number, str: string) => [str.slice(0, index), str.slice(index)] 
+
 const parse_txt = (contents: string, obsid: number) => {
     let tgts = [] as Target[]
     contents.split('\n').forEach((row) => {
         if (row === '') return
         if (row.startsWith('#')) return
-        const [target_name, rah, ram, ras, dech, decm, decs, epoch, ...opts] = row.replace(/\s\s+/g, ' ').split(' ')
+        const [target_name, remainder] = split_at(15, row) 
+        const [rah, ram, ras, dech, decm, decs, epoch, ...opts] = remainder.replace(/\s\s+/g, ' ').split(' ')
         let tgt: Target = {
             _id: randomId(),
             target_name,
