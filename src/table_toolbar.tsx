@@ -48,8 +48,8 @@ const getJson = (apiRef: React.MutableRefObject<GridApi>) => {
 const convert_target_to_targetlist_row = (target: Target) => {
   //required params
   const name = target.target_name?.slice(0, 14).padEnd(15, " ")
-  const ra = target.ra?.replace(':', ' ')
-  const dec = target.dec?.replace(':', ' ')
+  const ra = target.ra?.replaceAll(':', ' ')
+  const dec = target.dec?.replaceAll(':', ' ')
   let row = `${name} ${ra} ${dec}`
   const valid = target.target_name && target.ra && target.dec
   row = valid ? row : '# INVALID row: ' + row
