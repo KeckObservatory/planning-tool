@@ -27,15 +27,17 @@ interface TargetEditProps extends Props {
     open: boolean
 }
 
+export interface PropertyProps {
+    description: string,
+    type: string | string[],
+    short_description?: string,
+    default?: unknown,
+    not_editable_by_user?: boolean,
+    enum?: string[]
+}
+
 export interface TargetProps {
-    [key: string]: {
-        description: string,
-        type: string | string[],
-        short_description?: string,
-        default?: unknown,
-        not_editable_by_user?: boolean,
-        enum?: string[]
-    }
+    [key: string]: PropertyProps
 }
 
 const targetProps = target_schema.properties as TargetProps
@@ -92,7 +94,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
     }
 
     const input_label = (param: keyof Target, tooltip = false): string => {
-        console.log('param', param)
         return tooltip ?
             targetProps[param].description
             :
@@ -222,7 +223,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                     <Autocomplete
                                         disablePortal
                                         id="rotator-mode"
-                                        value={target.rotator_mode ? { label: target.rotator_mode }: null}
+                                        value={target.rotator_mode ? { label: target.rotator_mode } : null}
                                         onChange={(_, value) => handleTextChange('rotator_mode', value?.label)}
                                         options={rotOptions ?? []}
                                         sx={{ width: 250 }}
@@ -233,7 +234,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                     <Autocomplete
                                         disablePortal
                                         id="telescope-wrap"
-                                        value={target.telescope_wrap ? { label: target.telescope_wrap }: null}
+                                        value={target.telescope_wrap ? { label: target.telescope_wrap } : null}
                                         onChange={(_, value) => handleTextChange('telescope_wrap', value?.label)}
                                         options={wrapOptions ?? []}
                                         sx={{ width: 150 }}
@@ -242,6 +243,24 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 </Tooltip>
                             </Stack>
                             <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
+                                <Tooltip title={input_label('d_ra', true)}>
+                                    <TextField
+                                        label={input_label('d_ra')}
+                                        InputLabelProps={{ shrink: hasSimbad || target.d_ra!== undefined }}
+                                        id="dra"
+                                        value={target.d_ra}
+                                        onChange={(event) => handleTextChange('d_ra', event.target.value)}
+                                    />
+                                </Tooltip>
+                                <Tooltip title={input_label('d_dec', true)}>
+                                    <TextField
+                                        label={input_label('d_dec')}
+                                        InputLabelProps={{ shrink: hasSimbad || target.d_dec !== undefined }}
+                                        id="d_dec"
+                                        value={target.d_dec}
+                                        onChange={(event) => handleTextChange('d_dec', event.target.value)}
+                                    />
+                                </Tooltip>
                                 <Tooltip title={input_label('gaia_id', true)}>
                                     <TextField
                                         label={input_label('gaia_id')}

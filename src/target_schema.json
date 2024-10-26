@@ -35,6 +35,16 @@
             "type": "string",
             "description": "Epoch"
         },
+        "d_dec": {
+            "type": "number",
+            "short_description": "dDec",
+            "description": "Differential tracking in arcseconds Dec/hour"
+        },
+        "d_ra": {
+            "type": "number",
+            "short_description": "dRA",
+            "description": "Differential tracking in arcseconds RA/hour divided by 15 (positive is east)"
+        },
         "pm_dec": {
             "type": "number",
             "short_description": "PM Dec",

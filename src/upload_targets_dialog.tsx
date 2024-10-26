@@ -7,9 +7,10 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { Tooltip } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
-import { Target, useStateContext } from './App';
+import { RotatorMode, Target, TelescopeWrap, useStateContext } from './App';
 import target_schema from './target_schema.json'
 import { randomId } from '@mui/x-data-grid-generator';
+import { PropertyProps, TargetProps } from './target_edit_dialog';
 
 interface Props {
     setTargets: Function
@@ -22,9 +23,53 @@ interface UploadProps extends Props {
 }
 
 
-let hdrToKeyMapping = Object.fromEntries(Object.entries(target_schema.properties).map(([key, value]: [string, any]) => {
-    return[value.description as string, key as keyof Target]
+const targetProps = target_schema.properties as TargetProps
+
+let hdrToKeyMapping = Object.fromEntries(Object.entries(targetProps).map(([key, value]: [keyof TargetProps, PropertyProps]) => {
+    const desc = value.short_description ?? value.description
+    return[desc, key]
 }))
+
+let convert_string_to_type = (key: keyof Target, value: string) => {
+    //@ts-ignore
+    if (targetProps[key] === 'number') {
+        return Number(value)
+    }
+    return value
+}
+
+interface StarListOptionalKeys {
+    gmag?: number,
+    jmag?: number,
+    epoch?: number,
+    raoffset?: number,
+    decoffset?: number,
+    pmra?: number,
+    pmdec?: number,
+    rotmode?: RotatorMode,
+    wrap?: TelescopeWrap,
+    dra?: number,
+    ddec?: number,
+}
+
+let starlistToKeyMapping = {
+    'gmag': 'g_mag',
+    'jmag': 'j_mag',
+    'epoch': 'epoch',
+    'raoffset': 'ra_offset',
+    'decoffset': 'dec_offset',
+    'pmra': 'pm_ra',
+    'pmdec': 'pm_dec',
+    'rotmode': 'rotator_mode',
+    'wrap': 'telescope_wrap',
+    'dra': 'd_ra',
+    'ddec': 'd_dec',
+}
+
+const parse_json = (contents: string) => {
+    const tgts = JSON.parse(contents)
+    return tgts
+}
 
 const parse_csv = (contents: string) => {
     const [header, ...lines] = contents.split('\n')
@@ -46,20 +91,21 @@ const parse_txt = (contents: string, obsid: number) => {
         if (row === '') return
         if (row.startsWith('#')) return
         const [target_name, rah, ram, ras, dech, decm, decs, epoch, ...opts] = row.replace(/\s\s+/g, ' ').split(' ')
-        const tgt: Target = {
+        let tgt: Target = {
             _id: randomId(),
             target_name,
             obsid: obsid,
             ra: `${rah.padStart(2,'0')}:${ram.padStart(2,'0')}:${ras}`,
             dec: `${dech.padStart(2,'0')}:${decm.padStart(2,'0')}:${decs}`,
-            epoch,
-            ...opts
+            epoch
         };
         opts.forEach((opt) => {
             const [key, value] = opt.split('=')
-            // @ts-ignore
-            tgt[key] = value
+            const tgtKey = starlistToKeyMapping[key as keyof StarListOptionalKeys] as keyof Target 
+            //@ts-ignore
+            tgt[tgtKey] = convert_string_to_type(tgtKey, value)
         })
+        console.log('tgt', tgt)
         tgts.push(tgt);
     });
     return tgts
@@ -79,7 +125,22 @@ export function UploadComponent(props: UploadProps) {
         fileReader.readAsText(file, "UTF-8");
         fileReader.onload = e => {
             const contents = e.target?.result as string
-            const tgts = ext?.includes('csv') ? parse_csv(contents) : parse_txt(contents, context.obsid)
+            //const tgts = ext?.includes('csv') ? parse_csv(contents) : parse_txt(contents, context.obsid)
+            let tgts: Target[] = [] 
+            switch (ext) {
+                case 'json':
+                    tgts = parse_json(contents)
+                    break;
+                case 'csv':
+                    tgts = parse_csv(contents)
+                    break;
+                case 'txt':
+                    tgts = parse_txt(contents, context.obsid)
+                    break;
+                default:
+                    console.error('file type not supported')
+                    return
+            }
             console.log('tgts', tgts)
             props.setOpen && props.setOpen(false)
             props.setTargets(tgts)
