@@ -92,8 +92,9 @@ const parse_txt = (contents: string, obsid: number) => {
     contents.split('\n').forEach((row) => {
         if (row === '') return
         if (row.startsWith('#')) return
-        const [target_name, remainder] = split_at(15, row) 
-        const [rah, ram, ras, dech, decm, decs, epoch, ...opts] = remainder.replace(/\s\s+/g, ' ').split(' ')
+        const [target_name, tail] = split_at(15, row) 
+        const [rah, ram, ras, dech, decm, decs, epoch, ...opts] = tail.replace(/\s\s+/g, ' ').split(' ')
+        console.log('opts', opts)
         let tgt: Target = {
             _id: randomId(),
             target_name,
