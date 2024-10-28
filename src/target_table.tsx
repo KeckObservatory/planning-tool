@@ -183,12 +183,11 @@ export default function TargetTable() {
         let value = apiRef.current.getCellValue(id, params.field);
         let type = (target_schema.properties as TargetProps)[params.field as keyof PropertyProps].type
         // convert type to string if array
-        type = type instanceof Array ? type = type.reduce((acc, val) => acc + val, "") : type
-        const isNumber = ['number', 'integer'].includes(type)
-        format_edit_entry(params.field, value, isNumber)
-
         const changeDetected = editTarget[params.field as keyof Target] !== value
         if (changeDetected) {
+          type = type instanceof Array ? type = type.reduce((acc, val) => acc + val, "") : type
+          const isNumber = ['number', 'integer'].includes(type)
+          value = format_edit_entry(params.field, value, isNumber)
           console.log('target setting', params.field, value, id, params)
           setEditTarget({ ...editTarget, 'status': 'EDITED', [params.field]: value })
         }
