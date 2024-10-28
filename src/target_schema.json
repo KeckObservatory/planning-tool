@@ -25,11 +25,13 @@
         },
         "j_mag": {
             "type":  ["number", "string"],
-            "description": "J Magnitude"
+            "description": "J Magnitude",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "g_mag": {
             "type":  ["number", "string"],
-            "description": "G Magnitude"
+            "description": "G Magnitude",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "epoch": {
             "type":  ["number", "string"],
@@ -38,32 +40,38 @@
         "d_dec": {
             "type":  ["number", "string"],
             "short_description": "dDec",
-            "description": "Differential tracking in arcseconds Dec/hour"
+            "description": "Differential tracking in arcseconds Dec/hour",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "d_ra": {
             "type":  ["number", "string"],
             "short_description": "dRA",
-            "description": "Differential tracking in arcseconds RA/hour divided by 15 (positive is east)"
+            "description": "Differential tracking in arcseconds RA/hour divided by 15 (positive is east)",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "pm_dec": {
             "type":  ["number", "string"],
             "short_description": "PM Dec",
-            "description": "Proper Motion in arcseconds Dec/second"
+            "description": "Proper Motion in arcseconds Dec/second",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "pm_ra": {
             "type":  ["number", "string"],
             "short_description": "PM RA",
-            "description": "Proper Motion in arcseconds RA/second"
+            "description": "Proper Motion in arcseconds RA/second",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "ra_offset": {
             "type":  ["number", "string"],
             "short_description": "RA Offset",
-            "description": "Right Ascension Offset in arcseconds (positive is east)"
+            "description": "Right Ascension Offset in arcseconds (positive is east)",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "dec_offset": {
             "type":  ["number", "string"],
             "short_description": "Dec Offset",
-            "description": "Declination Offset in arcseconds (positive is north)"
+            "description": "Declination Offset in arcseconds (positive is north)",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "ra": {
             "type": "string",
@@ -128,7 +136,8 @@
         "_id",
         "target_name",
         "ra",
-        "dec"
+        "dec",
+        "epoch"
     ],
     "additionalProperties": true
 }
