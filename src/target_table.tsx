@@ -151,6 +151,7 @@ export default function TargetTable() {
     const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
     const [hasSimbad, setHasSimbad] = React.useState(row.tic_id || row.gaia_id ? true : false);
     validate(row)
+    validate.errors && console.log('errors', validate.errors, row)
     const [errors, setErrors] = React.useState<ErrorObject<string, Record<string, any>, unknown>[]>(validate.errors ?? []);
     const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
     const apiRef = useGridApiContext();
@@ -162,6 +163,7 @@ export default function TargetTable() {
         processRowUpdate(editTarget) //TODO: May want to wait till save is successful
         validate(newTgt)
         setErrors(validate.errors ?? [])
+        validate.errors && console.log('errors', validate.errors, newTgt)
         if (isEdited) newTgt = await debounced_save(editTarget)
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasSimbad(true)
