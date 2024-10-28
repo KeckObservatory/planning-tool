@@ -24,44 +24,44 @@
             "not_editable_by_user": false
         },
         "j_mag": {
-            "type": "number",
+            "type":  ["number", "string"],
             "description": "J Magnitude"
         },
         "g_mag": {
-            "type": "number",
+            "type":  ["number", "string"],
             "description": "G Magnitude"
         },
         "epoch": {
-            "type": "string",
+            "type":  ["number", "string"],
             "description": "Epoch"
         },
         "d_dec": {
-            "type": "number",
+            "type":  ["number", "string"],
             "short_description": "dDec",
             "description": "Differential tracking in arcseconds Dec/hour"
         },
         "d_ra": {
-            "type": "number",
+            "type":  ["number", "string"],
             "short_description": "dRA",
-            "description": "Differential tracking in arcseconds RA/hour divided by 15 (positive is east)"
+            "description": "Differential tracking in arcseconds RA/hour divided by 15 (positive is east)",
         },
         "pm_dec": {
-            "type": "number",
+            "type":  ["number", "string"],
             "short_description": "PM Dec",
             "description": "Proper Motion in arcseconds Dec/second"
         },
         "pm_ra": {
-            "type": "number",
+            "type":  ["number", "string"],
             "short_description": "PM RA",
             "description": "Proper Motion in arcseconds RA/second"
         },
         "ra_offset": {
-            "type": "number",
+            "type":  ["number", "string"],
             "short_description": "RA Offset",
             "description": "Right Ascension Offset in arcseconds (positive is east)"
         },
         "dec_offset": {
-            "type": "number",
+            "type":  ["number", "string"],
             "short_description": "Dec Offset",
             "description": "Declination Offset in arcseconds (positive is north)"
         },
