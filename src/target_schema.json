@@ -76,12 +76,12 @@
         "ra": {
             "type": "string",
             "description": "Right Ascension",
-            "pattern": "^([\\-\\+]?//d{2}://d{2}://d{2}\\.?[0-9]*)$"
+            "pattern": "^([\\-\\+]?\\d{2}:\\d{2}:\\d{2}\\.?\\d*)$"
         },
         "dec": {
             "type": "string",
             "description": "Declination",
-            "pattern": "^([\\-\\+]?//d{2}://d{2}://d{2}\\.?[0-9]*)$"
+            "pattern": "^([\\-\\+]?\\d{2}:\\d{2}:\\d{2}\\.?\\d*)$"
         },
         "ra_deg": {
             "type": "number",
