@@ -15,7 +15,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import SimbadButton from './simbad_button';
 import target_schema from './target_schema.json'
-import { Target } from './App';
+import { Status, Target } from './App';
 
 interface Props {
     target: Target
@@ -68,7 +68,9 @@ export const raDecFormat = (input: string) => {
 }
 
 export const rowSetter = (tgt: Target, key: string, value?: string | number | boolean) => {
-    tgt = { ...tgt, [key]: value, status: 'EDITED' }
+    let newTgt = { ...tgt, 'status': 'EDITED' as Status, [key]: value }
+    const delkey = value===undefined && !target_schema.required.includes(key)
+    delkey && delete newTgt[key as keyof Target]
     return tgt
 }
 

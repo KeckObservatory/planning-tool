@@ -26,7 +26,7 @@ import ValidationDialogButton, { validate } from './validation_check_dialog';
 import SimbadButton from './simbad_button';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
 import { Status, Target, useStateContext } from './App.tsx';
-import TargetEditDialogButton, { format_edit_entry, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog.tsx';
+import TargetEditDialogButton, { format_edit_entry, PropertyProps, raDecFormat, rowSetter, TargetProps } from './target_edit_dialog.tsx';
 import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 
@@ -169,8 +169,12 @@ export default function TargetTable() {
       }
     }
 
+
     React.useEffect(() => { // when targed is edited in target edit dialog or simbad dialog
       handleRowChange()
+      validate(editTarget)
+      setErrors(validate.errors ?? [])
+      validate.errors && console.log('errors', validate.errors, editTarget)
       setCount((prev: number) => prev + 1)
     }, [editTarget])
 
@@ -186,13 +190,7 @@ export default function TargetTable() {
         if (changeDetected) {
           const isNumber = type.includes('number') || type.includes('integer')
           value = format_edit_entry(params.field, value, isNumber)
-          console.log('target setting', params.field, value, id, params)
-          let newTgt = { ...editTarget, 'status': 'EDITED' as Status, [params.field]: value }
-          const delkey = value===undefined && !target_schema.required.includes(params.field)
-          delkey && delete newTgt[params.field as keyof Target]
-          validate(newTgt)
-          setErrors(validate.errors ?? [])
-          validate.errors && console.log('errors', validate.errors, newTgt)
+          const newTgt= rowSetter(editTarget, params.field, value)
           setEditTarget(newTgt)
         }
       }, 300)
