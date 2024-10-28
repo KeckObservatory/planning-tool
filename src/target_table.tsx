@@ -160,11 +160,10 @@ export default function TargetTable() {
         let newTgt: Target | undefined = undefined
         const isEdited = editTarget.status?.includes('EDITED')
         processRowUpdate(editTarget) //TODO: May want to wait till save is successful
+        validate(newTgt)
+        setErrors(validate.errors ?? [])
         if (isEdited) newTgt = await debounced_save(editTarget)
         if (newTgt) {
-          validate(newTgt)
-          const newErrors = validate.errors ?? []
-          setErrors(newErrors)
           newTgt.tic_id || newTgt.gaia_id && setHasSimbad(true)
           debounced_edit_click(id)
         }
