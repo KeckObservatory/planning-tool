@@ -32,6 +32,7 @@ export interface PropertyProps {
     type: string | string[],
     short_description?: string,
     default?: unknown,
+    pattern?: string,
     not_editable_by_user?: boolean,
     enum?: string[]
 }

@@ -50,13 +50,13 @@ const convert_target_to_targetlist_row = (target: Target) => {
   const name = target.target_name?.slice(0, 14).padEnd(15, " ")
   const ra = target.ra?.replaceAll(':', ' ')
   const dec = target.dec?.replaceAll(':', ' ')
-  let row = `${name} ${ra} ${dec}`
+  const epoch = target.epoch ?? 'J2000' 
+  let row = `${name} ${ra} ${dec} ${epoch}`
   const valid = target.target_name && target.ra && target.dec
   row = valid ? row : '# INVALID row: ' + row
   //optional params
   row = target.g_mag? row + ` gmag=${target.g_mag}` : row
   row = target.j_mag? row + ` jmag=${target.j_mag}` : row
-  row = target.epoch? row + ` epoch=${target.epoch}` : row
   row = target.ra_offset ? row + ` raoffset=${target.ra_offset}` : row
   row = target.dec_offset ? row + ` decoffset=${target.dec_offset}` : row
   row = target.rotator_mode ? row + ` rotmode=${target.rotator_mode}` : row

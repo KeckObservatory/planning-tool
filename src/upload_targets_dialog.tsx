@@ -41,7 +41,7 @@ let convert_string_to_type = (key: keyof Target, value: string) => {
 interface StarListOptionalKeys {
     gmag?: number,
     jmag?: number,
-    epoch?: number,
+    epoch?:  string,
     raoffset?: number,
     decoffset?: number,
     pmra?: number,
@@ -85,7 +85,7 @@ const parse_csv = (contents: string) => {
     return tgts
 }
 
-const split_at = (index: number, str: string) => [str.slice(0, index), str.slice(index)] 
+const split_at = (index: number, str: string) => [str.slice(0, index), str.slice(index+1)] 
 
 const parse_txt = (contents: string, obsid: number) => {
     let tgts = [] as Target[]
@@ -94,13 +94,20 @@ const parse_txt = (contents: string, obsid: number) => {
         if (row.startsWith('#')) return
         const [target_name, tail] = split_at(15, row) 
         const [rah, ram, ras, dech, decm, decs, epoch, ...opts] = tail.replace(/\s\s+/g, ' ').split(' ')
-        console.log('opts', opts)
+        console.log('opts', opts, 'tail', tail)
+        const ra = `${rah.padStart(2,'0')}:${ram.padStart(2,'0')}:${ras}`
+        const dec = `${dech.padStart(2,'0')}:${decm.padStart(2,'0')}:${decs}`
+        const coordValid = ra.match(targetProps.ra.pattern as string) && dec.match(targetProps.dec.pattern as string)
+        if (!coordValid) {
+            console.warn('ra', ra, 'dec', dec)
+            return
+        }
         let tgt: Target = {
             _id: randomId(),
             target_name,
             obsid: obsid,
-            ra: `${rah.padStart(2,'0')}:${ram.padStart(2,'0')}:${ras}`,
-            dec: `${dech.padStart(2,'0')}:${decm.padStart(2,'0')}:${decs}`,
+            ra,
+            dec,
             epoch
         };
         opts.forEach((opt) => {
