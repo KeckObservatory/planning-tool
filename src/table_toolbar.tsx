@@ -52,7 +52,7 @@ const convert_target_to_targetlist_row = (target: Target) => {
   const dec = target.dec?.replaceAll(':', ' ')
   const epoch = target.epoch ?? 'J2000' 
   let row = `${name} ${ra} ${dec} ${epoch}`
-  const valid = target.target_name && target.ra && target.dec
+  const valid = target.target_name && target.ra && target.dec && target.epoch
   row = valid ? row : '# INVALID row: ' + row
   //optional params
   row = target.g_mag? row + ` gmag=${target.g_mag}` : row
