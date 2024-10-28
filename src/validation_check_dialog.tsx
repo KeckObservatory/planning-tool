@@ -44,8 +44,8 @@ function ValidationDialog(props: SimpleDialogProps) {
             if (err.keyword === 'required') {
               msg = `${err.params.missingProperty}: ${err.message}`
             }
-            if (err.keyword === 'type') {
-            msg = `${err.instancePath.substring(1)}: ${err.message}`
+            if (err.keyword === 'type' || err.keyword === 'pattern') {
+              msg = `${err.instancePath.substring(1)}: ${err.message}`
             }
             return (
               <Typography key={msg} gutterBottom>
