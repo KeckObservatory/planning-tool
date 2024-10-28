@@ -189,7 +189,8 @@ export default function TargetTable() {
           value = format_edit_entry(params.field, value, isNumber)
           console.log('target setting', params.field, value, id, params)
           let newTgt = { ...editTarget, 'status': 'EDITED' as Status, [params.field]: value }
-          value === undefined && delete newTgt[params.field as keyof Target]
+          const delkey = value===undefined && !target_schema.required.includes(params.field)
+          delkey && delete newTgt[params.field as keyof Target]
           validate(newTgt)
           setErrors(validate.errors ?? [])
           validate.errors && console.log('errors', validate.errors, newTgt)
