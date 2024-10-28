@@ -33,7 +33,6 @@ export const validate = ajv.compile(ts)
 
 function ValidationDialog(props: SimpleDialogProps) {
   const { open, handleClose } = props;
-  console.log('errors', props.errors)
   return (
     <Dialog maxWidth="lg" onClose={() => handleClose()} open={open}>
       <DialogTitle>Target Validation Errors</DialogTitle>
