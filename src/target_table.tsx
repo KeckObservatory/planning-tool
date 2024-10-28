@@ -26,7 +26,7 @@ import ValidationDialogButton, { validate } from './validation_check_dialog';
 import SimbadButton from './simbad_button';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
 import { Target, useStateContext } from './App.tsx';
-import TargetEditDialogButton, { raDecFormat } from './target_edit_dialog.tsx';
+import TargetEditDialogButton, { format_edit_entry, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog.tsx';
 import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 
@@ -180,7 +180,13 @@ export default function TargetTable() {
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
     const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
-        const value = apiRef.current.getCellValue(id, params.field);
+        let value = apiRef.current.getCellValue(id, params.field);
+        let type = (target_schema.properties as TargetProps)[params.field as keyof PropertyProps].type
+        // convert type to string if array
+        type = type instanceof Array ? type = type.reduce((acc, val) => acc + val, "") : type
+        const isNumber = ['number', 'integer'].includes(type)
+        format_edit_entry(params.field, value, isNumber)
+
         const changeDetected = editTarget[params.field as keyof Target] !== value
         if (changeDetected) {
           console.log('target setting', params.field, value, id, params)

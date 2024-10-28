@@ -72,6 +72,23 @@ export const rowSetter = (tgt: Target, key: string, value?: string | number | bo
     return tgt
 }
 
+export const format_edit_entry = (key: string, value?: string | number, isNumber=false) => {
+    //add trailing zero if string ends in a decimal 
+    //value = isNumber ? String(value).replace(/(\d+)\.$/, "$1.0") : value
+    if (isNumber) {
+        //const pattern = targetProps[key].pattern ?? "\\d+"
+        const pattern = "[\\d\\.\\+\\-]*"
+        value = String(value).replace("(" + pattern + ")", "$1")
+        console.log('value', value, 'pattern', pattern)
+    }
+    if (value && (key === 'ra' || key === 'dec')) {
+        key === 'ra' && String(value).replace(/[^+-]/, "")
+        value = raDecFormat(value as string)
+    }
+    value = value === "" ? undefined : value
+    return value
+}
+
 
 export const TargetEditDialog = (props: TargetEditProps) => {
 
@@ -83,18 +100,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
     }, [target.tic_id, target.gaia_id])
 
     const handleTextChange = (key: string, value?: string | number, isNumber = false) => {
-        //add trailing zero if string ends in a decimal 
-        //value = isNumber ? String(value).replace(/(\d+)\.$/, "$1.0") : value
-        if (isNumber) {
-          //const pattern = targetProps[key].pattern ?? "\\d+"
-          const pattern = "[\\d\\.\\+\\-]*"
-          value = String(value).replace("(" + pattern + ")", "$1")
-          console.log('value', value, 'pattern', pattern)
-        }
-        if (value && (key === 'ra' || key === 'dec')) {
-            key === 'ra' && String(value).replace(/[^+-]/, "")
-            value = raDecFormat(value as string)
-        }
+        value = format_edit_entry(key, value, isNumber)
         setTarget((prev: Target) => {
             return rowSetter(prev, key, value)
         })
