@@ -87,7 +87,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
         //value = isNumber ? String(value).replace(/(\d+)\.$/, "$1.0") : value
         if (isNumber) {
           //const pattern = targetProps[key].pattern ?? "\\d+"
-          const pattern = "[0-9\.\+\-]+"
+          const pattern = "[\\d\\.\\+\\-]*"
           value = String(value).replace("(" + pattern + ")", "$1")
           console.log('value', value, 'pattern', pattern)
         }
