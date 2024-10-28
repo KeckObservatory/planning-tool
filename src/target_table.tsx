@@ -25,7 +25,7 @@ import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
 import SimbadButton from './simbad_button';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
-import { Target, useStateContext } from './App.tsx';
+import { Status, Target, useStateContext } from './App.tsx';
 import TargetEditDialogButton, { format_edit_entry, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog.tsx';
 import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
@@ -161,9 +161,6 @@ export default function TargetTable() {
         let newTgt: Target | undefined = undefined
         const isEdited = editTarget.status?.includes('EDITED')
         processRowUpdate(editTarget) //TODO: May want to wait till save is successful
-        validate(newTgt)
-        setErrors(validate.errors ?? [])
-        validate.errors && console.log('errors', validate.errors, newTgt)
         if (isEdited) newTgt = await debounced_save(editTarget)
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasSimbad(true)
@@ -191,7 +188,11 @@ export default function TargetTable() {
           const isNumber = ['number', 'integer'].includes(type)
           value = format_edit_entry(params.field, value, isNumber)
           console.log('target setting', params.field, value, id, params)
-          setEditTarget({ ...editTarget, 'status': 'EDITED', [params.field]: value })
+          const newTgt = { ...editTarget, 'status': 'EDITED' as Status, [params.field]: value }
+          validate(newTgt)
+          setErrors(validate.errors ?? [])
+          validate.errors && console.log('errors', validate.errors, newTgt)
+          setEditTarget(newTgt)
         }
       }, 300)
     }
