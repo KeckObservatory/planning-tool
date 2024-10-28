@@ -184,8 +184,7 @@ export default function TargetTable() {
         // convert type to string if array
         const changeDetected = editTarget[params.field as keyof Target] !== value
         if (changeDetected) {
-          type = type instanceof Array ? type = type.reduce((acc, val) => acc + val, "") : type
-          const isNumber = ['number', 'integer'].includes(type)
+          const isNumber = type.includes('number') || type.includes('integer')
           value = format_edit_entry(params.field, value, isNumber)
           console.log('target setting', params.field, value, id, params)
           let newTgt = { ...editTarget, 'status': 'EDITED' as Status, [params.field]: value }
