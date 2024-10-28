@@ -94,7 +94,6 @@ const parse_txt = (contents: string, obsid: number) => {
         if (row.startsWith('#')) return
         const [target_name, tail] = split_at(15, row) 
         const [rah, ram, ras, dech, decm, decs, epoch, ...opts] = tail.replace(/\s\s+/g, ' ').split(' ')
-        console.log('opts', opts, 'tail', tail)
         const ra = `${rah.padStart(2,'0')}:${ram.padStart(2,'0')}:${ras}`
         const dec = `${dech.padStart(2,'0')}:${decm.padStart(2,'0')}:${decs}`
         const coordValid = ra.match(targetProps.ra.pattern as string) && dec.match(targetProps.dec.pattern as string)
@@ -116,7 +115,6 @@ const parse_txt = (contents: string, obsid: number) => {
             //@ts-ignore
             tgt[tgtKey] = convert_string_to_type(tgtKey, value)
         })
-        console.log('tgt', tgt)
         tgts.push(tgt);
     });
     return tgts
@@ -131,7 +129,6 @@ export function UploadComponent(props: UploadProps) {
         evt.target?.files && (file = evt.target?.files[0])
         props.setLabel && props.setLabel(`${file.name} Uploaded`)
         const ext = file.name.split('.').pop()
-        console.log('file', file, ext)
         const fileReader = new FileReader()
         fileReader.readAsText(file, "UTF-8");
         fileReader.onload = e => {

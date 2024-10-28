@@ -84,7 +84,12 @@ export const TargetEditDialog = (props: TargetEditProps) => {
 
     const handleTextChange = (key: string, value?: string | number, isNumber = false) => {
         //add trailing zero if string ends in a decimal 
-        value = isNumber ? String(value).replace(/(\d+)\.$/, "$1.0") : value
+        //value = isNumber ? String(value).replace(/(\d+)\.$/, "$1.0") : value
+        if (isNumber) {
+          const pattern = targetProps[key].pattern ?? "\\d+"
+          value = String(value).replace("(" + pattern + ")", "$1")
+          console.log('value', value, 'pattern', pattern)
+        }
         if (value && (key === 'ra' || key === 'dec')) {
             key === 'ra' && String(value).replace(/[^+-]/, "")
             value = raDecFormat(value as string)
@@ -188,7 +193,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         InputLabelProps={{ shrink: hasSimbad || 'j_mag' in target }}
                                         id="j-magnitude"
                                         value={target.j_mag}
-                                        onChange={(event) => handleTextChange('j_mag', event.target.value)}
+                                        onChange={(event) => handleTextChange('j_mag', event.target.value, true)}
                                     />
                                 </Tooltip>
                                 <Tooltip title={input_label('g_mag', true)}>
@@ -197,7 +202,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         InputLabelProps={{ shrink: hasSimbad || 'g_mag' in target }}
                                         id="g-magnitude"
                                         value={target.g_mag}
-                                        onChange={(event) => handleTextChange('g_mag', event.target.value)}
+                                        onChange={(event) => handleTextChange('g_mag', event.target.value, true)}
                                     />
                                 </Tooltip>
                             </Stack>
@@ -208,7 +213,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         InputLabelProps={{ shrink: hasSimbad || 'ra_offset' in target }}
                                         id="ra_offset"
                                         value={target.ra_offset}
-                                        onChange={(event) => handleTextChange('ra_offset', event.target.value)}
+                                        onChange={(event) => handleTextChange('ra_offset', event.target.value, true)}
                                     />
                                 </Tooltip>
                                 <Tooltip title={input_label('dec_offset', true)}>
@@ -217,7 +222,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         InputLabelProps={{ shrink: hasSimbad || 'dec_offset' in target }}
                                         id="dec_offset"
                                         value={target.dec_offset}
-                                        onChange={(event) => handleTextChange('dec_offset', event.target.value)}
+                                        onChange={(event) => handleTextChange('dec_offset', event.target.value, true)}
                                     />
                                 </Tooltip>
                                 <Tooltip title={input_label('rotator_mode', true)}>
@@ -250,7 +255,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         InputLabelProps={{ shrink: hasSimbad || target.d_ra!== undefined }}
                                         id="dra"
                                         value={target.d_ra}
-                                        onChange={(event) => handleTextChange('d_ra', event.target.value)}
+                                        onChange={(event) => handleTextChange('d_ra', event.target.value, true)}
                                     />
                                 </Tooltip>
                                 <Tooltip title={input_label('d_dec', true)}>
@@ -259,7 +264,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         InputLabelProps={{ shrink: hasSimbad || target.d_dec !== undefined }}
                                         id="d_dec"
                                         value={target.d_dec}
-                                        onChange={(event) => handleTextChange('d_dec', event.target.value)}
+                                        onChange={(event) => handleTextChange('d_dec', event.target.value, true)}
                                     />
                                 </Tooltip>
                                 <Tooltip title={input_label('gaia_id', true)}>
@@ -288,7 +293,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         InputLabelProps={{ shrink: hasSimbad || 'pm_ra' in target }}
                                         id="pm-ra"
                                         value={target.pm_ra}
-                                        onChange={(event) => handleTextChange('pm_ra', event.target.value)}
+                                        onChange={(event) => handleTextChange('pm_ra', event.target.value, true)}
                                     />
                                 </Tooltip>
                                 <Tooltip title={input_label('pm_dec', true)}>
@@ -297,7 +302,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         InputLabelProps={{ shrink: hasSimbad || 'pm_dec' in target }}
                                         id="pm-dec"
                                         value={target.pm_dec}
-                                        onChange={(event) => handleTextChange('pm_dec', event.target.value)}
+                                        onChange={(event) => handleTextChange('pm_dec', event.target.value, true)}
                                     />
                                 </Tooltip>
                                 <Tooltip title={input_label('epoch', true)}>
