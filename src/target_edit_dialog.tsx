@@ -96,7 +96,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
             value = raDecFormat(value as string)
         }
         setTarget((prev: Target) => {
-            return rowSetter(prev, key, isNumber ? Number(value) : value)
+            return rowSetter(prev, key, value)
         })
     }
 
