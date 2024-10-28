@@ -43,7 +43,7 @@
         "d_ra": {
             "type":  ["number", "string"],
             "short_description": "dRA",
-            "description": "Differential tracking in arcseconds RA/hour divided by 15 (positive is east)",
+            "description": "Differential tracking in arcseconds RA/hour divided by 15 (positive is east)"
         },
         "pm_dec": {
             "type":  ["number", "string"],
