@@ -69,9 +69,7 @@ export const raDecFormat = (input: string) => {
 
 export const rowSetter = (tgt: Target, key: string, value?: string | number | boolean) => {
     let newTgt = { ...tgt, 'status': 'EDITED' as Status, [key]: value }
-    const delkey = value===undefined && !target_schema.required.includes(key)
-    delkey && delete newTgt[key as keyof Target]
-    return tgt
+    return newTgt 
 }
 
 export const format_edit_entry = (key: string, value?: string | number, isNumber=false) => {
