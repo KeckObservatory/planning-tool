@@ -146,16 +146,18 @@ export default function TargetTable() {
   };
 
   const validate_sanitized_target = (tgt: Target) => {
-    const sanitizedTgt = Object.fromEntries(Object.entries(tgt).map(([key, value]) => {
+    let sanitizedTgt: Partial<Target> = {} 
+    Object.entries(tgt).forEach(([key, value]) => {
       //allow empty strings to be valid for non-required fields
       const required = value === "" && target_schema.required.includes(key)
       if (value === "" && required) {
-        value = undefined
+        return 
       }
-      return [key, value] 
-    })) as Target
+      
+      sanitizedTgt[key as keyof Target] = value
+    }) 
 
-    validate(sanitizedTgt)
+    validate(sanitizedTgt as Target)
     validate.errors && console.log('errors', validate.errors, sanitizedTgt)
     return validate.errors ?? []
   }
