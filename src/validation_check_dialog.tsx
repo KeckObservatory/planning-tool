@@ -74,7 +74,6 @@ export default function ValidationDialogButton(props: Props) {
 
   const handleClickOpen = () => {
     if (props.errors.length > 0) {
-      console.log(props.errors)
       setOpen(true);
     }
   };
