@@ -79,9 +79,8 @@ export const format_edit_entry = (key: string, value?: string | number, isNumber
     //value = isNumber ? String(value).replace(/(\d+)\.$/, "$1.0") : value
     if (isNumber) {
         //const pattern = targetProps[key].pattern ?? "\\d+"
-        const pattern = "[\\d\\.\\+\\-]*"
-        value = String(value).replace("(" + pattern + ")", "$1")
-        console.log('value', value, 'pattern', pattern)
+        const pattern = /[^\d.-]/g 
+        value = String(value).replace(pattern, '')
         value = value === "" ? undefined : value
     }
     if (value && (key === 'ra' || key === 'dec')) {
