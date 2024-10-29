@@ -81,7 +81,6 @@ export const format_edit_entry = (key: string, value?: string | number, isNumber
         //const pattern = targetProps[key].pattern ?? "\\d+"
         const pattern = /[^\d.-]/g 
         value = String(value).replace(pattern, '')
-        value = value === "" ? undefined : value
     }
     if (value && (key === 'ra' || key === 'dec')) {
         key === 'ra' && String(value).replace(/[^+-]/, "")

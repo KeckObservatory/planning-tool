@@ -145,14 +145,27 @@ export default function TargetTable() {
     setRowModesModel(newRowModesModel);
   };
 
+  const validate_sanitized_target = (tgt: Target) => {
+    const sanitizedTgt = Object.fromEntries(Object.entries(tgt).map(([key, value]) => {
+      //allow empty strings to be valid for non-required fields
+      const required = value === "" && target_schema.required.includes(key)
+      if (value === "" && required) {
+        value = undefined
+      }
+      return [key, value] 
+    })) as Target
+
+    validate(sanitizedTgt)
+    validate.errors && console.log('errors', validate.errors, sanitizedTgt)
+    return validate.errors ?? []
+  }
+
   const ActionsCell = (params: GridRowParams<Target>) => {
     const { id, row } = params;
     const [editTarget, setEditTarget] = React.useState<Target>(row);
     const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
     const [hasSimbad, setHasSimbad] = React.useState(row.tic_id || row.gaia_id ? true : false);
-    validate(row)
-    validate.errors && console.log('errors', validate.errors, row)
-    const [errors, setErrors] = React.useState<ErrorObject<string, Record<string, any>, unknown>[]>(validate.errors ?? []);
+    const [errors, setErrors] = React.useState<ErrorObject<string, Record<string, any>, unknown>[]>(validate_sanitized_target(row));
     const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
     const apiRef = useGridApiContext();
 
@@ -172,9 +185,7 @@ export default function TargetTable() {
 
     React.useEffect(() => { // when targed is edited in target edit dialog or simbad dialog
       handleRowChange()
-      validate(editTarget)
-      setErrors(validate.errors ?? [])
-      validate.errors && console.log('errors', validate.errors, editTarget)
+      setErrors(validate_sanitized_target(editTarget))
       setCount((prev: number) => prev + 1)
     }, [editTarget])
 
