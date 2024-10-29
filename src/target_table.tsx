@@ -150,10 +150,9 @@ export default function TargetTable() {
     Object.entries(tgt).forEach(([key, value]) => {
       //allow empty strings to be valid for non-required fields
       const required = value === "" && target_schema.required.includes(key)
-      if (value === "" && required) {
+      if (value === "" || value === undefined && required) {
         return 
       }
-      
       sanitizedTgt[key as keyof Target] = value
     }) 
 
