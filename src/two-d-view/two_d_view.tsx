@@ -177,7 +177,7 @@ const TwoDView = ({ targets }: Props) => {
                 direction="column"
                 justifyContent='center'
                 spacing={0}>
-                <Stack sx={{ overflow: "auto"}}
+                <Stack sx={{ marginTop: '4px', overflow: "auto"}}
                     width="100%"
                     direction="row"
                     justifyContent='center'

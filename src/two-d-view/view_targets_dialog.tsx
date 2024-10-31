@@ -22,6 +22,7 @@ function ViewTargetsDialog(props: VTDProps) {
     <Dialog
       onClose={() => handleClose()}
       open={open}
+      sx={{ padding: '8px'}}
       maxWidth="xl"
     >
       <DialogTitle>Selected Target Charts</DialogTitle>
