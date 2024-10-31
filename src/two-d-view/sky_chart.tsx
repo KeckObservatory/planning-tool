@@ -95,7 +95,7 @@ export const SkyChart = (props: Props) => {
                 size: 4 
               },
             line: {
-                width: 10
+                width: 5 
             },
             textposition: 'top left',
             type: 'scatter',

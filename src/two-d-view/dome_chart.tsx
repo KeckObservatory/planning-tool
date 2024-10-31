@@ -67,6 +67,8 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
             txt += `HT: ${dayjs(viz.datetime).format(time_format)}<br>`
             txt += `Visible for: ${tgtv.visibilitySum.toFixed(2)} hours<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
+            const radius = 90 - viz.alt 
+            if (radius > 90) return //ignore points greater than the radius 
             texts.push(txt)
             color.push(reason_to_color_mapping(viz.reasons))
             rr.push(90 - viz.alt)
@@ -86,7 +88,7 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
                 size: 4
             },
             line: {
-                width: 10
+                width: 5 
             },
             textposition: 'top left',
             type: 'scatterpolar',
@@ -126,7 +128,7 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
             color: "rgb(0,0,0)",
             hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
             line: {
-                width: 10
+                width: 5 
             },
             textposition: 'top left',
             type: 'scatterpolar',

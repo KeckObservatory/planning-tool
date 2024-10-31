@@ -204,7 +204,7 @@ const TwoDView = ({ targets }: Props) => {
                 />
             </Stack>
             <Stack sx={{alignItems: 'flex-end'}} width="100%" direction="row" justifyContent='center' spacing={0}>
-                <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={0}>
+                <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={1}>
                     <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
                     <SkyChart
                         height={height}
