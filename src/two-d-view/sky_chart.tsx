@@ -109,14 +109,15 @@ export const SkyChart = (props: Props) => {
             const ra = tgtv.ra_deg as number
             const dec = tgtv.dec_deg as number
             const azEl = util.ra_dec_to_az_alt(ra, dec, time, lngLatEl)
-            const viz = { az: azEl[0], alt: azEl[1], datetime: time, air_mass: util.air_mass(azEl[1]) }
+            //const viz = { az: azEl[0], alt: azEl[1], datetime: time, air_mass: util.air_mass(azEl[1], lngLatEl.el) }
+            const viz = { az: azEl[0], alt: azEl[1], datetime: time, air_mass: util.air_mass(azEl[1], lngLatEl.el) }
             const datum = get_chart_datum(ra, dec, viz as VizRow, chartType, lngLatEl)
             const currTime = hidate(time, context.config.timezone)
             let text = ""
             text += `Az: ${azEl[0].toFixed(2)}<br>`
             text += `El: ${azEl[1].toFixed(2)}<br>`
-            //text += `Airmass: ${util.air_mass(azEl[1], lngLatEl.el).toFixed(2)}<br>`
-            text += `Airmass: ${util.air_mass(azEl[1]).toFixed(2)}<br>`
+            text += `Airmass: ${util.air_mass(azEl[1], lngLatEl.el).toFixed(2)}<br>`
+            // text += `Airmass: ${util.air_mass(azEl[1]).toFixed(2)}<br>`
             text += `HT: ${currTime.format(context.config.date_time_format)}`
 
             const trace: Plotly.Data = {

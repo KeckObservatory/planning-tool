@@ -129,7 +129,7 @@ export default function AladinViewer(props: Props) {
         }
     }
 
-    const scriptloaded = () => {
+    const scriptloaded = async () => {
         console.log('script loaded', props)
         const firstRow = props.targets[0]
         let params: any = { survey: 'P/DSS2/color', projection: 'MOL', zoom: zoom, showReticle: true }
@@ -144,7 +144,6 @@ export default function AladinViewer(props: Props) {
             const alad = A.aladin('#aladin-lite-div', params);
             setAladin(alad)
             setFOV(await get_fov(alad, instrument))
-
             // //@ts-ignore
             // const result = Object.groupBy(props.targets, ({ target_name}) => target_name);
             // console.log('adding catalog')

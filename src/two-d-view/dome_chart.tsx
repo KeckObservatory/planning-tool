@@ -108,8 +108,8 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
                 let txt = ""
                 txt += `Az: ${ae[0].toFixed(2)}<br>`
                 txt += `El: ${ae[1].toFixed(2)}<br>`
-                //txt += `Airmass: ${util.air_mass(ae[1], lngLatEl.el).toFixed(2)}<br>`
-                txt += `Airmass: ${util.air_mass(ae[1]).toFixed(2)}<br>`
+                txt += `Airmass: ${util.air_mass(ae[1], lngLatEl.el).toFixed(2)}<br>`
+                // txt += `Airmass: ${util.air_mass(ae[1]).toFixed(2)}<br>`
                 txt += `HT: ${dayjs(times[idx]).format(time_format)}`
                 texts.push(txt)
             }
@@ -149,8 +149,8 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
                 let txt = ""
                 txt += `Az: ${ae[0].toFixed(2)}<br>`
                 txt += `El: ${ae[1].toFixed(2)}<br>`
-                //txt += `Airmass: ${util.air_mass(ae[1], lngLatEl.el).toFixed(2)}<br>`
-                txt += `Airmass: ${util.air_mass(ae[1]).toFixed(2)}<br>`
+                txt += `Airmass: ${util.air_mass(ae[1], lngLatEl.el).toFixed(2)}<br>`
+                // txt += `Airmass: ${util.air_mass(ae[1]).toFixed(2)}<br>`
                 txt += `HT: ${dayjs(time).format(time_format)}`
                 texts.push(txt)
             }
@@ -166,8 +166,8 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
                 let txt = ""
                 txt += `Az: ${azEl[0][0].toFixed(2)}<br>`
                 txt += `El: ${azEl[0][1].toFixed(2)}<br>`
-                //txt += `Airmass: ${util.air_mass(azEl[0][1], lngLatEl.el).toFixed(2)}<br>`
-                txt += `Airmass: ${util.air_mass(azEl[0][1]).toFixed(2)}<br>`
+                txt += `Airmass: ${util.air_mass(azEl[0][1], lngLatEl.el).toFixed(2)}<br>`
+                // txt += `Airmass: ${util.air_mass(azEl[0][1]).toFixed(2)}<br>`
                 txt += `HT: ${dayjs(time).format(time_format)}`
                 texts.push(txt)
             }

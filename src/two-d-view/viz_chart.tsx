@@ -96,7 +96,6 @@ export const alt_az_observable = (alt: number, az: number, KG: GeoModel) => {
 
     //target is below telescope horizon?
     const targetBelowHorizon = alt < minAlt
-    // console.log('targetBelowHorizon', targetBelowHorizon, alt, minAlt)
     targetBelowHorizon && reasons.push('Below Horizon')
 
     //target is above tracking limits?
@@ -281,8 +280,8 @@ export const TargetVizChart = (props: Props) => {
             const times = get_day_times(startTime, endTime, ROUND_MINUTES)
             const visibility = times.map((time: Date) => {
                 const [az, alt] = ra_dec_to_az_alt(ra, dec, time, lngLatEl)
-                //const air_mass_val = air_mass(alt, lngLatEl.el)
-                const air_mass_val = air_mass(alt)
+                const air_mass_val = air_mass(alt, lngLatEl.el)
+                // const air_mass_val = air_mass(alt)
                 const vis: VizRow = { az, alt, ...alt_az_observable(alt, az, KG), datetime: time, air_mass: air_mass_val }
                 return vis
             })
@@ -310,8 +309,8 @@ export const TargetVizChart = (props: Props) => {
             let txt = ""
             txt += `Az: ${viz.az.toFixed(2)}<br>`
             txt += `El: ${viz.alt.toFixed(2)}<br>`
-            //txt += `Airmass: ${air_mass(viz.alt, lngLatEl.el).toFixed(2)}<br>`
-            txt += `Airmass: ${air_mass(viz.alt).toFixed(2)}<br>`
+            txt += `Airmass: ${air_mass(viz.alt, lngLatEl.el).toFixed(2)}<br>`
+            // txt += `Airmass: ${air_mass(viz.alt).toFixed(2)}<br>`
             txt += `HT: ${dayjs(viz.datetime).format(context.config.date_time_format)}<br>`
             txt += `Visible for: ${dayViz.visible_hours.toFixed(2)} hours<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`

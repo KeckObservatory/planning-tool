@@ -131,8 +131,8 @@ const TwoDView = ({targets}: Props) => {
                 const visibility: VizRow[] = []
                 newTimes.forEach((datetime: Date) => {
                     const [az, alt] = util.ra_dec_to_az_alt(ra_deg, dec_deg, datetime, lngLatEl)
-                    //const air_mass_val = util.air_mass(alt, lngLatEl.el)
-                    const air_mass_val = util.air_mass(alt)
+                    const air_mass_val = util.air_mass(alt, lngLatEl.el)
+                    // const air_mass_val = util.air_mass(alt)
                     const vis: VizRow = { az, alt, ...alt_az_observable(alt, az, KG), datetime, air_mass: air_mass_val }
                     azEl.push([az, alt])
                     visibility.push(vis)

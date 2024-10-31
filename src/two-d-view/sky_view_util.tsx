@@ -169,8 +169,8 @@ export function air_mass(alt: number, el?: number) {
 
 export const get_air_mass = (ra: number, dec: number, times: Date[], lngLatEl: LngLatEl) => {
     const azAlt = get_target_traj(ra, dec, times, lngLatEl)
-    //const airmass = azAlt.map((a: [number, number]) => { return air_mass(a[1], lngLatEl.el) })
-    const airmass = azAlt.map((a: [number, number]) => { return air_mass(a[1]) })
+    const airmass = azAlt.map((a: [number, number]) => { return air_mass(a[1], lngLatEl.el) })
+    // const airmass = azAlt.map((a: [number, number]) => { return air_mass(a[1]) })
     return airmass
 }
 
