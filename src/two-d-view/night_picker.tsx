@@ -5,7 +5,7 @@ import dayjs, { Dayjs } from 'dayjs';
 
 const datePickerStyle = {
     margin: '0px',
-    marginTop: '4px',
+    marginTop: '8px',
     padding: '0px',
     width: '200px'
 }

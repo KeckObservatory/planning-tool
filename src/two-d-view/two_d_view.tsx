@@ -181,7 +181,7 @@ const TwoDView = ({ targets }: Props) => {
                     width="100%"
                     direction="row"
                     justifyContent='center'
-                    spacing={0}>
+                    spacing={1}>
                     <NightPicker date={obsdate} handleDateChange={handleDateChange} />
                     <DomeSelect dome={dome} setDome={setDome} />
                     <FormControlLabel
