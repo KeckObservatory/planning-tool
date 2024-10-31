@@ -6,7 +6,8 @@ import dayjs, { Dayjs } from 'dayjs';
 const datePickerStyle = {
     margin: '0px',
     marginTop: '4px',
-    padding: '0px'
+    padding: '0px',
+    width: '200px'
 }
 
 interface Props {

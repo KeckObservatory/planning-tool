@@ -170,37 +170,41 @@ const TwoDView = ({ targets }: Props) => {
     return (
         <>
             <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={2}>
-                <NightPicker date={obsdate} handleDateChange={handleDateChange} />
+                <Stack sx={{overflow: "auto"}} width="100%" direction="row" justifyContent='center' spacing={2}>
+                    <NightPicker date={obsdate} handleDateChange={handleDateChange} />
+                    <DomeSelect dome={dome} setDome={setDome} />
+                    <FormControlLabel
+                        label="Show Current Location"
+                        value={showCurrLoc}
+                        control={<Switch checked={showCurrLoc} />}
+                        onChange={(_, checked) => setShowCurrLoc(checked)}
+                    />
+                    <FormControlLabel
+                        label="Show Moon"
+                        value={showMoon}
+                        control={<Switch checked={showMoon} />}
+                        onChange={(_, checked) => setShowMoon(checked)}
+                    />
+                </Stack>
                 <TimeSlider
                     times={times}
                     time={time}
                     setTime={setTime}
                 />
-                <DomeSelect dome={dome} setDome={setDome} />
-                <FormControlLabel
-                    label="Show Current Location"
-                    value={showCurrLoc}
-                    control={<Switch checked={showCurrLoc} />}
-                    onChange={(_, checked) => setShowCurrLoc(checked)}
-                />
-                <FormControlLabel
-                    label="Show Moon"
-                    value={showMoon}
-                    control={<Switch checked={showMoon} />}
-                    onChange={(_, checked) => setShowMoon(checked)}
-                />
             </Stack>
             <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={2}>
-                <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
-                <SkyChart
-                    chartType={skyChart}
-                    targetView={targetView}
-                    showMoon={showMoon}
-                    showCurrLoc={showCurrLoc}
-                    times={times}
-                    time={time}
-                    dome={dome}
-                />
+                <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={2}>
+                    <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
+                    <SkyChart
+                        chartType={skyChart}
+                        targetView={targetView}
+                        showMoon={showMoon}
+                        showCurrLoc={showCurrLoc}
+                        times={times}
+                        time={time}
+                        dome={dome}
+                    />
+                </Stack>
                 <DomeChart
                     targetView={targetView}
                     showMoon={showMoon}

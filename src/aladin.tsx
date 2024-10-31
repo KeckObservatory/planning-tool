@@ -2,7 +2,7 @@ import React from "react"
 import { ra_dec_to_deg } from './two-d-view/sky_view_util.tsx'
 import { Target } from "./App"
 import A from 'aladin-lite'
-import { Autocomplete, TextField, Tooltip } from '@mui/material'
+import { Autocomplete, Stack, TextField, Tooltip } from '@mui/material'
 
 const FOVlink = 'INSTRUMENTS_FOV.json'
 const instruments = ['KCWI', 'MOSFIRE']
@@ -76,21 +76,21 @@ export default function AladinViewer(props: Props) {
     //const [zoom, setZoom] = React.useState(360) //for whole sky
     const [zoom, setZoom] = React.useState(2)
 
-        // define custom draw function
-        const drawFunction = function(source: any, canvasCtx: any) {
-            canvasCtx.beginPath();
-            canvasCtx.arc(source.x, source.y, 2, 0, 2 * Math.PI, false);
-            canvasCtx.closePath();
-            //canvasCtx.strokeStyle = '#c38';
-            canvasCtx.fillStyle = source.catalog.color;
-            canvasCtx.lineWidth = 1
-            canvasCtx.stroke();
-            canvasCtx.fill();
-        };
+    // define custom draw function
+    const drawFunction = function (source: any, canvasCtx: any) {
+        canvasCtx.beginPath();
+        canvasCtx.arc(source.x, source.y, 2, 0, 2 * Math.PI, false);
+        canvasCtx.closePath();
+        //canvasCtx.strokeStyle = '#c38';
+        canvasCtx.fillStyle = source.catalog.color;
+        canvasCtx.lineWidth = 1
+        canvasCtx.stroke();
+        canvasCtx.fill();
+    };
 
-    const add_catalog = (alad: any, targets: Target[], name='Targets') => {
+    const add_catalog = (alad: any, targets: Target[], name = 'Targets') => {
         //var cat = A.catalog({ name: name, sourceSize: 4, shape: drawFunction});
-        var cat = A.catalog({ name: name, shape: drawFunction});
+        var cat = A.catalog({ name: name, shape: drawFunction });
         alad.addCatalog(cat);
 
         alad.on('objectClicked', function (object: any) {
@@ -118,9 +118,9 @@ export default function AladinViewer(props: Props) {
 }> RA: ${tgt.ra} <br /> Dec: ${tgt.dec}</t > `
             }
             const ra = tgt.ra ? ra_dec_to_deg(tgt.ra as string) : tgt.ra_deg
-            const dec = tgt.dec ? ra_dec_to_deg(tgt.ra as string,true) : tgt.dec_deg
+            const dec = tgt.dec ? ra_dec_to_deg(tgt.ra as string, true) : tgt.dec_deg
             if (ra && dec) {
-                cat.addSources( A.marker(ra,dec , options));
+                cat.addSources(A.marker(ra, dec, options));
             }
             // tgt.ra &&
             //     cat.addSources(
@@ -151,7 +151,7 @@ export default function AladinViewer(props: Props) {
             //     console.log(`${key}`);
             //     add_catalog(alad, value as Target[], key)
             // }
-            
+
             add_catalog(alad, props.targets)
         })
     }
@@ -178,21 +178,21 @@ export default function AladinViewer(props: Props) {
 
 
     return (
-        <>
-            <Tooltip placement="top" title="Select semid">
+        <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={2}>
+            <Tooltip placement="top" title="Select instrument field of view">
                 <Autocomplete
                     disablePortal
                     id="semid-selection"
                     value={{ label: instrument }}
                     onChange={(_, value) => onChange(value?.label)}
                     options={instruments.map((instr) => { return { label: instr } })}
-                    sx={{ width: 300, margin: '6px'}}
+                    sx={{ width: 300, margin: '6px' }}
                     renderInput={(params) => <TextField {...params} label="Instrument FOV" />}
                 />
             </Tooltip>
             <div id='aladin-lite-div' style={{ margin: '6px', width: '600px', height: '550px' }} >
                 {fov.map(f => <PolylineComponent points={f} />)}
             </div>
-        </>
+        </Stack>
     )
 }
