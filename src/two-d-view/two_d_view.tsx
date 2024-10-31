@@ -11,6 +11,7 @@ import { SkyChart } from './sky_chart.tsx';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { alt_az_observable, VizRow } from './viz_chart.tsx';
+import AladinViewer from '../aladin';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -168,25 +169,27 @@ const TwoDView = ({ targets }: Props) => {
 
     return (
         <>
-            <NightPicker date={obsdate} handleDateChange={handleDateChange} />
-            <TimeSlider
-                times={times}
-                time={time}
-                setTime={setTime}
-            />
-            <DomeSelect dome={dome} setDome={setDome} />
-            <FormControlLabel
-                label="Show Current Location"
-                value={showCurrLoc}
-                control={<Switch checked={showCurrLoc} />}
-                onChange={(_, checked) => setShowCurrLoc(checked)}
-            />
-            <FormControlLabel
-                label="Show Moon"
-                value={showMoon}
-                control={<Switch checked={showMoon} />}
-                onChange={(_, checked) => setShowMoon(checked)}
-            />
+            <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={2}>
+                <NightPicker date={obsdate} handleDateChange={handleDateChange} />
+                <TimeSlider
+                    times={times}
+                    time={time}
+                    setTime={setTime}
+                />
+                <DomeSelect dome={dome} setDome={setDome} />
+                <FormControlLabel
+                    label="Show Current Location"
+                    value={showCurrLoc}
+                    control={<Switch checked={showCurrLoc} />}
+                    onChange={(_, checked) => setShowCurrLoc(checked)}
+                />
+                <FormControlLabel
+                    label="Show Moon"
+                    value={showMoon}
+                    control={<Switch checked={showMoon} />}
+                    onChange={(_, checked) => setShowMoon(checked)}
+                />
+            </Stack>
             <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={2}>
                 <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
                 <SkyChart
@@ -206,6 +209,7 @@ const TwoDView = ({ targets }: Props) => {
                     time={time}
                     dome={dome}
                 />
+                <AladinViewer targets={targets} />
             </Stack>
         </>
     );

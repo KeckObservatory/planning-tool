@@ -7,8 +7,6 @@ import DialogContent from '@mui/material/DialogContent';
 import Tooltip from '@mui/material/Tooltip';
 import { Target } from '../App';
 import TwoDView from './two_d_view';
-import AladinViewer from '../aladin';
-import Stack from '@mui/material/Stack';
 
 
 export interface VTDProps {
@@ -28,10 +26,7 @@ function ViewTargetsDialog(props: VTDProps) {
     >
       <DialogTitle>Selected Target Charts</DialogTitle>
       <DialogContent>
-        <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={2}>
-          <TwoDView targets={targets} />
-          <AladinViewer targets={targets} />
-        </Stack>
+        <TwoDView targets={targets} />
       </DialogContent>
     </Dialog>
   );
