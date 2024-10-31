@@ -144,8 +144,8 @@ export const SkyChart = (props: Props) => {
     }
 
     const layout: Partial<Plotly.Layout> = {
-        width: 900,
-        height: 800,
+        width: 600,
+        height: 550,
         title: `Target ${chartType} vs Time`,
         hovermode: "closest",
         margin: {

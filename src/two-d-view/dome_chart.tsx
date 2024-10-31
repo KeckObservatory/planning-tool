@@ -249,8 +249,8 @@ export const DomeChart = (props: DomeChartProps) => {
         context.config.time_format, 
         KG, lngLatEl)
     const layout: Partial<Plotly.Layout> = {
-        width: 900,
-        height: 800,
+        width: 600,
+        height: 550,
         title: 'Target Trajectories',
         hovermode: "closest",
         polar: {

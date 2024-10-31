@@ -190,7 +190,7 @@ export default function AladinViewer(props: Props) {
                     renderInput={(params) => <TextField {...params} label="Instrument FOV" />}
                 />
             </Tooltip>
-            <div id='aladin-lite-div' style={{ margin: '6px', width: '900px', height: '900px' }} >
+            <div id='aladin-lite-div' style={{ margin: '6px', width: '600px', height: '550px' }} >
                 {fov.map(f => <PolylineComponent points={f} />)}
             </div>
         </>
