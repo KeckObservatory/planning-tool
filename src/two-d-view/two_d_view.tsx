@@ -3,7 +3,7 @@ import * as util from './sky_view_util.tsx'
 import { LngLatEl } from './sky_view_util.tsx';
 import NightPicker from '../two-d-view/night_picker'
 import dayjs, { Dayjs } from 'dayjs';
-import { FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Switch } from '@mui/material';
+import { FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Stack, Switch } from '@mui/material';
 import TimeSlider from './time_slider';
 import { Target, useStateContext } from '../App.tsx';
 import { DomeChart } from './dome_chart.tsx';
@@ -99,7 +99,7 @@ export const hidate = (date: Date, timezone: string) => {
 }
 
 
-const TwoDView = ({targets}: Props) => {
+const TwoDView = ({ targets }: Props) => {
     const context = useStateContext()
     const today = hidate(new Date(), context.config.timezone).toDate()
     const [obsdate, setObsdate] = React.useState<Date>(today)
@@ -120,14 +120,14 @@ const TwoDView = ({targets}: Props) => {
     React.useEffect(() => {
         const newNadir = util.get_suncalc_times(lngLatEl, obsdate).nadir
         const newTimes = util.get_times_using_nadir(newNadir)
-        const tviz: TargetView[] = [] 
+        const tviz: TargetView[] = []
         const KG = context.config.keck_geometry[dome]
         targets.forEach((tgt: Target) => {
             if (tgt.ra && tgt.dec) {
                 const ra_deg = tgt.ra_deg ?? util.ra_dec_to_deg(tgt.ra as string, false)
                 const dec_deg = tgt.dec_deg ?? util.ra_dec_to_deg(tgt.dec as string, true)
                 const azEl: [number, number][] = []
-               // util.get_target_traj(ra_deg, dec_deg, newTimes, keckLngLat) as [number, number][]
+                // util.get_target_traj(ra_deg, dec_deg, newTimes, keckLngLat) as [number, number][]
                 const visibility: VizRow[] = []
                 newTimes.forEach((datetime: Date) => {
                     const [az, alt] = util.ra_dec_to_az_alt(ra_deg, dec_deg, datetime, lngLatEl)
@@ -167,7 +167,7 @@ const TwoDView = ({targets}: Props) => {
 
 
     return (
-        <React.Fragment>
+        <>
             <NightPicker date={obsdate} handleDateChange={handleDateChange} />
             <TimeSlider
                 times={times}
@@ -187,25 +187,27 @@ const TwoDView = ({targets}: Props) => {
                 control={<Switch checked={showMoon} />}
                 onChange={(_, checked) => setShowMoon(checked)}
             />
-            <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
-            <SkyChart
-                chartType={skyChart}
-                targetView={targetView}
-                showMoon={showMoon}
-                showCurrLoc={showCurrLoc}
-                times={times}
-                time={time}
-                dome={dome}
-            />
-            <DomeChart
-                targetView={targetView}
-                showMoon={showMoon}
-                showCurrLoc={showCurrLoc}
-                times={times}
-                time={time}
-                dome={dome}
-            />
-        </React.Fragment>
+            <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={2}>
+                <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
+                <SkyChart
+                    chartType={skyChart}
+                    targetView={targetView}
+                    showMoon={showMoon}
+                    showCurrLoc={showCurrLoc}
+                    times={times}
+                    time={time}
+                    dome={dome}
+                />
+                <DomeChart
+                    targetView={targetView}
+                    showMoon={showMoon}
+                    showCurrLoc={showCurrLoc}
+                    times={times}
+                    time={time}
+                    dome={dome}
+                />
+            </Stack>
+        </>
     );
 }
 

@@ -8,6 +8,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { Target } from '../App';
 import TwoDView from './two_d_view';
 import AladinViewer from '../aladin';
+import Stack from '@mui/material/Stack';
 
 
 export interface VTDProps {
@@ -20,15 +21,17 @@ function ViewTargetsDialog(props: VTDProps) {
   const { open, handleClose, targets } = props;
 
   return (
-    <Dialog 
-    onClose={() => handleClose()} 
-    open={open}
-    maxWidth="lg" 
+    <Dialog
+      onClose={() => handleClose()}
+      open={open}
+      maxWidth="lg"
     >
       <DialogTitle>Selected Target Charts</DialogTitle>
       <DialogContent>
-        <TwoDView targets={targets} />
-        <AladinViewer targets={targets} /> 
+        <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={2}>
+          <TwoDView targets={targets} />
+          <AladinViewer targets={targets} />
+        </Stack>
       </DialogContent>
     </Dialog>
   );
@@ -51,11 +54,11 @@ export default function ViewTargetsDialogButton(props: Props) {
 
   return (
     <>
-        <Tooltip title="Display charts of selected target">
+      <Tooltip title="Display charts of selected target">
         <IconButton aria-label="help" color="primary" onClick={handleClickOpen}>
-          <MultilineChartIcon/>
+          <MultilineChartIcon />
         </IconButton>
-        </Tooltip>
+      </Tooltip>
       <ViewTargetsDialog
         open={open}
         targets={props.targets}
