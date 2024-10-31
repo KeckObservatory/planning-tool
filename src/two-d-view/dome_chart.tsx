@@ -13,6 +13,8 @@ interface DomeChartProps {
     times: Date[]
     time: Date
     dome: Dome
+    width: number
+    height: number
 }
 
 const make_disk_polar = (r1: number, r2: number, th1: number, th2: number) => {
@@ -232,7 +234,7 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
 }
 
 export const DomeChart = (props: DomeChartProps) => {
-    const { targetView, showMoon, showCurrLoc, times, time, dome } = props
+    const { targetView, showMoon, showCurrLoc, times, time, dome, width, height } = props
     const context = useStateContext()
     const KG = context.config.keck_geometry[dome]
     const lngLatEl: util.LngLatEl = {
@@ -249,8 +251,8 @@ export const DomeChart = (props: DomeChartProps) => {
         context.config.time_format, 
         KG, lngLatEl)
     const layout: Partial<Plotly.Layout> = {
-        width: 600,
-        height: 550,
+        width,
+        height,
         title: 'Target Trajectories',
         hovermode: "closest",
         polar: {

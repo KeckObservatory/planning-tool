@@ -19,6 +19,8 @@ interface Props {
     times: Date[]
     time: Date
     dome: Dome
+    width: number
+    height: number
 }
 
 const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType: SkyChart, lngLatEl: util.LngLatEl): number => {
@@ -49,7 +51,7 @@ const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType: SkyCha
 
 
 export const SkyChart = (props: Props) => {
-    const { targetView, chartType, time, showCurrLoc } = props
+    const { targetView, chartType, time, showCurrLoc, width, height } = props
     const context = useStateContext()
 
     const lngLatEl: util.LngLatEl = {
@@ -144,8 +146,8 @@ export const SkyChart = (props: Props) => {
     }
 
     const layout: Partial<Plotly.Layout> = {
-        width: 600,
-        height: 550,
+        width,
+        height,
         title: `Target ${chartType} vs Time`,
         hovermode: "closest",
         margin: {

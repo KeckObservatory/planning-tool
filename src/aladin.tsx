@@ -8,6 +8,8 @@ const FOVlink = 'INSTRUMENTS_FOV.json'
 const instruments = ['KCWI', 'MOSFIRE']
 
 interface Props {
+    width: number,
+    height: number,
     targets: Target[]
 }
 
@@ -69,6 +71,7 @@ const get_fov = async (aladin: any, instrument: string) => {
 
 export default function AladinViewer(props: Props) {
     console.log('aladin viewer init', props)
+    const { width, height, targets } = props
 
     const [fov, setFOV] = React.useState([] as [number, number][][])
     const [instrument, setInstrument] = React.useState('KCWI')
@@ -131,7 +134,7 @@ export default function AladinViewer(props: Props) {
 
     const scriptloaded = async () => {
         console.log('script loaded', props)
-        const firstRow = props.targets[0]
+        const firstRow = targets[0]
         let params: any = { survey: 'P/DSS2/color', projection: 'MOL', zoom: zoom, showReticle: true }
         if (firstRow?.ra) {
             let ra = ra_dec_to_deg(firstRow.ra as string)
@@ -152,7 +155,7 @@ export default function AladinViewer(props: Props) {
             //     add_catalog(alad, value as Target[], key)
             // }
 
-            add_catalog(alad, props.targets)
+            add_catalog(alad, targets)
         })
     }
 
@@ -190,7 +193,7 @@ export default function AladinViewer(props: Props) {
                     renderInput={(params) => <TextField {...params} label="Instrument FOV" />}
                 />
             </Tooltip>
-            <div id='aladin-lite-div' style={{ margin: '6px', width: '600px', height: '550px' }} >
+            <div id='aladin-lite-div' style={{ margin: '0px', width: width, height: height }} >
                 {fov.map(f => <PolylineComponent points={f} />)}
             </div>
         </Stack>

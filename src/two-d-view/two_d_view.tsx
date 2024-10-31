@@ -23,6 +23,9 @@ interface Props {
 
 export type Dome = "K1" | "K2"
 
+const height = 400
+const width = 400
+
 
 
 export interface TargetView extends Target {
@@ -169,8 +172,16 @@ const TwoDView = ({ targets }: Props) => {
 
     return (
         <>
-            <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={2}>
-                <Stack sx={{overflow: "auto"}} width="100%" direction="row" justifyContent='center' spacing={2}>
+            <Stack sx={{ margin: "12px" }}
+                width="100%"
+                direction="column"
+                justifyContent='center'
+                spacing={0}>
+                <Stack sx={{ overflow: "auto", alignItems: "flex-end" }}
+                    width="100%"
+                    direction="row"
+                    justifyContent='center'
+                    spacing={0}>
                     <NightPicker date={obsdate} handleDateChange={handleDateChange} />
                     <DomeSelect dome={dome} setDome={setDome} />
                     <FormControlLabel
@@ -192,10 +203,12 @@ const TwoDView = ({ targets }: Props) => {
                     setTime={setTime}
                 />
             </Stack>
-            <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={2}>
-                <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={2}>
+            <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={0}>
+                <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={0}>
                     <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
                     <SkyChart
+                        height={height}
+                        width={width}
                         chartType={skyChart}
                         targetView={targetView}
                         showMoon={showMoon}
@@ -206,6 +219,8 @@ const TwoDView = ({ targets }: Props) => {
                     />
                 </Stack>
                 <DomeChart
+                    height={height}
+                    width={width}
                     targetView={targetView}
                     showMoon={showMoon}
                     showCurrLoc={showCurrLoc}
@@ -213,7 +228,10 @@ const TwoDView = ({ targets }: Props) => {
                     time={time}
                     dome={dome}
                 />
-                <AladinViewer targets={targets} />
+                <AladinViewer
+                    height={height}
+                    width={width}
+                    targets={targets} />
             </Stack>
         </>
     );
