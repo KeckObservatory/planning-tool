@@ -23,8 +23,8 @@ interface Props {
 
 export type Dome = "K1" | "K2"
 
-const height = 400
-const width = 400
+const height = 500
+const width = 500
 
 
 
@@ -172,12 +172,12 @@ const TwoDView = ({ targets }: Props) => {
 
     return (
         <>
-            <Stack sx={{ margin: "12px" }}
+            <Stack sx={{ margin: "6px" }}
                 width="100%"
                 direction="column"
                 justifyContent='center'
                 spacing={0}>
-                <Stack sx={{ overflow: "auto", alignItems: "flex-end" }}
+                <Stack sx={{ overflow: "auto"}}
                     width="100%"
                     direction="row"
                     justifyContent='center'
@@ -203,7 +203,7 @@ const TwoDView = ({ targets }: Props) => {
                     setTime={setTime}
                 />
             </Stack>
-            <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={0}>
+            <Stack sx={{alignItems: 'flex-end'}} width="100%" direction="row" justifyContent='center' spacing={0}>
                 <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={0}>
                     <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
                     <SkyChart
