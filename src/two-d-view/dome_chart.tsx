@@ -45,6 +45,7 @@ const make_disk_polar = (r1: number, r2: number, th1: number, th2: number) => {
         type: 'scatterpolar',
         fill: 'toself',
         mode: 'lines',
+        showlegend: false,
         name: 'telescope bottom limit',
         hoverinfo: "none",
         hovermode: false,
@@ -182,6 +183,7 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
             theta: tt,
             text: texts,
             hovorinfo: 'text',
+            showlegend: false,
             hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
             color: "rgb(0,0,0)",
             textposition: 'top left',

@@ -149,7 +149,8 @@ export const SkyChart = (props: Props) => {
             })
     }
 
-    const yRange = [0, maxAirmass]
+    const yRange = [0, maxAirmass+1]
+    console.log('yRange', yRange)
 
     const layout: Partial<Plotly.Layout> = {
         width,
