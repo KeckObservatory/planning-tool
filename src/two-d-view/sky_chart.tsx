@@ -106,7 +106,7 @@ export const SkyChart = (props: Props) => {
     })
 
     //get curr marker
-    let maxAirmass = 29;
+    let maxAirmass = 10;
     if (showCurrLoc) {
         targetView.forEach((tgtv: TargetView) => { //add current location trace
             const ra = tgtv.ra_deg as number
@@ -117,11 +117,11 @@ export const SkyChart = (props: Props) => {
             const datum = get_chart_datum(ra, dec, viz as VizRow, chartType, lngLatEl)
             const currTime = hidate(time, context.config.timezone)
             const airmass = util.air_mass(azEl[1], lngLatEl.el)
-            maxAirmass = Math.min(maxAirmass, airmass)
+            maxAirmass = Math.max(maxAirmass, airmass)
             let text = ""
             text += `Az: ${azEl[0].toFixed(2)}<br>`
             text += `El: ${azEl[1].toFixed(2)}<br>`
-            text += `Airmass: ${airmass}).toFixed(2)}<br>`
+            text += `Airmass: ${airmass.toFixed(2)}<br>`
             // text += `Airmass: ${util.air_mass(azEl[1]).toFixed(2)}<br>`
             text += `HT: ${currTime.format(context.config.date_time_format)}`
 
@@ -149,7 +149,7 @@ export const SkyChart = (props: Props) => {
             })
     }
 
-    const yRange = [0, maxAirmass+1]
+    const yRange = [0, Math.min(30, maxAirmass)]
     console.log('yRange', yRange)
 
     const layout: Partial<Plotly.Layout> = {
