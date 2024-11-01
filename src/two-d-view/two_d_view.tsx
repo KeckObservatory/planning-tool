@@ -117,7 +117,7 @@ const TwoDView = ({ targets }: Props) => {
     const lngLatEl: LngLatEl = {
         lng: context.config.keck_longitude,
         lat: context.config.keck_latitude,
-        el: context.config.keck_elevation * 1_000 // convert km to meters
+        el: context.config.keck_elevation
     }
     const [nadir, setNadir] = React.useState(util.get_suncalc_times(lngLatEl, obsdate).nadir)
     const [times, setTimes] = React.useState(util.get_times_using_nadir(nadir))

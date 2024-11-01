@@ -242,7 +242,7 @@ export const DomeChart = (props: DomeChartProps) => {
     const lngLatEl: util.LngLatEl = {
         lng: context.config.keck_longitude,
         lat: context.config.keck_latitude,
-        el: context.config.keck_elevation * 1_000 // convert km to meters
+        el: context.config.keck_elevation
     }
 
     const traces = make_2d_traces(targetView, 
