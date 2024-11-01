@@ -2,7 +2,6 @@ import React from "react"
 import { ra_dec_to_deg } from './two-d-view/sky_view_util.tsx'
 import { Target } from "./App"
 import A from 'aladin-lite'
-import { Stack } from '@mui/material'
 
 const FOVlink = 'INSTRUMENTS_FOV.json'
 

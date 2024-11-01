@@ -3,7 +3,7 @@ import * as util from './sky_view_util.tsx'
 import { LngLatEl } from './sky_view_util.tsx';
 import NightPicker from '../two-d-view/night_picker'
 import dayjs, { Dayjs } from 'dayjs';
-import { Autocomplete, FormControl, FormControlLabel, FormLabel, Grid, Paper, Radio, RadioGroup, Stack, styled, Switch, TextField, Tooltip } from '@mui/material';
+import { Autocomplete, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, Stack, Switch, TextField, Tooltip } from '@mui/material';
 import TimeSlider from './time_slider';
 import { Target, useStateContext } from '../App.tsx';
 import { DomeChart } from './dome_chart.tsx';
@@ -172,18 +172,6 @@ const TwoDView = ({ targets }: Props) => {
         const newObsDate = hidate(newDate?.toDate(), context.config.timezone).toDate()
         newDate && setObsdate(newObsDate)
     }
-
-    const Item = styled(Paper)(({ theme }) => ({
-        backgroundColor: '#fff',
-        ...theme.typography.body2,
-        padding: theme.spacing(1),
-        textAlign: 'center',
-        color: theme.palette.text.secondary,
-        ...theme.applyStyles('dark', {
-            backgroundColor: '#1A2027',
-        }),
-    }));
-
 
     const onInstrumentFOVChange = (value: string | undefined | null) => {
         if (value) {
