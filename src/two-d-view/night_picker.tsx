@@ -1,13 +1,12 @@
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import dayjs, { Dayjs } from 'dayjs';
 
 const datePickerStyle = {
-    margin: '0px',
-    marginTop: '8px',
-    padding: '0px',
-    width: '200px'
+    paddingTop: '9px',
+    width: '175px',
+    VerticalAlign: 'bottom'
 }
 
 interface Props {
@@ -20,7 +19,7 @@ export default function NightPicker(props: Props) {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
+            <DesktopDatePicker
                 sx={datePickerStyle}
                 views={['year', 'month', 'day']}
                 label="Date of observation (HT)"

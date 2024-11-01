@@ -3,7 +3,7 @@ import * as util from './sky_view_util.tsx'
 import { LngLatEl } from './sky_view_util.tsx';
 import NightPicker from '../two-d-view/night_picker'
 import dayjs, { Dayjs } from 'dayjs';
-import { FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Stack, Switch } from '@mui/material';
+import { Autocomplete, FormControl, FormControlLabel, FormLabel, Grid, Paper, Radio, RadioGroup, Stack, styled, Switch, TextField, Tooltip } from '@mui/material';
 import TimeSlider from './time_slider';
 import { Target, useStateContext } from '../App.tsx';
 import { DomeChart } from './dome_chart.tsx';
@@ -15,6 +15,7 @@ import AladinViewer from '../aladin';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
+const instruments = ['KCWI', 'MOSFIRE']
 
 
 interface Props {
@@ -51,13 +52,15 @@ interface SkyChartSelectProps {
 export const SkyChartSelect = (props: SkyChartSelectProps) => {
     const { skyChart, setSkyChart } = props
 
+
     const handleSkyChartChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSkyChart(event.target.value as SkyChart)
     }
 
+
     return (
-        <FormControl>
-            <FormLabel id="sky-chart-row-radio-buttons-group-label">Sky Chart</FormLabel>
+        <FormControl sx={{ display: 'inlineBlock' }}>
+            <FormLabel sx={{ marginRight: '6px', paddingTop: '9px' }} id="sky-chart-row-radio-buttons-group-label">Sky Chart Type: </FormLabel>
             <RadioGroup
                 row
                 aria-labelledby="sky-chart-row-radio-buttons-group-label"
@@ -120,6 +123,7 @@ const TwoDView = ({ targets }: Props) => {
     const [times, setTimes] = React.useState(util.get_times_using_nadir(nadir))
     const [time, setTime] = React.useState(nadir)
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
+    const [instrumentFOV, setInstrumentFOV] = React.useState('KCWI')
 
     React.useEffect(() => {
         const newNadir = util.get_suncalc_times(lngLatEl, obsdate).nadir
@@ -143,7 +147,7 @@ const TwoDView = ({ targets }: Props) => {
                 })
 
                 const vizSum = visibility.reduce((sum: number, viz: VizRow) => {
-                    return viz.observable ? sum + 1 : sum
+                    return viz.observable ? sum + util.STEP_SIZE : sum
                 }, 0)
                 const tgtv: TargetView = {
                     ...tgt,
@@ -169,43 +173,138 @@ const TwoDView = ({ targets }: Props) => {
         newDate && setObsdate(newObsDate)
     }
 
+    const Item = styled(Paper)(({ theme }) => ({
+        backgroundColor: '#fff',
+        ...theme.typography.body2,
+        padding: theme.spacing(1),
+        textAlign: 'center',
+        color: theme.palette.text.secondary,
+        ...theme.applyStyles('dark', {
+            backgroundColor: '#1A2027',
+        }),
+    }));
+
+
+    const onInstrumentFOVChange = (value: string | undefined | null) => {
+        if (value) {
+            setInstrumentFOV(value)
+        }
+    }
+
 
     return (
-        <>
-            <Stack sx={{ margin: "6px" }}
-                width="100%"
-                direction="column"
-                justifyContent='center'
-                spacing={0}>
-                <Stack sx={{ marginTop: '4px', overflow: "auto"}}
-                    width="100%"
-                    direction="row"
-                    justifyContent='center'
-                    spacing={1}>
-                    <NightPicker date={obsdate} handleDateChange={handleDateChange} />
-                    <DomeSelect dome={dome} setDome={setDome} />
-                    <FormControlLabel
-                        label="Show Current Location"
-                        value={showCurrLoc}
-                        control={<Switch checked={showCurrLoc} />}
-                        onChange={(_, checked) => setShowCurrLoc(checked)}
+        // <>
+        //     <Stack sx={{ margin: "6px" }}
+        //         width="100%"
+        //         direction="column"
+        //         justifyContent='center'
+        //         spacing={0}>
+        //         <Stack sx={{ verticalAlign: 'bottom', paddingTop: '9px', marginBottom: '0px', overflow: "auto" }}
+        //             width="100%"
+        //             direction="row"
+
+        //             justifyContent='center'
+        //             spacing={1}>
+        //             <NightPicker date={obsdate} handleDateChange={handleDateChange} />
+        //             <DomeSelect dome={dome} setDome={setDome} />
+        //             <FormControlLabel
+        //                 label="Show Current Location"
+        //                 value={showCurrLoc}
+        //                 control={<Switch checked={showCurrLoc} />}
+        //                 onChange={(_, checked) => setShowCurrLoc(checked)}
+        //             />
+        //             <FormControlLabel
+        //                 label="Show Moon"
+        //                 value={showMoon}
+        //                 control={<Switch checked={showMoon} />}
+        //                 onChange={(_, checked) => setShowMoon(checked)}
+        //             />
+        //         </Stack>
+        //         <TimeSlider
+        //             times={times}
+        //             time={time}
+        //             setTime={setTime}
+        //         />
+        //     </Stack>
+        //     <SkyChartSelect skyChart={skyChart} instrumentFOV={instrumentFOV} setInstrumentFOV={setInstrumentFOV} setSkyChart={setSkyChart} />
+        //     <Stack sx={{ alignItems: 'flex-end' }} width="100%" direction="row" justifyContent='center' spacing={1}>
+        //         <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={1}>
+        //             <SkyChart
+        //                 height={height}
+        //                 width={width}
+        //                 chartType={skyChart}
+        //                 targetView={targetView}
+        //                 showMoon={showMoon}
+        //                 showCurrLoc={showCurrLoc}
+        //                 times={times}
+        //                 time={time}
+        //                 dome={dome}
+        //             />
+        //         </Stack>
+        //         <DomeChart
+        //             height={height}
+        //             width={width}
+        //             targetView={targetView}
+        //             showMoon={showMoon}
+        //             showCurrLoc={showCurrLoc}
+        //             times={times}
+        //             time={time}
+        //             dome={dome}
+        //         />
+        //         <AladinViewer
+        //             height={height}
+        //             instrumentFOV={instrumentFOV}
+        //             width={width}
+        //             targets={targets} />
+        //     </Stack>
+        // </>
+        <Grid container spacing={2}>
+            <Grid item xs={8}>
+                <>
+                    <Stack sx={{ verticalAlign: 'bottom', paddingTop: '9px', marginBottom: '0px', overflow: "auto" }}
+                        width="100%"
+                        direction="row"
+
+                        justifyContent='center'
+                        spacing={1}>
+                        <NightPicker date={obsdate} handleDateChange={handleDateChange} />
+                        <DomeSelect dome={dome} setDome={setDome} />
+                        <FormControlLabel
+                            label="Show Current Location"
+                            value={showCurrLoc}
+                            control={<Switch checked={showCurrLoc} />}
+                            onChange={(_, checked) => setShowCurrLoc(checked)}
+                        />
+                        <FormControlLabel
+                            label="Show Moon"
+                            value={showMoon}
+                            control={<Switch checked={showMoon} />}
+                            onChange={(_, checked) => setShowMoon(checked)}
+                        />
+                    </Stack>
+                    <TimeSlider
+                        times={times}
+                        time={time}
+                        setTime={setTime}
                     />
-                    <FormControlLabel
-                        label="Show Moon"
-                        value={showMoon}
-                        control={<Switch checked={showMoon} />}
-                        onChange={(_, checked) => setShowMoon(checked)}
-                    />
-                </Stack>
-                <TimeSlider
-                    times={times}
-                    time={time}
-                    setTime={setTime}
-                />
-            </Stack>
-            <Stack sx={{alignItems: 'flex-end'}} width="100%" direction="row" justifyContent='center' spacing={1}>
-                <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={1}>
                     <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
+                </>
+            </Grid>
+            <Grid item xs={4}>
+                <Tooltip placement="top" title="Select instrument field of view">
+                    <Autocomplete
+                        disablePortal
+                        id="semid-selection"
+                        value={{ label: instrumentFOV }}
+                        onChange={(_, value) => onInstrumentFOVChange(value?.label)}
+                        options={instruments.map((instr) => { return { label: instr } })}
+                        sx={{ width: 300, margin: '6px' }}
+                        renderInput={(params) => <TextField {...params} label="Instrument FOV" />}
+                    />
+                </Tooltip>
+            </Grid>
+            <Grid item xs={8}>
+                <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={1}>
                     <SkyChart
                         height={height}
                         width={width}
@@ -217,23 +316,26 @@ const TwoDView = ({ targets }: Props) => {
                         time={time}
                         dome={dome}
                     />
+                    <DomeChart
+                        height={height}
+                        width={width}
+                        targetView={targetView}
+                        showMoon={showMoon}
+                        showCurrLoc={showCurrLoc}
+                        times={times}
+                        time={time}
+                        dome={dome}
+                    />
                 </Stack>
-                <DomeChart
-                    height={height}
-                    width={width}
-                    targetView={targetView}
-                    showMoon={showMoon}
-                    showCurrLoc={showCurrLoc}
-                    times={times}
-                    time={time}
-                    dome={dome}
-                />
+            </Grid>
+            <Grid item xs={4}>
                 <AladinViewer
                     height={height}
+                    instrumentFOV={instrumentFOV}
                     width={width}
                     targets={targets} />
-            </Stack>
-        </>
+            </Grid>
+        </Grid >
     );
 }
 

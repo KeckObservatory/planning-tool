@@ -1,5 +1,4 @@
 import * as React from 'react';
-import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 import MultilineChartIcon from '@mui/icons-material/MultilineChart';
 import IconButton from '@mui/material/IconButton';
@@ -22,10 +21,10 @@ function ViewTargetsDialog(props: VTDProps) {
     <Dialog
       onClose={() => handleClose()}
       open={open}
-      sx={{ padding: '8px'}}
+      sx={{ padding: '0px'}}
       maxWidth="xl"
     >
-      <DialogTitle>Selected Target Charts</DialogTitle>
+      {/* <DialogTitle sx={{padding: '12px'}}>Selected Target Charts</DialogTitle> */}
       <DialogContent>
         <TwoDView targets={targets} />
       </DialogContent>

@@ -128,6 +128,7 @@ export const SkyChart = (props: Props) => {
                 text: [text],
                 // hovorinfo: 'text',
                 hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+                showlegend: false,
                 marker: { 
                     size: 12,
                     color: 'red',

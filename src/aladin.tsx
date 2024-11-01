@@ -2,14 +2,14 @@ import React from "react"
 import { ra_dec_to_deg } from './two-d-view/sky_view_util.tsx'
 import { Target } from "./App"
 import A from 'aladin-lite'
-import { Autocomplete, Stack, TextField, Tooltip } from '@mui/material'
+import { Stack } from '@mui/material'
 
 const FOVlink = 'INSTRUMENTS_FOV.json'
-const instruments = ['KCWI', 'MOSFIRE']
 
 interface Props {
     width: number,
     height: number,
+    instrumentFOV: string,
     targets: Target[]
 }
 
@@ -45,11 +45,11 @@ const PolylineComponent = (props: PolylineProps) => {
     )
 }
 
-const get_fov = async (aladin: any, instrument: string) => {
+const get_fov = async (aladin: any, instrumentFOV: string) => {
     const resp = await fetch(FOVlink)
     const data = await resp.text()
     const json = JSON.parse(data)
-    const feature = json['features'].find((f: any) => f['properties']['instrument'] === instrument)
+    const feature = json['features'].find((f: any) => f['properties']['instrument'] === instrumentFOV)
     const multipolygon = feature['geometry']['coordinates']
     const [ra0, dec0] = aladin.getRaDec()
     const polygons = multipolygon.map((polygon: [number, number][]) => {
@@ -71,10 +71,9 @@ const get_fov = async (aladin: any, instrument: string) => {
 
 export default function AladinViewer(props: Props) {
     console.log('aladin viewer init', props)
-    const { width, height, targets } = props
+    const { width, height, targets, instrumentFOV } = props
 
     const [fov, setFOV] = React.useState([] as [number, number][][])
-    const [instrument, setInstrument] = React.useState('KCWI')
     const [aladin, setAladin] = React.useState<null | any>(null)
     //const [zoom, setZoom] = React.useState(360) //for whole sky
     const [zoom, setZoom] = React.useState(2)
@@ -146,7 +145,7 @@ export default function AladinViewer(props: Props) {
         A.init.then(async () => {
             const alad = A.aladin('#aladin-lite-div', params);
             setAladin(alad)
-            setFOV(await get_fov(alad, instrument))
+            setFOV(await get_fov(alad, instrumentFOV))
             // //@ts-ignore
             // const result = Object.groupBy(props.targets, ({ target_name}) => target_name);
             // console.log('adding catalog')
@@ -165,37 +164,18 @@ export default function AladinViewer(props: Props) {
 
     React.useEffect(() => {
         const update_inst = async () => {
-            aladin && setFOV(await get_fov(aladin, instrument))
+            aladin && setFOV(await get_fov(aladin, instrumentFOV))
         }
         update_inst()
-    }, [instrument, zoom])
+    }, [instrumentFOV, zoom])
 
     React.useEffect(() => {
-    }, [props.targets])
-
-    const onChange = (value: string | undefined | null) => {
-        if (value) {
-            setInstrument(value)
-        }
-    }
+    }, [targets])
 
 
     return (
-        <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={2}>
-            <Tooltip placement="top" title="Select instrument field of view">
-                <Autocomplete
-                    disablePortal
-                    id="semid-selection"
-                    value={{ label: instrument }}
-                    onChange={(_, value) => onChange(value?.label)}
-                    options={instruments.map((instr) => { return { label: instr } })}
-                    sx={{ width: 300, margin: '6px' }}
-                    renderInput={(params) => <TextField {...params} label="Instrument FOV" />}
-                />
-            </Tooltip>
-            <div id='aladin-lite-div' style={{ margin: '0px', width: width, height: height }} >
-                {fov.map(f => <PolylineComponent points={f} />)}
-            </div>
-        </Stack>
+        <div id='aladin-lite-div' style={{ margin: '0px', width: width, height: height }} >
+            {fov.map(f => <PolylineComponent points={f} />)}
+        </div>
     )
 }
