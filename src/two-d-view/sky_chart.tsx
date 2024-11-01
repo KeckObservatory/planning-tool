@@ -106,6 +106,7 @@ export const SkyChart = (props: Props) => {
     })
 
     //get curr marker
+    let maxAirmass = 29;
     if (showCurrLoc) {
         targetView.forEach((tgtv: TargetView) => { //add current location trace
             const ra = tgtv.ra_deg as number
@@ -115,10 +116,12 @@ export const SkyChart = (props: Props) => {
             const viz = { az: azEl[0], alt: azEl[1], datetime: time, air_mass: util.air_mass(azEl[1], lngLatEl.el) }
             const datum = get_chart_datum(ra, dec, viz as VizRow, chartType, lngLatEl)
             const currTime = hidate(time, context.config.timezone)
+            const airmass = util.air_mass(azEl[1], lngLatEl.el)
+            maxAirmass = Math.min(maxAirmass, airmass)
             let text = ""
             text += `Az: ${azEl[0].toFixed(2)}<br>`
             text += `El: ${azEl[1].toFixed(2)}<br>`
-            text += `Airmass: ${util.air_mass(azEl[1], lngLatEl.el).toFixed(2)}<br>`
+            text += `Airmass: ${airmass}).toFixed(2)}<br>`
             // text += `Airmass: ${util.air_mass(azEl[1]).toFixed(2)}<br>`
             text += `HT: ${currTime.format(context.config.date_time_format)}`
 
@@ -146,11 +149,16 @@ export const SkyChart = (props: Props) => {
             })
     }
 
+    const yRange = [0, maxAirmass]
+
     const layout: Partial<Plotly.Layout> = {
         width,
         height,
         title: `Target ${chartType} vs Time`,
         hovermode: "closest",
+        yaxis: {
+            range: yRange
+        },
         margin: {
             l: 40,
             r: 40,
