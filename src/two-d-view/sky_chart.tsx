@@ -149,7 +149,7 @@ export const SkyChart = (props: Props) => {
             })
     }
 
-    const yRange = [0, Math.min(30, maxAirmass)]
+    const yRange = chartType.includes('Elevation') ? [0, Math.min(30, maxAirmass)] : undefined
     console.log('yRange', yRange)
 
     const layout: Partial<Plotly.Layout> = {
@@ -158,7 +158,8 @@ export const SkyChart = (props: Props) => {
         title: `Target ${chartType} vs Time`,
         hovermode: "closest",
         yaxis: {
-            range: yRange
+            range: yRange,
+            autorange: !chartType.includes('Elevation')
         },
         margin: {
             l: 40,
