@@ -215,25 +215,28 @@ const TwoDView = ({ targets }: Props) => {
                 </>
             </Grid>
             <Grid item xs={4}>
-                <Tooltip placement="top" title="Select instrument field of view">
-                    <Autocomplete
-                        disablePortal
-                        id="semid-selection"
-                        value={{ label: instrumentFOV }}
-                        onChange={(_, value) => onInstrumentFOVChange(value?.label)}
-                        options={instruments.map((instr) => { return { label: instr } })}
-                        sx={{ width: 300, margin: '6px' }}
-                        renderInput={(params) => <TextField {...params} label="Instrument FOV" />}
-                    />
-                </Tooltip>
-                <Tooltip title={'Rotator angle for Field of View'}>
-                    <TextField
-                        label={'Rotator Angle'}
-                        id="rotator-angle"
-                        value={rotatorAngle}
-                        onChange={(event) => setRotatorAngle(Number(event.target.value))}
-                    />
-                </Tooltip>
+                <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={0}>
+                    <Tooltip placement="top" title="Select instrument field of view">
+                        <Autocomplete
+                            disablePortal
+                            id="semid-selection"
+                            value={{ label: instrumentFOV }}
+                            onChange={(_, value) => onInstrumentFOVChange(value?.label)}
+                            options={instruments.map((instr) => { return { label: instr } })}
+                            sx={{ margin: '6px' }}
+                            renderInput={(params) => <TextField {...params} label="Instrument FOV" />}
+                        />
+                    </Tooltip>
+                    <Tooltip title={'Rotator angle for Field of View'}>
+                        <TextField
+                            sx={{ margin: '6px' }}
+                            label={'Rotator Angle'}
+                            id="rotator-angle"
+                            value={rotatorAngle}
+                            onChange={(event) => setRotatorAngle(Number(event.target.value))}
+                        />
+                    </Tooltip>
+                </Stack>
             </Grid>
             <Grid item xs={8}>
                 <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={1}>
