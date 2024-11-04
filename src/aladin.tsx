@@ -156,7 +156,7 @@ export default function AladinViewer(props: Props) {
             showCooGrid: true,
             projection: 'MOL',
             zoom: zoom,
-            showCooGridControl: true,
+            //showCooGridControl: true,
             showReticle: true
         }
         if (firstRow?.ra) {
