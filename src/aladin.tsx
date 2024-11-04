@@ -152,7 +152,7 @@ export default function AladinViewer(props: Props) {
             zoom: zoom,
             showCooGrid: false,
             showCooGridControl: true,
-            // showReticle: true,
+            showReticle: false,
             target: firstRow?.target_name
         }
         params['target'] = firstRow?.ra?.replaceAll(':', " ") + ' ' + firstRow?.dec?.replaceAll(':', ' ')
