@@ -114,6 +114,7 @@ const TwoDView = ({ targets }: Props) => {
     const [skyChart, setSkyChart] = React.useState<SkyChart>("Elevation")
     const [showMoon, setShowMoon] = React.useState(true)
     const [showCurrLoc, setShowCurrLoc] = React.useState(true)
+    const [rotatorAngle, setRotatorAngle] = React.useState(0)
     const lngLatEl: LngLatEl = {
         lng: context.config.keck_longitude,
         lat: context.config.keck_latitude,
@@ -181,71 +182,6 @@ const TwoDView = ({ targets }: Props) => {
 
 
     return (
-        // <>
-        //     <Stack sx={{ margin: "6px" }}
-        //         width="100%"
-        //         direction="column"
-        //         justifyContent='center'
-        //         spacing={0}>
-        //         <Stack sx={{ verticalAlign: 'bottom', paddingTop: '9px', marginBottom: '0px', overflow: "auto" }}
-        //             width="100%"
-        //             direction="row"
-
-        //             justifyContent='center'
-        //             spacing={1}>
-        //             <NightPicker date={obsdate} handleDateChange={handleDateChange} />
-        //             <DomeSelect dome={dome} setDome={setDome} />
-        //             <FormControlLabel
-        //                 label="Show Current Location"
-        //                 value={showCurrLoc}
-        //                 control={<Switch checked={showCurrLoc} />}
-        //                 onChange={(_, checked) => setShowCurrLoc(checked)}
-        //             />
-        //             <FormControlLabel
-        //                 label="Show Moon"
-        //                 value={showMoon}
-        //                 control={<Switch checked={showMoon} />}
-        //                 onChange={(_, checked) => setShowMoon(checked)}
-        //             />
-        //         </Stack>
-        //         <TimeSlider
-        //             times={times}
-        //             time={time}
-        //             setTime={setTime}
-        //         />
-        //     </Stack>
-        //     <SkyChartSelect skyChart={skyChart} instrumentFOV={instrumentFOV} setInstrumentFOV={setInstrumentFOV} setSkyChart={setSkyChart} />
-        //     <Stack sx={{ alignItems: 'flex-end' }} width="100%" direction="row" justifyContent='center' spacing={1}>
-        //         <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={1}>
-        //             <SkyChart
-        //                 height={height}
-        //                 width={width}
-        //                 chartType={skyChart}
-        //                 targetView={targetView}
-        //                 showMoon={showMoon}
-        //                 showCurrLoc={showCurrLoc}
-        //                 times={times}
-        //                 time={time}
-        //                 dome={dome}
-        //             />
-        //         </Stack>
-        //         <DomeChart
-        //             height={height}
-        //             width={width}
-        //             targetView={targetView}
-        //             showMoon={showMoon}
-        //             showCurrLoc={showCurrLoc}
-        //             times={times}
-        //             time={time}
-        //             dome={dome}
-        //         />
-        //         <AladinViewer
-        //             height={height}
-        //             instrumentFOV={instrumentFOV}
-        //             width={width}
-        //             targets={targets} />
-        //     </Stack>
-        // </>
         <Grid container spacing={2}>
             <Grid item xs={8}>
                 <>
@@ -291,6 +227,14 @@ const TwoDView = ({ targets }: Props) => {
                     />
                 </Tooltip>
             </Grid>
+            <Tooltip title={'Rotator angle for Field of View'}>
+                <TextField
+                    label={'Rotator Angle'}
+                    id="rotator-angle"
+                    value={rotatorAngle}
+                    onChange={(event) => setRotatorAngle(Number(event.target.value))}
+                />
+            </Tooltip>
             <Grid item xs={8}>
                 <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={1}>
                     <SkyChart
@@ -319,6 +263,7 @@ const TwoDView = ({ targets }: Props) => {
             <Grid item xs={4}>
                 <AladinViewer
                     height={height}
+                    angle={rotatorAngle}
                     instrumentFOV={instrumentFOV}
                     width={width}
                     targets={targets} />

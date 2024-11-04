@@ -10,7 +10,8 @@ interface Props {
     width: number,
     height: number,
     instrumentFOV: string,
-    targets: Target[]
+    targets: Target[],
+    angle: number
 }
 
 const format_target_coords = (ra: string | number, dec: string | number) => {
@@ -87,7 +88,7 @@ const get_fov = async (aladin: any, instrumentFOV: string, angle?: number) => {
 
 export default function AladinViewer(props: Props) {
     console.log('aladin viewer init', props)
-    const { width, height, targets, instrumentFOV } = props
+    const { width, height, targets, instrumentFOV, angle } = props
 
     const [fov, setFOV] = React.useState([] as [number, number][][])
     const [aladin, setAladin] = React.useState<null | any>(null)
@@ -165,7 +166,6 @@ export default function AladinViewer(props: Props) {
             const coords = format_target_coords(ra, dec)
             params['target'] = coords
         }
-        const angle = firstRow?.rotator_angle
 
         A.init.then(async () => {
             const alad = A.aladin('#aladin-lite-div', params);
@@ -190,7 +190,6 @@ export default function AladinViewer(props: Props) {
 
     const update_inst_fov = async (instrumentFOV: string) => {
         if (!aladin) return
-        const angle = targets.at(0)?.rotator_angle
         let FOV = await get_fov(aladin, instrumentFOV, angle)
         setFOV(FOV)
     }
@@ -199,7 +198,7 @@ export default function AladinViewer(props: Props) {
 
     React.useEffect(() => {
         debounced_update_inst_fov(instrumentFOV)
-    }, [instrumentFOV, zoom])
+    }, [instrumentFOV, zoom, angle])
 
     React.useEffect(() => {
     }, [targets])
