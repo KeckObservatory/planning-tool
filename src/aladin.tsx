@@ -2,6 +2,7 @@ import React from "react"
 import { ra_dec_to_deg, cosd, sind } from './two-d-view/sky_view_util.tsx'
 import { Target } from "./App"
 import A from 'aladin-lite'
+import { useDebounceCallback } from "./use_debounce_callback.tsx"
 
 const FOVlink = 'INSTRUMENTS_FOV.json'
 
@@ -188,16 +189,19 @@ export default function AladinViewer(props: Props) {
         scriptloaded()
     }, [])
 
+    const update_inst_fov = async () => {
+        if (!aladin) return
+        const rot = targets.at(0)?.rotator_angle
+        let FOV = await get_fov(aladin, instrumentFOV)
+        console.log('updating fov', FOV)
+        FOV = rotate_fov(FOV, rot)
+        setFOV(FOV)
+    }
+
+    const debounced_update_inst_fov = useDebounceCallback(update_inst_fov, 500)
+
     React.useEffect(() => {
-        const update_inst_fov = async () => {
-            if (!aladin) return
-            const rot = targets.at(0)?.rotator_angle
-            let FOV = await get_fov(aladin, instrumentFOV)
-            console.log('update fov', FOV)
-            FOV = rotate_fov(FOV, rot)
-            setFOV(FOV)
-        }
-        update_inst_fov()
+        debounced_update_inst_fov()
     }, [instrumentFOV, zoom])
 
     React.useEffect(() => {
