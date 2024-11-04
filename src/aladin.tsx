@@ -184,8 +184,7 @@ export default function AladinViewer(props: Props) {
         if (!aladin) return
         const [ra, dec] = aladin.getRaDec()
         const world2pix = aladin.world2pix
-
-        console.log('world2pix', world2pix)
+        console.log('world2pix', world2pix, world2pix(ra, dec))
         let FOV = await get_fov(ra, dec, world2pix, instrumentFOV, angle)
         setFOV(FOV)
     }
