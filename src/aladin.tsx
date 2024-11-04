@@ -158,13 +158,8 @@ export default function AladinViewer(props: Props) {
             zoom: zoom,
             showCooGrid: false,
             showCooGridControl: true,
-            showReticle: true
-        }
-        if (firstRow?.ra) {
-            let ra = ra_dec_to_deg(firstRow.ra as string)
-            let dec = ra_dec_to_deg(firstRow.dec as string, true)
-            const coords = format_target_coords(ra, dec)
-            params['target'] = coords
+            showReticle: true,
+            target: firstRow?.target_name
         }
 
         A.init.then(async () => {
