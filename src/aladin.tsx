@@ -3,6 +3,7 @@ import { ra_dec_to_deg, cosd, sind } from './two-d-view/sky_view_util.tsx'
 import { Target } from "./App"
 import A from 'aladin-lite'
 import { useDebounceCallback } from "./use_debounce_callback.tsx"
+import {Feature, FeatureCollection, MultiPolygon, Position} from 'geojson'
 
 const FOVlink = 'INSTRUMENTS_FOV.json'
 
@@ -20,7 +21,7 @@ const format_target_coords = (ra: string | number, dec: string | number) => {
 }
 
 interface PolylineProps {
-    points: [number, number][]
+    points: Position[][]
 
 }
 
@@ -46,17 +47,18 @@ const PolylineComponent = (props: PolylineProps) => {
     )
 }
 
-const rotate_fov = (coords: [number, number][][], angle?: number) => {
+const rotate_fov = (coords: Position[][][], angle?: number) => {
 
     const rotFOV = angle ? coords.map(shape => {
         const newShape = shape.map(point => {
+            const [x, y] = point as unknown as [number, number]
             const newPoint = [
-                point[0] * cosd(angle) - point[1] * sind(angle),
-                point[0] * sind(angle) + point[1] * cosd(angle)
+                x * cosd(angle) - y * sind(angle),
+                x * sind(angle) + y * cosd(angle)
             ]
-            return newPoint as [number, number]
+            return newPoint as unknown as Position[]
         })
-        return newShape
+        return newShape 
     }) : coords 
     console.log('rotFOV', rotFOV)
     return rotFOV
@@ -65,30 +67,31 @@ const rotate_fov = (coords: [number, number][][], angle?: number) => {
 const get_fov = async (ra: number, dec: number, world2pix: Function, instrumentFOV: string, angle?: number) => {
     const resp = await fetch(FOVlink)
     const data = await resp.text()
-    const json = JSON.parse(data)
-    const feature = json['features'].find((f: any) => f['properties']['instrument'] === instrumentFOV)
-    let multipolygon = feature['geometry']['coordinates']
+    const featureCollection = JSON.parse(data) as FeatureCollection<MultiPolygon>
+    const feature = featureCollection['features'].find((f: any) => f['properties']['instrument'] === instrumentFOV)
+    let multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
     multipolygon = angle ? rotate_fov(multipolygon, angle): multipolygon
-    const polygons = multipolygon.map((polygon: [number, number][]) => {
+    const polygons = multipolygon.map((polygon: Position[][]) => {
         let absPolygon = [...polygon, polygon[0]]
         absPolygon = absPolygon 
-            .map((point: [number, number]) => {
-                return [point[0] / 3600 + ra, point[1] / 3600 + dec]
+            .map((point) => {
+                const [x, y] = point as unknown as [number, number]
+                return [x / 3600 + ra, y / 3600 + dec]
             })
             .map((point) => {
-                const pix = world2pix(...point) as [number, number]
-                return pix as [number, number]
+                const pix = world2pix(...point)
+                return pix
             })
         return absPolygon
     })
-    return polygons as [number, number][][]
+    return polygons as Position[][][]
 }
 
 export default function AladinViewer(props: Props) {
     console.log('aladin viewer init', props)
     const { width, height, targets, instrumentFOV, angle } = props
 
-    const [fov, setFOV] = React.useState([] as [number, number][][])
+    const [fov, setFOV] = React.useState<Position[][][]>([])
     const [aladin, setAladin] = React.useState<null | any>(null)
     //const [zoom, setZoom] = React.useState(360) //for whole sky
     const [zoom, setZoom] = React.useState(2)
@@ -181,6 +184,8 @@ export default function AladinViewer(props: Props) {
         if (!aladin) return
         const [ra, dec] = aladin.getRaDec()
         const world2pix = aladin.world2pix
+
+        console.log('world2pix', world2pix)
         let FOV = await get_fov(ra, dec, world2pix, instrumentFOV, angle)
         setFOV(FOV)
     }
