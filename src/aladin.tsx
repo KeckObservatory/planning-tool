@@ -66,8 +66,6 @@ const rotate_fov = (coords: Position[][][], angle?: number) => {
 
 const get_fov = async (aladin: any, instrumentFOV: string, angle?: number) => {
     const [ra, dec] = aladin.getRaDec() as [number, number]
-    const world2pix = aladin.world2pix as Function
-    console.log('world2pix', world2pix, aladin)
     const resp = await fetch(FOVlink)
     const data = await resp.text()
     const featureCollection = JSON.parse(data) as FeatureCollection<MultiPolygon>
@@ -82,7 +80,9 @@ const get_fov = async (aladin: any, instrumentFOV: string, angle?: number) => {
                 return [x / 3600 + ra, y / 3600 + dec]
             })
             .map((point) => {
-                const pix = world2pix(...point)
+                const [x, y] = point as unknown as [number, number]
+                const pix = aladin.world2pix(x,y)
+                console.log('pix', pix)
                 return pix
             })
         return absPolygon
