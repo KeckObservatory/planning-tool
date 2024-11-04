@@ -46,7 +46,6 @@ export interface Target extends SimbadTargetData {
   telescope_wrap?: TelescopeWrap
   d_ra?: number,
   d_dec?: number,
-  rotator_angle?: number,
   t_eff?: number,
   comment?: string,
   status?: Status //used to track row/form edits and updates them accordingly.
