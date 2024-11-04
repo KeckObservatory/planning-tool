@@ -314,8 +314,8 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                     <TextField
                                         label={input_label('rotator_angle')}
                                         InputLabelProps={{ shrink: hasSimbad || 'rotator_angle' in target }}
-                                        id="epoch"
-                                        value={target.epoch}
+                                        id="rotator-angle"
+                                        value={target.rotator_angle}
                                         onChange={(event) => handleTextChange('rotator_angle', event.target.value, true)}
                                     />
                                 </Tooltip>
