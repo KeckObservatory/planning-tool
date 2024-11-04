@@ -50,10 +50,9 @@ const rotate_fov = (coords: [number, number][][], angle?: number) => {
 
     const rotFOV = angle ? coords.map(shape => {
         const newShape = shape.map(point => {
-            console.log(point)
             const newPoint = [
                 point[0] * cosd(angle) - point[1] * sind(angle),
-                point[1] * cosd(angle) + point[0] * sind(angle)
+                point[0] * sind(angle) + point[1] * cosd(angle)
             ]
             return newPoint as [number, number]
         })
@@ -169,17 +168,8 @@ export default function AladinViewer(props: Props) {
 
         A.init.then(async () => {
             const alad = A.aladin('#aladin-lite-div', params);
+            update_inst_fov(alad, instrumentFOV, angle)
             setAladin(alad)
-            let FOV = await get_fov(alad, instrumentFOV, angle)
-            setFOV(FOV)
-            // //@ts-ignore
-            // const result = Object.groupBy(props.targets, ({ target_name}) => target_name);
-            // console.log('adding catalog')
-            // for (const [key, value] of Object.entries(result)) {
-            //     console.log(`${key}`);
-            //     add_catalog(alad, value as Target[], key)
-            // }
-
             add_catalog(alad, targets)
         })
     }
@@ -188,16 +178,16 @@ export default function AladinViewer(props: Props) {
         scriptloaded()
     }, [])
 
-    const update_inst_fov = async (instrumentFOV: string) => {
-        if (!aladin) return
-        let FOV = await get_fov(aladin, instrumentFOV, angle)
+    const update_inst_fov = async (alad: any, instrumentFOV: string, angle: number) => {
+        if (!alad) return
+        let FOV = await get_fov(alad, instrumentFOV, angle)
         setFOV(FOV)
     }
 
     const debounced_update_inst_fov = useDebounceCallback(update_inst_fov, 500)
 
     React.useEffect(() => {
-        debounced_update_inst_fov(instrumentFOV)
+        debounced_update_inst_fov(aladin, instrumentFOV, angle)
     }, [instrumentFOV, zoom, angle])
 
     React.useEffect(() => {
