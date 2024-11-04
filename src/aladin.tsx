@@ -45,29 +45,45 @@ const PolylineComponent = (props: PolylineProps) => {
     )
 }
 
-const get_fov = async (aladin: any, instrumentFOV: string) => {
+const rotate_fov = (coords: [number, number][][], angle?: number) => {
+
+    const rotFOV = angle ? coords.map(shape => {
+        const newShape = shape.map(point => {
+            console.log(point)
+            const newPoint = [
+                point[0] * cosd(angle) - point[1] * sind(angle),
+                point[1] * cosd(angle) + point[0] * cosd(angle)
+            ]
+            return newPoint as [number, number]
+        })
+        return newShape
+    }) : coords 
+    console.log('rotFOV', rotFOV)
+    return rotFOV
+}
+
+const get_fov = async (aladin: any, instrumentFOV: string, angle?: number) => {
     const resp = await fetch(FOVlink)
     const data = await resp.text()
     const json = JSON.parse(data)
     const feature = json['features'].find((f: any) => f['properties']['instrument'] === instrumentFOV)
-    const multipolygon = feature['geometry']['coordinates']
+    let multipolygon = feature['geometry']['coordinates']
     const [ra0, dec0] = aladin.getRaDec()
+    multipolygon = angle ? rotate_fov(multipolygon, angle): multipolygon
     const polygons = multipolygon.map((polygon: [number, number][]) => {
-        let p = [...polygon, polygon[0]]
-        p = p
+        let absPolygon = [...polygon, polygon[0]]
+        absPolygon = absPolygon 
             .map((point: [number, number]) => {
                 return [point[0] / 3600 + ra0, point[1] / 3600 + dec0]
             })
-            .map((pt) => {
-                const pix = aladin.world2pix(...pt) as [number, number]
+            .map((point) => {
+                const pix = aladin.world2pix(...point) as [number, number]
                 return pix as [number, number]
             })
-        return p
+        return absPolygon
     })
     return polygons as [number, number][][]
 }
-
-
 
 export default function AladinViewer(props: Props) {
     console.log('aladin viewer init', props)
@@ -131,22 +147,6 @@ export default function AladinViewer(props: Props) {
         }
     }
 
-    const rotate_fov = (coords: [number, number][][], angle?: number) => {
-
-        const rotFOV = angle ? coords.map(shape => {
-            const newShape = shape.map(point => {
-                console.log(point)
-                const newPoint = [
-                    point[0] * cosd(angle) - point[1] * sind(angle),
-                    point[1] * cosd(angle) + point[0] * cosd(angle)
-                ]
-                return newPoint as [number, number]
-            })
-            return newShape
-        }) : coords 
-        console.log('rotFOV', rotFOV)
-        return rotFOV
-    }
 
     const scriptloaded = async () => {
         console.log('script loaded', props)
@@ -165,13 +165,12 @@ export default function AladinViewer(props: Props) {
             const coords = format_target_coords(ra, dec)
             params['target'] = coords
         }
-        const rot = firstRow?.rotator_angle
+        const angle = firstRow?.rotator_angle
 
         A.init.then(async () => {
             const alad = A.aladin('#aladin-lite-div', params);
             setAladin(alad)
-            let FOV = await get_fov(alad, instrumentFOV)
-            FOV = rotate_fov(FOV, rot)
+            let FOV = await get_fov(alad, instrumentFOV, angle)
             setFOV(FOV)
             // //@ts-ignore
             // const result = Object.groupBy(props.targets, ({ target_name}) => target_name);
@@ -189,19 +188,17 @@ export default function AladinViewer(props: Props) {
         scriptloaded()
     }, [])
 
-    const update_inst_fov = async () => {
+    const update_inst_fov = async (instrumentFOV: string) => {
         if (!aladin) return
-        const rot = targets.at(0)?.rotator_angle
-        let FOV = await get_fov(aladin, instrumentFOV)
-        console.log('updating fov', FOV)
-        FOV = rotate_fov(FOV, rot)
+        const angle = targets.at(0)?.rotator_angle
+        let FOV = await get_fov(aladin, instrumentFOV, angle)
         setFOV(FOV)
     }
 
     const debounced_update_inst_fov = useDebounceCallback(update_inst_fov, 500)
 
     React.useEffect(() => {
-        debounced_update_inst_fov()
+        debounced_update_inst_fov(instrumentFOV)
     }, [instrumentFOV, zoom])
 
     React.useEffect(() => {
