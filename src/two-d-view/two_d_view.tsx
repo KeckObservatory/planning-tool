@@ -12,7 +12,6 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { alt_az_observable, VizRow } from './viz_chart.tsx';
 import AladinViewer from '../aladin';
-import { useDebounceCallback } from "../use_debounce_callback.tsx"
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -181,8 +180,6 @@ const TwoDView = ({ targets }: Props) => {
         }
     }
 
-    const debouncedSetRotatorAngle = useDebounceCallback(setRotatorAngle, 500)
-
 
     return (
         <Grid container spacing={2}>
@@ -234,7 +231,7 @@ const TwoDView = ({ targets }: Props) => {
                         label={'Rotator Angle'}
                         id="rotator-angle"
                         value={rotatorAngle}
-                        onChange={(event) => debouncedSetRotatorAngle(Number(event.target.value))}
+                        onChange={(event) => setRotatorAngle(Number(event.target.value))}
                     />
                 </Tooltip>
             </Grid>

@@ -154,10 +154,10 @@ export default function AladinViewer(props: Props) {
         const firstRow = targets.at(0)
         let params: any = {
             survey: 'P/DSS2/color',
-            showCooGrid: true,
             projection: 'MOL',
             zoom: zoom,
-            //showCooGridControl: true,
+            showCooGrid: false,
+            showCooGridControl: true,
             showReticle: true
         }
         if (firstRow?.ra) {
