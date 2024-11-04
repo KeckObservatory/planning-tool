@@ -150,7 +150,7 @@ export default function AladinViewer(props: Props) {
             survey: 'P/DSS2/color',
             projection: 'MOL',
             // zoom: zoom,
-            fov: 15, 
+            fov: 15/60, 
             showCooGrid: false,
             showCooGridControl: true,
             showReticle: false,
