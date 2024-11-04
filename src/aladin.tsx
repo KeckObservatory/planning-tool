@@ -89,7 +89,7 @@ export default function AladinViewer(props: Props) {
 
     const [fov, setFOV] = React.useState<Position[][][]>([])
     const [aladin, setAladin] = React.useState<null | any>(null)
-    const [zoom, setZoom] = React.useState(1)
+    const [zoom, setZoom] = React.useState(2)
 
     // define custom draw function
     const drawFunction = function (source: any, canvasCtx: any) {
@@ -156,6 +156,8 @@ export default function AladinViewer(props: Props) {
             showReticle: true,
             target: firstRow?.target_name
         }
+        params['target'] = firstRow?.ra?.replaceAll(':', " ") + ' ' + firstRow?.dec?.replaceAll(':', ' ')
+        console.log('params', params)
 
         A.init.then(async () => {
             const alad = A.aladin('#aladin-lite-div', params);
