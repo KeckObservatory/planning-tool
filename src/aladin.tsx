@@ -3,7 +3,7 @@ import { ra_dec_to_deg, cosd, sind } from './two-d-view/sky_view_util.tsx'
 import { Target } from "./App"
 import A from 'aladin-lite'
 import { useDebounceCallback } from "./use_debounce_callback.tsx"
-import {Feature, FeatureCollection, MultiPolygon, Position} from 'geojson'
+import { Feature, FeatureCollection, MultiPolygon, Position } from 'geojson'
 
 const FOVlink = 'INSTRUMENTS_FOV.json'
 
@@ -58,8 +58,8 @@ const rotate_fov = (coords: Position[][][], angle?: number) => {
             ]
             return newPoint as unknown as Position[]
         })
-        return newShape 
-    }) : coords 
+        return newShape
+    }) : coords
     return rotFOV
 }
 
@@ -73,14 +73,14 @@ const get_fov = async (aladin: any, instrumentFOV: string, angle: number) => {
     multipolygon = rotate_fov(multipolygon, angle)
     const polygons = multipolygon.map((polygon: Position[][]) => {
         let absPolygon = [...polygon, polygon[0]]
-        absPolygon = absPolygon 
+        absPolygon = absPolygon
             .map((point) => {
                 const [x, y] = point as unknown as [number, number]
                 return [x / 3600 + ra, y / 3600 + dec]
             })
             .map((point) => {
                 const [x, y] = point as unknown as [number, number]
-                const pix = aladin.world2pix(x,y)
+                const pix = aladin.world2pix(x, y)
                 return pix
             })
         return absPolygon
@@ -134,8 +134,8 @@ export default function AladinViewer(props: Props) {
                 popupTitle: tgt.target_name + JSON.stringify(idx),
                 size: 4,
                 //TODO: style popup according to theme
-                popupDesc: `<t style={ color: "black", text-color: "black"
-}> RA: ${tgt.ra} <br /> Dec: ${tgt.dec}</t> `
+                popupDesc: `<t style={color: black, text-color: black
+                            }> RA: ${tgt.ra} <br /> Dec: ${tgt.dec}</t> `
             }
             const ra = tgt.ra ? ra_dec_to_deg(tgt.ra as string) : tgt.ra_deg
             const dec = tgt.dec ? ra_dec_to_deg(tgt.ra as string, true) : tgt.dec_deg
