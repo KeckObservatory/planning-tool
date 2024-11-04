@@ -48,6 +48,7 @@ export interface Target extends SimbadTargetData {
   d_dec?: number,
   t_eff?: number,
   comment?: string,
+  rotator_angle: number,
   status?: Status //used to track row/form edits and updates them accordingly.
 }
 

@@ -1,5 +1,5 @@
 import React from "react"
-import { ra_dec_to_deg } from './two-d-view/sky_view_util.tsx'
+import { ra_dec_to_deg, cosd, sind } from './two-d-view/sky_view_util.tsx'
 import { Target } from "./App"
 import A from 'aladin-lite'
 
@@ -132,19 +132,41 @@ export default function AladinViewer(props: Props) {
 
     const scriptloaded = async () => {
         console.log('script loaded', props)
-        const firstRow = targets[0]
-        let params: any = { survey: 'P/DSS2/color', projection: 'MOL', zoom: zoom, showReticle: true }
+        const firstRow = targets.at(0)
+        let params: any = {
+            survey: 'P/DSS2/color',
+            showCooGrid: true,
+            projection: 'MOL',
+            zoom: zoom,
+            showCooGridControl: true,
+            showReticle: true
+        }
         if (firstRow?.ra) {
             let ra = ra_dec_to_deg(firstRow.ra as string)
             let dec = ra_dec_to_deg(firstRow.dec as string, true)
             const coords = format_target_coords(ra, dec)
             params['target'] = coords
         }
+        const rot = firstRow?.rotator_angle
 
         A.init.then(async () => {
             const alad = A.aladin('#aladin-lite-div', params);
             setAladin(alad)
-            setFOV(await get_fov(alad, instrumentFOV))
+            const FOV = await get_fov(alad, instrumentFOV)
+
+            const rotFOV = rot ? FOV.map(shape => {
+                const newShape = shape.map(point => {
+                    console.log(point)
+                    const newPoint = [
+                        point[0] * cosd(rot) - point[1] * sind(rot),
+                        point[1] * cosd(rot) + point[0] * cosd(rot)
+                    ]
+                    return newPoint as [number, number]
+                })
+                return newShape
+            }) : FOV
+
+            setFOV(rotFOV)
             // //@ts-ignore
             // const result = Object.groupBy(props.targets, ({ target_name}) => target_name);
             // console.log('adding catalog')

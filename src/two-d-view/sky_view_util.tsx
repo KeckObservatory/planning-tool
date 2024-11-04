@@ -55,15 +55,15 @@ export const ra_dec_to_deg = (time: string, dec = false) => {
     return deg
 }
 
-const cosd = (deg: number): number => {
+export const cosd = (deg: number): number => {
     return Math.cos(Math.PI / 180 * deg)
 }
 
-const sind = (deg: number): number => {
+export const sind = (deg: number): number => {
     return Math.sin(Math.PI / 180 * deg)
 }
 
-const tand = (deg: number): number => {
+export const tand = (deg: number): number => {
     return Math.tan(Math.PI / 180 * deg)
 }
 

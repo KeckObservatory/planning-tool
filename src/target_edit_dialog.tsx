@@ -310,6 +310,15 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                         onChange={(event) => handleTextChange('pm_dec', event.target.value, true)}
                                     />
                                 </Tooltip>
+                                <Tooltip title={input_label('rotator_angle', true)}>
+                                    <TextField
+                                        label={input_label('rotator_angle')}
+                                        InputLabelProps={{ shrink: hasSimbad || 'rotator_angle' in target }}
+                                        id="epoch"
+                                        value={target.epoch}
+                                        onChange={(event) => handleTextChange('rotator_angle', event.target.value, true)}
+                                    />
+                                </Tooltip>
                                 <Tooltip title={input_label('epoch', true)}>
                                     <TextField
                                         label={input_label('epoch')}

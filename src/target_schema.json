@@ -49,6 +49,12 @@
             "description": "Differential tracking in arcseconds RA/hour divided by 15 (positive is east)",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
+        "rotator_angle": {
+            "type":  ["number", "string"],
+            "short_description": "Rotator Angle",
+            "description": "Rotator Angle in degrees (positive is east)",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+        },
         "pm_dec": {
             "type":  ["number", "string"],
             "short_description": "PM Dec",
