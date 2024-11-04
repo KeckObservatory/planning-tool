@@ -173,6 +173,9 @@ export default function AladinViewer(props: Props) {
 
         A.init.then(async () => {
             const alad = A.aladin('#aladin-lite-div', params);
+            if (!alad) return
+            const FOV = await get_fov(alad, instrumentFOV, angle)
+            setFOV(FOV)
             setAladin(alad)
             add_catalog(alad, targets)
         })
