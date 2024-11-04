@@ -130,6 +130,22 @@ export default function AladinViewer(props: Props) {
         }
     }
 
+    const rotate_fov = (coords: [number, number][][], angle?: number) => {
+
+        const rotFOV = angle ? coords.map(shape => {
+            const newShape = shape.map(point => {
+                console.log(point)
+                const newPoint = [
+                    point[0] * cosd(angle) - point[1] * sind(angle),
+                    point[1] * cosd(angle) + point[0] * cosd(angle)
+                ]
+                return newPoint as [number, number]
+            })
+            return newShape
+        }) : coords 
+        return rotFOV
+    }
+
     const scriptloaded = async () => {
         console.log('script loaded', props)
         const firstRow = targets.at(0)
@@ -152,21 +168,9 @@ export default function AladinViewer(props: Props) {
         A.init.then(async () => {
             const alad = A.aladin('#aladin-lite-div', params);
             setAladin(alad)
-            const FOV = await get_fov(alad, instrumentFOV)
-
-            const rotFOV = rot ? FOV.map(shape => {
-                const newShape = shape.map(point => {
-                    console.log(point)
-                    const newPoint = [
-                        point[0] * cosd(rot) - point[1] * sind(rot),
-                        point[1] * cosd(rot) + point[0] * cosd(rot)
-                    ]
-                    return newPoint as [number, number]
-                })
-                return newShape
-            }) : FOV
-
-            setFOV(rotFOV)
+            let FOV = await get_fov(alad, instrumentFOV)
+            FOV = rotate_fov(FOV, rot)
+            setFOV(FOV)
             // //@ts-ignore
             // const result = Object.groupBy(props.targets, ({ target_name}) => target_name);
             // console.log('adding catalog')
@@ -184,10 +188,14 @@ export default function AladinViewer(props: Props) {
     }, [])
 
     React.useEffect(() => {
-        const update_inst = async () => {
-            aladin && setFOV(await get_fov(aladin, instrumentFOV))
+        const update_inst_fov = async () => {
+            if (!aladin) return
+            const rot = targets.at(0)?.rotator_angle
+            let FOV = await get_fov(aladin, instrumentFOV)
+            FOV = rotate_fov(FOV, rot)
+            setFOV(FOV)
         }
-        update_inst()
+        update_inst_fov()
     }, [instrumentFOV, zoom])
 
     React.useEffect(() => {
