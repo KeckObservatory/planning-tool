@@ -53,7 +53,7 @@ const rotate_fov = (coords: [number, number][][], angle?: number) => {
             console.log(point)
             const newPoint = [
                 point[0] * cosd(angle) - point[1] * sind(angle),
-                point[1] * cosd(angle) + point[0] * cosd(angle)
+                point[1] * cosd(angle) + point[0] * sind(angle)
             ]
             return newPoint as [number, number]
         })
