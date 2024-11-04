@@ -89,7 +89,7 @@ export default function AladinViewer(props: Props) {
 
     const [fov, setFOV] = React.useState<Position[][][]>([])
     const [aladin, setAladin] = React.useState<null | any>(null)
-    const [zoom, setZoom] = React.useState(2)
+    const [zoom, setZoom] = React.useState(5)
 
     // define custom draw function
     const drawFunction = function (source: any, canvasCtx: any) {
@@ -128,7 +128,6 @@ export default function AladinViewer(props: Props) {
                 idx: idx,
                 popupTitle: tgt.target_name + JSON.stringify(idx),
                 size: 4,
-                //TODO: style popup according to theme
                 popupDesc: `<t> RA: ${tgt.ra} <br /> Dec: ${tgt.dec}</t>`
             }
             const ra = tgt.ra ? ra_dec_to_deg(tgt.ra as string) : tgt.ra_deg
@@ -153,7 +152,7 @@ export default function AladinViewer(props: Props) {
             zoom: zoom,
             showCooGrid: false,
             showCooGridControl: true,
-            showReticle: true,
+            // showReticle: true,
             target: firstRow?.target_name
         }
         params['target'] = firstRow?.ra?.replaceAll(':', " ") + ' ' + firstRow?.dec?.replaceAll(':', ' ')
