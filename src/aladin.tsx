@@ -28,7 +28,7 @@ interface PolylineProps {
 const PolylineComponent = (props: PolylineProps) => {
     let pointsStr = "";
     props.points.forEach(val => {
-        pointsStr += `${val[0]},${val[1]} `;
+        pointsStr += `${val.at(0)},${val.at(1)} `;
     });
 
     const style = {
@@ -60,7 +60,6 @@ const rotate_fov = (coords: Position[][][], angle?: number) => {
         })
         return newShape 
     }) : coords 
-    console.log('rotFOV', rotFOV)
     return rotFOV
 }
 
@@ -86,16 +85,15 @@ const get_fov = async (aladin: any, instrumentFOV: string, angle: number) => {
             })
         return absPolygon
     })
+
     return polygons as Position[][][]
 }
 
 export default function AladinViewer(props: Props) {
-    console.log('aladin viewer init', props)
     const { width, height, targets, instrumentFOV, angle } = props
 
     const [fov, setFOV] = React.useState<Position[][][]>([])
     const [aladin, setAladin] = React.useState<null | any>(null)
-    //const [zoom, setZoom] = React.useState(360) //for whole sky
     const [zoom, setZoom] = React.useState(2)
 
     // define custom draw function
@@ -136,8 +134,8 @@ export default function AladinViewer(props: Props) {
                 popupTitle: tgt.target_name + JSON.stringify(idx),
                 size: 4,
                 //TODO: style popup according to theme
-                popupDesc: `< t style = { color: "black", text- color: "black"
-}> RA: ${tgt.ra} <br /> Dec: ${tgt.dec}</t > `
+                popupDesc: `<t style={ color: "black", text-color: "black"
+}> RA: ${tgt.ra} <br /> Dec: ${tgt.dec}</t> `
             }
             const ra = tgt.ra ? ra_dec_to_deg(tgt.ra as string) : tgt.ra_deg
             const dec = tgt.dec ? ra_dec_to_deg(tgt.ra as string, true) : tgt.dec_deg
@@ -193,7 +191,6 @@ export default function AladinViewer(props: Props) {
     const debounced_update_inst_fov = useDebounceCallback(update_inst_fov, 250)
 
     React.useEffect(() => {
-        console.log('aladin viewer update', instrumentFOV, angle)
         debounced_update_inst_fov(instrumentFOV, angle)
     }, [aladin, instrumentFOV, zoom, angle])
 
