@@ -143,6 +143,7 @@ export default function AladinViewer(props: Props) {
             })
             return newShape
         }) : coords 
+        console.log('rotFOV', rotFOV)
         return rotFOV
     }
 
@@ -192,6 +193,7 @@ export default function AladinViewer(props: Props) {
             if (!aladin) return
             const rot = targets.at(0)?.rotator_angle
             let FOV = await get_fov(aladin, instrumentFOV)
+            console.log('update fov', FOV)
             FOV = rotate_fov(FOV, rot)
             setFOV(FOV)
         }
