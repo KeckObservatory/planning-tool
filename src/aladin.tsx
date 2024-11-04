@@ -15,11 +15,6 @@ interface Props {
     angle: number
 }
 
-const format_target_coords = (ra: string | number, dec: string | number) => {
-    const coords = `${ra} ${dec}`
-    return coords
-}
-
 interface PolylineProps {
     points: Position[][]
 
@@ -94,7 +89,7 @@ export default function AladinViewer(props: Props) {
 
     const [fov, setFOV] = React.useState<Position[][][]>([])
     const [aladin, setAladin] = React.useState<null | any>(null)
-    const [zoom, setZoom] = React.useState(2)
+    const [zoom, setZoom] = React.useState(1)
 
     // define custom draw function
     const drawFunction = function (source: any, canvasCtx: any) {
