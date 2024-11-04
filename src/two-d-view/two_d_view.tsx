@@ -215,7 +215,7 @@ const TwoDView = ({ targets }: Props) => {
                 </>
             </Grid>
             <Grid item xs={4}>
-                <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={0}>
+                <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={0}>
                     <Tooltip placement="top" title="Select instrument field of view">
                         <Autocomplete
                             disablePortal
@@ -223,13 +223,13 @@ const TwoDView = ({ targets }: Props) => {
                             value={{ label: instrumentFOV }}
                             onChange={(_, value) => onInstrumentFOVChange(value?.label)}
                             options={instruments.map((instr) => { return { label: instr } })}
-                            sx={{ margin: '6px' }}
+                            sx={{ width: '200px', margin: '6px' }}
                             renderInput={(params) => <TextField {...params} label="Instrument FOV" />}
                         />
                     </Tooltip>
                     <Tooltip title={'Rotator angle for Field of View'}>
                         <TextField
-                            sx={{ margin: '6px' }}
+                            sx={{ width: '200px', margin: '6px' }}
                             label={'Rotator Angle'}
                             id="rotator-angle"
                             value={rotatorAngle}
