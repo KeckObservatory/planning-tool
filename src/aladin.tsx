@@ -64,14 +64,14 @@ const rotate_fov = (coords: Position[][][], angle?: number) => {
     return rotFOV
 }
 
-const get_fov = async (aladin: any, instrumentFOV: string, angle?: number) => {
+const get_fov = async (aladin: any, instrumentFOV: string, angle: number) => {
     const [ra, dec] = aladin.getRaDec() as [number, number]
     const resp = await fetch(FOVlink)
     const data = await resp.text()
     const featureCollection = JSON.parse(data) as FeatureCollection<MultiPolygon>
     const feature = featureCollection['features'].find((f: any) => f['properties']['instrument'] === instrumentFOV)
     let multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
-    multipolygon = angle ? rotate_fov(multipolygon, angle): multipolygon
+    multipolygon = rotate_fov(multipolygon, angle)
     const polygons = multipolygon.map((polygon: Position[][]) => {
         let absPolygon = [...polygon, polygon[0]]
         absPolygon = absPolygon 
@@ -82,7 +82,6 @@ const get_fov = async (aladin: any, instrumentFOV: string, angle?: number) => {
             .map((point) => {
                 const [x, y] = point as unknown as [number, number]
                 const pix = aladin.world2pix(x,y)
-                console.log('pix', pix)
                 return pix
             })
         return absPolygon
@@ -191,9 +190,10 @@ export default function AladinViewer(props: Props) {
         setFOV(FOV)
     }
 
-    const debounced_update_inst_fov = useDebounceCallback(update_inst_fov, 500)
+    const debounced_update_inst_fov = useDebounceCallback(update_inst_fov, 250)
 
     React.useEffect(() => {
+        console.log('aladin viewer update', instrumentFOV, angle)
         debounced_update_inst_fov(instrumentFOV, angle)
     }, [aladin, instrumentFOV, zoom, angle])
 
