@@ -64,31 +64,6 @@ const rotate_fov = (coords: Position[][][], angle?: number) => {
     return rotFOV
 }
 
-const get_fov = async (aladin: any, instrumentFOV: string, angle?: number) => {
-    const [ra, dec] = aladin.getRaDec() as [number, number]
-    const world2pix = aladin.world2pix as Function
-    console.log('world2pix', world2pix, world2pix(ra, dec))
-    const resp = await fetch(FOVlink)
-    const data = await resp.text()
-    const featureCollection = JSON.parse(data) as FeatureCollection<MultiPolygon>
-    const feature = featureCollection['features'].find((f: any) => f['properties']['instrument'] === instrumentFOV)
-    let multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
-    multipolygon = angle ? rotate_fov(multipolygon, angle): multipolygon
-    const polygons = multipolygon.map((polygon: Position[][]) => {
-        let absPolygon = [...polygon, polygon[0]]
-        absPolygon = absPolygon 
-            .map((point) => {
-                const [x, y] = point as unknown as [number, number]
-                return [x / 3600 + ra, y / 3600 + dec]
-            })
-            .map((point) => {
-                const pix = world2pix(...point)
-                return pix
-            })
-        return absPolygon
-    })
-    return polygons as Position[][][]
-}
 
 export default function AladinViewer(props: Props) {
     console.log('aladin viewer init', props)
@@ -181,6 +156,32 @@ export default function AladinViewer(props: Props) {
     React.useEffect(() => {
         scriptloaded()
     }, [])
+
+    const get_fov = async (aladin: any, instrumentFOV: string, angle?: number) => {
+        const [ra, dec] = aladin.getRaDec() as [number, number]
+        const world2pix = aladin.world2pix as Function
+        console.log('world2pix', world2pix, world2pix(ra, dec))
+        const resp = await fetch(FOVlink)
+        const data = await resp.text()
+        const featureCollection = JSON.parse(data) as FeatureCollection<MultiPolygon>
+        const feature = featureCollection['features'].find((f: any) => f['properties']['instrument'] === instrumentFOV)
+        let multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
+        multipolygon = angle ? rotate_fov(multipolygon, angle): multipolygon
+        const polygons = multipolygon.map((polygon: Position[][]) => {
+            let absPolygon = [...polygon, polygon[0]]
+            absPolygon = absPolygon 
+                .map((point) => {
+                    const [x, y] = point as unknown as [number, number]
+                    return [x / 3600 + ra, y / 3600 + dec]
+                })
+                .map((point) => {
+                    const pix = world2pix(...point)
+                    return pix
+                })
+            return absPolygon
+        })
+        return polygons as Position[][][]
+    }
 
     const update_inst_fov = async (instrumentFOV: string, angle: number) => {
         if (!aladin) return
