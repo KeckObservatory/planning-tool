@@ -64,7 +64,10 @@ const rotate_fov = (coords: Position[][][], angle?: number) => {
     return rotFOV
 }
 
-const get_fov = async (ra: number, dec: number, world2pix: Function, instrumentFOV: string, angle?: number) => {
+const get_fov = async (aladin: any, instrumentFOV: string, angle?: number) => {
+    const [ra, dec] = aladin.getRaDec() as [number, number]
+    const world2pix = aladin.world2pix as Function
+    console.log('world2pix', world2pix, world2pix(ra, dec))
     const resp = await fetch(FOVlink)
     const data = await resp.text()
     const featureCollection = JSON.parse(data) as FeatureCollection<MultiPolygon>
@@ -180,12 +183,8 @@ export default function AladinViewer(props: Props) {
     }, [])
 
     const update_inst_fov = async (instrumentFOV: string, angle: number) => {
-        console.log('alad', aladin)
         if (!aladin) return
-        const [ra, dec] = aladin.getRaDec()
-        const world2pix = aladin.world2pix
-        console.log('world2pix', world2pix, world2pix(ra, dec))
-        let FOV = await get_fov(ra, dec, world2pix, instrumentFOV, angle)
+        let FOV = await get_fov(aladin, instrumentFOV, angle)
         setFOV(FOV)
     }
 
