@@ -69,13 +69,13 @@ const rotate_multipolygon= (coords: Position[][][], angle?: number) => {
 
 const get_angle = (aladin: any) => {
     const [ra, dec] = aladin.getRaDec() as [number, number]
-    const ddeg = .2 
+    const ddeg = 1 
     
     const [x0, y0] = aladin.world2pix(ra, dec)
     const [x1, y1] = aladin.world2pix(ra, dec+ddeg)
     const [x2, y2] = aladin.world2pix(ra+ddeg, dec)
-    console.log('x0, y0', x0, y0, 'x1, y1', x1, y1, 'x2, y2', x2, y2)
-    const angle = ( 180 / Math.PI ) * Math.atan2(y2 - y0, x2 - x0) - Math.atan2(y1 - y0, x1 - x0)
+    console.log('ra, dec', ra, dec, 'x0, y0', x0, y0, 'x1, y1', x1, y1, 'x2, y2', x2, y2)
+    const angle = ( 180 / Math.PI ) * ( Math.atan2(y2 - y0, x2 - x0) - Math.atan2(y1 - y0, x1 - x0) )
     console.log('compass angle:', angle)
     return angle
 }
@@ -87,26 +87,30 @@ const get_compass = async (aladin: any, height: number, width: number) => {
     if (!feature) return []
     let multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
     const angle = get_angle(aladin)
+    multipolygon = rotate_multipolygon(multipolygon, angle)
     const margin = 50
     const scale = 1 / 60 
-    multipolygon = rotate_multipolygon(multipolygon, angle)
     const polygons = multipolygon.map((polygon: Position[][]) => {
         let absPolygon = [...polygon, polygon[0]]
-        absPolygon = absPolygon
-            .map((point) => { 
-                const [x, y] = point as unknown as [number, number]
-                return [x + ra, y + dec]
-            })
-            .map((point) => { //convert to pixel, scale, and translate
-                let [x, y] = aladin.world2pix(...point)
+        absPolygon = absPolygon.map((point) => {
+            const [x, y] = point as unknown as [number, number]
+            return [x + width / 2 - margin, y + height - margin] as unknown as Position[]
+        })
+        // absPolygon = absPolygon
+        //     .map((point) => { 
+        //         const [x, y] = point as unknown as [number, number]
+        //         return [x + ra, y + dec]
+        //     })
+        //     .map((point) => { //convert to pixel, scale, and translate
+        //         let [x, y] = aladin.world2pix(...point)
 
-                x = x * scale 
-                y = y * scale 
-                x = x + width - margin //shift left
-                y = y + height - margin //shift down
+        //         x = x * scale 
+        //         y = y * scale 
+        //         x = x + width - margin //shift left
+        //         y = y + height - margin //shift down
 
-                return [x, y] as unknown as Position[]
-            })
+        //         return [x, y] as unknown as Position[]
+        //     })
         console.log('aladin', aladin, absPolygon)
         return absPolygon
     })
