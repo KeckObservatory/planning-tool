@@ -11,13 +11,14 @@ import { SkyChart } from './sky_chart.tsx';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { alt_az_observable, VizRow } from './viz_chart.tsx';
-import AladinViewer from '../aladin';
+import AladinViewer  from '../aladin';
+import { FeatureCollection, MultiPolygon } from 'geojson';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
-const instruments = ['KCWI', 'MOSFIRE']
 
 
+const FOVlink = 'FEATURES.json' //TODO: move to config
 interface Props {
     targets: Target[]
 }
@@ -47,6 +48,14 @@ interface DomeSelectProps {
 interface SkyChartSelectProps {
     skyChart: SkyChart
     setSkyChart: (skyChart: SkyChart) => void
+}
+
+export const get_fov_shapes = async () => {
+    const resp = await fetch(FOVlink)
+    const data = await resp.text()
+    const featureCollection = JSON.parse(data) as FeatureCollection<MultiPolygon>
+    const fovFeatures = featureCollection['features'].filter((f: any) => f['properties']['type']==='FOV')
+    return fovFeatures 
 }
 
 export const SkyChartSelect = (props: SkyChartSelectProps) => {
@@ -124,7 +133,18 @@ const TwoDView = ({ targets }: Props) => {
     const [times, setTimes] = React.useState(util.get_times_using_nadir(nadir))
     const [time, setTime] = React.useState(nadir)
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
+    const [fovs, setFOVs] = React.useState<string[]>([])
     const [instrumentFOV, setInstrumentFOV] = React.useState('KCWI')
+
+    React.useEffect(() => {
+        const fun = async () => {
+            const features = await get_fov_shapes()
+            const newFovs = features.map((f: any) => f['properties'].instrument) as string[]
+
+            setFOVs(newFovs)
+        }
+        fun() 
+    }, [])
 
     React.useEffect(() => {
         const newNadir = util.get_suncalc_times(lngLatEl, obsdate).nadir
@@ -222,7 +242,7 @@ const TwoDView = ({ targets }: Props) => {
                             id="semid-selection"
                             value={{ label: instrumentFOV }}
                             onChange={(_, value) => onInstrumentFOVChange(value?.label)}
-                            options={instruments.map((instr) => { return { label: instr } })}
+                            options={fovs.map((instr) => { return { label: instr } })}
                             sx={{ width: '200px', margin: '6px' }}
                             renderInput={(params) => <TextField {...params} label="Instrument FOV" />}
                         />

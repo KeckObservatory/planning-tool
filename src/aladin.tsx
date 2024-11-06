@@ -4,8 +4,9 @@ import { Target } from "./App"
 import A from 'aladin-lite'
 import { useDebounceCallback } from "./use_debounce_callback.tsx"
 import { Feature, FeatureCollection, MultiPolygon, Position } from 'geojson'
+import { get_fov_shapes } from "./two-d-view/two_d_view.tsx"
 
-const FOVlink = 'INSTRUMENTS_FOV.json'
+const FOVlink = 'FEATURES.json'
 
 interface Props {
     width: number,
@@ -17,7 +18,10 @@ interface Props {
 
 interface PolylineProps {
     points: Position[][]
-
+    width: number
+    height: number
+    fill?: string
+    color?: string
 }
 
 const PolylineComponent = (props: PolylineProps) => {
@@ -26,16 +30,21 @@ const PolylineComponent = (props: PolylineProps) => {
         pointsStr += `${val.at(0)},${val.at(1)} `;
     });
 
+    const width = JSON.stringify(props.width)
+    const height = JSON.stringify(props.height)
+    const fill = props.fill ?? 'none'
+    const color = props.color ?? 'green'
+
     const style = {
         'position': 'absolute',
-        'stroke': 'green',
+        'stroke': color,
         'strokeWidth': '2',
         'fillRule': 'evenodd',
         'pointerEvents': 'none' // lets clicks go through underneath el
     }
     return (
         <div className='fov-overlay' style={style as any}>
-            <svg width="600" fill="none" height="600">
+            <svg width={width} fill={fill} height={height}>
                 <polyline points={pointsStr} />
             </svg>
         </div>
@@ -60,10 +69,9 @@ const rotate_fov = (coords: Position[][][], angle?: number) => {
 
 const get_fov = async (aladin: any, instrumentFOV: string, angle: number) => {
     const [ra, dec] = aladin.getRaDec() as [number, number]
-    const resp = await fetch(FOVlink)
-    const data = await resp.text()
-    const featureCollection = JSON.parse(data) as FeatureCollection<MultiPolygon>
-    const feature = featureCollection['features'].find((f: any) => f['properties']['instrument'] === instrumentFOV)
+    const features = await get_fov_shapes()
+    const feature = features.find((f: any) => f['properties'].instrument === instrumentFOV)
+    if (!feature) return []
     let multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
     multipolygon = rotate_fov(multipolygon, angle)
     const polygons = multipolygon.map((polygon: Position[][]) => {
@@ -191,7 +199,7 @@ export default function AladinViewer(props: Props) {
 
     return (
         <div id='aladin-lite-div' style={{ margin: '0px', width: width, height: height }} >
-            {fov.map(f => <PolylineComponent points={f} />)}
+            {fov.map(f => <PolylineComponent points={f} width={width} height={height}/>)}
         </div>
     )
 }
