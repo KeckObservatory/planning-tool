@@ -91,12 +91,13 @@ const get_compass = async (aladin: any) => {
     const polygons = multipolygon.map((polygon: Position[][]) => {
         let absPolygon = [...polygon, polygon[0]]
         absPolygon = absPolygon
-            .map((point) => {
+            .map((point) => { //scale to canvas
                 const [x, y] = point as unknown as [number, number]
-                return [x + ra, y / 3600 + dec]
+                return [x / 360 + ra, y / 360 + dec]
             })
-            .map((point) => {
+            .map((point) => { //convert to pixel
                 const [x, y] = point as unknown as [number, number]
+                console.log('aladin', aladin)
                 const pix = aladin.world2pix(x, y)
                 return pix
             })
