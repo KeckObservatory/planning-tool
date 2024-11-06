@@ -80,13 +80,15 @@ const get_angle = (aladin: any) => {
     return angle
 }
 
-const get_compass = async (aladin: any) => {
+const get_compass = async (aladin: any, height: number, width: number) => {
     const [ra, dec] = aladin.getRaDec() as [number, number]
     const features = await get_shapes('static shape')
     const feature = features.find((f: any) => f['properties'].name === 'CompassRose')
     if (!feature) return []
     let multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
     const angle = get_angle(aladin)
+    const margin = 50
+    const scale = 1 / 15
     multipolygon = rotate_multipolygon(multipolygon, angle)
     const polygons = multipolygon.map((polygon: Position[][]) => {
         let absPolygon = [...polygon, polygon[0]]
@@ -95,12 +97,15 @@ const get_compass = async (aladin: any) => {
                 const [x, y] = point as unknown as [number, number]
                 return [x + ra, y + dec]
             })
-            .map((point) => { //convert to pixel
-                let [x, y] = point as unknown as [number, number]
-                x = x / 36 //scale to canvas
-                y = y / 36
-                const pix = aladin.world2pix(x, y)
-                return pix 
+            .map((point) => { //convert to pixel, scale, and translate
+                let [x, y] = aladin.world2pix(...point)
+
+                x = x * scale 
+                y = y * scale 
+                x = x - width / 2 + margin //shift left
+                y = y + height / 2 + margin //shift down
+
+                return [x, y] as unknown as Position[]
             })
         console.log('aladin', aladin, absPolygon)
         return absPolygon
@@ -214,7 +219,7 @@ export default function AladinViewer(props: Props) {
             const alad = A.aladin('#aladin-lite-div', params);
             if (!alad) return
             const FOV = await get_fov(alad, instrumentFOV, angle)
-            const newCompass = await get_compass(alad)
+            const newCompass = await get_compass(alad, height, width)
             setFOV(FOV)
             setAladin(alad)
             setCompass(newCompass)
@@ -229,7 +234,7 @@ export default function AladinViewer(props: Props) {
     const update_shapes= async (instrumentFOV: string, angle: number) => {
         if (!aladin) return
         let FOV = await get_fov(aladin, instrumentFOV, angle)
-        let newCompass = await get_compass(aladin)
+        let newCompass = await get_compass(aladin, height, width)
         setCompass(newCompass)
         setFOV(FOV)
     }
