@@ -81,7 +81,6 @@ const get_angle = (aladin: any) => {
 }
 
 const get_compass = async (aladin: any, height: number, width: number) => {
-    const [ra, dec] = aladin.getRaDec() as [number, number]
     const features = await get_shapes('static shape')
     const feature = features.find((f: any) => f['properties'].name === 'CompassRose')
     if (!feature) return []
