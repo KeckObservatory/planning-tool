@@ -74,6 +74,7 @@ const get_angle = (aladin: any) => {
     const [x0, y0] = aladin.world2pix(ra, dec)
     const [x1, y1] = aladin.world2pix(ra, dec+ddeg)
     const [x2, y2] = aladin.world2pix(ra+ddeg, dec)
+    console.log('x0, y0', x0, y0, 'x1, y1', x1, y1, 'x2, y2', x2, y2)
     const angle = Math.atan2(y2 - y0, x2 - x0) - Math.atan2(y1 - y0, x1 - x0)
     console.log('compass angle:', angle)
     return angle
@@ -92,7 +93,7 @@ const get_compass = async (aladin: any) => {
         absPolygon = absPolygon
             .map((point) => {
                 const [x, y] = point as unknown as [number, number]
-                return [x / 3600 + ra, y / 3600 + dec]
+                return [x + ra, y / 3600 + dec]
             })
             .map((point) => {
                 const [x, y] = point as unknown as [number, number]
