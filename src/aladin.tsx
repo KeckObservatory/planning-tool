@@ -102,8 +102,8 @@ const get_compass = async (aladin: any, height: number, width: number) => {
 
                 x = x * scale 
                 y = y * scale 
-                x = x - width + margin //shift left
-                y = y - height + margin //shift down
+                // x = x + width + margin //shift left
+                // y = y + height + margin //shift down
 
                 return [x, y] as unknown as Position[]
             })
