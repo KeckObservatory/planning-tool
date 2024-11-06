@@ -89,12 +89,12 @@ const get_compass = async (aladin: any, height: number, width: number) => {
     const angle = get_angle(aladin)
     multipolygon = rotate_multipolygon(multipolygon, angle)
     const margin = 50
-    const scale = 1 / 60 
+    const scale = 1
     const polygons = multipolygon.map((polygon: Position[][]) => {
         let absPolygon = [...polygon, polygon[0]]
         absPolygon = absPolygon.map((point) => {
             const [x, y] = point as unknown as [number, number]
-            return [x + width / 2 - margin, y + height - margin] as unknown as Position[]
+            return [scale * (x + width / 2 - margin), scale * (y + height - margin)] as unknown as Position[]
         })
         // absPolygon = absPolygon
         //     .map((point) => { 
