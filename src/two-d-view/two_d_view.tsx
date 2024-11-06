@@ -50,11 +50,13 @@ interface SkyChartSelectProps {
     setSkyChart: (skyChart: SkyChart) => void
 }
 
-export const get_fov_shapes = async () => {
+export type ShapeCatagory = 'FOV' | 'static shape'
+
+export const get_shapes = async (catagory='FOV') => {
     const resp = await fetch(FOVlink)
     const data = await resp.text()
     const featureCollection = JSON.parse(data) as FeatureCollection<MultiPolygon>
-    const fovFeatures = featureCollection['features'].filter((f: any) => f['properties']['type']==='FOV')
+    const fovFeatures = featureCollection['features'].filter((f: any) => f['properties']['type']===catagory)
     return fovFeatures 
 }
 
@@ -138,7 +140,7 @@ const TwoDView = ({ targets }: Props) => {
 
     React.useEffect(() => {
         const fun = async () => {
-            const features = await get_fov_shapes()
+            const features = await get_shapes()
             const newFovs = features.map((f: any) => f['properties'].instrument) as string[]
 
             setFOVs(newFovs)

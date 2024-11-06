@@ -3,10 +3,8 @@ import { ra_dec_to_deg, cosd, sind } from './two-d-view/sky_view_util.tsx'
 import { Target } from "./App"
 import A from 'aladin-lite'
 import { useDebounceCallback } from "./use_debounce_callback.tsx"
-import { Feature, FeatureCollection, MultiPolygon, Position } from 'geojson'
-import { get_fov_shapes } from "./two-d-view/two_d_view.tsx"
-
-const FOVlink = 'FEATURES.json'
+import { Feature, MultiPolygon, Position } from 'geojson'
+import { get_shapes } from "./two-d-view/two_d_view.tsx"
 
 interface Props {
     width: number,
@@ -22,6 +20,7 @@ interface PolylineProps {
     height: number
     fill?: string
     color?: string
+    className?: string
 }
 
 const PolylineComponent = (props: PolylineProps) => {
@@ -34,6 +33,7 @@ const PolylineComponent = (props: PolylineProps) => {
     const height = JSON.stringify(props.height)
     const fill = props.fill ?? 'none'
     const color = props.color ?? 'green'
+    const className = props.className ?? 'fov-overlay'
 
     const style = {
         'position': 'absolute',
@@ -43,7 +43,7 @@ const PolylineComponent = (props: PolylineProps) => {
         'pointerEvents': 'none' // lets clicks go through underneath el
     }
     return (
-        <div className='fov-overlay' style={style as any}>
+        <div className={className} style={style as any}>
             <svg width={width} fill={fill} height={height}>
                 <polyline points={pointsStr} />
             </svg>
@@ -51,7 +51,7 @@ const PolylineComponent = (props: PolylineProps) => {
     )
 }
 
-const rotate_fov = (coords: Position[][][], angle?: number) => {
+const rotate_multipolygon= (coords: Position[][][], angle?: number) => {
 
     const rotFOV = angle ? coords.map(shape => {
         const newShape = shape.map(point => {
@@ -67,13 +67,51 @@ const rotate_fov = (coords: Position[][][], angle?: number) => {
     return rotFOV
 }
 
+const get_angle = (aladin: any) => {
+    const [ra, dec] = aladin.getRaDec() as [number, number]
+    const ddeg = .2 
+    
+    const [x0, y0] = aladin.world2pix(ra, dec)
+    const [x1, y1] = aladin.world2pix(ra, dec+ddeg)
+    const [x2, y2] = aladin.world2pix(ra+ddeg, dec)
+    const angle = Math.atan2(y2 - y0, x2 - x0) - Math.atan2(y1 - y0, x1 - x0)
+    console.log('compass angle:', angle)
+    return angle
+}
+
+const get_compass = async (aladin: any) => {
+    const [ra, dec] = aladin.getRaDec() as [number, number]
+    const features = await get_shapes('static shape')
+    const feature = features.find((f: any) => f['properties'].instrument === 'Compass')
+    if (!feature) return []
+    let multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
+    const angle = get_angle(aladin)
+    multipolygon = rotate_multipolygon(multipolygon, angle)
+    const polygons = multipolygon.map((polygon: Position[][]) => {
+        let absPolygon = [...polygon, polygon[0]]
+        absPolygon = absPolygon
+            .map((point) => {
+                const [x, y] = point as unknown as [number, number]
+                return [x / 3600 + ra, y / 3600 + dec]
+            })
+            .map((point) => {
+                const [x, y] = point as unknown as [number, number]
+                const pix = aladin.world2pix(x, y)
+                return pix
+            })
+        return absPolygon
+    })
+
+    return polygons as Position[][][]
+}
+
 const get_fov = async (aladin: any, instrumentFOV: string, angle: number) => {
     const [ra, dec] = aladin.getRaDec() as [number, number]
-    const features = await get_fov_shapes()
+    const features = await get_shapes()
     const feature = features.find((f: any) => f['properties'].instrument === instrumentFOV)
     if (!feature) return []
     let multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
-    multipolygon = rotate_fov(multipolygon, angle)
+    multipolygon = rotate_multipolygon(multipolygon, angle)
     const polygons = multipolygon.map((polygon: Position[][]) => {
         let absPolygon = [...polygon, polygon[0]]
         absPolygon = absPolygon
@@ -96,6 +134,7 @@ export default function AladinViewer(props: Props) {
     const { width, height, targets, instrumentFOV, angle } = props
 
     const [fov, setFOV] = React.useState<Position[][][]>([])
+    const [compass, setCompass] = React.useState<Position[][][]>([])
     const [aladin, setAladin] = React.useState<null | any>(null)
     const [zoom, setZoom] = React.useState(5)
 
@@ -171,8 +210,10 @@ export default function AladinViewer(props: Props) {
             const alad = A.aladin('#aladin-lite-div', params);
             if (!alad) return
             const FOV = await get_fov(alad, instrumentFOV, angle)
+            const newCompass = await get_compass(alad)
             setFOV(FOV)
             setAladin(alad)
+            setCompass(newCompass)
             add_catalog(alad, targets)
         })
     }
@@ -181,16 +222,18 @@ export default function AladinViewer(props: Props) {
         scriptloaded()
     }, [])
 
-    const update_inst_fov = async (instrumentFOV: string, angle: number) => {
+    const update_shapes= async (instrumentFOV: string, angle: number) => {
         if (!aladin) return
         let FOV = await get_fov(aladin, instrumentFOV, angle)
+        let newCompass = await get_compass(aladin)
+        setCompass(newCompass)
         setFOV(FOV)
     }
 
-    const debounced_update_inst_fov = useDebounceCallback(update_inst_fov, 250)
+    const debounced_update_shapes= useDebounceCallback(update_shapes, 250)
 
     React.useEffect(() => {
-        debounced_update_inst_fov(instrumentFOV, angle)
+        debounced_update_shapes(instrumentFOV, angle)
     }, [aladin, instrumentFOV, zoom, angle])
 
     React.useEffect(() => {
@@ -200,6 +243,7 @@ export default function AladinViewer(props: Props) {
     return (
         <div id='aladin-lite-div' style={{ margin: '0px', width: width, height: height }} >
             {fov.map(f => <PolylineComponent points={f} width={width} height={height}/>)}
+            {compass.map(f => <PolylineComponent points={f} width={width} height={height} color='red' className='compass-overlay'/>)}
         </div>
     )
 }
