@@ -99,12 +99,10 @@ const get_compass = async (aladin: any) => {
                 let [x, y] = point as unknown as [number, number]
                 x = x / 36 //scale to canvas
                 y = y / 36
-                console.log('aladin', aladin)
                 const pix = aladin.world2pix(x, y)
-                x = pix[0] ?? 0
-                y = pix[1] ?? 0
-                return [x, y] as unknown as Position[]
+                return pix 
             })
+        console.log('aladin', aladin, absPolygon)
         return absPolygon
     })
 
