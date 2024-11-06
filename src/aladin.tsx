@@ -75,7 +75,7 @@ const get_angle = (aladin: any) => {
     const [x1, y1] = aladin.world2pix(ra, dec+ddeg)
     const [x2, y2] = aladin.world2pix(ra+ddeg, dec)
     console.log('x0, y0', x0, y0, 'x1, y1', x1, y1, 'x2, y2', x2, y2)
-    const angle = Math.atan2(y2 - y0, x2 - x0) - Math.atan2(y1 - y0, x1 - x0)
+    const angle = ( 180 / Math.PI ) * Math.atan2(y2 - y0, x2 - x0) - Math.atan2(y1 - y0, x1 - x0)
     console.log('compass angle:', angle)
     return angle
 }
@@ -102,8 +102,8 @@ const get_compass = async (aladin: any, height: number, width: number) => {
 
                 x = x * scale 
                 y = y * scale 
-                x = x - width / 2 + margin //shift left
-                y = y + height / 2 + margin //shift down
+                x = x + width / 2 + margin //shift left
+                y = y + height / 2 - margin //shift down
 
                 return [x, y] as unknown as Position[]
             })
