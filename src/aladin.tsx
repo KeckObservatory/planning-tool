@@ -82,7 +82,7 @@ const get_angle = (aladin: any) => {
 const get_compass = async (aladin: any) => {
     const [ra, dec] = aladin.getRaDec() as [number, number]
     const features = await get_shapes('static shape')
-    const feature = features.find((f: any) => f['properties'].instrument === 'Compass')
+    const feature = features.find((f: any) => f['properties'].name === 'CompassRose')
     if (!feature) return []
     let multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
     const angle = get_angle(aladin)
