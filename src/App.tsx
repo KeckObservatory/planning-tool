@@ -15,6 +15,7 @@ import { LicenseInfo } from '@mui/x-license';
 import licenseKey from './license.json'
 import Skeleton from '@mui/material/Skeleton';
 import { get_targets, get_userinfo } from './api/api_root.tsx';
+import { AxiosError } from 'axios';
 
 const CONFIG_PATH = './config.json'
 
@@ -160,7 +161,11 @@ function App() {
     const fetch_data = async () => {
       // const userinfo = await get_userinfo_mock();
       const userinfo = await get_userinfo();
-      const init_targets = await get_targets(userinfo.Id)
+      let init_targets = await get_targets(userinfo.Id)
+      if ((init_targets as unknown as AxiosError).message) {
+        console.warn('error fetching targets', init_targets)
+        init_targets = []
+      }
       console.log('targets', init_targets)
       const config = await get_config()
       const username = `${userinfo.FirstName} ${userinfo.LastName}`;
