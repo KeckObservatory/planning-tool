@@ -12,7 +12,7 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { alt_az_observable, VizRow } from './viz_chart.tsx';
 import AladinViewer  from '../aladin';
-import { FeatureCollection, MultiPolygon } from 'geojson';
+import { FeatureCollection, Geometry, MultiPolygon, Polygon } from 'geojson';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -50,14 +50,19 @@ interface SkyChartSelectProps {
     setSkyChart: (skyChart: SkyChart) => void
 }
 
-export type ShapeCatagory = 'FOV' | 'static shape'
+export type ShapeCatagory = 'fov' | 'compass_rose'
+interface ShapeCfgFile {
+    fov: FeatureCollection<MultiPolygon>
+    compass_rose: FeatureCollection<Polygon>
+}
 
-export const get_shapes = async (catagory='FOV') => {
+
+export const get_shapes = async (fcType: ShapeCatagory) => {
     const resp = await fetch(FOVlink)
     const data = await resp.text()
-    const featureCollection = JSON.parse(data) as FeatureCollection<MultiPolygon>
-    const fovFeatures = featureCollection['features'].filter((f: any) => f['properties']['type']===catagory)
-    return fovFeatures 
+    const json = JSON.parse(data) as ShapeCfgFile
+    const featureCollection = json[fcType]
+    return featureCollection 
 }
 
 export const SkyChartSelect = (props: SkyChartSelectProps) => {
@@ -126,6 +131,7 @@ const TwoDView = ({ targets }: Props) => {
     const [showMoon, setShowMoon] = React.useState(true)
     const [showCurrLoc, setShowCurrLoc] = React.useState(true)
     const [rotatorAngle, setRotatorAngle] = React.useState(0)
+    const [positionAngle, setPositionAngle] = React.useState(0)
     const lngLatEl: LngLatEl = {
         lng: context.config.keck_longitude,
         lat: context.config.keck_latitude,
@@ -136,13 +142,13 @@ const TwoDView = ({ targets }: Props) => {
     const [time, setTime] = React.useState(nadir)
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
     const [fovs, setFOVs] = React.useState<string[]>([])
-    const [instrumentFOV, setInstrumentFOV] = React.useState('KCWI')
+    const [instrumentFOV, setInstrumentFOV] = React.useState('MOSFIRE')
 
     React.useEffect(() => {
         const fun = async () => {
-            const features = await get_shapes()
+            const fc = await get_shapes('fov')
+            const features = fc['features'].filter((f: any) => f['properties'].type === 'FOV')
             const newFovs = features.map((f: any) => f['properties'].instrument) as string[]
-
             setFOVs(newFovs)
         }
         fun() 
@@ -258,6 +264,15 @@ const TwoDView = ({ targets }: Props) => {
                             onChange={(event) => setRotatorAngle(Number(event.target.value))}
                         />
                     </Tooltip>
+                    <Tooltip title={'Position angle for the sky'}>
+                        <TextField
+                            sx={{ width: '200px', margin: '6px' }}
+                            label={'Position Angle'}
+                            id="position-angle"
+                            value={positionAngle}
+                            onChange={(event) => setPositionAngle(Number(event.target.value))}
+                        />
+                    </Tooltip>
                 </Stack>
             </Grid>
             <Grid item xs={8}>
@@ -288,7 +303,8 @@ const TwoDView = ({ targets }: Props) => {
             <Grid item xs={4}>
                 <AladinViewer
                     height={height}
-                    angle={rotatorAngle}
+                    fovAngle={rotatorAngle}
+                    positionAngle={positionAngle}
                     instrumentFOV={instrumentFOV}
                     width={width}
                     targets={targets} />

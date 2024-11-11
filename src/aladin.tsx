@@ -3,7 +3,7 @@ import { ra_dec_to_deg, cosd, sind } from './two-d-view/sky_view_util.tsx'
 import { Target } from "./App"
 import A from 'aladin-lite'
 import { useDebounceCallback } from "./use_debounce_callback.tsx"
-import { Feature, MultiPolygon, Position } from 'geojson'
+import { Feature, FeatureCollection, GeometryCollection, MultiPolygon, Polygon, Position } from 'geojson'
 import { get_shapes } from "./two-d-view/two_d_view.tsx"
 
 interface Props {
@@ -11,7 +11,8 @@ interface Props {
     height: number,
     instrumentFOV: string,
     targets: Target[],
-    angle: number
+    fovAngle: number
+    positionAngle: number
 }
 
 interface PolylineProps {
@@ -51,19 +52,23 @@ const PolylineComponent = (props: PolylineProps) => {
     )
 }
 
-const rotate_multipolygon= (coords: Position[][][], angle?: number) => {
+const rotate_multipolygon = (coords: Position[][][], angle: number, pnt=[0,0]) => {
 
-    const rotFOV = angle ? coords.map(shape => {
+    const rotFOV = coords.map(shape => {
         const newShape = shape.map(point => {
-            const [x, y] = point as unknown as [number, number]
-            const newPoint = [
+            let [x, y] = point as unknown as [number, number]
+            x -= pnt[0]
+            y -= pnt[1]
+            let newPoint = [
                 x * cosd(angle) - y * sind(angle),
                 x * sind(angle) + y * cosd(angle)
             ]
+            newPoint[0] += pnt[0]
+            newPoint[1] += pnt[1]
             return newPoint as unknown as Position[]
         })
         return newShape
-    }) : coords
+    })
     return rotFOV
 }
 
@@ -72,47 +77,52 @@ const get_angle = (aladin: any) => {
     //so we need to calculate the angle of two vectors that are small enough to be approximately euclidian
     //usually 5 arcminutes is good enough
     const [ra, dec] = aladin.getRaDec() as [number, number]
-    const dra = 5/(24*60) //hours 5 minutes is probably good
-    const ddec = 5/60 //deg
-    
+    const dra = 5 / (24 * 60) //hours 5 minutes is probably good
+    const ddec = 90 //deg
+    // const dra = 5/(24*60) //hours 5 minutes is probably good
+    // const ddec = 5/60 //deg
+
     const [x0, y0] = aladin.world2pix(ra, dec) // originate compass on center of screen
-    const [x1, y1] = aladin.world2pix(ra, dec+ddec) //point up 
-    const [x2, y2] = aladin.world2pix(ra+dra, dec) //point left 
-    console.log('ra, dec', ra, dec, 'x0, y0', x0, y0, 'x1, y1', x1, y1, 'x2, y2', x2, y2)
-    const angle = ( 180 / Math.PI ) * ( Math.atan2((y2-x0)*(x1-x0) - (y1-y0)*(x2-x0), (x1-x0)*(x2-x0) + (y1-y0)*(y2-y0)) )
+    const [x1, y1] = aladin.world2pix(ra, dec + ddec) //point up 
+    const [x2, y2] = aladin.world2pix(ra + dra, dec) //point left 
+    const angle = (180 / Math.PI) * (Math.atan2((y2 - x0) * (x1 - x0) - (y1 - y0) * (x2 - x0), (x1 - x0) * (x2 - x0) + (y1 - y0) * (y2 - y0)))
     return angle
 }
 
-const get_compass = async (aladin: any, height: number, width: number) => {
-    const features = await get_shapes('static shape')
-    const feature = features.find((f: any) => f['properties'].name === 'CompassRose')
-    if (!feature) return []
-    let multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
+const get_compass = async (aladin: any, height: number, width: number, positionAngle: number) => {
+    const fc = await get_shapes('compass_rose') as FeatureCollection<Polygon>
     const angle = 90 + get_angle(aladin) // rotate to match compass
-    console.log('rotate compass:', angle, ' degs')
-    multipolygon = rotate_multipolygon(multipolygon, angle)
-    const margin = 80 
-    const polygons = multipolygon.map((polygon: Position[][]) => {
-        let absPolygon = [...polygon, polygon[0]]
-        absPolygon = absPolygon.map((point) => {
+    const aladinAngle = aladin.getViewCenter2NorthPoleAngle()
+    const wcs = aladin.getViewWCS()
+    console.log('calculated map angle', angle, 'aladin angle', aladinAngle, 'position angle', positionAngle, 'wcs', wcs)
+    fc['features'].forEach((f) => {
+        let polygon = f.geometry.coordinates
+        const offsetx = f.properties?.offsetx
+        const offsety = f.properties?.offsety
+        const margin = f.properties?.margin ?? 50
+        polygon = [...polygon, polygon[0]]
+        polygon = polygon.map((point) => {
             const [x, y] = point as unknown as [number, number]
-            return [x + width - margin, y + height - margin] as unknown as Position[]
+            return [x + width - margin + offsetx, y + height - margin + offsety] as unknown as Position[]
         })
-        console.log('aladin', aladin, absPolygon)
-        return absPolygon
+        const rotPnt = [width - margin, height - margin ]
+        polygon = rotate_multipolygon([polygon], aladinAngle + positionAngle, rotPnt)[0]
+        f.geometry.coordinates = polygon
     })
 
-    return polygons as Position[][][]
+    return fc
 }
 
-const get_fov = async (aladin: any, instrumentFOV: string, angle: number) => {
+const get_fovz = async (aladin: any, instrumentFOV: string, angle: number) => {
     const [ra, dec] = aladin.getRaDec() as [number, number]
-    const features = await get_shapes()
+    const fc = await get_shapes('fov')
+    const features = fc['features'].filter((f: any) => f['properties'].type === 'FOV')
     const feature = features.find((f: any) => f['properties'].instrument === instrumentFOV)
-    if (!feature) return []
-    let multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
-    multipolygon = rotate_multipolygon(multipolygon, angle)
-    const polygons = multipolygon.map((polygon: Position[][]) => {
+    if (!feature) return { fov: [], zoom: 5 } 
+    const multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
+    console.log('fovAngle', angle)
+    const rotPolygon = rotate_multipolygon(multipolygon, angle)
+    const polygons = rotPolygon.map((polygon: Position[][]) => {
         let absPolygon = [...polygon, polygon[0]]
         absPolygon = absPolygon
             .map((point) => {
@@ -127,15 +137,17 @@ const get_fov = async (aladin: any, instrumentFOV: string, angle: number) => {
         return absPolygon
     })
 
-    return polygons as Position[][][]
+    const zoom = feature?.properties?.zoom ?? 1
+    const out = { fov: polygons as Position[][][], zoom: zoom as number }
+    return out 
 }
 
 export default function AladinViewer(props: Props) {
-    const { width, height, targets, instrumentFOV, angle } = props
 
     const [fov, setFOV] = React.useState<Position[][][]>([])
-    const [compass, setCompass] = React.useState<Position[][][]>([])
+    const [compass, setCompass] = React.useState<FeatureCollection<Polygon>>({ type: 'FeatureCollection', features: [] })
     const [aladin, setAladin] = React.useState<null | any>(null)
+    // const [aladin, setAladin] = React.useMemo<null | any>(null, [])
     const [zoom, setZoom] = React.useState(5)
 
     // define custom draw function
@@ -189,15 +201,35 @@ export default function AladinViewer(props: Props) {
         }
     }
 
+    const update_shapes = async (aladin: any, updatefov = true, updateCompass = true) => {
+        console.log('updating shapes')
+        if (updatefov) {
+            const fovz = await get_fovz(aladin, props.instrumentFOV, props.fovAngle)
+            setZoom(fovz.zoom)
+            aladin.setFoV(fovz.zoom) // set zoom level
+            setFOV(() => [...fovz.fov])
+        }
+        if (updateCompass) {
+            console.log('updating compass')
+            let newCompass = await get_compass(aladin, props.height, props.width, props.positionAngle)
+            setCompass(newCompass)
+
+            const aladinAngle = aladin.getViewCenter2NorthPoleAngle()
+            aladin.setViewCenter2NorthPoleAngle(props.positionAngle + aladinAngle)
+        }
+
+    }
+
+    const debounced_update_shapes = useDebounceCallback(update_shapes, 250)
 
     const scriptloaded = async () => {
         console.log('script loaded', props)
-        const firstRow = targets.at(0)
+        const firstRow = props.targets.at(0)
         let params: any = {
             survey: 'P/DSS2/color',
             projection: 'MOL',
             // zoom: zoom,
-            fov: 15/60, 
+            fov: 15 / 60,
             showCooGrid: false,
             showCooGridControl: true,
             showReticle: false,
@@ -206,15 +238,23 @@ export default function AladinViewer(props: Props) {
         params['target'] = firstRow?.ra?.replaceAll(':', " ") + ' ' + firstRow?.dec?.replaceAll(':', ' ')
         console.log('params', params)
 
+
         A.init.then(async () => {
             const alad = A.aladin('#aladin-lite-div', params);
             if (!alad) return
-            const FOV = await get_fov(alad, instrumentFOV, angle)
-            const newCompass = await get_compass(alad, height, width)
-            setFOV(FOV)
+            alad.on('positionChanged', function () {
+                // console.log('positionChanged', ra, dec)
+                debounced_update_shapes(alad, false, true)
+            })
+            const fovz = await get_fovz(alad, props.instrumentFOV, props.fovAngle)
+            const newCompass = await get_compass(alad, props.height, props.width, props.positionAngle)
+            setZoom(fovz.zoom)
+            alad.setFoV(fovz.zoom) // set zoom level of shape
+            setFOV(() => [...fovz.fov])
             setAladin(alad)
             setCompass(newCompass)
-            add_catalog(alad, targets)
+            add_catalog(alad, props.targets)
+            alad.setViewCenter2NorthPoleAngle(props.positionAngle)
         })
     }
 
@@ -222,28 +262,25 @@ export default function AladinViewer(props: Props) {
         scriptloaded()
     }, [])
 
-    const update_shapes= async (instrumentFOV: string, angle: number) => {
-        if (!aladin) return
-        let FOV = await get_fov(aladin, instrumentFOV, angle)
-        let newCompass = await get_compass(aladin, height, width)
-        setCompass(newCompass)
-        setFOV(FOV)
-    }
-
-    const debounced_update_shapes= useDebounceCallback(update_shapes, 250)
 
     React.useEffect(() => {
-        debounced_update_shapes(instrumentFOV, angle)
-    }, [aladin, instrumentFOV, zoom, angle])
+        if(!aladin) return
+        debounced_update_shapes(aladin)
+    }, [aladin, props.instrumentFOV, zoom, props.fovAngle, props.positionAngle])
 
     React.useEffect(() => {
-    }, [targets])
+    }, [props.targets])
 
 
     return (
-        <div id='aladin-lite-div' style={{ margin: '0px', width: width, height: height }} >
-            {fov.map(f => <PolylineComponent points={f} width={width} height={height}/>)}
-            {compass.map(f => <PolylineComponent points={f} width={width} height={height} color='red' className='compass-overlay'/>)}
+        <div id='aladin-lite-div' style={{ margin: '0px', width: props.width, height: props.height }} >
+            {fov.map(f => <PolylineComponent points={f} width={props.width} height={props.height} />)}
+            {compass.features.map(f => <PolylineComponent points={f.geometry.coordinates}
+                width={props.width}
+                height={props.height}
+                color={f.properties?.color}
+                fill={f.properties?.fill}
+                className='compass-overlay' />)}
         </div>
     )
 }
