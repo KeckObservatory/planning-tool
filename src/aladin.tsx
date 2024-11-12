@@ -94,7 +94,6 @@ const get_compass = async (aladin: any, height: number, width: number, positionA
     const angle = 90 + get_angle(aladin) // rotate to match compass
     const aladinAngle = aladin.getViewCenter2NorthPoleAngle()
     const wcs = aladin.getViewWCS()
-    console.log('calculated map angle', angle, 'aladin angle', aladinAngle, 'position angle', positionAngle, 'wcs', wcs)
     fc['features'].forEach((f) => {
         let polygon = f.geometry.coordinates
         const offsetx = f.properties?.offsetx
@@ -106,7 +105,12 @@ const get_compass = async (aladin: any, height: number, width: number, positionA
             return [x + width - margin + offsetx, y + height - margin + offsety] as unknown as Position[]
         })
         const rotPnt = [width - margin, height - margin ]
-        const compassAngle = angle + positionAngle
+        const compassAngle = -1 * (angle + positionAngle + aladinAngle)
+        console.log('calculated map angle', angle, 
+            'aladin angle', aladinAngle, 
+            'position angle', positionAngle, 
+            'wcs', wcs,
+            'compass angle', compassAngle)
         polygon = rotate_multipolygon([polygon], compassAngle, rotPnt)[0]
         f.geometry.coordinates = polygon
     })
