@@ -3,7 +3,7 @@ import { ra_dec_to_deg, cosd, sind } from './two-d-view/sky_view_util.tsx'
 import { Target } from "./App"
 import A from 'aladin-lite'
 import { useDebounceCallback } from "./use_debounce_callback.tsx"
-import { Feature, FeatureCollection, GeometryCollection, MultiPolygon, Polygon, Position } from 'geojson'
+import { Feature, FeatureCollection, MultiPolygon, Polygon, Position } from 'geojson'
 import { get_shapes } from "./two-d-view/two_d_view.tsx"
 
 interface Props {
@@ -106,7 +106,8 @@ const get_compass = async (aladin: any, height: number, width: number, positionA
             return [x + width - margin + offsetx, y + height - margin + offsety] as unknown as Position[]
         })
         const rotPnt = [width - margin, height - margin ]
-        polygon = rotate_multipolygon([polygon], aladinAngle + positionAngle, rotPnt)[0]
+        const compassAngle = angle + positionAngle
+        polygon = rotate_multipolygon([polygon], compassAngle, rotPnt)[0]
         f.geometry.coordinates = polygon
     })
 
@@ -120,7 +121,6 @@ const get_fovz = async (aladin: any, instrumentFOV: string, angle: number) => {
     const feature = features.find((f: any) => f['properties'].instrument === instrumentFOV)
     if (!feature) return { fov: [], zoom: 5 } 
     const multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
-    console.log('fovAngle', angle)
     const rotPolygon = rotate_multipolygon(multipolygon, angle)
     const polygons = rotPolygon.map((polygon: Position[][]) => {
         let absPolygon = [...polygon, polygon[0]]
@@ -202,18 +202,13 @@ export default function AladinViewer(props: Props) {
     }
 
     const update_shapes = async (aladin: any, updatefov = true, updateCompass = true) => {
-        console.log('updating shapes')
         if (updatefov) {
             const fovz = await get_fovz(aladin, props.instrumentFOV, props.fovAngle)
-            setZoom(fovz.zoom)
-            aladin.setFoV(fovz.zoom) // set zoom level
             setFOV(() => [...fovz.fov])
         }
         if (updateCompass) {
-            console.log('updating compass')
             let newCompass = await get_compass(aladin, props.height, props.width, props.positionAngle)
             setCompass(newCompass)
-
             const aladinAngle = aladin.getViewCenter2NorthPoleAngle()
             aladin.setViewCenter2NorthPoleAngle(props.positionAngle + aladinAngle)
         }

@@ -12,7 +12,7 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { alt_az_observable, VizRow } from './viz_chart.tsx';
 import AladinViewer  from '../aladin';
-import { FeatureCollection, Geometry, MultiPolygon, Polygon } from 'geojson';
+import { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
