@@ -264,7 +264,7 @@ const TwoDView = ({ targets }: Props) => {
                             onChange={(event) => setRotatorAngle(Number(event.target.value))}
                         />
                     </Tooltip>
-                    <Tooltip title={'Position angle for the sky'}>
+                    {/* <Tooltip title={'Position angle for the sky'}>
                         <TextField
                             sx={{ width: '200px', margin: '6px' }}
                             label={'Position Angle'}
@@ -272,7 +272,7 @@ const TwoDView = ({ targets }: Props) => {
                             value={positionAngle}
                             onChange={(event) => setPositionAngle(Number(event.target.value))}
                         />
-                    </Tooltip>
+                    </Tooltip> */}
                 </Stack>
             </Grid>
             <Grid item xs={8}>
