@@ -76,7 +76,6 @@ function convert_schema_to_columns() {
         value = typeof value === 'string' ? value.replaceAll(',', '') : value
         value = Array.isArray(value) ? value.flat(Infinity) : [value]
         value = format_tags(value as any)
-        return tgt
       }
       tgt = { ...tgt, [key]: value }
       return tgt
