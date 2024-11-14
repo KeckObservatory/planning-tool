@@ -9,6 +9,14 @@
             "maxLength": 15,
             "description": "Target Name"
         },
+        "tags": {
+            "type": "array",
+            "description": "Tags",
+            "items": {
+                "type": "string",
+                "pattern": "^[^,]+$"
+            }
+        },
         "rotator_mode": {
             "type": "string",
             "description": "Rotator Mode",

@@ -9,7 +9,8 @@ import { Tooltip } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
 import { RotatorMode, Target, TelescopeWrap, useStateContext } from './App';
 import target_schema from './target_schema.json'
-import { randomId } from '@mui/x-data-grid-generator';
+
+// import { randomId } from '@mui/x-data-grid-generator';
 import { PropertyProps, TargetProps } from './target_edit_dialog';
 
 interface Props {

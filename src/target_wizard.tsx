@@ -19,9 +19,7 @@ import { useStateContext } from './App.tsx';
 import LinearProgress, { LinearProgressProps } from '@mui/material/LinearProgress';
 import { Target } from './App.tsx'
 import { useTargetContext } from './target_table.tsx';
-import {
-    randomId,
-} from '@mui/x-data-grid-generator';
+import { v4 as randomId } from 'uuid';
 import { submit_target } from './api/api_root.tsx';
 import { FormControlLabel, FormGroup, Switch } from '@mui/material';
 

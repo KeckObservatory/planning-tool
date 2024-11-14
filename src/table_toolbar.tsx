@@ -1,9 +1,6 @@
 import * as React from 'react';
 import target_schema from './target_schema.json';
 import AddIcon from '@mui/icons-material/Add';
-import {
-  randomId,
-} from '@mui/x-data-grid-generator';
 import { TargetWizardButton } from './target_wizard';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import {
@@ -19,6 +16,7 @@ import {
     GridRowsProp,
     GridRowModel,
 } from '@mui/x-data-grid-pro';
+import { v4 as randomId } from 'uuid';
 import MenuItem from '@mui/material/MenuItem';
 import Button, { ButtonProps } from '@mui/material/Button';
 import { Target, useStateContext } from './App.tsx';
