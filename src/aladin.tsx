@@ -93,7 +93,7 @@ const get_compass = async (aladin: any, height: number, width: number, positionA
     const fc = await get_shapes('compass_rose') as FeatureCollection<Polygon>
     const angle = 90 + get_angle(aladin) // rotate to match compass
     const aladinAngle = aladin.getViewCenter2NorthPoleAngle()
-    const wcs = aladin.getViewWCS()
+    // const wcs = aladin.getViewWCS()
     fc['features'].forEach((f) => {
         let polygon = f.geometry.coordinates
         const offsetx = f.properties?.offsetx
@@ -106,11 +106,11 @@ const get_compass = async (aladin: any, height: number, width: number, positionA
         })
         const rotPnt = [width - margin, height - margin ]
         const compassAngle = -1 * (angle + positionAngle + aladinAngle)
-        console.log('calculated map angle', angle, 
-            'aladin angle', aladinAngle, 
-            'position angle', positionAngle, 
-            'wcs', wcs,
-            'compass angle', compassAngle)
+        // console.log('calculated map angle', angle, 
+        //     'aladin angle', aladinAngle, 
+        //     'position angle', positionAngle, 
+        //     'wcs', wcs,
+        //     'compass angle', compassAngle)
         polygon = rotate_multipolygon([polygon], compassAngle, rotPnt)[0]
         f.geometry.coordinates = polygon
     })
@@ -252,7 +252,7 @@ export default function AladinViewer(props: Props) {
             setFOV(() => [...fovz.fov])
             setAladin(alad)
             setCompass(newCompass)
-            add_catalog(alad, props.targets)
+            props.targets && add_catalog(alad, props.targets)
             alad.setViewCenter2NorthPoleAngle(props.positionAngle)
         })
     }
