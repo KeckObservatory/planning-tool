@@ -73,7 +73,8 @@ function convert_schema_to_columns() {
     const valueSetter: GridValueSetter<Target> = (value: unknown, tgt: Target) => {
       if (valueProps.type === 'array' && value) {
         console.log('tags value setter', value, tgt)
-        value = typeof value === 'string' ? value.split(',') : value.flat(Infinity)
+        value = typeof value === 'string' ? value.replaceAll(',', '') : value
+        value = Array.isArray(value) ? value.flat(Infinity) : [value]
         value = format_tags(value as any)
         return tgt
       }
