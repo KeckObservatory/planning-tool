@@ -77,7 +77,7 @@ function convert_schema_to_columns(colWidth: number) {
         // value = format_tags(value as any)
         // value = tgt[tkey] ? [...(tgt[tkey] as Array<string>), ...(value as Array<string>)] : value
         console.log('tags value setter', value)
-        value = (value as string).split(',')
+        value = (value as string[]).join(',')
       }
       tgt = { ...tgt, [key]: value }
       return tgt
