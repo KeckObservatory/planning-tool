@@ -33,21 +33,34 @@ import { delete_target, submit_target } from './api/api_root.tsx';
 import { MuiChipsInput } from 'mui-chips-input';
 
 const createArrayField = (params: GridRenderCellParams) => {
-  console.log('create Array Field params', params)
+  // console.log('create Array Field params', params)
   const valArray = params.value ?? []
   return (
     <MuiChipsInput
       value={valArray}
-      onChange={(value) => {
-        console.log('chip change value', value)
-        params.api.setEditCellValue({
-          id: params.id,
-          field: params.field,
-          value: value.join(',')
-        })
-      }}
+      // onChange={(value) => {
+      //   console.log('chip change value', value)
+      //   params.api.setEditCellValue({
+      //     id: params.id,
+      //     field: params.field,
+      //     value: value.join(',')
+      //   })
+      // }}
     />
   )
+}
+
+function flatten_str_array(arr: string | string[]) {
+  let result = [] as string[];
+  for (let item of arr) {
+    if (Array.isArray(item)) {
+      result = result.concat(flatten_str_array(item)); // Recursively flatten nested arrays
+    } else {
+      result.push(item);
+    }
+  }
+
+  return result;
 }
 
 
@@ -74,8 +87,9 @@ function convert_schema_to_columns() {
     const valueSetter: GridValueSetter<Target> = (value: unknown, tgt: Target) => {
       if (valueProps.type === 'array' && value) {
         console.log('tags value setter', value, tgt)
+        value = flatten_str_array(value as string[] | string)
         // value = typeof value === 'string' ? value.split(',') : value 
-        // value = format_tags(value as any)
+        value = format_tags(value as any)
         return tgt
       }
       tgt = { ...tgt, [key]: value }
