@@ -50,20 +50,6 @@ const createArrayField = (params: GridRenderCellParams) => {
   )
 }
 
-function flatten_str_array(arr: string | string[]) {
-  let result = [] as string[];
-  for (let item of arr) {
-    if (Array.isArray(item)) {
-      result = result.concat(flatten_str_array(item)); // Recursively flatten nested arrays
-    } else {
-      result.push(item);
-    }
-  }
-
-  return result;
-}
-
-
 function convert_schema_to_columns() {
   const columns: GridColDef[] = []
   Object.entries(target_schema.properties).forEach(([key, valueProps]: [string, any]) => {
@@ -87,8 +73,7 @@ function convert_schema_to_columns() {
     const valueSetter: GridValueSetter<Target> = (value: unknown, tgt: Target) => {
       if (valueProps.type === 'array' && value) {
         console.log('tags value setter', value, tgt)
-        value = flatten_str_array(value as string[] | string)
-        // value = typeof value === 'string' ? value.split(',') : value 
+        value = typeof value === 'string' ? value.split(',') : value.flat(Infinity)
         value = format_tags(value as any)
         return tgt
       }
