@@ -63,10 +63,10 @@ function convert_schema_to_columns() {
         key === 'ra' && String(value).replace(/[^+-]/, "")
         value = raDecFormat(value as string)
       }
-      if (value && valueProps.type === 'array') {
-        console.log('array value parser', value)
-        value = (value as string[]).join(',')
-      }
+      // if (value && valueProps.type === 'array') {
+      //   console.log('array value parser', value)
+      //   value = (value as string[]).join(',')
+      // }
       return value
     }
 
