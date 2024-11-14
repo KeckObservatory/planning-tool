@@ -26,7 +26,7 @@ import ValidationDialogButton, { validate } from './validation_check_dialog';
 import SimbadButton from './simbad_button';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
 import { Target, useStateContext } from './App.tsx';
-import TargetEditDialogButton, { format_edit_entry, PropertyProps, raDecFormat, rowSetter, TargetProps } from './target_edit_dialog.tsx';
+import TargetEditDialogButton, { format_tags, format_edit_entry, PropertyProps, raDecFormat, rowSetter, TargetProps } from './target_edit_dialog.tsx';
 import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 
@@ -201,7 +201,8 @@ export default function TargetTable() {
         const changeDetected = editTarget[params.field as keyof Target] !== value
         if (changeDetected) {
           const isNumber = type.includes('number') || type.includes('integer')
-          value = format_edit_entry(params.field, value, isNumber)
+          const isArray = type.includes('array')
+          value = isArray ? format_tags(value) : format_edit_entry(params.field, value, isNumber)
           const newTgt= rowSetter(editTarget, params.field, value)
           setEditTarget(newTgt)
         }

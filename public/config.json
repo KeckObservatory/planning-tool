@@ -8,7 +8,8 @@
         "j_mag",
         "g_mag",
         "pm_ra",
-        "pm_dec"
+        "pm_dec",
+        "tags"
     ],
     "csv_order": [
         "target_name",
@@ -24,7 +25,8 @@
         "gaia_id",
         "ra_deg",
         "dec_deg",
-        "observer_id"
+        "observer_id",
+        "tags"
     ],
     "pinned_table_columns": {
         "left": [
@@ -32,7 +34,7 @@
             "actions",
             "target_name"
         ],
-        "right": []
+        "right": ["tags"]
     },
     "help_msg_filename": "helpMsg.md",
     "pi_logout_url": "https://www2.keck.hawaii.edu/inst/PILogin/homepage.php",

@@ -16,6 +16,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import SimbadButton from './simbad_button';
 import target_schema from './target_schema.json'
 import { Status, Target } from './App';
+import { MuiChipsInput } from 'mui-chips-input';
 
 interface Props {
     target: Target
@@ -67,17 +68,17 @@ export const raDecFormat = (input: string) => {
     return sign + input;
 }
 
-export const rowSetter = (tgt: Target, key: string, value?: string | number | boolean) => {
+export const rowSetter = (tgt: Target, key: string, value?: string | number | boolean | string[]) => {
     let newTgt = { ...tgt, 'status': 'EDITED' as Status, [key]: value }
-    return newTgt 
+    return newTgt
 }
 
-export const format_edit_entry = (key: string, value?: string | number, isNumber=false) => {
+export const format_edit_entry = (key: string, value?: string | number, isNumber = false) => {
     //add trailing zero if string ends in a decimal 
     //value = isNumber ? String(value).replace(/(\d+)\.$/, "$1.0") : value
     if (isNumber) {
         //const pattern = targetProps[key].pattern ?? "\\d+"
-        const pattern = /[^\d.-]/g 
+        const pattern = /[^\d.-]/g
         value = String(value).replace(pattern, '')
     }
     if (value && (key === 'ra' || key === 'dec')) {
@@ -85,6 +86,11 @@ export const format_edit_entry = (key: string, value?: string | number, isNumber
         value = raDecFormat(value as string)
     }
     return value
+}
+
+export const format_tags = (tags: string[]) => {
+    const pattern = /[,]/g
+    return tags.map((tag) => tag.trim().replace(pattern, ''))
 }
 
 
@@ -102,6 +108,14 @@ export const TargetEditDialog = (props: TargetEditProps) => {
         setTarget((prev: Target) => {
             return rowSetter(prev, key, value)
         })
+    }
+
+    const handleArrayChange = (key: string, value: string[]) => {
+        value = format_tags(value)
+        setTarget((prev: Target) => {
+            return rowSetter(prev, key, value)
+        })
+
     }
 
     const input_label = (param: keyof Target, tooltip = false): string => {
@@ -257,7 +271,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 <Tooltip title={input_label('d_ra', true)}>
                                     <TextField
                                         label={input_label('d_ra')}
-                                        InputLabelProps={{ shrink: hasSimbad || target.d_ra!== undefined }}
+                                        InputLabelProps={{ shrink: hasSimbad || target.d_ra !== undefined }}
                                         id="dra"
                                         value={target.d_ra}
                                         onChange={(event) => handleTextChange('d_ra', event.target.value, true)}
@@ -321,6 +335,14 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 </Tooltip>
                             </Stack>
                             <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
+                                <Tooltip title={input_label('tags', true)}>
+                                    <MuiChipsInput
+                                        value={target.tags}
+                                        onChange={(value) => handleArrayChange('tags', value)}
+                                        label={input_label('tags')}
+                                        id="tags"
+                                    />
+                                </Tooltip>
                                 <Tooltip title={input_label('comment', true)}>
                                     <TextField
                                         label={input_label('comment')}
