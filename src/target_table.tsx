@@ -20,6 +20,7 @@ import {
   GridValueSetter,
   GridCellEditStopParams,
   GridRowModel,
+  GridRenderCellParams,
 } from '@mui/x-data-grid-pro';
 import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
@@ -29,6 +30,15 @@ import { Target, useStateContext } from './App.tsx';
 import TargetEditDialogButton, { format_tags, format_edit_entry, PropertyProps, raDecFormat, rowSetter, TargetProps } from './target_edit_dialog.tsx';
 import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
+import { MuiChipsInput } from 'mui-chips-input';
+
+const createArrayField = (params: GridRenderCellParams<string[]>) => {
+  return (
+    <MuiChipsInput
+      value={params.value}
+    />
+  )
+}
 
 
 function convert_schema_to_columns() {
@@ -46,7 +56,7 @@ function convert_schema_to_columns() {
       return value
     }
 
-    //use to update other values when this value is changed (e.g. ra/dec change -> degRa/degDec update)
+    //TODO: use to update other values when this value is changed (e.g. ra/dec change -> degRa/degDec update)
     const valueSetter: GridValueSetter<Target> = (value: any, tgt: Target) => {
       tgt = { ...tgt, [key]: value }
       return tgt
@@ -61,10 +71,14 @@ function convert_schema_to_columns() {
       width: 140,
       editable: valueProps.editable ?? true,
     } as GridColDef
+
+    if (valueProps.type === 'array') {
+      col = { ...col, renderCell: createArrayField}
+    }
     columns.push(col)
   });
 
-  return columns;
+return columns;
 }
 
 
@@ -136,7 +150,7 @@ export default function TargetTable() {
 
   const processRowUpdate = async (newRow: GridRowModel<Target>) => {
     //row is sent to DataGrid rows. Used to match row with what was edited.
-    const newRows = rows.map((row) => (row._id === newRow._id ? newRow: row))
+    const newRows = rows.map((row) => (row._id === newRow._id ? newRow : row))
     setRows(newRows);
     return newRow;
   };
@@ -146,15 +160,15 @@ export default function TargetTable() {
   };
 
   const validate_sanitized_target = (tgt: Target) => {
-    let sanitizedTgt: Partial<Target> = {} 
+    let sanitizedTgt: Partial<Target> = {}
     Object.entries(tgt).forEach(([key, value]) => {
       //allow empty strings to be valid for non-required fields
       const required = value === "" && target_schema.required.includes(key)
       if (value === "" || value === undefined && required) {
-        return 
+        return
       }
       sanitizedTgt[key as keyof Target] = value
-    }) 
+    })
 
     validate(sanitizedTgt as Target)
     validate.errors && console.log('errors', validate.errors, sanitizedTgt)
@@ -190,8 +204,6 @@ export default function TargetTable() {
       setCount((prev: number) => prev + 1)
     }, [editTarget])
 
-
-
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
     const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
@@ -203,7 +215,7 @@ export default function TargetTable() {
           const isNumber = type.includes('number') || type.includes('integer')
           const isArray = type.includes('array')
           value = isArray ? format_tags(value) : format_edit_entry(params.field, value, isNumber)
-          const newTgt= rowSetter(editTarget, params.field, value)
+          const newTgt = rowSetter(editTarget, params.field, value)
           setEditTarget(newTgt)
         }
       }, 300)
