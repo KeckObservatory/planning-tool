@@ -225,10 +225,8 @@ export default function AladinViewer(props: Props) {
         console.log('script loaded', props)
         const firstRow = props.targets.at(0)
         let params: any = {
-            // survey: 'P/DSS2/color',
             survey: 'P/SDSS9/color',
             projection: 'MOL',
-            // zoom: zoom,
             fov: 15 / 60,
             showCooGrid: false,
             showCooGridControl: true,
