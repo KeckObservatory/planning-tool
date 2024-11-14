@@ -91,7 +91,7 @@ export const format_edit_entry = (key: string, value?: string | number, isNumber
 export const format_tags = (tags: string[] | string) => {
     const pattern = /[,]/g
     console.log('formatting tags', tags)
-    tags = typeof tags === 'string' ? [tags] : tags 
+    tags = typeof tags === 'string' ? tags.split(',') : tags 
     return tags.map((tag) => tag.trim().replace(pattern, ''))
 }
 
