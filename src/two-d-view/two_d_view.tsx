@@ -131,7 +131,7 @@ const TwoDView = ({ targets }: Props) => {
     const [showMoon, setShowMoon] = React.useState(true)
     const [showCurrLoc, setShowCurrLoc] = React.useState(true)
     const [rotatorAngle, setRotatorAngle] = React.useState(0)
-    const [positionAngle, setPositionAngle] = React.useState(0)
+    const [positionAngle] = React.useState(0)
     const lngLatEl: LngLatEl = {
         lng: context.config.keck_longitude,
         lat: context.config.keck_latitude,
