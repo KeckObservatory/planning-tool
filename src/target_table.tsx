@@ -20,7 +20,6 @@ import {
   GridValueSetter,
   GridCellEditStopParams,
   GridRowModel,
-  GridRenderCellParams,
 } from '@mui/x-data-grid-pro';
 import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
@@ -30,31 +29,30 @@ import { Target, useStateContext } from './App.tsx';
 import TargetEditDialogButton, { format_tags, format_edit_entry, PropertyProps, raDecFormat, rowSetter, TargetProps } from './target_edit_dialog.tsx';
 import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
-import { MuiChipsInput } from 'mui-chips-input';
 
-const createArrayField = (params: GridRenderCellParams) => {
-  // console.log('create Array Field params', params)
-  const valArray = params.value ?? []
-  return (
-    <MuiChipsInput
-      value={valArray}
-      // onChange={(value) => {
-      //   console.log('chip change value', value)
-      //   params.api.setEditCellValue({
-      //     id: params.id,
-      //     field: params.field,
-      //     value: value.join(',')
-      //   })
-      // }}
-    />
-  )
-}
+// const createArrayField = (params: GridRenderCellParams) => {
+//   // console.log('create Array Field params', params)
+//   const valArray = params.value ?? []
+//   return (
+//     <MuiChipsInput
+//       value={valArray}
+//       // onChange={(value) => {
+//       //   console.log('chip change value', value)
+//       //   params.api.setEditCellValue({
+//       //     id: params.id,
+//       //     field: params.field,
+//       //     value: value.join(',')
+//       //   })
+//       // }}
+//     />
+//   )
+// }
 
-function convert_schema_to_columns() {
+function convert_schema_to_columns(colWidth: number) {
   const columns: GridColDef[] = []
   Object.entries(target_schema.properties).forEach(([key, valueProps]: [string, any]) => {
     // format value for display
-    const tkey = key as keyof Target
+    // const tkey = key as keyof Target
     const valueParser: GridValueParser = (value: unknown) => {
       if (['number', 'integer'].includes(valueProps.type)) {
         return Number(value)
@@ -63,21 +61,23 @@ function convert_schema_to_columns() {
         key === 'ra' && String(value).replace(/[^+-]/, "")
         value = raDecFormat(value as string)
       }
-      // if (value && valueProps.type === 'array') {
-      //   console.log('array value parser', value)
-      //   value = (value as string[]).join(',')
-      // }
+      if (value && valueProps.type === 'array') {
+        console.log('array value parser', value)
+        value = (value as string[]).join(',')
+      }
       return value
     }
 
     //TODO: use to update other values when this value is changed (e.g. ra/dec change -> degRa/degDec update)
     const valueSetter: GridValueSetter<Target> = (value: unknown, tgt: Target) => {
       if (valueProps.type === 'array' && value) {
-        console.log('tags value setter', value, tgt)
-        value = typeof value === 'string' ? value.replaceAll(',', '') : value
-        value = Array.isArray(value) ? value.flat(Infinity) : [value]
-        value = format_tags(value as any)
-        value = tgt[tkey] ? [...(tgt[tkey] as Array<string>), ...(value as Array<string>)] : value
+        // console.log('tags value setter', value)
+        // value = typeof value === 'string' ? value.replaceAll(',', '') : value
+        // value = Array.isArray(value) ? value.flat(Infinity) : [value]
+        // value = format_tags(value as any)
+        // value = tgt[tkey] ? [...(tgt[tkey] as Array<string>), ...(value as Array<string>)] : value
+        console.log('tags value setter', value)
+        value = (value as string).split(',')
       }
       tgt = { ...tgt, [key]: value }
       return tgt
@@ -90,13 +90,13 @@ function convert_schema_to_columns() {
       description: valueProps.description,
       type: valueProps.type === 'array' ? 'string' : valueProps.type, //array cells are cast as string
       headerName: valueProps.short_description ?? valueProps.description,
-      width: 140,
+      width: valueProps.type === 'array' ? colWidth * 2: colWidth, //TODO: 
       editable: valueProps.editable ?? true,
     } as GridColDef
 
-    if (valueProps.type === 'array') {
-      col = { ...col, renderCell: createArrayField}
-    }
+    // if (valueProps.type === 'array') {
+    //   col = { ...col, renderCell: createArrayField}
+    // }
     columns.push(col)
   });
 
@@ -135,7 +135,7 @@ export default function TargetTable() {
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
   const cfg = context.config
-  let columns = convert_schema_to_columns();
+  let columns = convert_schema_to_columns(cfg.table_column_width);
   const sortOrder = cfg.default_table_columns
   columns = columns.sort((a, b) => {
     return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);

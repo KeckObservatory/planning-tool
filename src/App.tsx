@@ -97,6 +97,7 @@ interface ConfigFile {
   default_table_columns: string[];
   csv_order: string[];
   pinned_table_columns: { 'left': string[], 'right': string[] };
+  table_column_width: number,
   timezone: string,
   time_format: string,
   date_time_format: string,
