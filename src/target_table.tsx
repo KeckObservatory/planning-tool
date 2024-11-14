@@ -54,6 +54,7 @@ function convert_schema_to_columns() {
   const columns: GridColDef[] = []
   Object.entries(target_schema.properties).forEach(([key, valueProps]: [string, any]) => {
     // format value for display
+    const tkey = key as keyof Target
     const valueParser: GridValueParser = (value: unknown) => {
       if (['number', 'integer'].includes(valueProps.type)) {
         return Number(value)
@@ -76,6 +77,7 @@ function convert_schema_to_columns() {
         value = typeof value === 'string' ? value.replaceAll(',', '') : value
         value = Array.isArray(value) ? value.flat(Infinity) : [value]
         value = format_tags(value as any)
+        value = tgt[tkey] ? [...(tgt[tkey] as Array<string>), ...(value as Array<string>)] : value
       }
       tgt = { ...tgt, [key]: value }
       return tgt
