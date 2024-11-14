@@ -215,7 +215,7 @@ export default function TargetTable() {
         if (changeDetected) {
           const isNumber = type.includes('number') || type.includes('integer')
           const isArray = type.includes('array')
-          value = isArray ? format_tags(value) : format_edit_entry(params.field, value, isNumber)
+          value = isArray ? format_tags([value]) : format_edit_entry(params.field, value, isNumber)
           const newTgt = rowSetter(editTarget, params.field, value)
           setEditTarget(newTgt)
         }
