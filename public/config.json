@@ -34,7 +34,7 @@
             "actions",
             "target_name"
         ],
-        "right": ["tags"]
+        "right": []
     },
     "help_msg_filename": "helpMsg.md",
     "pi_logout_url": "https://www2.keck.hawaii.edu/inst/PILogin/homepage.php",
