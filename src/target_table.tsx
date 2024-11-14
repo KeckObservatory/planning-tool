@@ -39,6 +39,7 @@ const createArrayField = (params: GridRenderCellParams) => {
     <MuiChipsInput
       value={valArray}
       onChange={(value) => {
+        console.log('chip change value', value)
         params.api.setEditCellValue({
           id: params.id,
           field: params.field,
@@ -63,6 +64,7 @@ function convert_schema_to_columns() {
         value = raDecFormat(value as string)
       }
       if (value && valueProps.type === 'array') {
+        console.log('array value parser', value)
         value = (value as string[]).join(',')
       }
       return value
