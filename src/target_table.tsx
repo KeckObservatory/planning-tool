@@ -32,10 +32,19 @@ import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 import { MuiChipsInput } from 'mui-chips-input';
 
-const createArrayField = (params: GridRenderCellParams<string[]>) => {
+const createArrayField = (params: GridRenderCellParams) => {
+  params.value
+  console.log('create Array Field params', params)
   return (
     <MuiChipsInput
-      value={params.value}
+      value={params.value.split(',')}
+      onChange={(value) => {
+        params.api.setEditCellValue({
+          id: params.id,
+          field: params.field,
+          value: value.join(',')
+        })
+      }}
     />
   )
 }
@@ -53,11 +62,17 @@ function convert_schema_to_columns() {
         key === 'ra' && String(value).replace(/[^+-]/, "")
         value = raDecFormat(value as string)
       }
+      if (value && valueProps.type === 'array') {
+        return (value as string[]).join(',')
+      }
       return value
     }
 
     //TODO: use to update other values when this value is changed (e.g. ra/dec change -> degRa/degDec update)
     const valueSetter: GridValueSetter<Target> = (value: any, tgt: Target) => {
+      if (key === 'tags') {
+        value = format_tags(value.split(','))
+      }
       tgt = { ...tgt, [key]: value }
       return tgt
     }
@@ -67,7 +82,7 @@ function convert_schema_to_columns() {
       valueParser,
       valueSetter,
       description: valueProps.description,
-      type: valueProps.type,
+      type: valueProps.type === 'array' ? 'string' : valueProps.type, //array cells are cast as string
       headerName: valueProps.short_description ?? valueProps.description,
       width: 140,
       editable: valueProps.editable ?? true,
