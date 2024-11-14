@@ -63,7 +63,7 @@ function convert_schema_to_columns(colWidth: number) {
       }
       if (value && valueProps.type === 'array') {
         console.log('array value parser', value)
-        value = (value as string[]).join(',')
+        value = Array.isArray(value) ? (value as string[]).join(',') : value as string
       }
       return value
     }
