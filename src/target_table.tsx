@@ -61,6 +61,7 @@ function convert_schema_to_columns() {
       tgt = { ...tgt, [key]: value }
       return tgt
     }
+
     let col = {
       field: key,
       valueParser,
