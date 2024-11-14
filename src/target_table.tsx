@@ -33,11 +33,11 @@ import { delete_target, submit_target } from './api/api_root.tsx';
 import { MuiChipsInput } from 'mui-chips-input';
 
 const createArrayField = (params: GridRenderCellParams) => {
-  params.value
   console.log('create Array Field params', params)
+  const valArray = params.value ?? params.value.split(',')
   return (
     <MuiChipsInput
-      value={params.value.split(',')}
+      value={valArray}
       onChange={(value) => {
         params.api.setEditCellValue({
           id: params.id,
@@ -54,7 +54,7 @@ function convert_schema_to_columns() {
   const columns: GridColDef[] = []
   Object.entries(target_schema.properties).forEach(([key, valueProps]: [string, any]) => {
     // format value for display
-    const valueParser: GridValueParser = (value: any) => {
+    const valueParser: GridValueParser = (value: unknown) => {
       if (['number', 'integer'].includes(valueProps.type)) {
         return Number(value)
       }
@@ -63,7 +63,7 @@ function convert_schema_to_columns() {
         value = raDecFormat(value as string)
       }
       if (value && valueProps.type === 'array') {
-        return (value as string[]).join(',')
+        value = (value as string[]).join(',')
       }
       return value
     }
