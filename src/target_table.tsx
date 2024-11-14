@@ -73,6 +73,7 @@ function convert_schema_to_columns() {
     //TODO: use to update other values when this value is changed (e.g. ra/dec change -> degRa/degDec update)
     const valueSetter: GridValueSetter<Target> = (value: unknown, tgt: Target) => {
       if (key === 'tags') {
+        console.log('tags value setter', value)
         value = format_tags(value as string[])
       }
       tgt = { ...tgt, [key]: value }
