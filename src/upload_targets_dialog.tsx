@@ -78,7 +78,12 @@ const parse_csv = (contents: string) => {
         const tgt = {} as Target;
         header.forEach((desc, index) => {
             const key = hdrToKeyMapping[desc] as keyof Target
-            tgt[key] = item.at(index) as keyof Target[keyof Target]
+            let value = item.at(index) as keyof Target[keyof Target]
+            if (key === 'tags') {
+                //@ts-ignore
+                value = (value as string).split(',') as Array<string>
+            }
+            tgt[key] = value 
         });
         return tgt;
     });
