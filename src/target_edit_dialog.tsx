@@ -70,14 +70,22 @@ export const raDecFormat = (input: string) => {
     return sign + input;
 }
 
-function deg_to_hms(deg: number, dec = false) {
-    const sign = deg < 0 ? "-" : ""
-    while (deg < 0 && !dec) deg += 360 //convert to positive degrees
+function deg_to_dms(degrees: number) {
+    const sign = degrees < 0 ? "-" : ""
+    let deg = Math.floor(degrees)
+    deg = Math.abs(deg % 360)
+    const min = Math.floor((degrees - deg) * 60)
+    const sec = Math.floor((degrees - deg - min / 60) * 3600)
+    return `${sign}${deg}:${min}:${sec}`
+}
+
+function deg_to_hms(deg: number) {
+    while (deg < 0) deg += 360 //convert to positive degrees
     deg = Math.abs(deg % 360)
     const hours = Math.floor(deg / 15)
     const minutes = Math.floor((deg % 15) * 4)
     const seconds = ((deg % 15) * 4 - minutes) * 60
-    return `${sign}${hours}:${minutes}:${seconds}`
+    return `${hours}:${minutes}:${seconds}`
 }
 
 
@@ -94,7 +102,7 @@ export const rowSetter = (tgt: Target, key: string, value?: string | number | bo
             newTgt = { ...newTgt, ra: deg_to_hms(value as number) };
             break;
         case 'dec_deg':
-            newTgt = { ...newTgt, dec: deg_to_hms(value as number, true) };
+            newTgt = { ...newTgt, dec: deg_to_dms(value as number) };
             break;
     }
     return newTgt
