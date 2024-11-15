@@ -250,24 +250,24 @@ export function UploadComponent(props: UploadProps) {
         fileReader.readAsText(file, "UTF-8");
         fileReader.onload = e => {
             const contents = e.target?.result as string
-            let tgts: UploadedTarget[] = [] 
+            let uploadedTargets : UploadedTarget[] = [] 
             switch (ext) {
                 case 'json':
-                    tgts = parse_json(contents)
+                    uploadedTargets = parse_json(contents)
                     break;
                 case 'csv':
-                    tgts = parse_csv(contents)
+                    uploadedTargets = parse_csv(contents)
                     break;
                 case 'txt':
-                    tgts = parse_txt(contents, context.obsid)
+                    uploadedTargets = parse_txt(contents, context.obsid)
                     break;
                 default:
                     console.error('file type not supported')
                     return
             }
-            console.log('tgts', tgts)
+            console.log('uploaded tgts', uploadedTargets)
             props.setOpen && props.setOpen(false)
-            const fmtTgts = format_targets(tgts, targetProps)
+            const fmtTgts = format_targets(uploadedTargets, targetProps)
             props.setTargets(fmtTgts)
         };
     };
