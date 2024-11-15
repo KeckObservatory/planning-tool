@@ -186,6 +186,7 @@ const parse_csv = (contents: string) => {
 
     const tgtValues = lines.map(line => csv_to_array(line)).filter((item) => item !== null) as string[][]
     const tgts = tgtValues.map(line => {
+        console.log('line', line)
         const tgt = {} as UploadedTarget;
         header.forEach((hdr, index) => {
             const key = hdrToKeyMapping[hdr]

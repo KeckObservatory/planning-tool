@@ -75,7 +75,7 @@ return columns;
 export const submit_one_target = async (target: Target) => {
   const resp = await submit_target([target])
   if (resp.errors.length > 0) {
-    // console.error('errors', resp)
+    console.error('errors', resp)
     throw new Error('error updating target')
   }
   const submittedTarget = resp.targets[0]
