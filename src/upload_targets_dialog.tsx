@@ -10,7 +10,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import { RotatorMode, Target, TelescopeWrap, useStateContext } from './App';
 import target_schema from './target_schema.json'
 import { v4 as randomId } from 'uuid';
-import { PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog';
+import { format_tags, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog';
 
 interface Props {
     setTargets: Function
@@ -30,12 +30,53 @@ let hdrToKeyMapping = Object.fromEntries(Object.entries(targetProps).map(([key, 
     return[desc, key]
 }))
 
-let convert_string_to_type = (key: keyof Target, value: string) => {
-    //@ts-ignore
-    if (targetProps[key] === 'number') {
+const convert_value_to_type = (props: PropertyProps, value: unknown) => {
+    const type = props.type
+    if (type.includes('number') || type.includes('integer')) {
+        //@ts-ignore
         return Number(value)
     }
+    else if (type.includes('string')) {
+        //@ts-ignore
+        return String(value)
+    }
+    else if (type.includes('boolean')) {
+        //@ts-ignore
+        return Boolean(value)
+    }
+    else if (type.includes('array')) {
+        value = (value as Array<unknown>).map((item: unknown) => {
+            return convert_value_to_type(props.items as PropertyProps, item)
+        })
+
+    }
     return value
+}
+
+export const format_target_property = (key: keyof Target, value: unknown, props: PropertyProps) => {
+    const fmtValue = convert_value_to_type(props, value)
+    if (key === 'ra' || key === 'dec') {
+        //@ts-ignore
+        fmtValue = raDecFormat(fmtValue as string)
+    }
+    else if (key === 'tags') {
+        //@ts-ignore
+        fmtValue = format_tags(fmtValue as Array<string>) 
+    }
+    return fmtValue
+}
+
+export const format_targets = (tgts: Target[], targetProps: TargetProps) => {
+    const fmtTgts = tgts.map((tgt) => {
+        Object.entries(tgt).forEach(([key, value]) => {
+            const props = targetProps[key]
+            const fmtValue = format_target_property(key as keyof Target, value, props)
+            //@ts-ignore
+            tgt[key] = fmtValue
+        })
+        return tgt
+    }) 
+    return fmtTgts 
 }
 
 interface StarListOptionalKeys {
@@ -76,8 +117,8 @@ const parse_csv = (contents: string) => {
         .map(s => s.replace('\r', '').split(','))
     const tgts = lines.map((item) => {
         const tgt = {} as Target;
-        header.forEach((desc, index) => {
-            const key = hdrToKeyMapping[desc] as keyof Target
+        header.forEach((hdr, index) => {
+            const key = hdrToKeyMapping[hdr] as keyof Target
             let value = item.at(index) as keyof Target[keyof Target]
             if (key === 'ra' || key === 'dec') {
                 //@ts-ignore
@@ -87,6 +128,7 @@ const parse_csv = (contents: string) => {
                 //@ts-ignore
                 value = (value as string).split(',') as Array<string>
             }
+            
             tgt[key] = value 
         });
         return tgt;
@@ -122,7 +164,7 @@ const parse_txt = (contents: string, obsid: number) => {
             const [key, value] = opt.split('=')
             const tgtKey = starlistToKeyMapping[key as keyof StarListOptionalKeys] as keyof Target 
             //@ts-ignore
-            tgt[tgtKey] = convert_string_to_type(tgtKey, value)
+            tgt[tgtKey] = value
         })
         tgts.push(tgt);
     });
@@ -160,7 +202,8 @@ export function UploadComponent(props: UploadProps) {
             }
             console.log('tgts', tgts)
             props.setOpen && props.setOpen(false)
-            props.setTargets(tgts)
+            const fmtTgts = format_targets(tgts, targetProps)
+            props.setTargets(fmtTgts)
         };
     };
     return (

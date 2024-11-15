@@ -26,9 +26,10 @@ import ValidationDialogButton, { validate } from './validation_check_dialog';
 import SimbadButton from './simbad_button';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
 import { Target, useStateContext } from './App.tsx';
-import TargetEditDialogButton, { format_tags, format_edit_entry, PropertyProps, raDecFormat, rowSetter, TargetProps } from './target_edit_dialog.tsx';
+import TargetEditDialogButton, { format_tags, format_edit_entry, PropertyProps, rowSetter, TargetProps } from './target_edit_dialog.tsx';
 import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
+import { format_target_property } from './upload_targets_dialog.tsx';
 
 
 function convert_schema_to_columns(colWidth: number) {
@@ -36,14 +37,8 @@ function convert_schema_to_columns(colWidth: number) {
   Object.entries(target_schema.properties).forEach(([key, valueProps]: [string, any]) => {
     // format value for display
     const valueParser: GridValueParser = (value: unknown) => {
-      if (['number', 'integer'].includes(valueProps.type)) {
-        return Number(value)
-      }
-      if (value && ['ra', 'dec'].includes(key)) {
-        key === 'ra' && String(value).replace(/[^+-]/, "")
-        value = raDecFormat(value as string)
-      }
-      if (value && valueProps.type === 'array') {
+      value = format_target_property(key as keyof Target, value, valueProps)
+      if (value && valueProps.type === 'array') { //convert array to string for display
         console.log('array value parser', value)
         value = Array.isArray(value) ? (value as string[]).join(',') : value as string
       }

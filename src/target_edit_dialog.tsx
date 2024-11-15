@@ -35,7 +35,8 @@ export interface PropertyProps {
     default?: unknown,
     pattern?: string,
     not_editable_by_user?: boolean,
-    enum?: string[]
+    enum?: string[],
+    items?: PropertyProps
 }
 
 export interface TargetProps {
@@ -75,9 +76,7 @@ export const rowSetter = (tgt: Target, key: string, value?: string | number | bo
 
 export const format_edit_entry = (key: string, value?: string | number, isNumber = false) => {
     //add trailing zero if string ends in a decimal 
-    //value = isNumber ? String(value).replace(/(\d+)\.$/, "$1.0") : value
     if (isNumber) {
-        //const pattern = targetProps[key].pattern ?? "\\d+"
         const pattern = /[^\d.-]/g
         value = String(value).replace(pattern, '')
     }
