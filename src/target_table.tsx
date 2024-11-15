@@ -208,7 +208,12 @@ export default function TargetTable() {
         const changeDetected = editTarget[params.field as keyof Target] !== value
         if (changeDetected) {
           const isNumber = type.includes('number') || type.includes('integer')
-          value = type.includes('array') ? format_tags(value.split(',')) : format_edit_entry(params.field, value, isNumber)
+          if (type === 'array') {
+            value = format_tags(Array.isArray(value) ? value.flat(Infinity) : value.split(','))
+          }
+          else {
+            value = format_edit_entry(params.field, value, isNumber)
+          }
           const newTgt = rowSetter(editTarget, params.field, value)
           setEditTarget(newTgt)
         }

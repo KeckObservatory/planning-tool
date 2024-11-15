@@ -11,7 +11,8 @@
         },
         "tags": {
             "type": "array",
-            "description": "Tags",
+            "short_description": "Tags",
+            "description": "Tags, comma separated",
             "items": {
                 "type": "string",
                 "pattern": "^[^,]+$"
