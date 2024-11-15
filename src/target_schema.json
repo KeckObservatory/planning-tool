@@ -44,7 +44,7 @@
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "epoch": {
-            "type":  ["number", "string"],
+            "type":  "string",
             "description": "Epoch"
         },
         "d_dec": {
