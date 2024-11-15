@@ -54,7 +54,7 @@ const convert_value_to_type = (props: PropertyProps, value: unknown) => {
 }
 
 export const format_target_property = (key: keyof Target, value: unknown, props: PropertyProps) => {
-    const fmtValue = convert_value_to_type(props, value)
+    let fmtValue = convert_value_to_type(props, value)
     if (key === 'ra' || key === 'dec') {
         //@ts-ignore
         fmtValue = raDecFormat(fmtValue as string)
