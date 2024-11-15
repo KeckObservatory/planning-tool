@@ -20,6 +20,7 @@ import {
   GridValueSetter,
   GridCellEditStopParams,
   GridRowModel,
+  GridRenderCellParams,
 } from '@mui/x-data-grid-pro';
 import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
@@ -29,24 +30,25 @@ import { Target, useStateContext } from './App.tsx';
 import TargetEditDialogButton, { format_tags, format_edit_entry, PropertyProps, raDecFormat, rowSetter, TargetProps } from './target_edit_dialog.tsx';
 import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
+import { MuiChipsInput } from 'mui-chips-input';
 
-// const createArrayField = (params: GridRenderCellParams) => {
-//   // console.log('create Array Field params', params)
-//   const valArray = params.value ?? []
-//   return (
-//     <MuiChipsInput
-//       value={valArray}
-//       // onChange={(value) => {
-//       //   console.log('chip change value', value)
-//       //   params.api.setEditCellValue({
-//       //     id: params.id,
-//       //     field: params.field,
-//       //     value: value.join(',')
-//       //   })
-//       // }}
-//     />
-//   )
-// }
+const createArrayField = (params: GridRenderCellParams) => {
+  // console.log('create Array Field params', params)
+  const valArray = params.value.split(',') ?? []
+  return (
+    <MuiChipsInput
+      value={valArray}
+      // onChange={(value) => {
+      //   console.log('chip change value', value)
+      //   params.api.setEditCellValue({
+      //     id: params.id,
+      //     field: params.field,
+      //     value: value.join(',')
+      //   })
+      // }}
+    />
+  )
+}
 
 function convert_schema_to_columns(colWidth: number) {
   const columns: GridColDef[] = []
@@ -94,9 +96,9 @@ function convert_schema_to_columns(colWidth: number) {
       editable: valueProps.editable ?? true,
     } as GridColDef
 
-    // if (valueProps.type === 'array') {
-    //   col = { ...col, renderCell: createArrayField}
-    // }
+    if (valueProps.type === 'array') {
+      col = { ...col, renderCell: createArrayField, renderEditCell: createArrayField}
+    }
     columns.push(col)
   });
 
