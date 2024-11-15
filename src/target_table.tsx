@@ -20,7 +20,6 @@ import {
   GridValueSetter,
   GridCellEditStopParams,
   GridRowModel,
-  GridRenderCellParams,
 } from '@mui/x-data-grid-pro';
 import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
@@ -30,31 +29,12 @@ import { Target, useStateContext } from './App.tsx';
 import TargetEditDialogButton, { format_tags, format_edit_entry, PropertyProps, raDecFormat, rowSetter, TargetProps } from './target_edit_dialog.tsx';
 import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
-import { MuiChipsInput } from 'mui-chips-input';
 
-const createArrayField = (params: GridRenderCellParams) => {
-  // console.log('create Array Field params', params)
-  const valArray = Array.isArray(params.value) ? params.value : typeof params.value==='string' ? params.value.split(',') : []
-  return (
-    <MuiChipsInput
-      value={valArray}
-      // onChange={(value) => {
-      //   console.log('chip change value', value)
-      //   params.api.setEditCellValue({
-      //     id: params.id,
-      //     field: params.field,
-      //     value: value.join(',')
-      //   })
-      // }}
-    />
-  )
-}
 
 function convert_schema_to_columns(colWidth: number) {
   const columns: GridColDef[] = []
   Object.entries(target_schema.properties).forEach(([key, valueProps]: [string, any]) => {
     // format value for display
-    // const tkey = key as keyof Target
     const valueParser: GridValueParser = (value: unknown) => {
       if (['number', 'integer'].includes(valueProps.type)) {
         return Number(value)
@@ -73,13 +53,7 @@ function convert_schema_to_columns(colWidth: number) {
     //TODO: use to update other values when this value is changed (e.g. ra/dec change -> degRa/degDec update)
     const valueSetter: GridValueSetter<Target> = (value: unknown, tgt: Target) => {
       if (valueProps.type === 'array' && value) {
-        // console.log('tags value setter', value)
-        // value = typeof value === 'string' ? value.replaceAll(',', '') : value
-        // value = Array.isArray(value) ? value.flat(Infinity) : [value]
-        // value = format_tags(value as any)
-        // value = tgt[tkey] ? [...(tgt[tkey] as Array<string>), ...(value as Array<string>)] : value
-        console.log('tags value setter', value)
-        value = Array.isArray(value) ? (value as string[]).join(',') : (value as string).split(',')
+        value = (value as string).split(',') //should always be a string
       }
       tgt = { ...tgt, [key]: value }
       return tgt
@@ -96,9 +70,6 @@ function convert_schema_to_columns(colWidth: number) {
       editable: valueProps.editable ?? true,
     } as GridColDef
 
-    if (valueProps.type === 'array') {
-      col = { ...col, renderCell: createArrayField, renderEditCell: createArrayField}
-    }
     columns.push(col)
   });
 
@@ -238,7 +209,7 @@ export default function TargetTable() {
         if (changeDetected) {
           const isNumber = type.includes('number') || type.includes('integer')
           const isArray = type.includes('array')
-          value = (isArray && Array.isArray(value)) ? format_tags(value.flat(Infinity)) : format_edit_entry(params.field, value, isNumber)
+          value = isArray ? format_tags(value.flat(Infinity)) : format_edit_entry(params.field, value, isNumber)
           const newTgt = rowSetter(editTarget, params.field, value)
           setEditTarget(newTgt)
         }
