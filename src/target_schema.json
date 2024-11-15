@@ -46,7 +46,6 @@
         "epoch": {
             "type":  "string",
             "description": "Epoch",
-            "pattern": "^[A-Z]?\\d{4}+$"
         },
         "d_dec": {
             "type":  ["number", "string"],
