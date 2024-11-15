@@ -207,11 +207,15 @@ export default function TargetTable() {
         // convert type to string if array
         const changeDetected = editTarget[params.field as keyof Target] !== value
         if (changeDetected) {
-          const isNumber = type.includes('number') || type.includes('integer')
           const isArray = type.includes('array')
-          value = isArray ? format_tags(value.split(',')) : format_edit_entry(params.field, value, isNumber)
-          const newTgt = rowSetter(editTarget, params.field, value)
-          setEditTarget(newTgt)
+          if (isArray) {
+            const arrVal = [...new Set(value.split(','))] as string[] //remove duplicates
+            value = format_tags(arrVal)
+          }
+          else {
+            const isNumber = type.includes('number') || type.includes('integer')
+            value = format_edit_entry(params.field, value, isNumber)
+          }
         }
       }, 300)
     }
