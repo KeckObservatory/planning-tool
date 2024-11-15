@@ -10,7 +10,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import { RotatorMode, Target, TelescopeWrap, useStateContext } from './App';
 import target_schema from './target_schema.json'
 import { v4 as randomId } from 'uuid';
-import { PropertyProps, TargetProps } from './target_edit_dialog';
+import { PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog';
 
 interface Props {
     setTargets: Function
@@ -79,6 +79,10 @@ const parse_csv = (contents: string) => {
         header.forEach((desc, index) => {
             const key = hdrToKeyMapping[desc] as keyof Target
             let value = item.at(index) as keyof Target[keyof Target]
+            if (key === 'ra' || key === 'dec') {
+                //@ts-ignore
+                value = raDecFormat(value as string)
+            }
             if (key === 'tags') {
                 //@ts-ignore
                 value = (value as string).split(',') as Array<string>
