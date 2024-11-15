@@ -34,10 +34,10 @@ import { MuiChipsInput } from 'mui-chips-input';
 
 const createArrayField = (params: GridRenderCellParams) => {
   // console.log('create Array Field params', params)
-  const valArray = params.value ?? []
+  const valArray = Array.isArray(params.value) ? params.value : typeof params.value==='string' ? params.value.split(',') : []
   return (
     <MuiChipsInput
-      value={valArray.split(',')}
+      value={valArray}
       // onChange={(value) => {
       //   console.log('chip change value', value)
       //   params.api.setEditCellValue({
