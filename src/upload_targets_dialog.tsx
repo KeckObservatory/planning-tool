@@ -27,13 +27,14 @@ const targetProps = target_schema.properties as TargetProps
 
 let hdrToKeyMapping = Object.fromEntries(Object.entries(targetProps).map(([key, value]: [keyof TargetProps, PropertyProps]) => {
     const desc = value.short_description ?? value.description
-    return[desc, key]
+    return [desc, key]
 }))
 
-const convert_value_to_type = (props: PropertyProps, value: unknown) => {
+const convert_value_to_type = (props: PropertyProps, value: unknown): unknown => {
     const type = props.type
     if (type.includes('number') || type.includes('integer')) {
         //@ts-ignore
+        typeof value === 'string' && (value = value.replaceAll('\'', ''))
         return Number(value)
     }
     else if (type.includes('string')) {
@@ -44,11 +45,9 @@ const convert_value_to_type = (props: PropertyProps, value: unknown) => {
         //@ts-ignore
         return Boolean(value)
     }
-    else if (type.includes('array')) {
-        value = (value as Array<unknown>).map((item: unknown) => {
-            return convert_value_to_type(props.items as PropertyProps, item)
-        })
-
+    else if (type.includes('array') && typeof value === 'string') {
+        const arr = value.split(',') as string[]
+        return arr.map(item => convert_value_to_type(props.items as PropertyProps, item))
     }
     return value
 }
@@ -66,7 +65,7 @@ export const format_target_property = (key: keyof Target, value: unknown, props:
     return fmtValue
 }
 
-export const format_targets = (tgts: Target[], targetProps: TargetProps) => {
+export const format_targets = (tgts: UploadedTarget[], targetProps: TargetProps) => {
     const fmtTgts = tgts.map((tgt) => {
         Object.entries(tgt).forEach(([key, value]) => {
             const props = targetProps[key]
@@ -116,20 +115,12 @@ const parse_csv = (contents: string) => {
     const [header, ...lines] = contents.split('\n')
         .map(s => s.replace('\r', '').split(','))
     const tgts = lines.map((item) => {
-        const tgt = {} as Target;
+        const tgt = {} as UploadedTarget;
         header.forEach((hdr, index) => {
-            const key = hdrToKeyMapping[hdr] as keyof Target
-            let value = item.at(index) as keyof Target[keyof Target]
-            if (key === 'ra' || key === 'dec') {
-                //@ts-ignore
-                value = raDecFormat(value as string)
-            }
-            if (key === 'tags') {
-                //@ts-ignore
-                value = (value as string).split(',') as Array<string>
-            }
-            
-            tgt[key] = value 
+            const key = hdrToKeyMapping[hdr]
+            let value = item.at(index)
+            //@ts-ignore
+            key && (tgt[key] = value)
         });
         return tgt;
     });
@@ -139,7 +130,7 @@ const parse_csv = (contents: string) => {
 const split_at = (index: number, str: string) => [str.slice(0, index), str.slice(index+1)] 
 
 const parse_txt = (contents: string, obsid: number) => {
-    let tgts = [] as Target[]
+    let tgts = [] as UploadedTarget[]
     contents.split('\n').forEach((row) => {
         if (row === '') return
         if (row.startsWith('#')) return
@@ -152,10 +143,10 @@ const parse_txt = (contents: string, obsid: number) => {
             console.warn('ra', ra, 'dec', dec)
             return
         }
-        let tgt: Target = {
+        let tgt: UploadedTarget = {
             _id: randomId(),
             target_name,
-            obsid: obsid,
+            obsid: String(obsid),
             ra,
             dec,
             epoch
@@ -169,6 +160,10 @@ const parse_txt = (contents: string, obsid: number) => {
         tgts.push(tgt);
     });
     return tgts
+}
+
+interface UploadedTarget {
+    [key: string]: string
 }
 
 export function UploadComponent(props: UploadProps) {
@@ -185,7 +180,7 @@ export function UploadComponent(props: UploadProps) {
         fileReader.onload = e => {
             const contents = e.target?.result as string
             //const tgts = ext?.includes('csv') ? parse_csv(contents) : parse_txt(contents, context.obsid)
-            let tgts: Target[] = [] 
+            let tgts: UploadedTarget[] = [] 
             switch (ext) {
                 case 'json':
                     tgts = parse_json(contents)
