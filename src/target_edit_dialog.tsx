@@ -17,6 +17,7 @@ import SimbadButton from './simbad_button';
 import target_schema from './target_schema.json'
 import { Status, Target } from './App';
 import { MuiChipsInput } from 'mui-chips-input';
+import { ra_dec_to_deg } from './two-d-view/sky_view_util';
 
 interface Props {
     target: Target
@@ -69,8 +70,33 @@ export const raDecFormat = (input: string) => {
     return sign + input;
 }
 
+function deg_to_hms(deg: number, dec = false) {
+    const sign = deg < 0 ? "-" : ""
+    while (deg < 0 && !dec) deg += 360 //convert to positive degrees
+    deg = Math.abs(deg % 360)
+    const hours = Math.floor(deg / 15)
+    const minutes = Math.floor((deg % 15) * 4)
+    const seconds = ((deg % 15) * 4 - minutes) * 60
+    return `${sign}${hours}:${minutes}:${seconds}`
+}
+
+
 export const rowSetter = (tgt: Target, key: string, value?: string | number | boolean | string[]) => {
     let newTgt = { ...tgt, 'status': 'EDITED' as Status, [key]: value }
+    switch (key) {
+        case 'ra':
+            newTgt = { ...newTgt, ra_deg: ra_dec_to_deg(String(value)) };
+            break;
+        case 'dec':
+            newTgt = { ...newTgt, dec_deg: ra_dec_to_deg(String(value), true) };
+            break;
+        case 'ra_deg':
+            newTgt = { ...newTgt, ra: deg_to_hms(value as number) };
+            break;
+        case 'dec_deg':
+            newTgt = { ...newTgt, dec: deg_to_hms(value as number, true) };
+            break;
+    }
     return newTgt
 }
 
@@ -194,7 +220,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 <Tooltip title={input_label('ra', true)}>
                                     <TextField
                                         label={input_label('ra')}
-                                        InputLabelProps={{ shrink: hasSimbad || 'ra' in target }}
                                         id="ra"
                                         value={target.ra}
                                         onChange={(event) => handleTextChange('ra', event.target.value)}
@@ -203,16 +228,32 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 <Tooltip title={input_label('dec', true)}>
                                     <TextField
                                         label={input_label('dec')}
-                                        InputLabelProps={{ shrink: hasSimbad || 'dec' in target }}
                                         id="dec"
                                         value={target.dec}
                                         onChange={(event) => handleTextChange('dec', event.target.value)}
                                     />
                                 </Tooltip>
+                                <Tooltip title={input_label('ra_deg', true)}>
+                                    <TextField
+                                        label={input_label('ra_deg')}
+                                        id="ra_deg"
+                                        value={target.ra_deg}
+                                        onChange={(event) => handleTextChange('ra_deg', event.target.value, true)}
+                                    />
+                                </Tooltip>
+                                <Tooltip title={input_label('dec_deg', true)}>
+                                    <TextField
+                                        label={input_label('dec_deg')}
+                                        id="dec_deg"
+                                        value={target.dec_deg}
+                                        onChange={(event) => handleTextChange('dec_deg', event.target.value)}
+                                    />
+                                </Tooltip>
+                            </Stack>
+                            <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
                                 <Tooltip title={input_label('j_mag', true)}>
                                     <TextField
                                         label={input_label('j_mag')}
-                                        InputLabelProps={{ shrink: hasSimbad || 'j_mag' in target }}
                                         id="j-magnitude"
                                         value={target.j_mag}
                                         onChange={(event) => handleTextChange('j_mag', event.target.value, true)}
@@ -221,7 +262,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 <Tooltip title={input_label('g_mag', true)}>
                                     <TextField
                                         label={input_label('g_mag')}
-                                        InputLabelProps={{ shrink: hasSimbad || 'g_mag' in target }}
                                         id="g-magnitude"
                                         value={target.g_mag}
                                         onChange={(event) => handleTextChange('g_mag', event.target.value, true)}
@@ -232,7 +272,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 <Tooltip title={input_label('ra_offset', true)}>
                                     <TextField
                                         label={input_label('ra_offset')}
-                                        InputLabelProps={{ shrink: hasSimbad || 'ra_offset' in target }}
                                         id="ra_offset"
                                         value={target.ra_offset}
                                         onChange={(event) => handleTextChange('ra_offset', event.target.value, true)}
@@ -241,7 +280,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 <Tooltip title={input_label('dec_offset', true)}>
                                     <TextField
                                         label={input_label('dec_offset')}
-                                        InputLabelProps={{ shrink: hasSimbad || 'dec_offset' in target }}
                                         id="dec_offset"
                                         value={target.dec_offset}
                                         onChange={(event) => handleTextChange('dec_offset', event.target.value, true)}
@@ -274,7 +312,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 <Tooltip title={input_label('d_ra', true)}>
                                     <TextField
                                         label={input_label('d_ra')}
-                                        InputLabelProps={{ shrink: hasSimbad || target.d_ra !== undefined }}
                                         id="dra"
                                         value={target.d_ra}
                                         onChange={(event) => handleTextChange('d_ra', event.target.value, true)}
@@ -283,7 +320,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 <Tooltip title={input_label('d_dec', true)}>
                                     <TextField
                                         label={input_label('d_dec')}
-                                        InputLabelProps={{ shrink: hasSimbad || target.d_dec !== undefined }}
                                         id="d_dec"
                                         value={target.d_dec}
                                         onChange={(event) => handleTextChange('d_dec', event.target.value, true)}
@@ -292,7 +328,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 <Tooltip title={input_label('gaia_id', true)}>
                                     <TextField
                                         label={input_label('gaia_id')}
-                                        InputLabelProps={{ shrink: hasSimbad || target.gaia_id !== undefined }}
                                         id="gaia-id"
                                         value={target.gaia_id}
                                         onChange={(event) => handleTextChange('gaia_id', event.target.value)}
@@ -301,7 +336,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 <Tooltip title={input_label('tic_id', true)}>
                                     <TextField
                                         label={input_label('tic_id')}
-                                        InputLabelProps={{ shrink: hasSimbad || target.tic !== undefined }}
                                         id="tic"
                                         value={target.tic}
                                         onChange={(event) => handleTextChange('tic_id', event.target.value)}
@@ -312,7 +346,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 <Tooltip title={input_label('pm_ra', true)}>
                                     <TextField
                                         label={input_label('pm_ra')}
-                                        InputLabelProps={{ shrink: hasSimbad || 'pm_ra' in target }}
                                         id="pm-ra"
                                         value={target.pm_ra}
                                         onChange={(event) => handleTextChange('pm_ra', event.target.value, true)}
@@ -321,7 +354,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 <Tooltip title={input_label('pm_dec', true)}>
                                     <TextField
                                         label={input_label('pm_dec')}
-                                        InputLabelProps={{ shrink: hasSimbad || 'pm_dec' in target }}
                                         id="pm-dec"
                                         value={target.pm_dec}
                                         onChange={(event) => handleTextChange('pm_dec', event.target.value, true)}
@@ -330,7 +362,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 <Tooltip title={input_label('epoch', true)}>
                                     <TextField
                                         label={input_label('epoch')}
-                                        InputLabelProps={{ shrink: hasSimbad || 'epoch' in target }}
                                         id="epoch"
                                         value={target.epoch}
                                         onChange={(event) => handleTextChange('epoch', event.target.value)}
@@ -349,7 +380,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 <Tooltip title={input_label('comment', true)}>
                                     <TextField
                                         label={input_label('comment')}
-                                        InputLabelProps={{ shrink: hasSimbad || 'comment' in target }}
                                         id="comments"
                                         value={target.comment}
                                         onChange={(event) => handleTextChange('comment', event.target.value)}

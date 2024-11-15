@@ -130,7 +130,7 @@ const TargetStepper = (props: Props) => {
 
         const resp = await submit_target(tgts)
         if (resp.errors) {
-            console.error('errors', resp.errors)
+            // console.error('errors', resp.errors)
         }
 
         targetContext.setTargets((curTgts) => [...tgts, ...curTgts])
