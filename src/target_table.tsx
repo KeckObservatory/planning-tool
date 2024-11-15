@@ -53,7 +53,7 @@ function convert_schema_to_columns(colWidth: number) {
     //TODO: use to update other values when this value is changed (e.g. ra/dec change -> degRa/degDec update)
     const valueSetter: GridValueSetter<Target> = (value: unknown, tgt: Target) => {
       if (valueProps.type === 'array' && value) {
-        value = (value as string).split(',') //should always be a string
+        value = Array.isArray(value) ? (value as string[]).join(',') : value as string
       }
       tgt = { ...tgt, [key]: value }
       return tgt
@@ -209,7 +209,7 @@ export default function TargetTable() {
         if (changeDetected) {
           const isNumber = type.includes('number') || type.includes('integer')
           const isArray = type.includes('array')
-          value = isArray ? format_tags(value.flat(Infinity)) : format_edit_entry(params.field, value, isNumber)
+          value = isArray ? format_tags(value.split(',')) : format_edit_entry(params.field, value, isNumber)
           const newTgt = rowSetter(editTarget, params.field, value)
           setEditTarget(newTgt)
         }
