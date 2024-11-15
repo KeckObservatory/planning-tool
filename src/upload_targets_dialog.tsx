@@ -160,6 +160,7 @@ const csv_to_array = (text: string) => {
     }
     var a = [];                     // Initialize array to receive values.
     text.replace(re_value, // "Walk" the string using replace with callback.
+        //@ts-ignore
         function(m0, m1, m2, m3) {
             // Remove backslash from \' in single quoted values.
             if      (m1 !== undefined) a.push(m1.replace(/\\'/g, "'"));
