@@ -45,7 +45,7 @@
         },
         "epoch": {
             "type":  "string",
-            "description": "Epoch",
+            "description": "Epoch"
         },
         "d_dec": {
             "type":  ["number", "string"],
