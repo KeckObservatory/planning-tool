@@ -241,7 +241,10 @@ export const SkyChart = (props: Props) => {
              xref: 'paper',
              yref: 'y',
              x0: 0,
-             label: {text: 'Left/North Wrap limit'},
+             label: {
+                text: 'Left/North Wrap limit',
+                textposition: 'top center',
+            },
              y0: context.config.keck_geometry[dome].left_north_wrap,
              x1: 1,
              y1: context.config.keck_geometry[dome].left_north_wrap,
@@ -257,7 +260,10 @@ export const SkyChart = (props: Props) => {
              xref: 'paper',
              yref: 'y',
              x0: 0,
-             label: {text: 'Right/South Wrap limit'},
+             label: {
+                text: 'Right/South Wrap limit',
+                textposition: 'top center',
+            },
              y0: context.config.keck_geometry[dome].right_south_wrap,
              x1: 1,
              y1: context.config.keck_geometry[dome].right_south_wrap,
