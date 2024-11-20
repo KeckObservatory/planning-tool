@@ -162,6 +162,7 @@ export const SkyChart = (props: Props) => {
              y1: 1,
              fillcolor: '#eeeeee',
              layer: 'below',
+             opacity: 0.5,
              line: {
                 width: 0
              }
@@ -176,6 +177,7 @@ export const SkyChart = (props: Props) => {
              y1: 1,
              fillcolor: '#dddddd',
              layer: 'below',
+             opacity: 0.5,
              line: {
                 width: 0
              }
@@ -190,6 +192,7 @@ export const SkyChart = (props: Props) => {
              y1: 1,
              fillcolor: '#cccccc',
              layer: 'below',
+             opacity: 0.5,
              line: {
                 width: 0
              }
@@ -204,6 +207,7 @@ export const SkyChart = (props: Props) => {
              y1: 1,
              fillcolor: '#dddddd',
              layer: 'below',
+             opacity: 0.5,
              line: {
                 width: 0
              }
@@ -218,6 +222,7 @@ export const SkyChart = (props: Props) => {
              y1: 1,
              fillcolor: '#eeeeee',
              layer: 'below',
+             opacity: 0.5,
              line: {
                 width: 0
              }
@@ -242,6 +247,7 @@ export const SkyChart = (props: Props) => {
             title: 'Time',
             type: 'date',
             tickformat: '%H:%M',
+            dtick: 3600000, //milliseconds in an hour
             range: [suncalcTimes.dusk.getTime(), suncalcTimes.dawn.getTime()],
         },
         margin: {
