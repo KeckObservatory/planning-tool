@@ -234,6 +234,27 @@ export const SkyChart = (props: Props) => {
     ]
 
     
+    const el_shapes: Partial<Plotly.Shape>[] = [
+        {
+             type: 'rect',
+             xref: 'paper',
+             yref: 'y',
+             x0: 0,
+             label: {
+                text: 'Elevation Limit',
+                textposition: 'top center',
+            },
+             y0: context.config.keck_geometry[dome].r1,
+             x1: 1,
+             y1: context.config.keck_geometry[dome].r1,
+             fillcolor: '#eeeeee',
+             layer: 'above',
+             opacity: 0.5,
+             line: {
+                width: 1
+             }
+        },
+    ]
 
     const az_shapes: Partial<Plotly.Shape>[] = [
         {
@@ -278,6 +299,9 @@ export const SkyChart = (props: Props) => {
 
     if (chartType === 'Azimuth') {
         shapes.push(...az_shapes)
+    }
+    else if (chartType === 'Elevation') {
+        shapes.push(...el_shapes)
     }
 
     const yRange = chartType.includes('Airmass') ? [0, Math.min(30, maxAirmass)] : undefined
