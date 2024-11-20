@@ -14,6 +14,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <App />
         </QueryParamProvider>
       </BrowserRouter>
-    </React.StrictMode>,
+    </React.StrictMode>
   </React.Fragment>
 )

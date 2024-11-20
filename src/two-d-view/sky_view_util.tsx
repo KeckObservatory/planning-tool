@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import * as SunCalc from 'suncalc'
+import { DayViz } from './viz_chart'
 
 //TODO: Put in cfg file
 export const STEP_SIZE = 10 / 60 //hours
@@ -90,16 +91,25 @@ export const get_suncalc_times = (lngLatEl: LngLatEl, date?: Date) => {
     if (!date) {
         date = new Date()
     }
-    let times = SunCalc.getTimes(date, lngLatEl.lat, lngLatEl.lng)
+    SunCalc.addTime(-12, 'amateurDawn', 'amateurDusk')
+    SunCalc.addTime(-18, 'astronomicalDawn', 'astronomicalDusk')
+    let times = SunCalc.getTimes(date, lngLatEl.lat, lngLatEl.lng) as DayViz
     if (date < times.sunrise) { // sun has not risen yet. use yesterday.
         const yesterday = dayjs(date).add(-1, 'day').toDate()
-        times = SunCalc.getTimes(yesterday, lngLatEl.lat, lngLatEl.lng)
+        times = SunCalc.getTimes(yesterday, lngLatEl.lat, lngLatEl.lng) as DayViz
     }
     const nextday = dayjs(date).add(1, 'day').toDate() //be careful not to mutate date
-    let nextdaytimes = SunCalc.getTimes(nextday, lngLatEl.lat, lngLatEl.lng)
+    let nextdaytimes = SunCalc.getTimes(nextday, lngLatEl.lat, lngLatEl.lng) as DayViz
     times.sunrise = nextdaytimes.sunrise
     times.sunriseEnd = nextdaytimes.sunriseEnd
+
+    times.amateurDawn = nextdaytimes.amateurDawn
+    times.nadir = nextdaytimes.nadir
+    times.astronomicalDawn = nextdaytimes.astronomicalDawn
     times.nightEnd = nextdaytimes.nightEnd
+    times.dawn = nextdaytimes.dawn
+    times.nauticalDawn = nextdaytimes.nauticalDawn
+    times.goldenHourEnd = nextdaytimes.goldenHourEnd
     return times
 }
 

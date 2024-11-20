@@ -3,7 +3,7 @@ import * as util from './sky_view_util.tsx'
 import { LngLatEl } from './sky_view_util.tsx';
 import NightPicker from '../two-d-view/night_picker'
 import dayjs, { Dayjs } from 'dayjs';
-import { Autocomplete, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, Stack, Switch, TextField, Tooltip } from '@mui/material';
+import { Autocomplete, FormControl, FormControlLabel, FormLabel, Grid2, Radio, RadioGroup, Stack, Switch, TextField, Tooltip } from '@mui/material';
 import TimeSlider from './time_slider';
 import { Target, useStateContext } from '../App.tsx';
 import { DomeChart } from './dome_chart.tsx';
@@ -137,9 +137,9 @@ const TwoDView = ({ targets }: Props) => {
         lat: context.config.keck_latitude,
         el: context.config.keck_elevation
     }
-    const [nadir, setNadir] = React.useState(util.get_suncalc_times(lngLatEl, obsdate).nadir)
-    const [times, setTimes] = React.useState(util.get_times_using_nadir(nadir))
-    const [time, setTime] = React.useState(nadir)
+    const [suncalcTimes, setSuncalcTimes] = React.useState(util.get_suncalc_times(lngLatEl, obsdate))
+    const [times, setTimes] = React.useState(util.get_times_using_nadir(suncalcTimes.nadir))
+    const [time, setTime] = React.useState(suncalcTimes.nadir)
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
     const [fovs, setFOVs] = React.useState<string[]>([])
     const [instrumentFOV, setInstrumentFOV] = React.useState('MOSFIRE')
@@ -155,8 +155,8 @@ const TwoDView = ({ targets }: Props) => {
     }, [])
 
     React.useEffect(() => {
-        const newNadir = util.get_suncalc_times(lngLatEl, obsdate).nadir
-        const newTimes = util.get_times_using_nadir(newNadir)
+        const newSuncalcTimes = util.get_suncalc_times(lngLatEl, obsdate)
+        const newTimes = util.get_times_using_nadir(newSuncalcTimes.nadir)
         const tviz: TargetView[] = []
         const KG = context.config.keck_geometry[dome]
         targets.forEach((tgt: Target) => {
@@ -191,8 +191,8 @@ const TwoDView = ({ targets }: Props) => {
             }
         })
         setTargetView(tviz)
-        setNadir(newNadir)
-        setTime(newNadir)
+        setSuncalcTimes(newSuncalcTimes)
+        setTime(newSuncalcTimes.nadir)
         setTimes(newTimes)
     }, [obsdate, targets])
 
@@ -210,8 +210,8 @@ const TwoDView = ({ targets }: Props) => {
 
 
     return (
-        <Grid container spacing={2}>
-            <Grid item xs={8}>
+        <Grid2 container spacing={2}>
+            <Grid2 size={{xs:8}}>
                 <>
                     <Stack sx={{ verticalAlign: 'bottom', paddingTop: '9px', marginBottom: '0px', overflow: "auto" }}
                         width="100%"
@@ -241,8 +241,8 @@ const TwoDView = ({ targets }: Props) => {
                     />
                     <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
                 </>
-            </Grid>
-            <Grid item xs={4}>
+            </Grid2>
+            <Grid2 size={{xs:4}}>
                 <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={0}>
                     <Tooltip placement="top" title="Select instrument field of view">
                         <Autocomplete
@@ -274,8 +274,8 @@ const TwoDView = ({ targets }: Props) => {
                         />
                     </Tooltip> */}
                 </Stack>
-            </Grid>
-            <Grid item xs={8}>
+            </Grid2>
+            <Grid2 size={{xs:8}}>
                 <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={1}>
                     <SkyChart
                         height={height}
@@ -285,6 +285,7 @@ const TwoDView = ({ targets }: Props) => {
                         showMoon={showMoon}
                         showCurrLoc={showCurrLoc}
                         times={times}
+                        suncalcTimes={suncalcTimes}
                         time={time}
                         dome={dome}
                     />
@@ -299,8 +300,8 @@ const TwoDView = ({ targets }: Props) => {
                         dome={dome}
                     />
                 </Stack>
-            </Grid>
-            <Grid item xs={4}>
+            </Grid2>
+            <Grid2 size={{xs:4}}>
                 <AladinViewer
                     height={height}
                     fovAngle={rotatorAngle}
@@ -308,8 +309,8 @@ const TwoDView = ({ targets }: Props) => {
                     instrumentFOV={instrumentFOV}
                     width={width}
                     targets={targets} />
-            </Grid>
-        </Grid >
+            </Grid2>
+        </Grid2 >
     );
 }
 

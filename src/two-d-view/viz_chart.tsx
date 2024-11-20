@@ -152,10 +152,14 @@ interface TargetViz extends Target {
     semester_visibility: DayViz[]
 }
 
-interface DayViz extends GetTimesResult {
+export interface DayViz extends GetTimesResult {
     date: Date,
     visibility: VizRow[]
     visible_hours: number
+    amateurDawn: Date, // Sun in 12 degrees below the horizon
+    amateurDusk: Date, // Sun in 12 degrees below the horizon
+    astronomicalDawn: Date, // Sun is 18 degrees below the horizon
+    astronomicalDusk: Date, // Sun is 18 degrees below the horizon
 }
 
 export interface VizRow {
@@ -282,7 +286,12 @@ export const TargetVizChart = (props: Props) => {
                 const [az, alt] = ra_dec_to_az_alt(ra, dec, time, lngLatEl)
                 const air_mass_val = air_mass(alt, lngLatEl.el)
                 // const air_mass_val = air_mass(alt)
-                const vis: VizRow = { az, alt, ...alt_az_observable(alt, az, KG), datetime: time, air_mass: air_mass_val }
+                const vis: VizRow = { 
+                    az, 
+                    alt, 
+                    ...alt_az_observable(alt, az, KG), 
+                    datetime: time, 
+                    air_mass: air_mass_val }
                 return vis
             })
 
@@ -293,7 +302,7 @@ export const TargetVizChart = (props: Props) => {
 
             const visible_hours = vizSum * ROUND_MINUTES / 60
 
-            return { date: date.toDate(), ...suncalc_times, visibility, visible_hours }
+            return { ...suncalc_times, visibility, visible_hours }
         })
 
         setTargetView(tViz as TargetViz)

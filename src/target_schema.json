@@ -127,6 +127,11 @@
             "short_description": "TIC ID",
             "description": "TIC Identifier"
         },
+        "rotator_destintation": {
+            "type": "number",
+            "short_description": "Rotator Angle",
+            "description": "Rotator Position Angle in degrees"
+        },
         "gaia_id": {
             "type": "string",
             "short_description": "GAIA ID",

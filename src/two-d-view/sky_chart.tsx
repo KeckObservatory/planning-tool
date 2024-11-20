@@ -2,7 +2,7 @@ import Plot from "react-plotly.js";
 import * as util from './sky_view_util.tsx'
 import { Dome, hidate, TargetView } from "./two_d_view";
 import { useStateContext } from "../App";
-import { reason_to_color_mapping, VizRow } from "./viz_chart.tsx";
+import { DayViz, reason_to_color_mapping, VizRow } from "./viz_chart.tsx";
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -21,6 +21,7 @@ interface Props {
     dome: Dome
     width: number
     height: number
+    suncalcTimes: DayViz
 }
 
 const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType: SkyChart, lngLatEl: util.LngLatEl): number => {
@@ -51,7 +52,7 @@ const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType: SkyCha
 
 
 export const SkyChart = (props: Props) => {
-    const { targetView, chartType, time, showCurrLoc, width, height } = props
+    const { targetView, chartType, time, showCurrLoc, width, height, suncalcTimes } = props
     const context = useStateContext()
 
     const lngLatEl: util.LngLatEl = {
@@ -61,8 +62,6 @@ export const SkyChart = (props: Props) => {
     }
 
     let traces = targetView.map((tgtv: TargetView) => {
-
-
         let texts: string[] = []
         let y: number[] = []
         let color: string[] = []
@@ -149,17 +148,96 @@ export const SkyChart = (props: Props) => {
             })
     }
 
+    //show twilight times
+    console.log('suncalcTimes', suncalcTimes)
+
+    const shapes: Partial<Plotly.Shape>[] = [
+        {
+             type: 'rect',
+             xref: 'x',
+             yref: 'paper',
+             x0: suncalcTimes.dusk.getTime(),
+             y0: 0,
+             x1: suncalcTimes.amateurDusk.getTime(),
+             y1: 1,
+             fillcolor: '#eeeeee',
+             line: {
+                width: 0
+             }
+        },
+        {
+             type: 'rect',
+             xref: 'x',
+             yref: 'paper',
+             x0: suncalcTimes.amateurDusk.getTime(),
+             y0: 0,
+             x1: suncalcTimes.astronomicalDusk.getTime(),
+             y1: 1,
+             fillcolor: '#dddddd',
+             line: {
+                width: 0
+             }
+        },
+        {
+             type: 'rect',
+             xref: 'x',
+             yref: 'paper',
+             x0: suncalcTimes.astronomicalDusk.getTime(),
+             y0: 0,
+             x1: suncalcTimes.astronomicalDawn.getTime(),
+             y1: 1,
+             fillcolor: '#cccccc',
+             line: {
+                width: 0
+             }
+        },
+        {
+             type: 'rect',
+             xref: 'x',
+             yref: 'paper',
+             x0: suncalcTimes.astronomicalDawn.getTime(),
+             y0: 0,
+             x1: suncalcTimes.amateurDawn.getTime(),
+             y1: 1,
+             fillcolor: '#dddddd',
+             line: {
+                width: 0
+             }
+        },
+        {
+             type: 'rect',
+             xref: 'x',
+             yref: 'paper',
+             x0: suncalcTimes.amateurDawn.getTime(),
+             y0: 0,
+             x1: suncalcTimes.dawn.getTime(),
+             y1: 1,
+             fillcolor: '#eeeeee',
+             line: {
+                width: 0
+             }
+        },
+    ]
+
+
     const yRange = chartType.includes('Airmass') ? [0, Math.min(30, maxAirmass)] : undefined
     console.log('yRange', yRange)
 
     const layout: Partial<Plotly.Layout> = {
         width,
         height,
+        shapes,
         title: `Target ${chartType} vs Time`,
         hovermode: "closest",
         yaxis: {
             range: yRange,
             autorange: !chartType.includes('Airmass')
+        },
+        xaxis: {
+            title: 'Time',
+            type: 'date',
+            tickformat: '%H:%M',
+            range: [suncalcTimes.dusk.getTime(), suncalcTimes.dawn.getTime()],
         },
         margin: {
             l: 40,
