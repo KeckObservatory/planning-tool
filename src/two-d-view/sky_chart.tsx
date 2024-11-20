@@ -161,6 +161,7 @@ export const SkyChart = (props: Props) => {
              x1: suncalcTimes.amateurDusk.getTime(),
              y1: 1,
              fillcolor: '#eeeeee',
+             layer: 'below',
              line: {
                 width: 0
              }
@@ -174,6 +175,7 @@ export const SkyChart = (props: Props) => {
              x1: suncalcTimes.astronomicalDusk.getTime(),
              y1: 1,
              fillcolor: '#dddddd',
+             layer: 'below',
              line: {
                 width: 0
              }
@@ -187,6 +189,7 @@ export const SkyChart = (props: Props) => {
              x1: suncalcTimes.astronomicalDawn.getTime(),
              y1: 1,
              fillcolor: '#cccccc',
+             layer: 'below',
              line: {
                 width: 0
              }
@@ -200,6 +203,7 @@ export const SkyChart = (props: Props) => {
              x1: suncalcTimes.amateurDawn.getTime(),
              y1: 1,
              fillcolor: '#dddddd',
+             layer: 'below',
              line: {
                 width: 0
              }
@@ -213,6 +217,7 @@ export const SkyChart = (props: Props) => {
              x1: suncalcTimes.dawn.getTime(),
              y1: 1,
              fillcolor: '#eeeeee',
+             layer: 'below',
              line: {
                 width: 0
              }
