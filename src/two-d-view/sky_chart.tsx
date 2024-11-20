@@ -246,7 +246,7 @@ export const SkyChart = (props: Props) => {
              x1: 1,
              y1: context.config.keck_geometry[dome].left_north_wrap,
              fillcolor: '#eeeeee',
-             layer: 'below',
+             layer: 'above',
              opacity: 0.5,
              line: {
                 width: 1
@@ -262,7 +262,7 @@ export const SkyChart = (props: Props) => {
              x1: 1,
              y1: context.config.keck_geometry[dome].right_south_wrap,
              fillcolor: '#eeeeee',
-             layer: 'below',
+             layer: 'above',
              opacity: 0.5,
              line: {
                 width: 1
