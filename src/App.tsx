@@ -89,6 +89,8 @@ export interface GeoModel {
     t1: number,
     t2: number,
     t3: number,
+    left_north_wrap: number,
+    right_south_wrap: number,
     trackLimit: number
 }
 

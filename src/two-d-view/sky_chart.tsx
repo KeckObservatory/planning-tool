@@ -56,7 +56,7 @@ const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType: SkyCha
 
 
 export const SkyChart = (props: Props) => {
-    const { targetView, chartType, time, showCurrLoc, width, height, suncalcTimes } = props
+    const { targetView, chartType, time, showCurrLoc, width, height, dome, suncalcTimes } = props
     const context = useStateContext()
 
     const lngLatEl: util.LngLatEl = {
@@ -233,6 +233,46 @@ export const SkyChart = (props: Props) => {
         },
     ]
 
+    
+
+    const az_shapes: Partial<Plotly.Shape>[] = [
+        {
+             type: 'rect',
+             xref: 'paper',
+             yref: 'y',
+             x0: 0,
+             label: {text: 'Left/North Wrap limit'},
+             y0: context.config.keck_geometry[dome].left_north_wrap,
+             x1: 1,
+             y1: context.config.keck_geometry[dome].left_north_wrap,
+             fillcolor: '#eeeeee',
+             layer: 'below',
+             opacity: 0.5,
+             line: {
+                width: 1
+             }
+        },
+        {
+             type: 'rect',
+             xref: 'paper',
+             yref: 'y',
+             x0: 0,
+             label: {text: 'Right/South Wrap limit'},
+             y0: context.config.keck_geometry[dome].right_south_wrap,
+             x1: 1,
+             y1: context.config.keck_geometry[dome].right_south_wrap,
+             fillcolor: '#eeeeee',
+             layer: 'below',
+             opacity: 0.5,
+             line: {
+                width: 1
+             }
+        },
+    ]
+
+    if (chartType === 'Azimuth') {
+        shapes.push(...az_shapes)
+    }
 
     const yRange = chartType.includes('Airmass') ? [0, Math.min(30, maxAirmass)] : undefined
     console.log('yRange', yRange)

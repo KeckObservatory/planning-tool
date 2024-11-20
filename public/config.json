@@ -56,6 +56,8 @@
             "t1": 361,
             "t2": 5.3,
             "t3": 146.2,
+            "left_north_wrap": 235,
+            "right_south_wrap": 325,
             "trackLimit": 85
         },
         "K2": {
@@ -67,6 +69,8 @@
             "t1": 361,
             "t2": 185.3,
             "t3": 332.8,
+            "left_north_wrap": 235,
+            "right_south_wrap": 325,
             "trackLimit": 85
         }
     }
