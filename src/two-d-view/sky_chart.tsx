@@ -9,7 +9,7 @@ import timezone from 'dayjs/plugin/timezone'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-export type SkyChart = "Airmass" | "Elevation" | "Parallactic" | "Lunar Angle"
+export type SkyChart = "Airmass" | "Elevation" | "Parallactic" | "Lunar Angle" | "Azimuth"
 
 interface Props {
     targetView: TargetView[]
@@ -41,6 +41,10 @@ const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType: SkyCha
         }
         case 'Lunar Angle': {
             val = util.lunar_angle(ra, dec, viz.datetime, lngLatEl)
+            break;
+        }
+        case 'Azimuth': {
+            val = viz.az
             break;
         }
         default: {
