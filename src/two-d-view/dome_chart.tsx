@@ -85,7 +85,7 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
             hovorinfo: 'text',
             hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
             marker: {
-                color: color,
+                color: colors[idx % colors.length],
                 opacity: 0,
                 size: 4
             },
