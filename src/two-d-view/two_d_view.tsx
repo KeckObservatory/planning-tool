@@ -3,7 +3,7 @@ import * as util from './sky_view_util.tsx'
 import { LngLatEl } from './sky_view_util.tsx';
 import NightPicker from '../two-d-view/night_picker'
 import dayjs, { Dayjs } from 'dayjs';
-import { Autocomplete, FormControl, FormControlLabel, FormLabel, Grid2, Radio, RadioGroup, Stack, Switch, TextField, Tooltip } from '@mui/material';
+import { Autocomplete, FormControl, FormControlLabel, FormLabel, Grid2, Radio, RadioGroup, Stack, Switch, TextField, Tooltip, Typography } from '@mui/material';
 import TimeSlider from './time_slider';
 import { Target, useStateContext } from '../App.tsx';
 import { DomeChart } from './dome_chart.tsx';
@@ -11,8 +11,10 @@ import { SkyChart } from './sky_chart.tsx';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { alt_az_observable, VizRow } from './viz_chart.tsx';
-import AladinViewer  from '../aladin';
+import AladinViewer from '../aladin';
 import { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
+import { MoonMarker } from './moon_marker.tsx';
+import * as SunCalc from "suncalc";
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -62,7 +64,7 @@ export const get_shapes = async (fcType: ShapeCatagory) => {
     const data = await resp.text()
     const json = JSON.parse(data) as ShapeCfgFile
     const featureCollection = json[fcType]
-    return featureCollection 
+    return featureCollection
 }
 
 export const SkyChartSelect = (props: SkyChartSelectProps) => {
@@ -153,7 +155,7 @@ const TwoDView = ({ targets }: Props) => {
             const newFovs = features.map((f: any) => f['properties'].instrument) as string[]
             setFOVs(newFovs)
         }
-        fun() 
+        fun()
     }, [])
 
     React.useEffect(() => {
@@ -210,15 +212,16 @@ const TwoDView = ({ targets }: Props) => {
         }
     }
 
+    const moonInfo = SunCalc.getMoonIllumination(time)
+
 
     return (
         <Grid2 container spacing={2}>
-            <Grid2 size={{xs:8}}>
+            <Grid2 size={{ xs: 8 }}>
                 <>
                     <Stack sx={{ verticalAlign: 'bottom', paddingTop: '9px', marginBottom: '0px', overflow: "auto" }}
                         width="100%"
                         direction="row"
-
                         justifyContent='center'
                         spacing={1}>
                         <NightPicker date={obsdate} handleDateChange={handleDateChange} />
@@ -247,10 +250,25 @@ const TwoDView = ({ targets }: Props) => {
                         time={time}
                         setTime={setTime}
                     />
-                    <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
+                    <Stack width="100%" direction="row" justifyContent='space-between' spacing={0}>
+                        <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
+                        <Stack direction='column'>
+                            <FormControl sx={{ display: 'inlineBlock' }}>
+                                <FormLabel sx={{ marginRight: '6px', paddingTop: '9px' }}
+                                    id="moon-phase-group-label">Moon Fraction: </FormLabel>
+                            </FormControl>
+                            <Stack direction='row' spacing={1}>
+                                <MoonMarker
+                                    moonInfo={moonInfo}
+                                    datetime={time} width={width} height={height}
+                                />
+                                <Typography>{Math.floor(moonInfo.fraction * 100)}%</Typography>
+                            </Stack>
+                        </Stack>
+                    </Stack>
                 </>
             </Grid2>
-            <Grid2 size={{xs:4}}>
+            <Grid2 size={{ xs: 4 }}>
                 <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={0}>
                     <Tooltip placement="top" title="Select instrument field of view">
                         <Autocomplete
@@ -283,7 +301,8 @@ const TwoDView = ({ targets }: Props) => {
                     </Tooltip> */}
                 </Stack>
             </Grid2>
-            <Grid2 size={{xs:8}}>
+            <Grid2 size={{ xs: 8 }}>
+                {/* TODO: Work on Vertical Spacing */}
                 <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={1}>
                     <SkyChart
                         height={height}
@@ -310,7 +329,7 @@ const TwoDView = ({ targets }: Props) => {
                     />
                 </Stack>
             </Grid2>
-            <Grid2 size={{xs:4}}>
+            <Grid2 size={{ xs: 4 }}>
                 <AladinViewer
                     height={height}
                     fovAngle={rotatorAngle}

@@ -29,7 +29,7 @@ const TimeSlider = (props: Props) => {
 
     return (
         <Box sx={{
-            height: "30px",
+            height: "40px",
         }} padding={0}>
             <FormLabel id="hour-offset-from-now-label">{`HT: ${dayjs(props.time).format('HH:mm')}`}</FormLabel>
             <Slider

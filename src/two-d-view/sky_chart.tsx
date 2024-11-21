@@ -167,7 +167,7 @@ export const SkyChart = (props: Props) => {
     }
 
     //show twilight times
-    console.log('suncalcTimes', suncalcTimes)
+    // console.log('suncalcTimes', suncalcTimes)
 
     const shapes: Partial<Plotly.Shape>[] = [
         {
@@ -319,7 +319,7 @@ export const SkyChart = (props: Props) => {
     }
 
     const yRange = chartType.includes('Airmass') ? [0, Math.min(30, maxAirmass)] : undefined
-    console.log('yRange', yRange)
+    // console.log('yRange', yRange)
 
     const layout: Partial<Plotly.Layout> = {
         width,

@@ -7,6 +7,8 @@ import { colors } from "./sky_chart.tsx"
 import { GeoModel, useStateContext } from "../App.tsx"
 import { reason_to_color_mapping, VizRow } from "./viz_chart.tsx"
 
+const traceRadiusLimit = 90 - 2 //ignore points greater than the dome radius
+
 interface DomeChartProps {
     targetView: TargetView[]
     showMoon: boolean
@@ -58,10 +60,12 @@ const make_disk_polar = (r1: number, r2: number, th1: number, th2: number) => {
 
 const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc: boolean, times: Date[], time: Date,
     time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
-): any[] => {
+): [any[], any] => {
 
     //target trajectory traces
-    let traces: any[] = targetView.map((tgtv: TargetView, idx: number) => {
+    let moonImage: Partial<Plotly.Image> = {}
+    let traces: Partial<Plotly.Data>[] = []
+    targetView.forEach((tgtv: TargetView, idx: number) => {
         let [rr, tt] = [[] as number[], [] as number[]]
         const texts: string[] = []
         let color: string[] = []
@@ -74,7 +78,7 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
             txt += `Visible for: ${tgtv.visibilitySum.toFixed(2)} hours<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
             const radius = 90 - viz.alt
-            if (radius > 90) return //ignore points greater than the radius 
+            if (radius > traceRadiusLimit + 1) return //ignore points greater than the radius 
             texts.push(txt)
             color.push(reason_to_color_mapping(viz.reasons))
             rr.push(90 - viz.alt)
@@ -103,7 +107,7 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
             namelength: -1,
             name: tgtv.target_name
         }
-        return trace
+        traces.push(trace as Plotly.Data)
     })
 
     //moon trajectory trace
@@ -113,15 +117,15 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
         times.forEach((time: Date, idx: number) => {
             const azel = SunCalc.getMoonPosition(time, lngLatEl.lat, lngLatEl.lng)
             const ae = [(Math.PI + azel.azimuth) * 180 / Math.PI, azel.altitude * 180 / Math.PI]
+            const moonFraction = SunCalc.getMoonIllumination(time).fraction
             const r = 90 - ae[1]
-            if (r <= 90) {
+            if (r <= traceRadiusLimit + 1) { //can be more tolerant than markers
                 rr.push(90 - ae[1])
                 tt.push(ae[0])
                 let txt = ""
                 txt += `Az: ${ae[0].toFixed(2)}<br>`
                 txt += `El: ${ae[1].toFixed(2)}<br>`
-                txt += `Airmass: ${util.air_mass(ae[1], lngLatEl.el).toFixed(2)}<br>`
-                // txt += `Airmass: ${util.air_mass(ae[1]).toFixed(2)}<br>`
+                txt += `Moon Fraction: ${(100 * moonFraction).toFixed(2)} %<br>`
                 txt += `HT: ${dayjs(times[idx]).format(time_format)}`
                 texts.push(txt)
             }
@@ -145,7 +149,56 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
             namelength: -1,
             name: 'Moon'
         }
-        traces.push(moonTrace)
+        traces.push(moonTrace as Plotly.Data)
+
+        if (showCurrLoc) {
+            const azel = SunCalc.getMoonPosition(time, lngLatEl.lat, lngLatEl.lng)
+            const moonFraction = SunCalc.getMoonIllumination(time).fraction
+            const ae = [(Math.PI + azel.azimuth) * 180 / Math.PI, azel.altitude * 180 / Math.PI]
+            const r = 90 - ae[1]
+            let txt = ""
+            txt += `Az: ${ae[0].toFixed(2)}<br>`
+            txt += `El: ${ae[1].toFixed(2)}<br>`
+            txt += `Moon Fraction: ${(100 * moonFraction).toFixed(2)} %<br>`
+            txt += `HT: ${dayjs(time).format(time_format)}`
+            const moonMarkerTrace = {
+                r: [r],
+                theta: [ae[0]],
+                text: r <= KG.trackLimit ? [txt] : [],
+                hovorinfo: 'text',
+                showlegend: false,
+                hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+                color: "rgb(0,0,0)",
+                textposition: 'top left',
+                type: 'scatterpolar',
+                mode: 'markers',
+                marker: {
+                    size: 12,
+                    color: moon_color,
+                    line: {
+                        color: 'black',
+                        width: 2
+                    }
+                },
+                namelength: -1,
+                name: 'Current Moon Location'
+            }
+
+            if (r < traceRadiusLimit) {
+                traces.push(moonMarkerTrace as Plotly.Data)
+                const x = ae[1] * Math.cos(ae[0] * Math.PI / 180)
+                const y = ae[1] * Math.sin(ae[0] * Math.PI / 180)
+                moonImage = {
+                    source: "https://images.plot.ly/language-icons/api-home/python-logo.png",
+                    xref: "x",
+                    yref: "y",
+                    x: x,
+                    y: y,
+                    sizex: 0.2,
+                    sizey: 0.2,
+                }
+            }
+        }
     }
 
 
@@ -159,7 +212,7 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
             const dec = tgtv.dec_deg as number
             const azEl = util.get_target_traj(ra, dec, [time], lngLatEl) as [number, number][]
             const r = 90 - azEl[0][1]
-            if (r <= KG.trackLimit) {
+            if (r <= traceRadiusLimit) {
                 rr.push(r)
                 tt.push(azEl[0][0])
                 let txt = ""
@@ -193,50 +246,8 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
                 namelength: -1,
                 name: 'Current location'
             }
-            traces.push(trace)
+            traces.push(trace as Plotly.Data)
         })
-
-        if (showMoon) {
-            let [rr, tt] = [[] as number[], [] as number[]]
-            let texts: string[] = []
-            const azel = SunCalc.getMoonPosition(time, lngLatEl.lat, lngLatEl.lng)
-            const ae = [(Math.PI + azel.azimuth) * 180 / Math.PI, azel.altitude * 180 / Math.PI]
-            const r = 90 - ae[1]
-            if (r <= KG.trackLimit) {
-                rr.push(r)
-                tt.push(ae[0])
-                let txt = ""
-                txt += `Az: ${ae[0].toFixed(2)}<br>`
-                txt += `El: ${ae[1].toFixed(2)}<br>`
-                txt += `Airmass: ${util.air_mass(ae[1], lngLatEl.el).toFixed(2)}<br>`
-                // txt += `Airmass: ${util.air_mass(ae[1]).toFixed(2)}<br>`
-                txt += `HT: ${dayjs(time).format(time_format)}`
-                texts.push(txt)
-            }
-            const moonTrace = {
-                r: rr,
-                theta: tt,
-                text: texts,
-                hovorinfo: 'text',
-                showlegend: false,
-                hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
-                color: "rgb(0,0,0)",
-                textposition: 'top left',
-                type: 'scatterpolar',
-                mode: 'markers',
-                marker: {
-                    size: 12,
-                    color: moon_color,
-                    line: {
-                        color: 'black',
-                        width: 2
-                    }
-                },
-                namelength: -1,
-                name: 'Current Moon Location'
-            }
-            traces.push(moonTrace)
-        }
     }
 
     //add dome shapes
@@ -270,7 +281,7 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
         theta: d3.theta
     }
     traces.push(trackingshape)
-    return traces
+    return [traces, moonImage]
 }
 
 export const DomeChart = (props: DomeChartProps) => {
@@ -283,7 +294,7 @@ export const DomeChart = (props: DomeChartProps) => {
         el: context.config.keck_elevation
     }
 
-    const traces = make_2d_traces(targetView,
+    const [traces, moonImage] = make_2d_traces(targetView,
         showMoon,
         showCurrLoc,
         times,
@@ -336,10 +347,18 @@ export const DomeChart = (props: DomeChartProps) => {
         }]
     }
 
+    if (showMoon) {
+        console.log('moonImage', moonImage)
+        // layout.images = [ moonImage ]
+    }
+
     return (
-        <Plot
-            data={traces}
-            layout={layout}
-        />
+        <>
+            <Plot
+                data={traces}
+                layout={layout}
+            />
+
+        </>
     )
 }
