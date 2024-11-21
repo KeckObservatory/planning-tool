@@ -137,7 +137,7 @@ export const SkyChart = (props: Props) => {
                 showlegend: false,
                 marker: { 
                     size: 12,
-                    color: 'red',
+                    // color: 'red',
                     line: {
                         color: 'black',
                         width: 3
