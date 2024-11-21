@@ -328,14 +328,15 @@ export const SkyChart = (props: Props) => {
         title: `Target ${chartType} vs Time`,
         hovermode: "closest",
         yaxis: {
+            title: chartType === 'Airmass' ? 'Airmass' : 'Degrees',
             range: yRange,
             autorange: !chartType.includes('Airmass')
         },
         xaxis: {
-            title: 'Time',
+            title: 'Time [Hr:Min]',
             type: 'date',
             tickformat: '%H:%M',
-            dtick: 3600000, //milliseconds in an hour
+            dtick: 2 * 3600000, //milliseconds in an hour
             range: [suncalcTimes.dusk.getTime(), suncalcTimes.dawn.getTime()],
         },
         margin: {
