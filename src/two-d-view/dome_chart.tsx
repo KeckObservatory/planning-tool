@@ -3,6 +3,7 @@ import * as SunCalc from 'suncalc'
 import * as util from './sky_view_util.tsx'
 import { Dome, TargetView } from "./two_d_view"
 import Plot from "react-plotly.js"
+import { colors } from "./sky_chart.tsx"
 import { GeoModel, useStateContext } from "../App.tsx"
 import { reason_to_color_mapping, VizRow } from "./viz_chart.tsx"
 
@@ -53,10 +54,10 @@ const make_disk_polar = (r1: number, r2: number, th1: number, th2: number) => {
     return pTrace
 }
 
-const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc: boolean, times: Date[], time: Date, 
-time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl 
+const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc: boolean, times: Date[], time: Date,
+    time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
 ): any[] => {
-    let traces: any[] = targetView.map((tgtv: TargetView) => {
+    let traces: any[] = targetView.map((tgtv: TargetView, idx: number) => {
         let [rr, tt] = [[] as number[], [] as number[]]
         const texts: string[] = []
         let color: string[] = []
@@ -68,7 +69,7 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
             txt += `HT: ${dayjs(viz.datetime).format(time_format)}<br>`
             txt += `Visible for: ${tgtv.visibilitySum.toFixed(2)} hours<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
-            const radius = 90 - viz.alt 
+            const radius = 90 - viz.alt
             if (radius > 90) return //ignore points greater than the radius 
             texts.push(txt)
             color.push(reason_to_color_mapping(viz.reasons))
@@ -89,7 +90,8 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
                 size: 4
             },
             line: {
-                width: 5 
+                color: colors[idx % colors.length],
+                width: 5
             },
             textposition: 'top left',
             type: 'scatterpolar',
@@ -129,7 +131,7 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
             color: "rgb(0,0,0)",
             hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
             line: {
-                width: 5 
+                width: 5
             },
             textposition: 'top left',
             type: 'scatterpolar',
@@ -160,7 +162,8 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
                 texts.push(txt)
             }
         }
-        targetView.forEach((tgtv: TargetView) => { //add current location trace
+
+        targetView.forEach((tgtv: TargetView, idx: number) => { //add current location trace
             const ra = tgtv.ra_deg as number
             const dec = tgtv.dec_deg as number
             const azEl = util.get_target_traj(ra, dec, [time], lngLatEl) as [number, number][]
@@ -176,31 +179,32 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
                 txt += `HT: ${dayjs(time).format(time_format)}`
                 texts.push(txt)
             }
+
+            const trace = {
+                r: rr,
+                theta: tt,
+                text: texts,
+                hovorinfo: 'text',
+                showlegend: false,
+                hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+                color: "rgb(0,0,0)",
+                textposition: 'top left',
+                type: 'scatterpolar',
+                mode: 'markers',
+                marker: {
+                    size: 12,
+                    color: colors[idx % colors.length],
+                    line: {
+                        color: 'black',
+                        width: 2
+                    }
+                },
+                namelength: -1,
+                name: 'Current location'
+            }
+            traces.push(trace)
         })
 
-        const trace = {
-            r: rr,
-            theta: tt,
-            text: texts,
-            hovorinfo: 'text',
-            showlegend: false,
-            hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
-            color: "rgb(0,0,0)",
-            textposition: 'top left',
-            type: 'scatterpolar',
-            mode: 'markers',
-            marker: { 
-                size: 12,
-                color: 'red',
-                line: {
-                    color: 'black',
-                    width: 2
-                  }
-             },
-            namelength: -1,
-            name: 'Current location'
-        }
-        traces.push(trace)
     }
 
     //add dome shapes
@@ -223,8 +227,8 @@ time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
     traces.push(shape)
 
     //add tracking limits
-    const rt1 = 0 
-    const rt2 = 5 
+    const rt1 = 0
+    const rt2 = 5
     const tt0 = 0
     const tt1 = 361
     const d3 = make_disk_polar(rt1, rt2, tt0, tt1)
@@ -247,12 +251,12 @@ export const DomeChart = (props: DomeChartProps) => {
         el: context.config.keck_elevation
     }
 
-    const traces = make_2d_traces(targetView, 
-        showMoon, 
-        showCurrLoc, 
-        times, 
-        time, 
-        context.config.time_format, 
+    const traces = make_2d_traces(targetView,
+        showMoon,
+        showCurrLoc,
+        times,
+        time,
+        context.config.time_format,
         KG, lngLatEl)
     const layout: Partial<Plotly.Layout> = {
         width,
