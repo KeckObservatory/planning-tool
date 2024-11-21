@@ -18,7 +18,7 @@ interface DomeChartProps {
     height: number
 }
 
-export const moon_color = '#702963' 
+export const moon_color = '#702963'
 
 const make_disk_polar = (r1: number, r2: number, th1: number, th2: number) => {
 
@@ -149,29 +149,13 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
     if (showCurrLoc) {
         let [rr, tt] = [[] as number[], [] as number[]]
         const texts: string[] = []
-        if (showMoon) {
-            const azel = SunCalc.getMoonPosition(time, lngLatEl.lat, lngLatEl.lng)
-            const ae = [(Math.PI + azel.azimuth) * 180 / Math.PI, azel.altitude * 180 / Math.PI]
-            const r = 90 - ae[1]
-            if (r <= 88) {
-                rr.push(90 - ae[1])
-                tt.push(ae[0])
-                let txt = ""
-                txt += `Az: ${ae[0].toFixed(2)}<br>`
-                txt += `El: ${ae[1].toFixed(2)}<br>`
-                txt += `Airmass: ${util.air_mass(ae[1], lngLatEl.el).toFixed(2)}<br>`
-                // txt += `Airmass: ${util.air_mass(ae[1]).toFixed(2)}<br>`
-                txt += `HT: ${dayjs(time).format(time_format)}`
-                texts.push(txt)
-            }
-        }
 
         targetView.forEach((tgtv: TargetView, idx: number) => { //add current location trace
             const ra = tgtv.ra_deg as number
             const dec = tgtv.dec_deg as number
             const azEl = util.get_target_traj(ra, dec, [time], lngLatEl) as [number, number][]
             const r = 90 - azEl[0][1]
-            if (r <= 88) {
+            if (r <= KG.trackLimit) {
                 rr.push(r)
                 tt.push(azEl[0][0])
                 let txt = ""
@@ -208,6 +192,45 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
             traces.push(trace)
         })
 
+        if (showMoon) {
+            const azel = SunCalc.getMoonPosition(time, lngLatEl.lat, lngLatEl.lng)
+            const ae = [(Math.PI + azel.azimuth) * 180 / Math.PI, azel.altitude * 180 / Math.PI]
+            const r = 90 - ae[1]
+            if (r <= KG.trackLimit) {
+                rr.push(90 - ae[1])
+                tt.push(ae[0])
+                let txt = ""
+                txt += `Az: ${ae[0].toFixed(2)}<br>`
+                txt += `El: ${ae[1].toFixed(2)}<br>`
+                txt += `Airmass: ${util.air_mass(ae[1], lngLatEl.el).toFixed(2)}<br>`
+                // txt += `Airmass: ${util.air_mass(ae[1]).toFixed(2)}<br>`
+                txt += `HT: ${dayjs(time).format(time_format)}`
+                texts.push(txt)
+            }
+            const trace = {
+                r: rr,
+                theta: tt,
+                text: texts,
+                hovorinfo: 'text',
+                showlegend: false,
+                hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+                color: "rgb(0,0,0)",
+                textposition: 'top left',
+                type: 'scatterpolar',
+                mode: 'markers',
+                marker: {
+                    size: 12,
+                    color: moon_color,
+                    line: {
+                        color: 'black',
+                        width: 2
+                    }
+                },
+                namelength: -1,
+                name: 'Current Moon location'
+            }
+            traces.push(trace)
+        }
     }
 
     //add dome shapes
