@@ -328,7 +328,7 @@ export const SkyChart = (props: Props) => {
         title: `Target ${chartType} vs Time`,
         hovermode: "closest",
         yaxis: {
-            title: chartType === 'Airmass' ? 'Airmass' : 'Degrees',
+            title: chartType.includes('Airmass') ? 'Airmass' : 'Degrees',
             range: yRange,
             autorange: !chartType.includes('Airmass')
         },
