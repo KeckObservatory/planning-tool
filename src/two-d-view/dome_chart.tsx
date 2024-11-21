@@ -59,6 +59,8 @@ const make_disk_polar = (r1: number, r2: number, th1: number, th2: number) => {
 const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc: boolean, times: Date[], time: Date,
     time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
 ): any[] => {
+
+    //target trajectory traces
     let traces: any[] = targetView.map((tgtv: TargetView, idx: number) => {
         let [rr, tt] = [[] as number[], [] as number[]]
         const texts: string[] = []
@@ -104,6 +106,7 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
         return trace
     })
 
+    //moon trajectory trace
     if (showMoon) {
         let [rr, tt] = [[] as number[], [] as number[]]
         const texts: string[] = []
@@ -150,6 +153,7 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
         let [rr, tt] = [[] as number[], [] as number[]]
         const texts: string[] = []
 
+        //target current location traces
         targetView.forEach((tgtv: TargetView, idx: number) => { //add current location trace
             const ra = tgtv.ra_deg as number
             const dec = tgtv.dec_deg as number
@@ -174,7 +178,7 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
                 hovorinfo: 'text',
                 showlegend: false,
                 hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
-                color: "rgb(0,0,0)",
+                color: colors[idx % colors.length],
                 textposition: 'top left',
                 type: 'scatterpolar',
                 mode: 'markers',
@@ -207,7 +211,7 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
                 txt += `HT: ${dayjs(time).format(time_format)}`
                 texts.push(txt)
             }
-            const trace = {
+            const moonTrace = {
                 r: rr,
                 theta: tt,
                 text: texts,
@@ -229,7 +233,7 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
                 namelength: -1,
                 name: 'Current Moon location'
             }
-            traces.push(trace)
+            traces.push(moonTrace)
         }
     }
 
