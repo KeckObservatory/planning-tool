@@ -150,11 +150,11 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
 
 
     if (showCurrLoc) {
-        let [rr, tt] = [[] as number[], [] as number[]]
-        const texts: string[] = []
 
         //target current location traces
         targetView.forEach((tgtv: TargetView, idx: number) => { //add current location trace
+            let [rr, tt] = [[] as number[], [] as number[]]
+            let texts: string[] = []
             const ra = tgtv.ra_deg as number
             const dec = tgtv.dec_deg as number
             const azEl = util.get_target_traj(ra, dec, [time], lngLatEl) as [number, number][]
@@ -197,11 +197,13 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
         })
 
         if (showMoon) {
+            let [rr, tt] = [[] as number[], [] as number[]]
+            let texts: string[] = []
             const azel = SunCalc.getMoonPosition(time, lngLatEl.lat, lngLatEl.lng)
             const ae = [(Math.PI + azel.azimuth) * 180 / Math.PI, azel.altitude * 180 / Math.PI]
             const r = 90 - ae[1]
             if (r <= KG.trackLimit) {
-                rr.push(90 - ae[1])
+                rr.push(r)
                 tt.push(ae[0])
                 let txt = ""
                 txt += `Az: ${ae[0].toFixed(2)}<br>`
@@ -231,7 +233,7 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
                     }
                 },
                 namelength: -1,
-                name: 'Current Moon location'
+                name: 'Current Moon Location'
             }
             traces.push(moonTrace)
         }
