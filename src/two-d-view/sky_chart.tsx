@@ -67,7 +67,6 @@ export const colors = [
     '#17becf'   // blue-teal
 ];
 
-
 export const SkyChart = (props: Props) => {
     const { targetView, chartType, time, showCurrLoc, width, height, dome, suncalcTimes } = props
     const context = useStateContext()

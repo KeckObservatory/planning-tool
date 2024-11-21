@@ -18,6 +18,8 @@ interface DomeChartProps {
     height: number
 }
 
+export const moon_color = '#702963' 
+
 const make_disk_polar = (r1: number, r2: number, th1: number, th2: number) => {
 
     let rr1 = [] as number[]
@@ -128,9 +130,10 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
             text: texts,
             opacity: .5,
             hovorinfo: 'text',
-            color: "rgb(0,0,0)",
+            color: moon_color,
             hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
             line: {
+                color: moon_color,
                 width: 5
             },
             textposition: 'top left',
