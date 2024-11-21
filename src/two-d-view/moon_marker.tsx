@@ -1,5 +1,6 @@
 import React from "react";
 import * as SunCalc from "suncalc";
+import { useTheme } from "@emotion/react";
 
 interface Props {
     datetime: Date,
@@ -13,14 +14,18 @@ export const MoonMarker = (props: Props) => {
 
     const deg = 360 - Math.floor(props.moonInfo.phase * 360)
     // const deg = 180 - Math.floor(moonInfo.fraction * 360)
-    console.log('deg', deg)
     const width = '30px'
     const height = '30px'
+    const theme = useTheme()
+    console.log('deg', deg, theme)
+    //@ts-ignore
+    const outline = theme.palette.mode === 'dark' ? 'none' : '1px solid black'
 
     const sphereStyle: React.CSSProperties = {
         borderRadius: '100%', //makes a circle
         width,
         height,
+        outline: outline,
         display: 'flex',
         overflow: 'hidden',
         position: 'relative',
