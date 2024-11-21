@@ -131,6 +131,7 @@ const TwoDView = ({ targets }: Props) => {
     const [skyChart, setSkyChart] = React.useState<SkyChart>("Elevation")
     const [showMoon, setShowMoon] = React.useState(true)
     const [showCurrLoc, setShowCurrLoc] = React.useState(true)
+    const [showLimits, setShowLimits] = React.useState(true)
     const [rotatorAngle, setRotatorAngle] = React.useState(0)
     const [positionAngle] = React.useState(0)
     const lngLatEl: LngLatEl = {
@@ -229,6 +230,12 @@ const TwoDView = ({ targets }: Props) => {
                             onChange={(_, checked) => setShowCurrLoc(checked)}
                         />
                         <FormControlLabel
+                            label="Show Telescope Limits"
+                            value={showLimits}
+                            control={<Switch checked={showLimits} />}
+                            onChange={(_, checked) => setShowLimits(checked)}
+                        />
+                        <FormControlLabel
                             label="Show Moon"
                             value={showMoon}
                             control={<Switch checked={showMoon} />}
@@ -282,6 +289,7 @@ const TwoDView = ({ targets }: Props) => {
                         height={height}
                         width={width}
                         chartType={skyChart}
+                        showLimits={showLimits}
                         targetView={targetView}
                         showMoon={showMoon}
                         showCurrLoc={showCurrLoc}

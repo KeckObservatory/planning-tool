@@ -16,6 +16,7 @@ interface Props {
     chartType: SkyChart 
     showMoon: boolean
     showCurrLoc: boolean
+    showLimits: boolean
     times: Date[]
     time: Date
     dome: Dome
@@ -68,7 +69,7 @@ export const colors = [
 ];
 
 export const SkyChart = (props: Props) => {
-    const { targetView, chartType, time, showCurrLoc, width, height, dome, suncalcTimes } = props
+    const { targetView, chartType, time, showCurrLoc, showLimits, width, height, dome, suncalcTimes } = props
     const context = useStateContext()
 
     const lngLatEl: util.LngLatEl = {
@@ -310,10 +311,10 @@ export const SkyChart = (props: Props) => {
         },
     ]
 
-    if (chartType === 'Azimuth') {
+    if (chartType === 'Azimuth' && showLimits) {
         shapes.push(...az_shapes)
     }
-    else if (chartType === 'Elevation') {
+    else if (chartType === 'Elevation' && showLimits) {
         shapes.push(...el_shapes)
     }
 
