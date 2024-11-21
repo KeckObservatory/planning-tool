@@ -54,6 +54,19 @@ const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType: SkyCha
     return val
 }
 
+export const colors = [
+    '#1f77b4',  // muted blue
+    '#ff7f0e',  // safety orange
+    '#2ca02c',  // cooked asparagus green
+    '#d62728',  // brick red
+    '#9467bd',  // muted purple
+    '#8c564b',  // chestnut brown
+    '#e377c2',  // raspberry yogurt pink
+    '#7f7f7f',  // middle gray
+    '#bcbd22',  // curry yellow-green
+    '#17becf'   // blue-teal
+];
+
 
 export const SkyChart = (props: Props) => {
     const { targetView, chartType, time, showCurrLoc, width, height, dome, suncalcTimes } = props
@@ -65,7 +78,7 @@ export const SkyChart = (props: Props) => {
         el: context.config.keck_elevation
     }
 
-    let traces = targetView.map((tgtv: TargetView) => {
+    let traces = targetView.map((tgtv: TargetView, idx: number) => {
         let texts: string[] = []
         let y: number[] = []
         let color: string[] = []
@@ -85,7 +98,6 @@ export const SkyChart = (props: Props) => {
         })
 
 
-
         const trace: Plotly.Data = {
             x: tgtv.visibility.map((viz: VizRow) => viz.datetime),
             y: y,
@@ -98,7 +110,8 @@ export const SkyChart = (props: Props) => {
                 size: 4 
               },
             line: {
-                width: 5 
+                width: 5,
+                color: colors[idx % colors.length] 
             },
             textposition: 'top left',
             type: 'scatter',
@@ -111,7 +124,7 @@ export const SkyChart = (props: Props) => {
     //get curr marker
     let maxAirmass = 10;
     if (showCurrLoc) {
-        targetView.forEach((tgtv: TargetView) => { //add current location trace
+        targetView.forEach((tgtv: TargetView, idx: number) => { //add current location trace
             const ra = tgtv.ra_deg as number
             const dec = tgtv.dec_deg as number
             const azEl = util.ra_dec_to_az_alt(ra, dec, time, lngLatEl)
@@ -138,6 +151,7 @@ export const SkyChart = (props: Props) => {
                 marker: { 
                     size: 12,
                     // color: 'red',
+                    color: colors[idx % colors.length], 
                     line: {
                         color: 'black',
                         width: 3
