@@ -367,10 +367,12 @@ export const TargetVizChart = (props: Props) => {
     if (traces.length > 0) {
         const UTTrace = {...traces[0]} as Partial<Plotly.PlotData>
         //@ts-ignore
-        const ydates = UTTrace.y.map((date: Date) => dayjs(date).utc(false).toDate())
+        const ydates = UTTrace.y.map((date: Date) => dayjs(date).add(10, 'hour').toDate())
         console.log('ydates', ydates)
         //@ts-ignore
         UTTrace.y = ydates
+        //@ts-ignore
+        UTTrace.marker?.opacity = 0
         UTTrace.yaxis = 'y2'
         // UTTrace.visible = false
         traces.push(UTTrace)
