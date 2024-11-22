@@ -394,6 +394,7 @@ export const TargetVizChart = (props: Props) => {
         yaxis: {
             title: 'Time [HT]',
             type: 'date',
+            layer: 'above traces',
             autorange: 'reversed',
             tickformat: '%H:%M',
             tickmode: 'auto',
@@ -402,6 +403,7 @@ export const TargetVizChart = (props: Props) => {
         xaxis: {
             title: 'Date',
             type: 'date',
+            layer: 'above traces',
             dtick: 15 * 24 * 60 * 60 * 1000, // milliseconds
             tickformat: '%Y-%m-%d',
             // tickmode: 'auto',
