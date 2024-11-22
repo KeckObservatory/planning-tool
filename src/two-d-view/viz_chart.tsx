@@ -276,7 +276,6 @@ export const TargetVizChart = (props: Props) => {
             semester_visibility: [],
         }
 
-
         const ra = target.ra_deg ?? ra_dec_to_deg(target.ra as string)
         const dec = target.dec_deg ?? ra_dec_to_deg(target.dec as string, true)
         tViz.semester_visibility = dates.map((date: Dayjs) => {
@@ -306,7 +305,7 @@ export const TargetVizChart = (props: Props) => {
 
             const visible_hours = vizSum * ROUND_MINUTES / 60
 
-            return { ...suncalc_times, visibility, visible_hours }
+            return { ...suncalc_times, date: date.toDate(), visibility, visible_hours }
         })
 
         setTargetView(tViz as TargetViz)
