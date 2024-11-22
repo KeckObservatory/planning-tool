@@ -6,6 +6,7 @@ import { DayViz, reason_to_color_mapping, VizRow } from "./viz_chart.tsx";
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import * as SunCalc from "suncalc";
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -88,6 +89,7 @@ export const SkyChart = (props: Props) => {
             txt += `El: ${viz.alt.toFixed(2)}<br>`
             txt += `Airmass: ${viz.air_mass.toFixed(2)}<br>`
             txt += `HT: ${dayjs(viz.datetime).format(context.config.date_time_format)}<br>`
+            chartType.includes('Lunar Angle') && (txt += `Moon Fraction: ${viz.moon_fraction.toFixed(2)}<br>`)
             txt += `Visible for: ${tgtv.visibilitySum.toFixed(2)} hours<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
             texts.push(txt)
@@ -129,7 +131,12 @@ export const SkyChart = (props: Props) => {
             const dec = tgtv.dec_deg as number
             const azEl = util.ra_dec_to_az_alt(ra, dec, time, lngLatEl)
             //const viz = { az: azEl[0], alt: azEl[1], datetime: time, air_mass: util.air_mass(azEl[1], lngLatEl.el) }
-            const viz = { az: azEl[0], alt: azEl[1], datetime: time, air_mass: util.air_mass(azEl[1], lngLatEl.el) }
+            const moon_fraction = SunCalc.getMoonIllumination(time).fraction
+            const viz = { az: azEl[0], 
+                alt: azEl[1], 
+                datetime: time, 
+                moon_fraction: moon_fraction,
+                air_mass: util.air_mass(azEl[1], lngLatEl.el) }
             const datum = get_chart_datum(ra, dec, viz as VizRow, chartType, lngLatEl)
             const currTime = hidate(time, context.config.timezone)
             const airmass = util.air_mass(azEl[1], lngLatEl.el)
@@ -138,6 +145,7 @@ export const SkyChart = (props: Props) => {
             text += `Az: ${azEl[0].toFixed(2)}<br>`
             text += `El: ${azEl[1].toFixed(2)}<br>`
             text += `Airmass: ${airmass.toFixed(2)}<br>`
+            chartType.includes('Lunar Angle') && (text += `Moon Fraction: ${viz.moon_fraction.toFixed(2)}<br>`)
             // text += `Airmass: ${util.air_mass(azEl[1]).toFixed(2)}<br>`
             text += `HT: ${currTime.format(context.config.date_time_format)}`
 
@@ -319,7 +327,6 @@ export const SkyChart = (props: Props) => {
     }
 
     const yRange = chartType.includes('Airmass') ? [0, Math.min(30, maxAirmass)] : undefined
-    // console.log('yRange', yRange)
 
     const layout: Partial<Plotly.Layout> = {
         width,

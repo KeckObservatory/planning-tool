@@ -21,6 +21,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import Plot from "react-plotly.js";
+import * as SunCalc from "suncalc";
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -169,6 +170,7 @@ export interface VizRow {
     observable: boolean
     air_mass: number
     reasons: string[]
+    moon_fraction: number
 }
 
 const get_curr_semester = (date: Date) => {
@@ -285,12 +287,14 @@ export const TargetVizChart = (props: Props) => {
             const visibility = times.map((time: Date) => {
                 const [az, alt] = ra_dec_to_az_alt(ra, dec, time, lngLatEl)
                 const air_mass_val = air_mass(alt, lngLatEl.el)
+                const moon_fraction = SunCalc.getMoonIllumination(time).fraction
                 // const air_mass_val = air_mass(alt)
                 const vis: VizRow = { 
                     az, 
                     alt, 
                     ...alt_az_observable(alt, az, KG), 
                     datetime: time, 
+                    moon_fraction,
                     air_mass: air_mass_val }
                 return vis
             })
