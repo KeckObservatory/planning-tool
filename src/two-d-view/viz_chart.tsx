@@ -338,14 +338,14 @@ export const TargetVizChart = (props: Props) => {
         const ydate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
         const x = Array.from({ length: y.length }, () => ydate)
 
-        const trace: Partial<Plotly.Data> = {
+        const trace: Partial<Plotly.PlotData> = {
             x,
             y,
             marker: {
                 color,
                 size: ROUND_MINUTES,
                 symbol: 'square',
-                opacity: 0.5
+                opacity: 0.25
             },
             // color,
             text: texts,
@@ -364,12 +364,14 @@ export const TargetVizChart = (props: Props) => {
         return trace
     })
 
-    // const UTTrace = {...traces[0]}
-    // //@ts-ignore
-    // UTTrace.y = UTTrace.y.map((date: Date) => dayjs(date).utc().toDate())
-    // //@ts-ignore
-    // UTTrace.yaxis = 'y2'
-    // traces.push(UTTrace)
+    if (traces.length > 0) {
+        const UTTrace = {...traces[0]} as Partial<Plotly.PlotData>
+        //@ts-ignore
+        UTTrace.y = UTTrace.y.map((date: Date) => dayjs(date).utc().toDate())
+        UTTrace.yaxis = 'y2'
+        UTTrace.visible = false
+        traces.push(UTTrace)
+    }
 
 
     const layout: Partial<Plotly.Layout> = {
