@@ -345,7 +345,7 @@ export const TargetVizChart = (props: Props) => {
                 color,
                 size: ROUND_MINUTES,
                 symbol: 'square',
-                opacity: 0.25
+                opacity: 1 // too dense to see ticks
             },
             // color,
             text: texts,
@@ -367,7 +367,10 @@ export const TargetVizChart = (props: Props) => {
     if (traces.length > 0) {
         const UTTrace = {...traces[0]} as Partial<Plotly.PlotData>
         //@ts-ignore
-        UTTrace.y = UTTrace.y.map((date: Date) => dayjs(date).utc().toDate())
+        const ydates = UTTrace.y.map((date: Date) => dayjs(date).utc().toDate())
+        console.log('ydates', ydates)
+        //@ts-ignore
+        UTTrace.y = ydates
         UTTrace.yaxis = 'y2'
         UTTrace.visible = false
         traces.push(UTTrace)
