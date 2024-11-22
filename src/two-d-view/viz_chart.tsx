@@ -22,6 +22,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import Plot from "react-plotly.js";
 import * as SunCalc from "suncalc";
+import { Opacity } from "@mui/icons-material";
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -338,16 +339,18 @@ export const TargetVizChart = (props: Props) => {
         const ydate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
         const x = Array.from({ length: y.length }, () => ydate)
 
-        const trace = {
+        const trace: Partial<Plotly.Data> = {
             x,
             y,
             marker: {
                 color,
                 size: ROUND_MINUTES,
-                symbol: 'square'
+                symbol: 'square',
+                opacity: 0.5
             },
             // color,
             text: texts,
+            //@ts-ignore
             hovorinfo: 'text',
             hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
             line: {
@@ -360,9 +363,8 @@ export const TargetVizChart = (props: Props) => {
             name: targetViz.target_name ?? 'Target'
         }
         return trace
-    }) as Partial<Plotly.Data>[] 
+    })
 
-    console.log('traces', traces)
 
     const layout: Partial<Plotly.Layout> = {
         width: 1200,
