@@ -334,7 +334,7 @@ export const TargetVizChart = (props: Props) => {
             const daytime = date_normalize(viz.datetime)
             // daytime.setFullYear(2020, 1, 1)
             y.push(daytime)
-            return txt
+            texts.push(txt)
         })
         const ydate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
         const x = Array.from({ length: y.length }, () => ydate)
@@ -361,7 +361,9 @@ export const TargetVizChart = (props: Props) => {
             name: targetViz.target_name ?? 'Target'
         }
         return trace
-    }) as any
+    }) as Partial<Plotly.Data>[] 
+
+    console.log('traces', traces)
 
     const layout: Partial<Plotly.Layout> = {
         width: 1200,
