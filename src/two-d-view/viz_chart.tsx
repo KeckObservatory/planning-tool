@@ -379,10 +379,10 @@ export const TargetVizChart = (props: Props) => {
         xaxis: {
             title: 'Date',
             type: 'date',
-            //dtick: 15 * 24 * 60 * 60 * 1000, // milliseconds
+            dtick: 15 * 24 * 60 * 60 * 1000, // milliseconds
             tickformat: '%Y-%m-%d',
-            tickmode: 'auto',
-            nticks: 0
+            //tickmode: 'auto',
+            //nticks: 0
         },
         hovermode: "closest",
     }
