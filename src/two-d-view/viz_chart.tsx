@@ -364,10 +364,12 @@ export const TargetVizChart = (props: Props) => {
         return trace
     })
 
-    //@ts-ignore
-    traces[0].y = traces[0].y.map((date: Date) => dayjs(date).utc().toDate())
-    //@ts-ignore
-    traces[0].yaxis = 'y2'
+    // const UTTrace = {...traces[0]}
+    // //@ts-ignore
+    // UTTrace.y = UTTrace.y.map((date: Date) => dayjs(date).utc().toDate())
+    // //@ts-ignore
+    // UTTrace.yaxis = 'y2'
+    // traces.push(UTTrace)
 
 
     const layout: Partial<Plotly.Layout> = {
