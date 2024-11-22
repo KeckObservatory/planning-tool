@@ -372,7 +372,7 @@ export const TargetVizChart = (props: Props) => {
         //@ts-ignore
         UTTrace.y = ydates
         UTTrace.yaxis = 'y2'
-        UTTrace.visible = false
+        // UTTrace.visible = false
         traces.push(UTTrace)
     }
 
