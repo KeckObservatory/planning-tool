@@ -22,7 +22,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import Plot from "react-plotly.js";
 import * as SunCalc from "suncalc";
-import { Opacity } from "@mui/icons-material";
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -365,13 +364,28 @@ export const TargetVizChart = (props: Props) => {
         return trace
     })
 
+    //@ts-ignore
+    traces[0].y = traces[0].y.map((date: Date) => dayjs(date).utc().toDate())
+    //@ts-ignore
+    traces[0].yaxis = 'y2'
+
 
     const layout: Partial<Plotly.Layout> = {
         width: 1200,
         height: 400,
         title: `${target.target_name ?? 'Target'} Visibility`,
+        yaxis2: {
+            title: 'Time [UTC]',
+            type: 'date',
+            overlaying: 'y', 
+            side: 'right',
+            autorange: 'reversed',
+            tickformat: '%H:%M',
+            tickmode: 'auto',
+            nticks: 10
+        },
         yaxis: {
-            title: 'Time',
+            title: 'Time [HT]',
             type: 'date',
             autorange: 'reversed',
             tickformat: '%H:%M',
