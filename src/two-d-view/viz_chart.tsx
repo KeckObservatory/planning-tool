@@ -367,7 +367,7 @@ export const TargetVizChart = (props: Props) => {
     if (traces.length > 0) {
         const UTTrace = {...traces[0]} as Partial<Plotly.PlotData>
         //@ts-ignore
-        const ydates = UTTrace.y.map((date: Date) => dayjs(date).utc().toDate())
+        const ydates = UTTrace.y.map((date: Date) => dayjs(date).utc(false).toDate())
         console.log('ydates', ydates)
         //@ts-ignore
         UTTrace.y = ydates
@@ -386,6 +386,7 @@ export const TargetVizChart = (props: Props) => {
             type: 'date',
             overlaying: 'y', 
             side: 'right',
+            layer: 'above traces',
             autorange: 'reversed',
             tickformat: '%H:%M',
             tickmode: 'auto',
