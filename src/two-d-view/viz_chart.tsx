@@ -365,6 +365,7 @@ export const TargetVizChart = (props: Props) => {
         return trace
     })
 
+    //Add UT time trace
     if (traces.length > 0) {
         let UTTrace = {...traces.at(0)} as Partial<Plotly.PlotData>
         //@ts-ignore
@@ -373,6 +374,10 @@ export const TargetVizChart = (props: Props) => {
         UTTrace.y = ydates
         if (UTTrace.marker) {
             UTTrace.marker.opacity = 0;
+            UTTrace.marker.size = 0;
+        }
+        if (UTTrace.line) {
+            UTTrace.line.width = 0;
         }
         UTTrace.yaxis = 'y2'
         UTTrace.visible = true 
