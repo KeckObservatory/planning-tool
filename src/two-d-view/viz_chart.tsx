@@ -389,9 +389,10 @@ export const TargetVizChart = (props: Props) => {
     const traces = [trace]
     console.log('traces', traces)
 
+    const yvals = trace.y.map(y => (y as Date).valueOf())
     //@ts-ignore
-    const yvals = trace.y.map(y => y.valueOf()) as number[]
-    const yaxisticmarks = get_day_times(new Date(Math.min(...yvals)), new Date(Math.max(...yvals)), 2/60)
+    console.log('min', new Date(Math.min(...yvals)), 'max', new Date(Math.max(...yvals)))
+    const yaxisticmarks = get_day_times(new Date(Math.min(...yvals)), new Date(Math.max(...yvals)), 2)
     const y2axisticmarks = yaxisticmarks.map((date: Date) => dayjs(date).add(10, 'hour').toDate())
     console.log('yaxisticmarks', yaxisticmarks, 'y2axisticmarks', y2axisticmarks)
 
@@ -437,4 +438,8 @@ export const TargetVizChart = (props: Props) => {
             layout={layout}
         />
     )
+}
+
+function round_date(roundMin: any, nadir: any) {
+    throw new Error("Function not implemented.");
 }
