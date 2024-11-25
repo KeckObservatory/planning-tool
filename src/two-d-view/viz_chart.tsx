@@ -392,7 +392,7 @@ export const TargetVizChart = (props: Props) => {
     const yvals = trace.y.map(y => (y as Date).valueOf())
     //@ts-ignore
     console.log('min', new Date(Math.min(...yvals)), 'max', new Date(Math.max(...yvals)))
-    const yaxisticmarks = get_day_times(new Date(2020, 1, 1, 7, 0, 0, 0), new Date(2020, 1, 2, 5, 0, 0), 2)
+    const yaxisticmarks = get_day_times(new Date(2020, 1, 1, 7, 0, 0, 0), new Date(2020, 1, 2, 5, 0, 0), 2 * 60)
     const y2axisticmarks = yaxisticmarks.map((date: Date) => dayjs(date).add(10, 'hour').toDate())
     console.log('yaxisticmarks', yaxisticmarks, 'y2axisticmarks', y2axisticmarks)
 
