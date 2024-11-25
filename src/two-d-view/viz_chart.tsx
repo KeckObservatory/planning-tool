@@ -375,7 +375,7 @@ export const TargetVizChart = (props: Props) => {
 
     //HT to UT conversion
     // const yLtext = ['06:00', '04:00', '02:00', '00:00', '22:00', '20:00', '18:00']
-    // const yRtext = ['16:00', '18:00', '20:00', '22:00', '24:00', '02:00', '04:00']
+    const yRtext = ['16:00', '18:00', '20:00', '22:00', '24:00', '02:00', '04:00']
 
     const layout: Partial<Plotly.Layout> = {
         width: 1600,
@@ -399,6 +399,7 @@ export const TargetVizChart = (props: Props) => {
             gridwidth: 5,
             // ticktext: yRtext,
             layer: 'above traces',
+            ticktext: yRtext,
             autorange: 'reversed',
             tickformat: '%H:%M',
         },
