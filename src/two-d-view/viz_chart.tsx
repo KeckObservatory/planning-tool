@@ -376,8 +376,7 @@ export const TargetVizChart = (props: Props) => {
         trace.text = [...trace.text, ...texts]
         //@ts-ignore
         if (!firstTrace.x) {
-            //@ts-ignore
-            firstTrace = [...trace]
+            firstTrace = {...trace}
 
         }
     })
@@ -385,10 +384,9 @@ export const TargetVizChart = (props: Props) => {
 
     //Add UT time trace
     if (traces.length > 0) {
-        let UTTrace = { ...traces.at(0) } as Partial<Plotly.PlotData>
+        let UTTrace = firstTrace 
         //@ts-ignore
         const ydates = UTTrace.y.map((date: Date) => dayjs(date).add(10, 'hour').toDate())
-        //@ts-ignore
         UTTrace.y = ydates
         if (UTTrace.marker) {
             UTTrace.marker.opacity = 0;
