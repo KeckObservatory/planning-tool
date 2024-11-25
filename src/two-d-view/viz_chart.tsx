@@ -380,7 +380,7 @@ export const TargetVizChart = (props: Props) => {
             layer: 'above traces',
             autorange: 'reversed',
             tickformat: '%H:%M',
-            ticktext: yLtext,
+            // ticktext: yLtext,
             nticks: 7 
         },
         yaxis2: {
@@ -389,7 +389,7 @@ export const TargetVizChart = (props: Props) => {
             overlaying: 'y', 
             side: 'right',
             gridwidth: 5,
-            ticktext: yRtext,
+            // ticktext: yRtext,
             layer: 'above traces',
             autorange: 'reversed',
             tickformat: '%H:%M',
