@@ -356,8 +356,7 @@ export const TargetVizChart = (props: Props) => {
                 width: 0,
             },
             textposition: 'top left',
-            // type: 'scattergl',
-            type: 'scatter',
+            type: 'scattergl',
             mode: 'markers',
             showlegend: false,
             name: targetViz.target_name ?? 'Target'
@@ -390,29 +389,24 @@ export const TargetVizChart = (props: Props) => {
         width: 1600,
         height: 600,
         title: `${target.target_name ?? 'Target'} Visibility`,
+        yaxis: {
+            title: 'Time [HT]',
+            type: 'date',
+            gridwidth: 5,
+            layer: 'above traces',
+            autorange: 'reversed',
+            tickformat: '%H:%M',
+            nticks: 7 
+        },
         yaxis2: {
             title: 'Time [UTC]',
             type: 'date',
             overlaying: 'y', 
             side: 'right',
             gridwidth: 5,
-            //@ts-ignore
-            layer: 'above',
-            // layer: 'above traces',
+            layer: 'above traces',
             autorange: 'reversed',
             tickformat: '%H:%M',
-        },
-        yaxis: {
-            title: 'Time [HT]',
-            type: 'date',
-            //@ts-ignore
-            layer: 'above',
-            // layer: 'above traces',
-            gridwidth: 5,
-            autorange: 'reversed',
-            tickformat: '%H:%M',
-            tickmode: 'auto',
-            nticks: 7 
         },
         xaxis: {
             title: 'Date',
