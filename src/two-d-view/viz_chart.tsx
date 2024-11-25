@@ -190,7 +190,7 @@ const TargetVizDialog = (props: TargetVizDialogProps) => {
     const [semester, setSemester] = useQueryParam('semester', withDefault(StringParam, default_semester))
     return (
         <Dialog
-            maxWidth="xl"
+            maxWidth={false}
             onClose={() => props.handleClose()}
             open={props.open}
         >
@@ -345,8 +345,7 @@ export const TargetVizChart = (props: Props) => {
                 color,
                 size: ROUND_MINUTES,
                 symbol: 'square',
-                //opacity: 1 // too dense to see ticks
-                opacity: .1 // too dense to see ticks
+                opacity: 1 // too dense to see ticks
             },
             // color,
             text: texts,
@@ -395,6 +394,7 @@ export const TargetVizChart = (props: Props) => {
             type: 'date',
             overlaying: 'y', 
             side: 'right',
+            gridwidth: 2,
             layer: 'above traces',
             autorange: 'reversed',
             tickformat: '%H:%M',
@@ -403,6 +403,7 @@ export const TargetVizChart = (props: Props) => {
             title: 'Time [HT]',
             type: 'date',
             layer: 'above traces',
+            gridwidth: 2,
             autorange: 'reversed',
             tickformat: '%H:%M',
             tickmode: 'auto',
