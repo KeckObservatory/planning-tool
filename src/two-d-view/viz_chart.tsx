@@ -24,7 +24,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import Plot from "react-plotly.js";
 import * as SunCalc from "suncalc";
-import { UTurnLeftTwoTone } from "@mui/icons-material";
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
