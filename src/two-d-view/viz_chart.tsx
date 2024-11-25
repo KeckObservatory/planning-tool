@@ -382,7 +382,7 @@ export const TargetVizChart = (props: Props) => {
 
     //Add UT time trace
     if (traces.length > 0) {
-        let UTTrace = firstTrace 
+        let UTTrace = {...firstTrace}
         //@ts-ignore
         const ydates = UTTrace.y.map((date: Date) => dayjs(date).add(10, 'hour').toDate())
         UTTrace.y = ydates
