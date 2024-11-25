@@ -364,18 +364,13 @@ export const TargetVizChart = (props: Props) => {
         const ydate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
         const x = Array.from({ length: y.length }, () => ydate)
 
-        trace = {
-            //@ts-ignore
-            x: [...trace.x, ...x],
-            y: [...trace.y, ...y],
-            //@ts-ignore
-            text: [...trace.text, ...texts],
-            marker: {
-                ...trace.marker,
-                //@ts-ignore
-                color: [...trace.marker.color, ...color],
-            },
-        }
+        //@ts-ignore
+        trace.x = [...trace.x, ...x]
+        trace.y = [...trace.y, ...y]
+        //@ts-ignore
+        trace.marker.color = [...trace.marker.color, ...color]
+        //@ts-ignore
+        trace.text = [...trace.text, ...texts]
     })
     const traces = [trace]
 
