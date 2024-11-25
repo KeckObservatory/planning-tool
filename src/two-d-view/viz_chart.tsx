@@ -383,15 +383,7 @@ export const TargetVizChart = (props: Props) => {
     //@ts-ignore
     const ydates = UTTrace.y.map((date: Date) => dayjs(date).add(10, 'hour').toDate())
     UTTrace.y = ydates
-    if (UTTrace.marker) {
-        UTTrace.marker.opacity = 0;
-        UTTrace.marker.size = 0;
-    }
-    if (UTTrace.line) {
-        UTTrace.line.width = 0;
-    }
     UTTrace.yaxis = 'y2'
-    UTTrace.visible = true
 
     const traces = [trace, UTTrace]
     console.log('traces', traces)
