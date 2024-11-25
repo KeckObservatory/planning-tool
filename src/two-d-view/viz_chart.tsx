@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { GeoModel, Target, useStateContext } from "../App";
-import {
-    ra_dec_to_deg,
-    get_day_times,
-    get_suncalc_times,
-    ROUND_MINUTES,
-    ra_dec_to_az_alt,
-    air_mass,
-    LngLatEl
-} from "./sky_view_util";
+import { ra_dec_to_deg, 
+    get_day_times, 
+    get_suncalc_times, 
+    ROUND_MINUTES, 
+    ra_dec_to_az_alt, 
+    air_mass, 
+    LngLatEl} from "./sky_view_util";
 import { DomeSelect, Dome } from "./two_d_view";
 import dayjs, { Dayjs, ManipulateType } from 'dayjs';
 import utc from 'dayjs/plugin/utc'
@@ -202,8 +200,8 @@ const TargetVizDialog = (props: TargetVizDialogProps) => {
                 </>
             </DialogTitle>
             <DialogContent >
-                <SemesterSelect semester={semester} setSemester={setSemester} />
-                <DomeSelect dome={dome} setDome={setDome} />
+                <SemesterSelect semester={semester} setSemester={setSemester}/>
+                <DomeSelect dome={dome} setDome={setDome}/>
                 <TargetVizChart target={props.target} semester={semester} dome={dome} />
             </DialogContent>
         </Dialog>
@@ -253,7 +251,7 @@ export const reason_to_color_mapping = (reasons: string[]) => {
 }
 
 export const TargetVizChart = (props: Props) => {
-    const { target, semester, dome } = props
+    const { target, semester, dome } = props 
     const regexp = new RegExp("^[12][0-9]{3}[AB]$")
     const init_target_viz = { semester, dome, ...target, semester_visibility: [] }
     const [targetViz, setTargetView] = useState<TargetViz>(init_target_viz)
@@ -261,8 +259,8 @@ export const TargetVizChart = (props: Props) => {
 
     const KG = context.config.keck_geometry[dome as Dome]
     const lngLatEl: LngLatEl = {
-        lng: context.config.keck_longitude,
-        lat: context.config.keck_latitude,
+        lng: context.config.keck_longitude, 
+        lat: context.config.keck_latitude, 
         el: context.config.keck_elevation
     }
 
@@ -290,14 +288,13 @@ export const TargetVizChart = (props: Props) => {
                 const air_mass_val = air_mass(alt, lngLatEl.el)
                 const moon_fraction = SunCalc.getMoonIllumination(time).fraction
                 // const air_mass_val = air_mass(alt)
-                const vis: VizRow = {
-                    az,
-                    alt,
-                    ...alt_az_observable(alt, az, KG),
-                    datetime: time,
+                const vis: VizRow = { 
+                    az, 
+                    alt, 
+                    ...alt_az_observable(alt, az, KG), 
+                    datetime: time, 
                     moon_fraction,
-                    air_mass: air_mass_val
-                }
+                    air_mass: air_mass_val }
                 return vis
             })
 
@@ -315,32 +312,7 @@ export const TargetVizChart = (props: Props) => {
     }, [target, semester, dome])
 
 
-    let trace: Plotly.PlotData = {
-        x: [],
-        y: [],
-        text: [],
-        marker: {
-            color: [],
-            size: 10,
-            symbol: 'square',
-        },
-        //@ts-ignore
-        hovorinfo: 'text',
-        hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
-        line: {
-            width: 0,
-        },
-        textposition: 'top left',
-        type: 'scattergl',
-        zorder: -999,
-        mode: 'markers',
-        visible: true,
-        showlegend: false,
-        name: targetViz.target_name ?? 'Target'
-    }
-    let firstTrace = { ...trace }
-
-    targetViz.semester_visibility.forEach((dayViz: DayViz) => {
+    const traces = targetViz.semester_visibility.map((dayViz: DayViz) => {
         let texts: string[] = []
         let y: Date[] = []
         let color: string[] = []
@@ -366,37 +338,34 @@ export const TargetVizChart = (props: Props) => {
         const ydate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
         const x = Array.from({ length: y.length }, () => ydate)
 
-        //@ts-ignore
-        trace.x = [...trace.x, ...x]
-        //@ts-ignore
-        trace.y = [...trace.y, ...y]
-        //@ts-ignore
-        trace.marker.color = [...trace.marker.color, ...color]
-        //@ts-ignore
-        trace.text = [...trace.text, ...texts]
-        //@ts-ignore
-        if (firstTrace.x.length <= 0) {
-            firstTrace = { ...trace }
+        const trace: Partial<Plotly.PlotData> = {
+            x,
+            y,
+            text: texts,
+            marker: {
+                color,
+                size: ROUND_MINUTES,
+                symbol: 'square',
+                opacity: 1 // too dense to see ticks
+            },
+            // color,
+            //@ts-ignore
+            hovorinfo: 'text',
+            hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+            line: {
+                width: 0,
+            },
+            textposition: 'top left',
+            type: 'scattergl',
+            mode: 'markers',
+            showlegend: false,
+            name: targetViz.target_name ?? 'Target'
         }
+        return trace
     })
-    // //Add UT time trace
-    // let UTTrace = { ...firstTrace }
-    // //@ts-ignore
-    // const ydates = UTTrace.y.map((date: Date) => dayjs(date).add(10, 'hour').toDate())
-    // UTTrace.y = ydates
-    // UTTrace.yaxis = 'y2'
-
-    const traces = [trace]
-    console.log('traces', traces)
-
-    const yvals = trace.y.map(y => (y as Date).valueOf())
-    //@ts-ignore
-    console.log('min', new Date(Math.min(...yvals)), 'max', new Date(Math.max(...yvals)))
-    const yaxisticmarks = get_day_times(new Date(2020, 1, 1, 7, 0, 0, 0), new Date(2020, 1, 2, 5, 0, 0), 2 * 60)
-    const y2axisticmarks = yaxisticmarks.map((date: Date) => dayjs(date).add(10, 'hour').toDate())
-    console.log('yaxisticmarks', yaxisticmarks, 'y2axisticmarks', y2axisticmarks)
 
 
+    //HT to UT conversion
 
     const layout: Partial<Plotly.Layout> = {
         width: 1600,
@@ -405,20 +374,21 @@ export const TargetVizChart = (props: Props) => {
         yaxis: {
             title: 'Time [HT]',
             type: 'date',
+            gridwidth: 5,
             layer: 'above traces',
             autorange: 'reversed',
-            tickvals: yaxisticmarks,
-            ticktext: yaxisticmarks.map((date: Date) => dayjs(date).format('HH:mm')), 
+            tickformat: '%H:%M',
+            nticks: 7 
         },
         yaxis2: {
             title: 'Time [UTC]',
             type: 'date',
-            overlaying: 'y',
+            overlaying: 'y', 
             side: 'right',
-            ticktext: y2axisticmarks.map((date: Date) => dayjs(date).format('HH:mm')), 
-            tickvals: yaxisticmarks,
+            gridwidth: 5,
             layer: 'above traces',
             autorange: 'reversed',
+            tickformat: '%H:%M',
         },
         xaxis: {
             title: 'Date',
