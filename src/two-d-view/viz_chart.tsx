@@ -379,18 +379,19 @@ export const TargetVizChart = (props: Props) => {
             firstTrace = { ...trace }
         }
     })
-    //Add UT time trace
-    let UTTrace = { ...firstTrace }
-    //@ts-ignore
-    const ydates = UTTrace.y.map((date: Date) => dayjs(date).add(10, 'hour').toDate())
-    UTTrace.y = ydates
-    UTTrace.yaxis = 'y2'
+    // //Add UT time trace
+    // let UTTrace = { ...firstTrace }
+    // //@ts-ignore
+    // const ydates = UTTrace.y.map((date: Date) => dayjs(date).add(10, 'hour').toDate())
+    // UTTrace.y = ydates
+    // UTTrace.yaxis = 'y2'
 
-    const traces = [trace, UTTrace]
+    const traces = [trace]
     console.log('traces', traces)
 
     //@ts-ignore
-    const yaxisticmarks = get_day_times(new Date(Math.min(trace.y)), new Date(Math.max(trace.y)), 2)
+    const yvals = trace.y.map(y => y.valueOf()) as number[]
+    const yaxisticmarks = get_day_times(new Date(Math.min(...yvals)), new Date(Math.max(...yvals)), 2)
     const y2axisticmarks = yaxisticmarks.map((date: Date) => dayjs(date).add(10, 'hour').toDate())
     console.log('yaxisticmarks', yaxisticmarks, 'y2axisticmarks', y2axisticmarks)
 
