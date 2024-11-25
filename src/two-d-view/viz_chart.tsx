@@ -315,15 +315,14 @@ export const TargetVizChart = (props: Props) => {
     }, [target, semester, dome])
 
 
-    let trace: Partial<Plotly.PlotData> = {
+    let trace: Plotly.PlotData = {
         x: [],
         y: [],
         text: [],
         marker: {
             color: [],
-            size: ROUND_MINUTES,
+            size: 10,
             symbol: 'square',
-            opacity: 1 // too dense to see ticks
         },
         //@ts-ignore
         hovorinfo: 'text',
@@ -337,6 +336,9 @@ export const TargetVizChart = (props: Props) => {
         showlegend: false,
         name: targetViz.target_name ?? 'Target'
     }
+
+
+    let firstTrace = {...trace}
 
     targetViz.semester_visibility.forEach((dayViz: DayViz) => {
         let texts: string[] = []
@@ -366,11 +368,18 @@ export const TargetVizChart = (props: Props) => {
 
         //@ts-ignore
         trace.x = [...trace.x, ...x]
+        //@ts-ignore
         trace.y = [...trace.y, ...y]
         //@ts-ignore
         trace.marker.color = [...trace.marker.color, ...color]
         //@ts-ignore
         trace.text = [...trace.text, ...texts]
+        //@ts-ignore
+        if (!firstTrace.x) {
+            //@ts-ignore
+            firstTrace = [...trace]
+
+        }
     })
     const traces = [trace]
 
