@@ -389,6 +389,12 @@ export const TargetVizChart = (props: Props) => {
     const traces = [trace, UTTrace]
     console.log('traces', traces)
 
+    //@ts-ignore
+    const yaxisticmarks = get_day_times(new Date(Math.min(trace.y)), new Date(Math.max(trace.y)), 2)
+    const y2axisticmarks = yaxisticmarks.map((date: Date) => dayjs(date).add(10, 'hour').toDate())
+    console.log('yaxisticmarks', yaxisticmarks, 'y2axisticmarks', y2axisticmarks)
+
+
 
     const layout: Partial<Plotly.Layout> = {
         width: 1600,
@@ -397,21 +403,20 @@ export const TargetVizChart = (props: Props) => {
         yaxis: {
             title: 'Time [HT]',
             type: 'date',
-            gridwidth: 5,
             layer: 'above traces',
             autorange: 'reversed',
-            tickformat: '%H:%M',
-            nticks: 7
+            tickvals: yaxisticmarks,
+            ticktext: yaxisticmarks.map((date: Date) => dayjs(date).format('HH:mm')), 
         },
         yaxis2: {
             title: 'Time [UTC]',
             type: 'date',
             overlaying: 'y',
             side: 'right',
-            // gridwidth: 5,
+            ticktext: y2axisticmarks.map((date: Date) => dayjs(date).format('HH:mm')), 
+            tickvals: yaxisticmarks,
             layer: 'above traces',
             autorange: 'reversed',
-            tickformat: '%H:%M',
         },
         xaxis: {
             title: 'Date',
