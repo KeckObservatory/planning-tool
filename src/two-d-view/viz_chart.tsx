@@ -371,23 +371,10 @@ export const TargetVizChart = (props: Props) => {
             //@ts-ignore
             text: [...trace.text, ...texts],
             marker: {
+                ...trace.marker,
                 //@ts-ignore
                 color: [...trace.marker.color, ...color],
-                size: ROUND_MINUTES,
-                symbol: 'square',
-                opacity: 1 // too dense to see ticks
             },
-            //@ts-ignore
-            hovorinfo: 'text',
-            hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
-            line: {
-                width: 0,
-            },
-            textposition: 'top left',
-            type: 'scattergl',
-            mode: 'markers',
-            showlegend: false,
-            name: targetViz.target_name ?? 'Target'
         }
     })
     const traces = [trace]
