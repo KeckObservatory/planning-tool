@@ -353,11 +353,11 @@ export const TargetVizChart = (props: Props) => {
             hovorinfo: 'text',
             hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
             line: {
-                width: 10,
+                width: 0,
             },
             textposition: 'top left',
             type: 'scattergl',
-            mode: 'markers',
+            mode: 'lines+markers',
             showlegend: false,
             name: targetViz.target_name ?? 'Target'
         }
@@ -407,7 +407,7 @@ export const TargetVizChart = (props: Props) => {
             autorange: 'reversed',
             tickformat: '%H:%M',
             tickmode: 'auto',
-            nticks: 10
+            nticks: 7 
         },
         xaxis: {
             title: 'Date',
