@@ -190,7 +190,7 @@ const TargetVizDialog = (props: TargetVizDialogProps) => {
     const [semester, setSemester] = useQueryParam('semester', withDefault(StringParam, default_semester))
     return (
         <Dialog
-            maxWidth="lg"
+            maxWidth="xl"
             onClose={() => props.handleClose()}
             open={props.open}
         >
@@ -398,8 +398,6 @@ export const TargetVizChart = (props: Props) => {
             layer: 'above traces',
             autorange: 'reversed',
             tickformat: '%H:%M',
-            tickmode: 'auto',
-            nticks: 10
         },
         yaxis: {
             title: 'Time [HT]',
