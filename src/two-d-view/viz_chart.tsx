@@ -24,6 +24,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import Plot from "react-plotly.js";
 import * as SunCalc from "suncalc";
+import { UTurnLeftTwoTone } from "@mui/icons-material";
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -337,7 +338,7 @@ export const TargetVizChart = (props: Props) => {
         showlegend: false,
         name: targetViz.target_name ?? 'Target'
     }
-    let firstTrace = {...trace}
+    let firstTrace = { ...trace }
 
     targetViz.semester_visibility.forEach((dayViz: DayViz) => {
         let texts: string[] = []
@@ -375,30 +376,25 @@ export const TargetVizChart = (props: Props) => {
         trace.text = [...trace.text, ...texts]
         //@ts-ignore
         if (firstTrace.x.length <= 0) {
-            firstTrace = {...trace}
+            firstTrace = { ...trace }
         }
     })
-    const traces = [trace]
-
     //Add UT time trace
-    if (traces.length > 0) {
-        let UTTrace = {...firstTrace}
-        //@ts-ignore
-        const ydates = UTTrace.y.map((date: Date) => dayjs(date).add(10, 'hour').toDate())
-        UTTrace.y = ydates
-        if (UTTrace.marker) {
-            UTTrace.marker.opacity = 0;
-            UTTrace.marker.size = 0;
-        }
-        if (UTTrace.line) {
-            UTTrace.line.width = 0;
-        }
-        UTTrace.yaxis = 'y2'
-        UTTrace.visible = true
-        console.log('UTTrace', UTTrace)
-        traces.push(UTTrace)
+    let UTTrace = { ...firstTrace }
+    //@ts-ignore
+    const ydates = UTTrace.y.map((date: Date) => dayjs(date).add(10, 'hour').toDate())
+    UTTrace.y = ydates
+    if (UTTrace.marker) {
+        UTTrace.marker.opacity = 0;
+        UTTrace.marker.size = 0;
     }
+    if (UTTrace.line) {
+        UTTrace.line.width = 0;
+    }
+    UTTrace.yaxis = 'y2'
+    UTTrace.visible = true
 
+    const traces = [trace, UTTrace]
     console.log('traces', traces)
 
 
