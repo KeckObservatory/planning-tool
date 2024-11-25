@@ -332,6 +332,7 @@ export const TargetVizChart = (props: Props) => {
         },
         textposition: 'top left',
         type: 'scattergl',
+        zorder: -999,
         mode: 'markers',
         visible: true,
         showlegend: false,
