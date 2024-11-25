@@ -333,11 +333,10 @@ export const TargetVizChart = (props: Props) => {
         textposition: 'top left',
         type: 'scattergl',
         mode: 'markers',
+        visible: true,
         showlegend: false,
         name: targetViz.target_name ?? 'Target'
     }
-
-
     let firstTrace = {...trace}
 
     targetViz.semester_visibility.forEach((dayViz: DayViz) => {
@@ -375,9 +374,8 @@ export const TargetVizChart = (props: Props) => {
         //@ts-ignore
         trace.text = [...trace.text, ...texts]
         //@ts-ignore
-        if (!firstTrace.x) {
+        if (firstTrace.x.length <= 0) {
             firstTrace = {...trace}
-
         }
     })
     const traces = [trace]
@@ -401,6 +399,8 @@ export const TargetVizChart = (props: Props) => {
         traces.push(UTTrace)
     }
 
+    console.log('traces', traces)
+
 
     const layout: Partial<Plotly.Layout> = {
         width: 1600,
@@ -420,7 +420,7 @@ export const TargetVizChart = (props: Props) => {
             type: 'date',
             overlaying: 'y',
             side: 'right',
-            gridwidth: 5,
+            // gridwidth: 5,
             layer: 'above traces',
             autorange: 'reversed',
             tickformat: '%H:%M',
