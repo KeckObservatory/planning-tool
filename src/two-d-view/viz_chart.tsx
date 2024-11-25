@@ -387,8 +387,8 @@ export const TargetVizChart = (props: Props) => {
 
 
     const layout: Partial<Plotly.Layout> = {
-        width: 1200,
-        height: 400,
+        width: 1600,
+        height: 600,
         title: `${target.target_name ?? 'Target'} Visibility`,
         yaxis2: {
             title: 'Time [UTC]',
