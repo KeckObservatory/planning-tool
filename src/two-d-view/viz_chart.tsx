@@ -439,7 +439,3 @@ export const TargetVizChart = (props: Props) => {
         />
     )
 }
-
-function round_date(roundMin: any, nadir: any) {
-    throw new Error("Function not implemented.");
-}
