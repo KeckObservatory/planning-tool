@@ -396,14 +396,18 @@ export const TargetVizChart = (props: Props) => {
             overlaying: 'y', 
             side: 'right',
             gridwidth: 5,
-            layer: 'above traces',
+            //@ts-ignore
+            layer: 'above',
+            // layer: 'above traces',
             autorange: 'reversed',
             tickformat: '%H:%M',
         },
         yaxis: {
             title: 'Time [HT]',
             type: 'date',
-            layer: 'above traces',
+            //@ts-ignore
+            layer: 'above',
+            // layer: 'above traces',
             gridwidth: 5,
             autorange: 'reversed',
             tickformat: '%H:%M',
