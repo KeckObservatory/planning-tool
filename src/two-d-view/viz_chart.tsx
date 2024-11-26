@@ -373,17 +373,6 @@ export const TargetVizChart = (props: Props) => {
         return trace
     })
 
-
-    // //HT to UT conversion
-    // // const yLtext = ['06:00', '04:00', '02:00', '00:00', '22:00', '20:00', '18:00']
-    // const rtrace = traces.at(-1) as Partial<Plotly.PlotData>
-    // //@ts-ignore
-    // rtrace && (rtrace.y = rtrace.y.map((date: Date) => {dayjs(date).add(10, 'hour').toDate()}))
-    // rtrace && traces.push(rtrace)
-    // console.log(traces, rtrace)
-
-    // const yRtext = ['16:00', '18:00', '20:00', '22:00', '24:00', '02:00', '04:00']
-
     const layout: Partial<Plotly.Layout> = {
         width: 1600,
         height: 600,
@@ -392,22 +381,9 @@ export const TargetVizChart = (props: Props) => {
             title: 'Time [HT]',
             type: 'date',
             gridwidth: 5,
-            layer: 'above traces',
             autorange: 'reversed',
             tickformat: '%H:%M',
-            nticks: 7
         },
-        // yaxis2: {
-        //     title: 'Time [UTC]',
-        //     type: 'date',
-        //     overlaying: 'y',
-        //     side: 'right',
-        //     gridwidth: 5,
-        //     // ticktext: yRtext,
-        //     layer: 'above traces',
-        //     autorange: 'reversed',
-        //     tickformat: '%H:%M',
-        // },
         xaxis: {
             title: 'Date',
             type: 'date',
