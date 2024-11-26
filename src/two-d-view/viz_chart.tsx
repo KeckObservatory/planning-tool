@@ -373,8 +373,8 @@ export const TargetVizChart = (props: Props) => {
     })
 
     const layout: Partial<Plotly.Layout> = {
-        width: 1400,
-        height: 400,
+        width: 1600,
+        height: 600,
         title: `${target.target_name ?? 'Target'} Visibility`,
         yaxis: {
             title: 'Time [HT]',
@@ -399,6 +399,7 @@ export const TargetVizChart = (props: Props) => {
         <Plot
             data={traces}
             layout={layout}
+            onInitialized={(figure, graphDiv) => console.log(figure, graphDiv)}
         />
     )
 }
