@@ -381,7 +381,7 @@ export const TargetVizChart = (props: Props) => {
     rtrace && (rtrace.y = rtrace.y.map((date: Date) => {dayjs(date).add(10, 'hour').toDate()}))
     rtrace && traces.push(rtrace)
 
-    const yRtext = ['16:00', '18:00', '20:00', '22:00', '24:00', '02:00', '04:00']
+    // const yRtext = ['16:00', '18:00', '20:00', '22:00', '24:00', '02:00', '04:00']
 
     const layout: Partial<Plotly.Layout> = {
         width: 1600,
@@ -394,7 +394,6 @@ export const TargetVizChart = (props: Props) => {
             layer: 'above traces',
             autorange: 'reversed',
             tickformat: '%H:%M',
-            // ticktext: yLtext,
             nticks: 7
         },
         yaxis2: {
@@ -405,7 +404,6 @@ export const TargetVizChart = (props: Props) => {
             gridwidth: 5,
             // ticktext: yRtext,
             layer: 'above traces',
-            ticktext: yRtext,
             autorange: 'reversed',
             tickformat: '%H:%M',
         },
