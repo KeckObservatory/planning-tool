@@ -380,6 +380,7 @@ export const TargetVizChart = (props: Props) => {
     //@ts-ignore
     rtrace && (rtrace.y = rtrace.y.map((date: Date) => {dayjs(date).add(10, 'hour').toDate()}))
     rtrace && traces.push(rtrace)
+    console.log(traces, rtrace)
 
     // const yRtext = ['16:00', '18:00', '20:00', '22:00', '24:00', '02:00', '04:00']
 
