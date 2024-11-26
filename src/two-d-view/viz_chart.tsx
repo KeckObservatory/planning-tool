@@ -375,6 +375,10 @@ export const TargetVizChart = (props: Props) => {
 
     //HT to UT conversion
     // const yLtext = ['06:00', '04:00', '02:00', '00:00', '22:00', '20:00', '18:00']
+    const rtrace = traces.at(-1) as Partial<Plotly.PlotData>
+    //@ts-ignore
+    rtrace.y = rtrace.y.map((date: Date) => {dayjs(date).add(10, 'hour').toDate()})
+
     const yRtext = ['16:00', '18:00', '20:00', '22:00', '24:00', '02:00', '04:00']
 
     const layout: Partial<Plotly.Layout> = {
