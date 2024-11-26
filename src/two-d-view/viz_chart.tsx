@@ -357,17 +357,13 @@ export const TargetVizChart = (props: Props) => {
                 symbol: 'square',
                 opacity: 1 // too dense to see ticks
             },
-            // color,
-            //@ts-ignore
-            hovorinfo: 'text',
             hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
             line: {
                 width: 0,
             },
             textposition: 'top left',
-            // type: 'scattergl',
-            type: 'scatter',
-            mode: 'markers',
+            type: 'scattergl',
+            mode: 'lines+markers',
             showlegend: false,
             name: targetViz.target_name ?? 'Target'
         }
