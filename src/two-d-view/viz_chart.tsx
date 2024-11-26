@@ -371,8 +371,8 @@ export const TargetVizChart = (props: Props) => {
     })
 
     const layout: Partial<Plotly.Layout> = {
-        width: 1600,
-        height: 600,
+        width: 1400,
+        height: 400,
         title: `${target.target_name ?? 'Target'} Visibility`,
         yaxis: {
             title: 'Time [HT]',
@@ -390,7 +390,7 @@ export const TargetVizChart = (props: Props) => {
             // tickmode: 'auto',
             //nticks: 0
         },
-        hovermode: "closest",
+        // hovermode: "closest",
     }
 
     return (
