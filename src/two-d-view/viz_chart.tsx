@@ -362,8 +362,10 @@ export const TargetVizChart = (props: Props) => {
                 width: 0,
             },
             textposition: 'top left',
-            type: 'scattergl',
-            mode: 'lines+markers',
+            type: 'scatter',
+            // type: 'scattergl',
+            // mode: 'lines+markers',
+            mode: 'markers',
             showlegend: false,
             name: targetViz.target_name ?? 'Target'
         }
@@ -390,7 +392,7 @@ export const TargetVizChart = (props: Props) => {
             // tickmode: 'auto',
             //nticks: 0
         },
-        // hovermode: "closest",
+        hovermode: "closest",
     }
 
     return (
