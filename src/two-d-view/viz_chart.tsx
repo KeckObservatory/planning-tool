@@ -332,6 +332,7 @@ export const TargetVizChart = (props: Props) => {
             txt += `Airmass: ${air_mass(viz.alt, lngLatEl.el).toFixed(2)}<br>`
             // txt += `Airmass: ${air_mass(viz.alt).toFixed(2)}<br>`
             txt += `HT: ${dayjs(viz.datetime).format(context.config.date_time_format)}<br>`
+            txt += `UT: ${dayjs(viz.datetime).utc(false).format(context.config.date_time_format)}<br>`
             txt += `Visible for: ${dayViz.visible_hours.toFixed(2)} hours<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
             texts.push(txt)
