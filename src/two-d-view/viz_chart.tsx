@@ -365,7 +365,8 @@ export const TargetVizChart = (props: Props) => {
                 width: 0,
             },
             textposition: 'top left',
-            type: 'scattergl',
+            // type: 'scattergl',
+            type: 'scatter',
             mode: 'markers',
             showlegend: false,
             name: targetViz.target_name ?? 'Target'
