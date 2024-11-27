@@ -98,7 +98,6 @@ const check_for_duplicates = (targets: Target[]) => {
       return t.ra === target.ra && t.dec === target.dec && idx !== index
     })
     const alreadyInList = duplicates.some((dup) => dup.target_name === target.target_name)
-    console.log('checking for duplicates', target.target_name, duplicateNames, duplcateRADEC, alreadyInList, duplicates)
     if (
       target.target_name //only check for duplicates if target has a name
       && (duplicateNames || duplcateRADEC)
