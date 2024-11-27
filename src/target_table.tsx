@@ -108,8 +108,8 @@ const check_for_duplicates = (targets: Target[]) => {
 
 
   const uniqueDuplicates = Array.from(new Set(duplicates
-    .map(dup => JSON.stringify(dup))
-    .map(strdup => JSON.parse(strdup))))
+    .map(dup => JSON.stringify(dup))))
+    .map(strdup => JSON.parse(strdup))
 
   console.log('duplicates', duplicates, 'unique', uniqueDuplicates)
   return uniqueDuplicates
