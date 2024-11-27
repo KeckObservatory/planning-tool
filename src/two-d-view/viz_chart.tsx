@@ -482,6 +482,7 @@ export const TargetVizChart = (props: Props) => {
             // txt += `Airmass: ${air_mass(viz.alt).toFixed(2)}<br>`
             txt += `HT: ${dayjs(viz.datetime).format(context.config.date_time_format)}<br>`
             txt += `UT: ${dayjs(viz.datetime).utc(false).format(context.config.date_time_format)}<br>`
+            txt += `Moon Fraction: ${viz.moon_fraction.toFixed(2)}<br>`
             txt += `Visible for: ${dayViz.visible_hours.toFixed(2)} hours<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
 
@@ -517,9 +518,6 @@ export const TargetVizChart = (props: Props) => {
     })
 
     const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.PlotData[]
-
-    // traces = [...traces, ...Object.values(lightTraces)]
-    console.log('lightTraces', lightTraces)
     //@ts-ignore
     traces = [...traces, ...lightTraces]
 
@@ -567,8 +565,6 @@ export const TargetVizChart = (props: Props) => {
             data={traces}
             divId='target-viz-chart'
             layout={layout}
-            onInitialized={(figure, graphDiv) => console.log('onInit', figure, graphDiv)}
-            onAfterPlot={() => console.log('onAfterPlot')}
         />
     )
 }
