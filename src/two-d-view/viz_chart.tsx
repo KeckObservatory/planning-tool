@@ -13,6 +13,7 @@ import { DomeSelect, Dome } from "./two_d_view";
 import dayjs, { Dayjs, ManipulateType } from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import arraySupport from 'dayjs/plugin/arraySupport'
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { GetTimesResult } from "suncalc";
 import Tooltip from "@mui/material/Tooltip";
@@ -28,6 +29,7 @@ import { Stack } from "@mui/material";
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
+dayjs.extend(arraySupport)
 
 interface ButtonProps {
     target: Target
@@ -78,7 +80,6 @@ const get_semester_dates = (semester: string) => {
     const range = SEMESTER_RANGES[sem as 'A' | 'B']
 
     const startDate = dayjs().year(year).month(range.start_month).date(range.start_day)
-
     const endDate = dayjs().year(endYear).month(range.end_month).date(range.end_day)
     const ranges = dayjs_range(startDate, endDate, 'day')
     return ranges
@@ -240,21 +241,168 @@ export const SemesterSelect = (props: SemesterSelectProps) => {
     )
 }
 
-const date_normalize = (date: Date) => {
-    const d = new Date(date.valueOf())
-    d.setFullYear(2020, 1, 1)
-    //if morning set to next day
-    return d.getHours() < 12 ? dayjs(d).add(1, 'day').toDate() : d
+const date_normalize = (date: Date, utctz=false) => {
+    //if date is before semester date set to next day
+    let out = dayjs(date).set('year', 2000).set('month', 0).set('date', 1)
+    out = out.get('hours') < 12 ? out.add(1, 'day') : out
+    if (utctz) {
+        return out.utc(true).toDate()
+    }
+    return out.toDate() 
+}
+
+const colors = {
+    'Deck Blocking': '#7570b3',
+    'Below Horizon': '#e7298a',
+    'Above Tracking Limits': '#d95f02'
 }
 
 export const reason_to_color_mapping = (reasons: string[]) => {
-    const colors = {
-        'Deck Blocking': '#7570b3',
-        'Below Horizon': '#e7298a',
-        'Above Tracking Limits': '#d95f02'
-    }
     const cols = reasons.map((reason: string) => colors[reason as keyof typeof colors])
     return cols.length ? cols[0] : '#1b9e77'
+}
+
+const create_dawn_dusk_text = (date: Date, date_time_format: string) => {
+    let txt = ""
+    txt += "HT: " + dayjs(date).format(date_time_format) + "<br>"
+    txt += "UT: " + dayjs(date).utc(false).format(date_time_format)
+    return txt
+}
+
+const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: string) => {
+
+    const trace = {
+        yaxis: 'y2',
+        hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+        textposition: 'top left',
+        mode: 'lines+markers',
+        showlegend: false,
+        type: 'scattergl',
+        marker: {
+            size: 2,
+            symbol: 'square',
+        },
+        line: {
+            width: 2
+        }
+    }
+    let dawn_dusk_traces: { [key: string]: any } = {
+        dusk: {
+            ...trace,
+            x: [],
+            y: [],
+            text: [],
+            name: 'Dusk',
+            marker: {
+                ...trace.marker,
+                color: '#eeeeee',
+            },
+            line: {
+                ...trace.line,
+                color: '#eeeeee',
+            }
+        },
+        amateur_dusk: {
+            ...trace,
+            x: [],
+            y: [],
+            text: [],
+            name: 'Amateur Dusk',
+            marker: {
+                ...trace.marker,
+                color: '#dddddd',
+            },
+            line: {
+                ...trace.line,
+                color: '#dddddd',
+            }
+        },
+        astronomical_dusk: {
+            ...trace,
+            x: [],
+            y: [],
+            text: [],
+            name: 'Astronomical Dusk',
+            marker: {
+                ...trace.marker,
+                color: '#cccccc',
+            },
+            line: {
+                ...trace.line,
+                color: '#cccccc',
+            }
+        },
+        astronomical_dawn: {
+            ...trace,
+            x: [],
+            y: [],
+            text: [],
+            name: 'Astronomical Dawn',
+            marker: {
+                ...trace.marker,
+                color: '#cccccc',
+            },
+            line: {
+                ...trace.line,
+                color: '#cccccc',
+            }
+        },
+        amateur_dawn: {
+            ...trace,
+            x: [],
+            y: [],
+            text: [],
+            name: 'Amateur Dawn',
+            marker: {
+                ...trace.marker,
+                color: '#dddddd',
+            },
+            line: {
+                ...trace.line,
+                color: '#dddddd',
+            }
+        },
+        dawn: {
+            ...trace,
+            x: [],
+            y: [],
+            text: [],
+            name: 'Dawn',
+            marker: {
+                ...trace.marker,
+                color: '#eeeeee',
+            },
+            line: {
+                ...trace.line,
+                color: '#eeeeee',
+            }
+        }
+    }
+
+    targetViz.semester_visibility.forEach((dayViz: DayViz) => {
+        const xdate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
+        dawn_dusk_traces.amateur_dawn.x.push(xdate)
+        dawn_dusk_traces.amateur_dusk.x.push(xdate)
+        dawn_dusk_traces.dawn.x.push(xdate)
+        dawn_dusk_traces.dusk.x.push(xdate)
+        dawn_dusk_traces.astronomical_dawn.x.push(xdate)
+        dawn_dusk_traces.astronomical_dusk.x.push(xdate)
+
+        dawn_dusk_traces.amateur_dawn.y.push(date_normalize(dayViz.amateurDawn, true))
+        dawn_dusk_traces.amateur_dusk.y.push(date_normalize(dayViz.amateurDusk, true))
+        dawn_dusk_traces.dawn.y.push(date_normalize(dayViz.dawn, true))
+        dawn_dusk_traces.dusk.y.push(date_normalize(dayViz.dusk, true))
+        dawn_dusk_traces.astronomical_dawn.y.push(date_normalize(dayViz.astronomicalDawn, true))
+        dawn_dusk_traces.astronomical_dusk.y.push(date_normalize(dayViz.astronomicalDusk, true))
+
+        dawn_dusk_traces.amateur_dawn.text.push(create_dawn_dusk_text(dayViz.amateurDawn, date_time_format))
+        dawn_dusk_traces.amateur_dusk.text.push(create_dawn_dusk_text(dayViz.amateurDusk, date_time_format))
+        dawn_dusk_traces.dawn.text.push(create_dawn_dusk_text(dayViz.amateurDusk, date_time_format))
+        dawn_dusk_traces.dusk.text.push(create_dawn_dusk_text(dayViz.amateurDusk, date_time_format))
+        dawn_dusk_traces.astronomical_dawn.text.push(create_dawn_dusk_text(dayViz.amateurDusk, date_time_format))
+        dawn_dusk_traces.astronomical_dusk.text.push(create_dawn_dusk_text(dayViz.amateurDusk, date_time_format))
+    })
+    return dawn_dusk_traces
 }
 
 export const TargetVizChart = (props: Props) => {
@@ -320,8 +468,9 @@ export const TargetVizChart = (props: Props) => {
     }, [target, semester, dome])
 
 
-    const traces = targetViz.semester_visibility.map((dayViz: DayViz) => {
-        let texts: string[] = []
+
+    let traces = targetViz.semester_visibility.map((dayViz: DayViz) => {
+        let text: string[] = []
         let y: Date[] = []
         let color: string[] = []
         //let color: number[] = []
@@ -335,14 +484,11 @@ export const TargetVizChart = (props: Props) => {
             txt += `UT: ${dayjs(viz.datetime).utc(false).format(context.config.date_time_format)}<br>`
             txt += `Visible for: ${dayViz.visible_hours.toFixed(2)} hours<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
-            texts.push(txt)
+
             color.push(reason_to_color_mapping(viz.reasons))
-            // color.push(viz.reasons.length? viz.reasons[0] : 'visible')
-            // const daytime = new Date(viz.datetime.valueOf())
             const daytime = date_normalize(viz.datetime)
-            // daytime.setFullYear(2020, 1, 1)
             y.push(daytime)
-            texts.push(txt)
+            text.push(txt)
         })
         const ydate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
         const x = Array.from({ length: y.length }, () => ydate)
@@ -350,7 +496,7 @@ export const TargetVizChart = (props: Props) => {
         const trace: Partial<Plotly.PlotData> = {
             x,
             y,
-            text: texts,
+            text,
             marker: {
                 color,
                 size: ROUND_MINUTES,
@@ -362,25 +508,46 @@ export const TargetVizChart = (props: Props) => {
                 width: 0,
             },
             textposition: 'top left',
-            type: 'scatter',
-            // type: 'scattergl',
-            // mode: 'lines+markers',
-            mode: 'markers',
+            type: 'scattergl',
+            mode: 'lines+markers',
             showlegend: false,
             name: targetViz.target_name ?? 'Target'
         }
         return trace
     })
 
+    const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.PlotData[]
+
+    // traces = [...traces, ...Object.values(lightTraces)]
+    console.log('lightTraces', lightTraces)
+    //@ts-ignore
+    traces = [...traces, ...lightTraces]
+
     const layout: Partial<Plotly.Layout> = {
         width: 1600,
         height: 600,
         title: `${target.target_name ?? 'Target'} Visibility`,
+        plot_bgcolor: 'black',
+        yaxis2: {
+            title: 'Time [HT]',
+            type: 'date',
+            gridwidth: 0,
+            overlaying: 'y',
+            scaleanchor: 'y',
+            side: 'right',
+            layer: 'above traces',
+            autorange: 'reversed',
+            // tickmode: 'auto',
+            tickformat: '%H:%M',
+        },
         yaxis: {
             title: 'Time [HT]',
             type: 'date',
-            gridwidth: 5,
+            gridwidth: 0,
+            scaleanchor: 'y2',
             autorange: 'reversed',
+            layer: 'above traces',
+            // tickmode: 'auto',
             tickformat: '%H:%M',
         },
         xaxis: {
@@ -389,17 +556,19 @@ export const TargetVizChart = (props: Props) => {
             layer: 'above traces',
             dtick: 15 * 24 * 60 * 60 * 1000, // milliseconds
             tickformat: '%Y-%m-%d',
-            // tickmode: 'auto',
+            tickmode: 'auto',
             //nticks: 0
         },
-        hovermode: "closest",
+        // hovermode: "closest",
     }
 
     return (
         <Plot
             data={traces}
+            divId='target-viz-chart'
             layout={layout}
-            onInitialized={(figure, graphDiv) => console.log(figure, graphDiv)}
+            onInitialized={(figure, graphDiv) => console.log('onInit', figure, graphDiv)}
+            onAfterPlot={() => console.log('onAfterPlot')}
         />
     )
 }

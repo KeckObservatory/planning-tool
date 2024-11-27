@@ -76,22 +76,22 @@ const SnackbarContext = React.createContext<SnackbarContextProps>(init_snackbar_
 export const useSnackbarContext = () => React.useContext(SnackbarContext);
 
 export interface KeckGeoModel {
-    K1: GeoModel
-    K2: GeoModel
+  K1: GeoModel
+  K2: GeoModel
 }
 
 export interface GeoModel {
-    r0: number,
-    r1: number,
-    r2: number,
-    r3: number,
-    t0: number,
-    t1: number,
-    t2: number,
-    t3: number,
-    left_north_wrap: number,
-    right_south_wrap: number,
-    trackLimit: number
+  r0: number,
+  r1: number,
+  r2: number,
+  r3: number,
+  t0: number,
+  t1: number,
+  t2: number,
+  t3: number,
+  left_north_wrap: number,
+  right_south_wrap: number,
+  trackLimit: number
 }
 
 
@@ -103,7 +103,7 @@ interface ConfigFile {
   timezone: string,
   time_format: string,
   date_time_format: string,
-  keck_geometry: KeckGeoModel 
+  keck_geometry: KeckGeoModel
   keck_latitude: number, //deg
   keck_longitude: number, // Keck Observatory longitude west of Greenwich [deg]
   keck_elevation: number, // km
@@ -113,12 +113,12 @@ interface State {
   username: string;
   obsid: number;
   is_admin: boolean;
-  config: ConfigFile; 
+  config: ConfigFile;
 }
 
-interface StateContextProps extends State{
+interface StateContextProps extends State {
   targets: Target[];
-  setTargets: React.Dispatch<React.SetStateAction<Target[]>>; 
+  setTargets: React.Dispatch<React.SetStateAction<Target[]>>;
 }
 
 export interface UserInfo {
@@ -168,7 +168,28 @@ function App() {
       let init_targets = await get_targets(userinfo.Id)
       if ((init_targets as unknown as AxiosError).message) {
         console.warn('error fetching targets', init_targets)
-        init_targets = []
+        init_targets = [
+          {
+            "_id": "3272fa23-b4eb-4781-8f60-7b9dc706190d",
+            "comment": "",
+            "dec": "02:03:08.597629980",
+            "dec_deg": 2.052,
+            "epoch": "J2000",
+            "g_mag": 12.84409,
+            "gaia_id": "3.70038690560506E+018",
+            "j_mag": 11.692,
+            "obsid": 4866,
+            "pm_dec": 0.098,
+            "pm_ra": 3,
+            "ra": "12:29:06.6998257176",
+            "ra_deg": 187.275,
+            "tags": [
+              "asdf quer",
+              "asdf"
+            ],
+            "target_name": "3C 273",
+            "tic_id": ""
+          }]
       }
       console.log('targets', init_targets)
       const config = await get_config()
@@ -189,7 +210,7 @@ function App() {
   return (
     <ThemeProvider theme={theme} >
       <CssBaseline />
-      <StateContext.Provider value={{...state, targets, setTargets}}>
+      <StateContext.Provider value={{ ...state, targets, setTargets }}>
         <SnackbarContext.Provider value={{
           snackbarOpen: openSnackbar,
           setSnackbarOpen: setOpenSnackbar,
@@ -221,8 +242,8 @@ function App() {
                 flexDirection: 'column',
               }}
             >
-              {Object.keys(state).length > 0 ? (<TargetTable />):
-              (<Skeleton variant="rectangular" width="100%" height={500} />)}
+              {Object.keys(state).length > 0 ? (<TargetTable />) :
+                (<Skeleton variant="rectangular" width="100%" height={500} />)}
             </Paper>
           </Stack>
         </SnackbarContext.Provider>
