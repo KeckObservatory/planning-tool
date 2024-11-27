@@ -35,7 +35,6 @@ dayjs.extend(arraySupport)
 interface ButtonProps {
     targetName: string 
     targetNames: string[]
-    setTargetName: (targetName: string) => void
 }
 
 interface Props{ 
@@ -127,7 +126,7 @@ export const dayjs_range = (start: Dayjs, end: Dayjs, unit: ManipulateType = 'da
 
 
 export const TargetVizButton = (props: ButtonProps) => {
-    const { targetName, setTargetName, targetNames } = props
+    const { targetName, targetNames } = props
 
     const [open, setOpen] = React.useState(false);
 
@@ -150,7 +149,6 @@ export const TargetVizButton = (props: ButtonProps) => {
                 open={open}
                 targetName={targetName}
                 targetNames={targetNames}
-                setTargetName={setTargetName}
                 handleClose={handleClose}
             />
         </>
@@ -193,7 +191,6 @@ interface TargetVizDialogProps {
     open: boolean,
     targetName: string 
     targetNames: string[]
-    setTargetName: (targetName: string) => void
     handleClose: () => void
 }
 
@@ -206,7 +203,6 @@ const TargetVizDialog = (props: TargetVizDialogProps) => {
     const [target, setTarget] = useState<Target>(initTarget ?? {} as Target)
 
     const onTargetNameSelect = (name: string) => {
-        props.setTargetName(name)
         if (name !== props.targetName) {
             const newTarget = context.targets.find((t: Target) => t.target_name === name || t._id === name)
             setTarget(newTarget ?? {} as Target)
