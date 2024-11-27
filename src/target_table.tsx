@@ -96,9 +96,12 @@ const check_for_duplicates = (targets: Target[]) => {
     const duplcateRADEC = targets.some((t, idx) => {
       return t.ra === target.ra && t.dec === target.dec && idx !== index
     })
-    //check for duplicate names or ra/dec. ignore undefined names
-    console.log('checking for duplicates', target.target_name, duplicateNames, duplcateRADEC)
-    if (target.target_name !== undefined && duplicateNames || duplcateRADEC) {
+    if (
+      target.target_name !== undefined //ignore undefined names
+      && duplicateNames 
+      || duplcateRADEC
+      && !duplicates.some((dup) => dup.target_name === target.target_name) //ignore duplicates that already been discovered
+    ) {
       const duplicate: Duplicate = {
         target_name: target.target_name as string,
         reason: duplicateNames ? 'duplicate name' : 'duplicate ra/dec'
