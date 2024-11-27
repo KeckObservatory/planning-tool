@@ -158,7 +158,7 @@ export default function TargetTable() {
     const duplicates = check_for_duplicates(rows)
     if (duplicates.length > 0) {
       sbcontext.setSnackbarMessage({
-        message: `Duplicate targets found: ${duplicates.map(dup => `${dup.target_name} (${dup.reason})`).join(', ')}`,
+        message: `Duplicate targets found: ${duplicates.map(dup => `${dup.target_name} (${dup.reason})`).join(' <br>')}`,
         severity: 'error'
       })
       sbcontext.setSnackbarOpen(true)
