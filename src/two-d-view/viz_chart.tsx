@@ -25,17 +25,21 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import Plot from "react-plotly.js";
 import * as SunCalc from "suncalc";
-import { Stack } from "@mui/material";
+import { Autocomplete, Stack } from "@mui/material";
+import { useTargetContext } from "../target_table";
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.extend(arraySupport)
 
 interface ButtonProps {
-    target: Target
+    targetName: string 
+    targetNames: string[]
+    setTargetName: (targetName: string) => void
 }
 
-interface Props extends ButtonProps { //TODO: Is extension needed?
+interface Props{ 
+    target: Target,
     dome: Dome
     semester: string
 }
@@ -123,8 +127,7 @@ export const dayjs_range = (start: Dayjs, end: Dayjs, unit: ManipulateType = 'da
 
 
 export const TargetVizButton = (props: ButtonProps) => {
-    const { target } = props
-    const targetName = target.target_name
+    const { targetName, setTargetName, targetNames } = props
 
     const [open, setOpen] = React.useState(false);
 
@@ -145,7 +148,9 @@ export const TargetVizButton = (props: ButtonProps) => {
             </Tooltip>
             <TargetVizDialog
                 open={open}
-                target={target}
+                targetName={targetName}
+                targetNames={targetNames}
+                setTargetName={setTargetName}
                 handleClose={handleClose}
             />
         </>
@@ -185,13 +190,29 @@ const get_curr_semester = (date: Date) => {
 }
 
 interface TargetVizDialogProps {
-    open: boolean, target: Target, handleClose: () => void
+    open: boolean,
+    targetName: string 
+    targetNames: string[]
+    setTargetName: (targetName: string) => void
+    handleClose: () => void
 }
 
 const TargetVizDialog = (props: TargetVizDialogProps) => {
     const [dome, setDome] = useState<Dome>("K2")
     const default_semester = get_curr_semester(new Date())
     const [semester, setSemester] = useQueryParam('semester', withDefault(StringParam, default_semester))
+    const context = useTargetContext()
+    const initTarget = context.targets.find((t: Target) => t.target_name === props.targetName || t._id === props.targetName)
+    const [target, setTarget] = useState<Target>(initTarget ?? {} as Target)
+
+    const onTargetNameSelect = (name: string) => {
+        props.setTargetName(name)
+        if (name !== props.targetName) {
+            const newTarget = context.targets.find((t: Target) => t.target_name === name || t._id === name)
+            setTarget(newTarget ?? {} as Target)
+        }
+    }
+
     return (
         <Dialog
             maxWidth={false}
@@ -204,12 +225,29 @@ const TargetVizDialog = (props: TargetVizDialogProps) => {
                 </>
             </DialogTitle>
             <DialogContent >
-                <Stack direction='column'>
-                    <div>
+                <Stack
+                    sx={{
+                        paddingTop: '16px',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                    }}
+                    direction='column'>
+                    <Stack direction='row'>
                         <SemesterSelect semester={semester} setSemester={setSemester} />
                         <DomeSelect dome={dome} setDome={setDome} />
-                    </div>
-                    <TargetVizChart target={props.target} semester={semester} dome={dome} />
+                        <Tooltip title={'Target'}>
+                            <Autocomplete
+                                disablePortal
+                                id="selected-target"
+                                value={props.targetName}
+                                onChange={(_, value) => value && onTargetNameSelect(value)}
+                                options={props.targetNames ?? []}
+                                sx={{ width: 250 }}
+                                renderInput={(params) => <TextField {...params} label={'Selected Target'} />}
+                            />
+                        </Tooltip>
+                    </Stack>
+                    {target && <TargetVizChart target={target} semester={semester} dome={dome} />}
                 </Stack>
             </DialogContent>
         </Dialog>
@@ -241,14 +279,14 @@ export const SemesterSelect = (props: SemesterSelectProps) => {
     )
 }
 
-const date_normalize = (date: Date, utctz=false) => {
+const date_normalize = (date: Date, utctz = false) => {
     //if date is before semester date set to next day
     let out = dayjs(date).set('year', 2000).set('month', 0).set('date', 1)
     out = out.get('hours') < 12 ? out.add(1, 'day') : out
     if (utctz) {
         return out.utc(true).toDate()
     }
-    return out.toDate() 
+    return out.toDate()
 }
 
 const colors = {

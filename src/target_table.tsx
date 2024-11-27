@@ -100,6 +100,7 @@ export const useTargetContext = () => React.useContext(TargetContext);
 export default function TargetTable() {
   const context = useStateContext()
   const [rows, setRows] = React.useState(context.targets as Target[]);
+  const [vizTargetName, setVizTargetName] = React.useState<string>('');
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
   const cfg = context.config
@@ -165,6 +166,8 @@ export default function TargetTable() {
     return validate.errors ?? []
   }
 
+  const targetNames = rows.map((row) => row.target_name ?? 'undefined target name')
+
   const ActionsCell = (params: GridRowParams<Target>) => {
     const { id, row } = params;
     const [editTarget, setEditTarget] = React.useState<Target>(row);
@@ -219,7 +222,11 @@ export default function TargetTable() {
 
     return [
       <SimbadButton hasSimbad={hasSimbad} target={editTarget} setTarget={setEditTarget} />,
-      <TargetVizButton target={editTarget} />,
+      <TargetVizButton 
+        targetName={editTarget.target_name ?? editTarget._id}
+        targetNames={targetNames}
+        setTargetName={setVizTargetName}
+       />,
       <ValidationDialogButton errors={errors} target={editTarget} />,
       <TargetEditDialogButton
         target={editTarget}
