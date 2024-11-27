@@ -89,30 +89,24 @@ interface Duplicate {
 
 const check_for_duplicates = (targets: Target[]) => {
   const duplicates: Duplicate[] = []
-  targets.forEach((target, idx) => {
-    const duplicateNames = targets.filter((t, index) => {
+  targets.forEach((target, index) => {
+    const duplicateNames = targets.some((t, idx) => {
       return t.target_name === target.target_name && idx !== index
     })
-    const duplcateRADEC = targets.filter((t, index) => {
+    const duplcateRADEC = targets.some((t, idx) => {
       return t.ra === target.ra && t.dec === target.dec && idx !== index
     })
     //check for duplicate names or ra/dec. ignore undefined names
-    if (target.target_name !== undefined && duplicateNames.length > 1 || duplcateRADEC.length > 1) {
+    console.log('checking for duplicates', target.target_name, duplicateNames, duplcateRADEC)
+    if (target.target_name !== undefined && duplicateNames || duplcateRADEC) {
       const duplicate: Duplicate = {
         target_name: target.target_name as string,
-        reason: duplicateNames.length > 1 ? 'duplicate name' : 'duplicate ra/dec'
+        reason: duplicateNames ? 'duplicate name' : 'duplicate ra/dec'
       }
       duplicates.push(duplicate)
     }
   })
-
-
-  const uniqueDuplicates = Array.from(new Set(duplicates
-    .map(dup => JSON.stringify(dup))))
-    .map(strdup => JSON.parse(strdup))
-
-  console.log('duplicates', duplicates, 'unique', uniqueDuplicates)
-  return uniqueDuplicates
+  return duplicates
 }
 
 export interface TargetsContext {
