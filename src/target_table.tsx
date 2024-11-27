@@ -25,7 +25,7 @@ import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
 import SimbadButton from './simbad_button';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
-import { Target, useStateContext } from './App.tsx';
+import { Target, useSnackbarContext, useStateContext } from './App.tsx';
 import TargetEditDialogButton, { format_tags, format_edit_entry, PropertyProps, rowSetter, TargetProps } from './target_edit_dialog.tsx';
 import { TargetVizButton } from './two-d-view/viz_chart.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
@@ -61,14 +61,14 @@ function convert_schema_to_columns(colWidth: number) {
       description: valueProps.description,
       type: valueProps.type === 'array' ? 'string' : valueProps.type, //array cells are cast as string
       headerName: valueProps.short_description ?? valueProps.description,
-      width: valueProps.type === 'array' ? colWidth * 2: colWidth, //TODO: 
+      width: valueProps.type === 'array' ? colWidth * 2 : colWidth, //TODO: 
       editable: valueProps.editable ?? true,
     } as GridColDef
 
     columns.push(col)
   });
 
-return columns;
+  return columns;
 }
 
 
@@ -82,7 +82,36 @@ export const submit_one_target = async (target: Target) => {
   return submittedTarget
 }
 
+interface Duplicate {
+  target_name: string,
+  reason: string
+}
 
+const check_for_duplicates = (targets: Target[]) => {
+  const duplicates: Duplicate[] = []
+  targets.forEach((target, idx) => {
+    const duplicateNames = targets.filter((t, index) => {
+      return t.target_name === target.target_name && idx !== index
+    })
+    const duplcateRADEC = targets.filter((t, index) => {
+      return t.ra === target.ra && t.dec === target.dec && idx !== index
+    })
+    //check for duplicate names or ra/dec. ignore undefined names
+    if (target.target_name !== undefined && duplicateNames.length > 1 || duplcateRADEC.length > 1) {
+      const duplicate: Duplicate = {
+        target_name: target.target_name as string,
+        reason: duplicateNames.length > 1 ? 'duplicate name' : 'duplicate ra/dec'
+      }
+      duplicates.push(duplicate)
+    }
+  })
+
+  const uniqueDuplicates = Array.from(new Set(duplicates
+    .map(dup => JSON.stringify(dup))
+    .map(strdup => JSON.parse(strdup))))
+
+  return uniqueDuplicates
+}
 
 export interface TargetsContext {
   targets: Target[];
@@ -99,6 +128,7 @@ export const useTargetContext = () => React.useContext(TargetContext);
 
 export default function TargetTable() {
   const context = useStateContext()
+  const sbcontext = useSnackbarContext();
   const [rows, setRows] = React.useState(context.targets as Target[]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
@@ -121,6 +151,16 @@ export default function TargetTable() {
     console.log('debounced save', target)
     return await submit_one_target(target)
   }
+
+  React.useEffect(() => {
+    const duplicates = check_for_duplicates(rows)
+    if (duplicates.length > 0) {
+      sbcontext.setSnackbarMessage({
+        message: `Duplicate targets found: ${duplicates.map(dup => `${dup.target_name} (${dup.reason})`).join(', ')}`,
+        severity: 'error'
+      })
+    }
+  }, [rows])
 
   const debounced_save = useDebounceCallback(edit_target, 2000)
 
@@ -221,10 +261,10 @@ export default function TargetTable() {
 
     return [
       <SimbadButton hasSimbad={hasSimbad} target={editTarget} setTarget={setEditTarget} />,
-      <TargetVizButton 
+      <TargetVizButton
         targetName={editTarget.target_name ?? editTarget._id}
         targetNames={targetNames}
-       />,
+      />,
       <ValidationDialogButton errors={errors} target={editTarget} />,
       <TargetEditDialogButton
         target={editTarget}
