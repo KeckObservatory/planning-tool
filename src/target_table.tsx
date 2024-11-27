@@ -89,8 +89,8 @@ interface Duplicate {
 
 const check_for_duplicates = (targets: Target[]) => {
   const duplicates: Duplicate[] = []
-  for (let idx = 0; idx < targets.length; idx++) {
-    const target = targets[idx]
+  for (let index = 0; index< targets.length; index++) {
+    const target = targets[index]
     const duplicateNames = targets.some((t, idx) => {
       return t.target_name === target.target_name && idx !== index
     })
