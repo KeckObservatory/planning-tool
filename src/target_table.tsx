@@ -89,18 +89,21 @@ interface Duplicate {
 
 const check_for_duplicates = (targets: Target[]) => {
   const duplicates: Duplicate[] = []
-  targets.forEach((target, index) => {
+  for (let idx = 0; idx < targets.length; idx++) {
+    const target = targets[idx]
     const duplicateNames = targets.some((t, idx) => {
       return t.target_name === target.target_name && idx !== index
     })
     const duplcateRADEC = targets.some((t, idx) => {
       return t.ra === target.ra && t.dec === target.dec && idx !== index
     })
+    const alreadyInList = duplicates.some((dup) => dup.target_name === target.target_name)
+    console.log('checking for duplicates', target.target_name, duplicateNames, duplcateRADEC, alreadyInList, duplicates)
     if (
-      target.target_name !== undefined //ignore undefined names
+      target.target_name //only check for duplicates if target has a name
       && duplicateNames 
       || duplcateRADEC
-      && !duplicates.some((dup) => dup.target_name === target.target_name) //ignore duplicates that already been discovered
+      && !alreadyInList
     ) {
       const duplicate: Duplicate = {
         target_name: target.target_name as string,
