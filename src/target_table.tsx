@@ -106,10 +106,12 @@ const check_for_duplicates = (targets: Target[]) => {
     }
   })
 
+
   const uniqueDuplicates = Array.from(new Set(duplicates
     .map(dup => JSON.stringify(dup))
     .map(strdup => JSON.parse(strdup))))
 
+  console.log('duplicates', duplicates, 'unique', uniqueDuplicates)
   return uniqueDuplicates
 }
 
@@ -159,6 +161,7 @@ export default function TargetTable() {
         message: `Duplicate targets found: ${duplicates.map(dup => `${dup.target_name} (${dup.reason})`).join(', ')}`,
         severity: 'error'
       })
+      sbcontext.setSnackbarOpen(true)
     }
   }, [rows])
 
