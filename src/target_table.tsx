@@ -101,8 +101,7 @@ const check_for_duplicates = (targets: Target[]) => {
     console.log('checking for duplicates', target.target_name, duplicateNames, duplcateRADEC, alreadyInList, duplicates)
     if (
       target.target_name //only check for duplicates if target has a name
-      && duplicateNames 
-      || duplcateRADEC
+      && (duplicateNames || duplcateRADEC)
       && !alreadyInList
     ) {
       const duplicate: Duplicate = {
