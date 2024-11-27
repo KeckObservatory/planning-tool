@@ -292,7 +292,7 @@ const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: string)
             x: [],
             y: [],
             text: [],
-            name: 'Dusk',
+            name: 'Nautical Dusk (6 deg)',
             marker: {
                 ...trace.marker,
                 color: '#eeeeee',
@@ -307,7 +307,7 @@ const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: string)
             x: [],
             y: [],
             text: [],
-            name: 'Amateur Dusk',
+            name: 'Amateur Dusk (12 deg)',
             marker: {
                 ...trace.marker,
                 color: '#dddddd',
@@ -322,7 +322,7 @@ const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: string)
             x: [],
             y: [],
             text: [],
-            name: 'Astronomical Dusk',
+            name: 'Astronomical Dusk (18 deg)',
             marker: {
                 ...trace.marker,
                 color: '#cccccc',
@@ -337,7 +337,7 @@ const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: string)
             x: [],
             y: [],
             text: [],
-            name: 'Astronomical Dawn',
+            name: 'Astronomical Dawn (18 deg)',
             marker: {
                 ...trace.marker,
                 color: '#cccccc',
@@ -352,7 +352,7 @@ const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: string)
             x: [],
             y: [],
             text: [],
-            name: 'Amateur Dawn',
+            name: 'Amateur Dawn (12 deg)',
             marker: {
                 ...trace.marker,
                 color: '#dddddd',
@@ -367,7 +367,7 @@ const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: string)
             x: [],
             y: [],
             text: [],
-            name: 'Dawn',
+            name: 'Nautical Dawn (6 deg)',
             marker: {
                 ...trace.marker,
                 color: '#eeeeee',
@@ -531,7 +531,7 @@ export const TargetVizChart = (props: Props) => {
             type: 'date',
             gridwidth: 0,
             overlaying: 'y',
-            scaleanchor: 'y',
+            // scaleanchor: 'y',
             side: 'right',
             layer: 'above traces',
             autorange: 'reversed',
@@ -542,7 +542,7 @@ export const TargetVizChart = (props: Props) => {
             title: 'Time [HT]',
             type: 'date',
             gridwidth: 0,
-            scaleanchor: 'y2',
+            // scaleanchor: 'y2',
             autorange: 'reversed',
             layer: 'above traces',
             // tickmode: 'auto',
