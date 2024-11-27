@@ -111,7 +111,7 @@ const check_for_duplicates = (targets: Target[]) => {
       }
       duplicates.push(duplicate)
     }
-  })
+  }
   return duplicates
 }
 
