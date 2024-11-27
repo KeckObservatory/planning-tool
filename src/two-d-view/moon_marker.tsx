@@ -12,12 +12,15 @@ interface Props {
 
 export const MoonMarker = (props: Props) => {
 
-    const deg = 360 - Math.floor(props.moonInfo.phase * 360)
-    // const deg = 180 - Math.floor(moonInfo.fraction * 360)
+    // const deg = Math.floor(props.moonInfo.angle) 
+    //0 rotate -90 degrees
+    //0.5 rotate 0 degrees
+    //1 rotate 90 degrees
+    const deg = 360 - Math.floor((props.moonInfo.phase) * 360)
     const width = '30px'
     const height = '30px'
     const theme = useTheme()
-    console.log('deg', deg, theme)
+    console.log('deg', deg, 'moon info', props.moonInfo)
     //@ts-ignore
     const outline = theme.palette.mode === 'dark' ? 'none' : '1px solid black'
 
@@ -55,22 +58,23 @@ export const MoonMarker = (props: Props) => {
         borderRadius: '100%',
         transformStyle: 'preserve-3d',
         backfaceVisibility: 'hidden',
-        transform: `rotate3d(0,1,0, ${deg}deg)`
+        backgroundColor: '#575851', //dark
+        transform: `rotate3d(0,1,0, ${deg}deg)`,
     }
 
     const dividerAfterStyle: React.CSSProperties = { //back face of moon
         ...dividerStyle,
         content: '',
-        backgroundColor: '#F4F6F0',
+        backgroundColor: '#F4F6F0', //light
         transform: 'rotateY(180deg)',
     }
 
     return (
         <div style={sphereStyle}>
-            <div id={deg < 180 ? 'light-hemisphere' : 'dark-hemisphere'}
-                style={deg < 180 ? lightStyle : darkStyle}></div>
-            <div id={deg < 180 ? 'dark-hemisphere' : 'light-hemisphere'}
-                style={deg < 180 ? darkStyle : lightStyle}></div>
+            <div id={deg > 180 ? 'light-hemisphere' : 'dark-hemisphere'}
+                style={deg > 180 ? lightStyle : darkStyle}></div>
+            <div id={deg > 180 ? 'dark-hemisphere' : 'light-hemisphere'}
+                style={deg > 180 ? darkStyle : lightStyle}></div>
             <div style={dividerStyle}>
                 <div style={dividerAfterStyle}></div>
             </div>

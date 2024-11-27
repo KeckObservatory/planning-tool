@@ -60,10 +60,9 @@ const make_disk_polar = (r1: number, r2: number, th1: number, th2: number) => {
 
 const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc: boolean, times: Date[], time: Date,
     time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
-): [any[], any] => {
+) => {
 
     //target trajectory traces
-    let moonImage: Partial<Plotly.Image> = {}
     let traces: Partial<Plotly.Data>[] = []
     targetView.forEach((tgtv: TargetView, idx: number) => {
         let [rr, tt] = [[] as number[], [] as number[]]
@@ -186,17 +185,6 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
 
             if (r < traceRadiusLimit) {
                 traces.push(moonMarkerTrace as Plotly.Data)
-                const x = ae[1] * Math.cos(ae[0] * Math.PI / 180)
-                const y = ae[1] * Math.sin(ae[0] * Math.PI / 180)
-                moonImage = {
-                    source: "https://images.plot.ly/language-icons/api-home/python-logo.png",
-                    xref: "x",
-                    yref: "y",
-                    x: x,
-                    y: y,
-                    sizex: 0.2,
-                    sizey: 0.2,
-                }
             }
         }
     }
@@ -281,7 +269,7 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
         theta: d3.theta
     }
     traces.push(trackingshape)
-    return [traces, moonImage]
+    return traces
 }
 
 export const DomeChart = (props: DomeChartProps) => {
@@ -294,7 +282,7 @@ export const DomeChart = (props: DomeChartProps) => {
         el: context.config.keck_elevation
     }
 
-    const [traces, moonImage] = make_2d_traces(targetView,
+    const traces = make_2d_traces(targetView,
         showMoon,
         showCurrLoc,
         times,
@@ -345,11 +333,6 @@ export const DomeChart = (props: DomeChartProps) => {
             text: 'East',
             showarrow: false
         }]
-    }
-
-    if (showMoon) {
-        console.log('moonImage', moonImage)
-        // layout.images = [ moonImage ]
     }
 
     return (
