@@ -24,25 +24,23 @@ export const MoonVizChart = (props: Props) => {
     targetViz.semester_visibility.forEach((dayViz: DayViz) => {
         //let color: number[] = []
         dayViz.visibility.forEach((viz: VizRow) => {
+            const lunarAngle = lunar_angle(targetViz.ra_deg as number,
+                 targetViz.dec_deg as number,
+                 viz.datetime,
+                 context.config.tel_lat_lng_el.keck)
+
             let txt = ""
             txt += `Az: ${viz.az.toFixed(2)}<br>`
             txt += `El: ${viz.alt.toFixed(2)}<br>`
-            txt += `Airmass: ${air_mass(viz.alt, context.config.tel_lat_lng_el.keck.el).toFixed(2)}<br>`
-            // txt += `Airmass: ${air_mass(viz.alt).toFixed(2)}<br>`
             txt += `HT: ${dayjs(viz.datetime).format(context.config.date_time_format)}<br>`
             txt += `UT: ${dayjs(viz.datetime).utc(false).format(context.config.date_time_format)}<br>`
             txt += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`
-            txt += `Visible for: ${dayViz.visible_hours.toFixed(2)} hours<br>`
+            txt += `Lunar Angle: ${lunarAngle.toFixed(2)}<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
 
             color.push(reason_to_color_mapping(viz.reasons))
             const daytime = date_normalize(viz.datetime)
             y.push(daytime)
-            const lunarAngle = lunar_angle(targetViz.ra_deg as number,
-                 targetViz.dec_deg as number,
-                 viz.datetime,
-                 context.config.tel_lat_lng_el.keck)
-                
             z.push(lunarAngle)
             text.push(txt)
         })
@@ -62,16 +60,16 @@ export const MoonVizChart = (props: Props) => {
         showlegend: false,
         name: targetViz.target_name ?? 'Target' + ' Lunar Angle Contour Chart'
     }
-    const traces = [trace]
+    let traces = [trace]
 
     const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.PlotData[]
     //@ts-ignore
-    // traces = [...traces, ...lightTraces]
+    traces = [...traces, ...lightTraces]
     console.log('lunar traces', traces)
 
     const layout: Partial<Plotly.Layout> = {
-        width: 1600,
-        height: 600,
+        width: 1200,
+        height: 400,
         title: `${targetViz.target_name ?? 'Target'} Visibility`,
         plot_bgcolor: 'black',
         yaxis2: {

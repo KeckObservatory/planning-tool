@@ -136,7 +136,7 @@ const TwoDView = ({ targets }: Props) => {
     const [showLimits, setShowLimits] = React.useState(true)
     const [rotatorAngle, setRotatorAngle] = React.useState(0)
     const [positionAngle] = React.useState(0)
-    const lngLatEl: LngLatEl = context.config.tel_lat_lng_el.keck
+    const lngLatEl = context.config.tel_lat_lng_el.keck
     const [suncalcTimes, setSuncalcTimes] = React.useState(util.get_suncalc_times(lngLatEl, obsdate))
     const [times, setTimes] = React.useState(util.get_times_using_nadir(suncalcTimes.nadir))
     const [time, setTime] = React.useState(suncalcTimes.nadir)

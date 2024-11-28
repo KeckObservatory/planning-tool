@@ -266,8 +266,8 @@ export const TargetVizChart = (props: Props) => {
     traces = [...traces, ...lightTraces]
 
     const layout: Partial<Plotly.Layout> = {
-        width: 1600,
-        height: 600,
+        width: 1200,
+        height: 400,
         title: `${targetViz.target_name ?? 'Target'} Visibility`,
         plot_bgcolor: 'black',
         yaxis2: {
