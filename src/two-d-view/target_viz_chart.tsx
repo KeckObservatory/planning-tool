@@ -11,7 +11,6 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { DayViz, TargetViz, VizRow } from "./viz_dialog";
 import { air_mass } from "./sky_view_util";
-import { X } from "@mui/icons-material";
 dayjs.extend(utc)
 dayjs.extend(timezone)
 

@@ -1,8 +1,6 @@
-import React from "react";
 import { DayViz, TargetViz, VizRow } from "./viz_dialog";
 import Plot from "react-plotly.js";
 import { useStateContext } from "../App";
-import { air_mass } from "./sky_view_util";
 import dayjs from "dayjs";
 import { lunar_angle } from "./sky_view_util";  
 import { reason_to_color_mapping, create_dawn_dusk_traces, date_normalize } from "./target_viz_chart";
