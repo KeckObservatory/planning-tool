@@ -45,9 +45,9 @@
     "date_time_format": "YYYY/MM/DD HH:mm",
     "tel_lat_lng_el": {
         "keck": {
-            "latitude": 19.8283,
-            "longitude": 204.5253,
-            "elevation": 4.160
+            "lat": 19.8283,
+            "lng": 204.5253,
+            "el": 4.160
         }
     },
     "tel_geometry": {

@@ -4,8 +4,8 @@ import * as util from './sky_view_util.tsx'
 import { Dome, TargetView } from "./two_d_view"
 import Plot from "react-plotly.js"
 import { colors } from "./sky_chart.tsx"
-import { GeoModel, useStateContext } from "../App.tsx"
-import { reason_to_color_mapping } from "./viz_chart.tsx"
+import { LngLatEl, GeoModel, useStateContext } from "../App.tsx"
+import { reason_to_color_mapping } from "./target_viz_chart.tsx"
 import { VizRow } from "./viz_dialog.tsx"
 
 const traceRadiusLimit = 90 - 2 //ignore points greater than the dome radius
@@ -60,7 +60,7 @@ const make_disk_polar = (r1: number, r2: number, th1: number, th2: number) => {
 }
 
 const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc: boolean, times: Date[], time: Date,
-    time_format: string, KG: GeoModel, lngLatEl: util.LngLatEl
+    time_format: string, KG: GeoModel, lngLatEl: LngLatEl
 ) => {
 
     //target trajectory traces
@@ -276,12 +276,8 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
 export const DomeChart = (props: DomeChartProps) => {
     const { targetView, showMoon, showCurrLoc, times, time, dome, width, height } = props
     const context = useStateContext()
-    const KG = context.config.keck_geometry[dome]
-    const lngLatEl: util.LngLatEl = {
-        lng: context.config.keck_longitude,
-        lat: context.config.keck_latitude,
-        el: context.config.keck_elevation
-    }
+    const KG = context.config.tel_geometry.keck[dome]
+    const lngLatEl = context.config.tel_lat_lng_el.keck
 
     const traces = make_2d_traces(targetView,
         showMoon,

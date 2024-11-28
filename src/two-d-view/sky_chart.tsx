@@ -2,7 +2,7 @@ import Plot from "react-plotly.js";
 import * as util from './sky_view_util.tsx'
 import { Dome, hidate, TargetView } from "./two_d_view";
 import { useStateContext } from "../App";
-import { reason_to_color_mapping } from "./viz_chart.tsx";
+import { reason_to_color_mapping } from "./target_viz_chart.tsx";
 import { DayViz, VizRow } from "./viz_dialog.tsx";
 import { LngLatEl } from "../App";
 import dayjs from "dayjs";

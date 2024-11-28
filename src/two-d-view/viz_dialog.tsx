@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react'
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import IconButton from '@mui/material/IconButton'
@@ -8,14 +7,15 @@ import { StringParam, useQueryParam, withDefault } from 'use-query-params';
 import { useTargetContext } from '../target_table';
 import { Target, useStateContext } from '../App';
 import { Autocomplete, Dialog, DialogContent, DialogTitle, Stack, TextField } from '@mui/material';
-import { alt_az_observable, TargetVizChart } from './viz_chart';
+import { alt_az_observable, TargetVizChart } from './target_viz_chart';
 import dayjs, { Dayjs, ManipulateType } from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import * as SunCalc from 'suncalc'
 import timezone from 'dayjs/plugin/timezone'
 import { GetTimesResult, GetMoonIlluminationResult } from "suncalc";
 import { air_mass, get_day_times, get_suncalc_times, ra_dec_to_az_alt, ra_dec_to_deg } from './sky_view_util';
-import { ROUND_MINUTES } from './constants';
+import { ROUND_MINUTES, SEMESTER_RANGES } from './constants';
+import { MoonVizChart } from './moon_viz_chart';
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -59,6 +59,38 @@ export const dayjs_range = (start: Dayjs, end: Dayjs, unit: ManipulateType = 'da
     return range;
 }
 
+const get_curr_semester = (date: Date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const sem = month > 1 && month < 8 ? 'A' : 'B'
+    return `${year}${sem}`
+}
+
+interface VizDialogProps {
+    open: boolean,
+    targetName: string 
+    targetNames: string[]
+    handleClose: () => void
+}
+
+interface SemesterSelectProps {
+    semester: string
+    setSemester: (semester: string) => void
+}
+
+const get_semester_dates = (semester: string) => {
+    const sem = semester[semester.length - 1] as 'A' | 'B'
+    const year = Number(semester.slice(0, 4))
+    const plusYear = SEMESTER_RANGES[sem].plus_year ?? 0
+    const endYear = year + plusYear
+    const range = SEMESTER_RANGES[sem as 'A' | 'B']
+
+    const startDate = dayjs().year(year).month(range.start_month).date(range.start_day)
+    const endDate = dayjs().year(endYear).month(range.end_month).date(range.end_day)
+    const ranges = dayjs_range(startDate, endDate, 'day')
+    return ranges
+}
+
 export const TargetVizButton = (props: ButtonProps) => {
     const { targetName, targetNames } = props
 
@@ -88,61 +120,23 @@ export const TargetVizButton = (props: ButtonProps) => {
         </>
     );
 }
-const get_curr_semester = (date: Date) => {
-    const year = date.getFullYear()
-    const month = date.getMonth()
-    const sem = month > 1 && month < 8 ? 'A' : 'B'
-    return `${year}${sem}`
-}
 
-interface VizDialogProps {
-    open: boolean,
-    targetName: string 
-    targetNames: string[]
-    handleClose: () => void
-}
-
-//TODO: add to config
-interface SemesterDates {
-    start_day: number
-    start_month: number
-    end_day: number
-    end_month: number
-    plus_year?: number
-}
-
-interface SemesterRange {
-    'A': SemesterDates
-    'B': SemesterDates
-}
-const SEMESTER_RANGES: SemesterRange = {
-    'A': {
-        start_day: 1,
-        start_month: 2,
-        end_day: 31,
-        end_month: 7
-    },
-    'B': {
-        start_day: 1,
-        start_month: 8,
-        end_day: 31,
-        end_month: 1,
-        plus_year: 1
+export const SemesterSelect = (props: SemesterSelectProps) => {
+    const { semester, setSemester } = props
+    const handleSemesterChange = (semester?: string) => {
+        if (semester) setSemester(semester)
     }
-}
-
-//HELPER FUNCTIONS
-const get_semester_dates = (semester: string) => {
-    const sem = semester[semester.length - 1] as 'A' | 'B'
-    const year = Number(semester.slice(0, 4))
-    const plusYear = SEMESTER_RANGES[sem].plus_year ?? 0
-    const endYear = year + plusYear
-    const range = SEMESTER_RANGES[sem as 'A' | 'B']
-
-    const startDate = dayjs().year(year).month(range.start_month).date(range.start_day)
-    const endDate = dayjs().year(endYear).month(range.end_month).date(range.end_day)
-    const ranges = dayjs_range(startDate, endDate, 'day')
-    return ranges
+    return (
+        <Tooltip title="Select Semester visibility Range.">
+            <TextField
+                // focused
+                label={'Semester Select'}
+                id="target-name"
+                value={semester}
+                onChange={(event) => handleSemesterChange(event.target.value)}
+            />
+        </Tooltip>
+    )
 }
 
 
@@ -195,7 +189,6 @@ export const VizDialog = (props: VizDialogProps) => {
                 }
                 return vis
             })
-
 
             const vizSum = visibility.reduce((sum: number, viz: VizRow) => {
                 return viz.observable ? sum + 1 : sum
@@ -251,33 +244,9 @@ export const VizDialog = (props: VizDialogProps) => {
                         </Tooltip>
                     </Stack>
                     {target && <TargetVizChart targetViz={targetViz} />}
+                    {target && <MoonVizChart targetViz={targetViz} />}
                 </Stack>
             </DialogContent>
         </Dialog>
-    )
-}
-
-interface SemesterSelectProps {
-    semester: string
-    setSemester: (semester: string) => void
-}
-
-
-export const SemesterSelect = (props: SemesterSelectProps) => {
-    const { semester, setSemester } = props
-    const handleSemesterChange = (semester?: string) => {
-        if (semester) setSemester(semester)
-    }
-    return (
-        <Tooltip title="Select Semester visibility Range.">
-            <TextField
-                // focused
-                label={'Semester Select'}
-                id="target-name"
-                value={semester}
-                onChange={(event) => handleSemesterChange(event.target.value)}
-
-            />
-        </Tooltip>
     )
 }

@@ -1,6 +1,5 @@
 import React from 'react';
 import * as util from './sky_view_util.tsx'
-import { LngLatEl } from './sky_view_util.tsx';
 import NightPicker from '../two-d-view/night_picker'
 import dayjs, { Dayjs } from 'dayjs';
 import { Autocomplete, FormControl, FormControlLabel, FormLabel, Grid2, Radio, RadioGroup, Stack, Switch, TextField, Tooltip, Typography } from '@mui/material';
@@ -10,18 +9,18 @@ import { DomeChart } from './dome_chart.tsx';
 import { SkyChart } from './sky_chart.tsx';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
-import { alt_az_observable } from './viz_chart.tsx';
+import { alt_az_observable } from './target_viz_chart.tsx';
 import { VizRow } from './viz_dialog.tsx';
 import AladinViewer from '../aladin';
 import { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import { MoonMarker } from './moon_marker.tsx';
 import * as SunCalc from "suncalc";
+import { FOVlink, STEP_SIZE } from './constants.tsx';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
 
-const FOVlink = 'FEATURES.json' //TODO: move to config
 interface Props {
     targets: Target[]
 }
@@ -137,11 +136,7 @@ const TwoDView = ({ targets }: Props) => {
     const [showLimits, setShowLimits] = React.useState(true)
     const [rotatorAngle, setRotatorAngle] = React.useState(0)
     const [positionAngle] = React.useState(0)
-    const lngLatEl: LngLatEl = {
-        lng: context.config.keck_longitude,
-        lat: context.config.keck_latitude,
-        el: context.config.keck_elevation
-    }
+    const lngLatEl: LngLatEl = context.config.tel_lat_lng_el.keck
     const [suncalcTimes, setSuncalcTimes] = React.useState(util.get_suncalc_times(lngLatEl, obsdate))
     const [times, setTimes] = React.useState(util.get_times_using_nadir(suncalcTimes.nadir))
     const [time, setTime] = React.useState(suncalcTimes.nadir)
@@ -163,7 +158,7 @@ const TwoDView = ({ targets }: Props) => {
         const newSuncalcTimes = util.get_suncalc_times(lngLatEl, obsdate)
         const newTimes = util.get_times_using_nadir(newSuncalcTimes.nadir)
         const tviz: TargetView[] = []
-        const KG = context.config.keck_geometry[dome]
+        const KG = context.config.tel_geometry.keck[dome]
         targets.forEach((tgt: Target) => {
             if (tgt.ra && tgt.dec) {
                 const ra_deg = tgt.ra_deg ?? util.ra_dec_to_deg(tgt.ra as string, false)
@@ -188,7 +183,7 @@ const TwoDView = ({ targets }: Props) => {
                 })
 
                 const vizSum = visibility.reduce((sum: number, viz: VizRow) => {
-                    return viz.observable ? sum + util.STEP_SIZE : sum
+                    return viz.observable ? sum + STEP_SIZE : sum
                 }, 0)
                 const tgtv: TargetView = {
                     ...tgt,

@@ -1,6 +1,9 @@
 import { GeoModel, useStateContext } from "../App";
 import {
-    ROUND_MINUTES,
+    MARKER_SIZE,
+    XAXIS_DTICK,
+    MOON_MARKER_LINE_WIDTH,
+    MOON_MARKER_SIZE
 } from "./constants";
 import Plot from "react-plotly.js";
 import dayjs from 'dayjs';
@@ -8,6 +11,7 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { DayViz, TargetViz, VizRow } from "./viz_dialog";
 import { air_mass } from "./sky_view_util";
+import { X } from "@mui/icons-material";
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -15,9 +19,6 @@ dayjs.extend(timezone)
 interface Props{ 
     targetViz: TargetViz,
 }
-
-
-
 
 export const alt_az_observable = (alt: number, az: number, KG: GeoModel) => {
     const minDeckAz = KG.t2
@@ -45,13 +46,7 @@ export const alt_az_observable = (alt: number, az: number, KG: GeoModel) => {
     return { observable, reasons }
 }
 
-
-
-
-
-
-
-const date_normalize = (date: Date, utctz = false) => {
+export const date_normalize = (date: Date, utctz = false) => {
     //if date is before semester date set to next day
     let out = dayjs(date).set('year', 2000).set('month', 0).set('date', 1)
     out = out.get('hours') < 12 ? out.add(1, 'day') : out
@@ -79,7 +74,7 @@ const create_dawn_dusk_text = (date: Date, date_time_format: string) => {
     return txt
 }
 
-const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: string) => {
+export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: string) => {
 
     const trace = {
         yaxis: 'y2',
@@ -89,11 +84,11 @@ const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: string)
         showlegend: false,
         type: 'scattergl',
         marker: {
-            size: 2,
+            size: MOON_MARKER_SIZE,
             symbol: 'square',
         },
         line: {
-            width: 2
+            width: MOON_MARKER_LINE_WIDTH 
         }
     }
     let dawn_dusk_traces: { [key: string]: any } = {
@@ -218,7 +213,6 @@ const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: string)
 export const TargetVizChart = (props: Props) => {
     const { targetViz } = props
     const context = useStateContext()
-
     let traces = targetViz.semester_visibility.map((dayViz: DayViz) => {
         let text: string[] = []
         let y: Date[] = []
@@ -250,7 +244,7 @@ export const TargetVizChart = (props: Props) => {
             text,
             marker: {
                 color,
-                size: ROUND_MINUTES,
+                size: MARKER_SIZE,
                 symbol: 'square',
                 opacity: 1 // too dense to see ticks
             },
@@ -305,7 +299,7 @@ export const TargetVizChart = (props: Props) => {
             gridwidth: 2,
             gridcolor: 'white',
             layer: 'above traces',
-            dtick: 15 * 24 * 60 * 60 * 1000, // milliseconds
+            dtick: XAXIS_DTICK, 
             tickformat: '%Y-%m-%d',
             tickmode: 'auto',
             //nticks: 0

@@ -61,7 +61,7 @@ function convert_schema_to_columns(colWidth: number) {
       description: valueProps.description,
       type: valueProps.type === 'array' ? 'string' : valueProps.type, //array cells are cast as string
       headerName: valueProps.short_description ?? valueProps.description,
-      width: valueProps.type === 'array' ? colWidth * 2 : colWidth, //TODO: 
+      width: valueProps.type === 'array' ? colWidth * 2 : colWidth, 
       editable: valueProps.editable ?? true,
     } as GridColDef
 
