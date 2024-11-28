@@ -43,35 +43,41 @@
     "timezone": "Pacific/Honolulu",
     "time_format": "MM:DD HH:mm",
     "date_time_format": "YYYY/MM/DD HH:mm",
-    "keck_latitude": 19.8283,
-    "keck_longitude": 204.5253,
-    "keck_elevation": 4.160,
-    "keck_geometry": {
-        "K1": {
-            "r0": 0,
-            "r1": 18,
-            "r2": 0,
-            "r3": 33.3,
-            "t0": 0,
-            "t1": 361,
-            "t2": 5.3,
-            "t3": 146.2,
-            "left_north_wrap": 235,
-            "right_south_wrap": 325,
-            "trackLimit": 85
-        },
-        "K2": {
-            "r0": 0,
-            "r1": 18,
-            "r2": 0,
-            "r3": 36.8,
-            "t0": 0,
-            "t1": 361,
-            "t2": 185.3,
-            "t3": 332.8,
-            "left_north_wrap": 235,
-            "right_south_wrap": 325,
-            "trackLimit": 85
+    "tel_lat_lng_el": {
+        "keck": {
+            "latitude": 19.8283,
+            "longitude": 204.5253,
+            "elevation": 4.160
+        }
+    },
+    "tel_geometry": {
+        "keck": {
+            "K1": {
+                "r0": 0,
+                "r1": 18,
+                "r2": 0,
+                "r3": 33.3,
+                "t0": 0,
+                "t1": 361,
+                "t2": 5.3,
+                "t3": 146.2,
+                "left_north_wrap": 235,
+                "right_south_wrap": 325,
+                "trackLimit": 85
+            },
+            "K2": {
+                "r0": 0,
+                "r1": 18,
+                "r2": 0,
+                "r3": 36.8,
+                "t0": 0,
+                "t1": 361,
+                "t2": 185.3,
+                "t3": 332.8,
+                "left_north_wrap": 235,
+                "right_south_wrap": 325,
+                "trackLimit": 85
+            }
         }
     }
 }

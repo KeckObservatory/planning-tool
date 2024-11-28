@@ -2,7 +2,9 @@ import Plot from "react-plotly.js";
 import * as util from './sky_view_util.tsx'
 import { Dome, hidate, TargetView } from "./two_d_view";
 import { useStateContext } from "../App";
-import { DayViz, reason_to_color_mapping, VizRow } from "./viz_chart.tsx";
+import { reason_to_color_mapping } from "./viz_chart.tsx";
+import { DayViz, VizRow } from "./viz_dialog.tsx";
+import { LngLatEl } from "../App";
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -26,7 +28,7 @@ interface Props {
     suncalcTimes: DayViz
 }
 
-const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType: SkyChart, lngLatEl: util.LngLatEl): number => {
+const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType: SkyChart, lngLatEl: LngLatEl): number => {
     let val;
     switch (chartType) {
         case 'Elevation': {
@@ -73,11 +75,7 @@ export const SkyChart = (props: Props) => {
     const { targetView, chartType, time, showCurrLoc, showLimits, width, height, dome, suncalcTimes } = props
     const context = useStateContext()
 
-    const lngLatEl: util.LngLatEl = {
-        lng: context.config.keck_longitude, 
-        lat: context.config.keck_latitude, 
-        el: context.config.keck_elevation
-    }
+    const lngLatEl = context.config.tel_lat_lng_el.keck
 
     let traces = targetView.map((tgtv: TargetView, idx: number) => {
         let texts: string[] = []
@@ -89,7 +87,7 @@ export const SkyChart = (props: Props) => {
             txt += `El: ${viz.alt.toFixed(2)}<br>`
             txt += `Airmass: ${viz.air_mass.toFixed(2)}<br>`
             txt += `HT: ${dayjs(viz.datetime).format(context.config.date_time_format)}<br>`
-            chartType.includes('Lunar Angle') && (txt += `Moon Fraction: ${viz.moon_fraction.toFixed(2)}<br>`)
+            chartType.includes('Lunar Angle') && (txt += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`)
             txt += `Visible for: ${tgtv.visibilitySum.toFixed(2)} hours<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
             texts.push(txt)
@@ -131,11 +129,11 @@ export const SkyChart = (props: Props) => {
             const dec = tgtv.dec_deg as number
             const azEl = util.ra_dec_to_az_alt(ra, dec, time, lngLatEl)
             //const viz = { az: azEl[0], alt: azEl[1], datetime: time, air_mass: util.air_mass(azEl[1], lngLatEl.el) }
-            const moon_fraction = SunCalc.getMoonIllumination(time).fraction
+            const moon_illumination = SunCalc.getMoonIllumination(time)
             const viz = { az: azEl[0], 
                 alt: azEl[1], 
                 datetime: time, 
-                moon_fraction: moon_fraction,
+                moon_illumination,
                 air_mass: util.air_mass(azEl[1], lngLatEl.el) }
             const datum = get_chart_datum(ra, dec, viz as VizRow, chartType, lngLatEl)
             const currTime = hidate(time, context.config.timezone)
@@ -145,7 +143,7 @@ export const SkyChart = (props: Props) => {
             text += `Az: ${azEl[0].toFixed(2)}<br>`
             text += `El: ${azEl[1].toFixed(2)}<br>`
             text += `Airmass: ${airmass.toFixed(2)}<br>`
-            chartType.includes('Lunar Angle') && (text += `Moon Fraction: ${viz.moon_fraction.toFixed(2)}<br>`)
+            chartType.includes('Lunar Angle') && (text += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`)
             // text += `Airmass: ${util.air_mass(azEl[1]).toFixed(2)}<br>`
             text += `HT: ${currTime.format(context.config.date_time_format)}`
 
@@ -266,9 +264,9 @@ export const SkyChart = (props: Props) => {
                 text: 'Elevation Limit',
                 textposition: 'top center',
             },
-             y0: context.config.keck_geometry[dome].r1,
+             y0: context.config.tel_geometry.keck[dome].r1,
              x1: 1,
-             y1: context.config.keck_geometry[dome].r1,
+             y1: context.config.tel_geometry.keck[dome].r1,
              fillcolor: '#eeeeee',
              layer: 'above',
              opacity: 0.5,
@@ -288,9 +286,9 @@ export const SkyChart = (props: Props) => {
                 text: 'Left/North Wrap limit',
                 textposition: 'top center',
             },
-             y0: context.config.keck_geometry[dome].left_north_wrap,
+             y0: context.config.tel_geometry.keck[dome].left_north_wrap,
              x1: 1,
-             y1: context.config.keck_geometry[dome].left_north_wrap,
+             y1: context.config.tel_geometry.keck[dome].left_north_wrap,
              fillcolor: '#eeeeee',
              layer: 'above',
              opacity: 0.5,
@@ -307,9 +305,9 @@ export const SkyChart = (props: Props) => {
                 text: 'Right/South Wrap limit',
                 textposition: 'top center',
             },
-             y0: context.config.keck_geometry[dome].right_south_wrap,
+             y0: context.config.tel_geometry.keck[dome].right_south_wrap,
              x1: 1,
-             y1: context.config.keck_geometry[dome].right_south_wrap,
+             y1: context.config.tel_geometry.keck[dome].right_south_wrap,
              fillcolor: '#eeeeee',
              layer: 'above',
              opacity: 0.5,

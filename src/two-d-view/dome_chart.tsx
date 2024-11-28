@@ -5,7 +5,8 @@ import { Dome, TargetView } from "./two_d_view"
 import Plot from "react-plotly.js"
 import { colors } from "./sky_chart.tsx"
 import { GeoModel, useStateContext } from "../App.tsx"
-import { reason_to_color_mapping, VizRow } from "./viz_chart.tsx"
+import { reason_to_color_mapping } from "./viz_chart.tsx"
+import { VizRow } from "./viz_dialog.tsx"
 
 const traceRadiusLimit = 90 - 2 //ignore points greater than the dome radius
 

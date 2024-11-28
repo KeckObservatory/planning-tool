@@ -94,6 +94,12 @@ export interface GeoModel {
   trackLimit: number
 }
 
+export interface LngLatEl {
+  lat: number,
+  lng: number,
+  el: number
+}
+
 
 interface ConfigFile {
   default_table_columns: string[];
@@ -103,10 +109,8 @@ interface ConfigFile {
   timezone: string,
   time_format: string,
   date_time_format: string,
-  keck_geometry: KeckGeoModel
-  keck_latitude: number, //deg
-  keck_longitude: number, // Keck Observatory longitude west of Greenwich [deg]
-  keck_elevation: number, // km
+  tel_geometry: { [key: string]: KeckGeoModel }
+  tel_lat_lng_el: { [key: string]: LngLatEl }
 }
 
 interface State {

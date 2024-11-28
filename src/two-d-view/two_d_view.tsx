@@ -10,7 +10,8 @@ import { DomeChart } from './dome_chart.tsx';
 import { SkyChart } from './sky_chart.tsx';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
-import { alt_az_observable, VizRow } from './viz_chart.tsx';
+import { alt_az_observable } from './viz_chart.tsx';
+import { VizRow } from './viz_dialog.tsx';
 import AladinViewer from '../aladin';
 import { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import { MoonMarker } from './moon_marker.tsx';
@@ -173,14 +174,14 @@ const TwoDView = ({ targets }: Props) => {
                 newTimes.forEach((datetime: Date) => {
                     const [az, alt] = util.ra_dec_to_az_alt(ra_deg, dec_deg, datetime, lngLatEl)
                     const air_mass_val = util.air_mass(alt, lngLatEl.el)
-                    const moon_fraction = SunCalc.getMoonIllumination(datetime).fraction
+                    const moon_illumination = SunCalc.getMoonIllumination(datetime)
                     // const air_mass_val = util.air_mass(alt)
                     const vis: VizRow = { az, 
                         alt, 
                         ...alt_az_observable(alt, az, KG), 
                         datetime, 
                         air_mass: air_mass_val,
-                        moon_fraction: moon_fraction
+                        moon_illumination
                      }
                     azEl.push([az, alt])
                     visibility.push(vis)

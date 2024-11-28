@@ -27,7 +27,7 @@ import SimbadButton from './simbad_button';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
 import { Target, useSnackbarContext, useStateContext } from './App.tsx';
 import TargetEditDialogButton, { format_tags, format_edit_entry, PropertyProps, rowSetter, TargetProps } from './target_edit_dialog.tsx';
-import { TargetVizButton } from './two-d-view/viz_chart.tsx';
+import { TargetVizButton } from './two-d-view/viz_dialog.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 import { format_target_property } from './upload_targets_dialog.tsx';
 

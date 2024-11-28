@@ -1,21 +1,15 @@
 import dayjs from 'dayjs'
 import * as SunCalc from 'suncalc'
-import { DayViz } from './viz_chart'
-
-//TODO: Put in cfg file
-export const STEP_SIZE = 10 / 60 //hours
-export const TIMES_START = -7 //hours from nadir
-export const TIMES_END = 7 //hours from nadir
-export const ROUND_MINUTES = 10 //round nadir to nearest ROUND_MINUTES
-const RADIUS_EARTH = 6378.1000 // km
-const ATMOSPHERE_HEIGHT = 50.000 // km
-
-export interface LngLatEl {
-    lng: number,
-    lat: number,
-    el: number
-
-}
+import { DayViz } from './viz_dialog'
+import {
+    RADIUS_EARTH,
+    ATMOSPHERE_HEIGHT,
+    ROUND_MINUTES,
+    STEP_SIZE,
+    TIMES_START,
+    TIMES_END
+} from './constants'
+import { LngLatEl } from '../App'
 
 
 export const date_to_juld = (date: Date) => {
