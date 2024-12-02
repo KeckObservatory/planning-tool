@@ -2,12 +2,12 @@ import { DayViz, TargetViz, VizRow } from "./viz_dialog";
 import Plot from "react-plotly.js";
 import { useStateContext } from "../App";
 import dayjs from "dayjs";
-import { lunar_angle } from "./sky_view_util";  
+import { lunar_angle } from "./sky_view_util";
 import { reason_to_color_mapping, create_dawn_dusk_traces, date_normalize } from "./target_viz_chart";
 
 
 interface Props {
-    targetViz: TargetViz 
+    targetViz: TargetViz
 }
 
 export const MoonVizChart = (props: Props) => {
@@ -23,9 +23,9 @@ export const MoonVizChart = (props: Props) => {
         //let color: number[] = []
         dayViz.visibility.forEach((viz: VizRow) => {
             const lunarAngle = lunar_angle(targetViz.ra_deg as number,
-                 targetViz.dec_deg as number,
-                 viz.datetime,
-                 context.config.tel_lat_lng_el.keck)
+                targetViz.dec_deg as number,
+                viz.datetime,
+                context.config.tel_lat_lng_el.keck)
 
             let txt = ""
             txt += `Az: ${viz.az.toFixed(2)}<br>`
@@ -39,24 +39,40 @@ export const MoonVizChart = (props: Props) => {
             color.push(reason_to_color_mapping(viz.reasons))
             const daytime = date_normalize(viz.datetime)
             y.push(daytime)
-            z.push(lunarAngle)
+            //TODO: is there a better way to scale the lunar angle with brightness?
+            //z.push(Math.abs(lunarAngle) * viz.moon_illumination.fraction)
+            z.push(Math.abs(lunarAngle))
             text.push(txt)
         })
         const ydate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
-        const xvals = Array.from({ length: dayViz.visibility.length}, () => ydate)
+        const xvals = Array.from({ length: dayViz.visibility.length }, () => ydate)
         x = [...x, ...xvals]
 
     })
+
+    let name =  targetViz.target_name ?? 'Target'
+    name += ' Lunar Angle' 
     const trace: Partial<Plotly.PlotData> = {
         x,
         y,
         z,
         text,
-        hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+        line: {
+            smoothing: 0.85
+        },
+        contours: {
+            coloring: 'heatmap',
+        },
+        colorbar: {
+            x: 1.05,
+        },
+            hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
         textposition: 'top left',
+        //colorscale: 'YlGnBu',
+        colorscale: 'Hot',
+        // reversescale: true,
         type: 'contour',
         showlegend: false,
-        name: targetViz.target_name ?? 'Target' + ' Lunar Angle Contour Chart'
     }
     let traces = [trace]
 
@@ -68,10 +84,10 @@ export const MoonVizChart = (props: Props) => {
     const layout: Partial<Plotly.Layout> = {
         width: 1200,
         height: 400,
-        title: `${targetViz.target_name ?? 'Target'} Visibility`,
+        title: name,
         plot_bgcolor: 'black',
         yaxis2: {
-            title: 'Time [HT]',
+            title: 'Time [UT]',
             type: 'date',
             gridwidth: 0,
             overlaying: 'y',

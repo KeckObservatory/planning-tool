@@ -270,7 +270,7 @@ export const TargetVizChart = (props: Props) => {
         title: `${targetViz.target_name ?? 'Target'} Visibility`,
         plot_bgcolor: 'black',
         yaxis2: {
-            title: 'Time [HT]',
+            title: 'Time [UT]',
             type: 'date',
             gridwidth: 0,
             overlaying: 'y',
