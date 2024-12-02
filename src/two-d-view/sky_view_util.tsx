@@ -28,6 +28,7 @@ export const get_gmt = (date?: Date) => {
 }
 
 export const ra_dec_to_deg = (time: string, dec = false) => {
+    console.log('time', time, dec)
     let [hours, min, sec] = time.split(':')
     let deg
     if (dec) {
