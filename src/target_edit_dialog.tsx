@@ -93,16 +93,19 @@ export const rowSetter = (tgt: Target, key: string, value?: string | number | bo
     let newTgt = { ...tgt, 'status': 'EDITED' as Status, [key]: value }
     switch (key) {
         case 'ra':
-            newTgt = { ...newTgt, ra_deg: ra_dec_to_deg(String(value)) };
+            newTgt = { ...newTgt,
+                 ra_deg: value ? ra_dec_to_deg(String(value)) : undefined };
             break;
         case 'dec':
-            newTgt = { ...newTgt, dec_deg: ra_dec_to_deg(String(value), true) };
+            newTgt = { ...newTgt, 
+                dec_deg: value ? ra_dec_to_deg(String(value), true) : undefined };
             break;
         case 'ra_deg':
-            newTgt = { ...newTgt, ra: deg_to_hms(value as number) };
+            newTgt = { ...newTgt, ra: value ? deg_to_hms(value as number) : undefined
+             };
             break;
         case 'dec_deg':
-            newTgt = { ...newTgt, dec: deg_to_dms(value as number) };
+            newTgt = { ...newTgt, dec: value ? deg_to_dms(value as number) : undefined};
             break;
     }
     return newTgt
