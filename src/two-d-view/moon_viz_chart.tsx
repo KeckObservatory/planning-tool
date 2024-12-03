@@ -66,7 +66,9 @@ export const MoonVizChart = (props: Props) => {
         colorbar: {
             x: 1.05,
         },
-            hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+        //@ts-ignore
+        coloraxis: 'coloraxis',
+        hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
         textposition: 'top left',
         //colorscale: 'YlGnBu',
         colorscale: 'Hot',
@@ -86,6 +88,11 @@ export const MoonVizChart = (props: Props) => {
         height: 400,
         title: name,
         plot_bgcolor: 'black',
+        //@ts-ignore
+        coloraxis: {
+            cmin: 0,
+            cmax: 30,
+        },
         yaxis2: {
             title: 'Time [UT]',
             type: 'date',
