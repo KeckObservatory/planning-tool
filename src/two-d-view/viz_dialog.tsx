@@ -168,8 +168,8 @@ export const VizDialog = (props: VizDialogProps) => {
             semester_visibility: [],
         }
 
-        const ra = target.ra_deg ?? ra_dec_to_deg(target.ra as string)
-        const dec = target.dec_deg ?? ra_dec_to_deg(target.dec as string, true)
+        const ra = target.ra_deg ?? target.ra ? ra_dec_to_deg(target.ra as string): 0 
+        const dec = target.dec_deg ?? target.dec ? ra_dec_to_deg(target.dec as string, true): 0 
         const lngLatEl = context.config.tel_lat_lng_el.keck
         tViz.semester_visibility = dates.map((date: Dayjs) => {
             let suncalc_times = get_suncalc_times(lngLatEl, date.toDate())
