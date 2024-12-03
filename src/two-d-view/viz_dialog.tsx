@@ -146,8 +146,10 @@ export const VizDialog = (props: VizDialogProps) => {
     const [semester, setSemester] = useQueryParam('semester', withDefault(StringParam, default_semester))
     const context = useStateContext()
     const targetContext = useTargetContext()
-    const initTarget = targetContext.targets.find((t: Target) => t.target_name === props.targetName || t._id === props.targetName)
-    const [target, setTarget] = useState<Target>(initTarget ?? {} as Target)
+    let initTarget = targetContext.targets.find((t: Target) => t.target_name === props.targetName || t._id === props.targetName)
+    // target must have ra dec and be defined
+    initTarget = (initTarget && initTarget.ra && initTarget.dec) ? initTarget : {} as Target
+    const [target, setTarget] = useState<Target>(initTarget)
 
     const init_target_viz = { semester, dome, ...target, semester_visibility: [] }
     const [targetViz, setTargetView] = useState<TargetViz>(init_target_viz)
