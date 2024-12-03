@@ -178,7 +178,8 @@ export const VizDialog = (props: VizDialogProps) => {
             const endTime = suncalc_times.nightEnd
             const times = get_day_times(startTime, endTime, ROUND_MINUTES)
             const visibility = times.map((time: Date) => {
-                const [az, alt] = ra_dec_to_az_alt(target.ra_deg as number, target.dec_deg as number, time, lngLatEl)
+                const [az, alt] = ra_dec_to_az_alt(target.ra_deg as number,
+                     target.dec_deg as number, time, lngLatEl)
                 const air_mass_val = air_mass(alt, lngLatEl.el)
                 const moon_illumination = SunCalc.getMoonIllumination(time)
                 // const air_mass_val = air_mass(alt)

@@ -13,38 +13,6 @@ export interface Props {
     hasSimbad: boolean
 }
 
-// export const ra_dec_to_deg = (time: string | number, dec = false): number => {
-//     //if float return
-//     if (typeof time === 'number') { //already stored as degree
-//         return time
-//     }
-
-//     let deg = 0;
-//     let sigfig = 3;
-//     (time as string).includes('+') || (time as string).includes('-') && (dec = true)
-//     try {
-//         let [hours, min, sec] = (time as string).split(':')
-//         sigfig = sec.split('.')[1].length
-//         if (dec) {
-//             const decDeg = Number(hours)
-//             let sign = Math.sign(decDeg)
-//             deg = decDeg // dec is already in degrees
-//                 + sign * Number(min) / 60
-//                 + sign * Number(sec) / 3600
-//             console.log('time', time, 'dec', dec, 'sign', sign, 'decDeg', decDeg, 'hours', hours)
-//         }
-
-//         else {
-//             deg = Number(hours) * 15 // convert hours to deg
-//                 + Number(min) / 4
-//                 + Number(sec) / 240
-//         }
-//     }
-//     finally {
-//         return Number(deg.toFixed(sigfig))
-//     }
-// }
-
 export interface SimbadTargetData {
     ra?: string,
     dec?: string,
