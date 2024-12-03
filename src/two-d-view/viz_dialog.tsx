@@ -13,7 +13,7 @@ import utc from 'dayjs/plugin/utc'
 import * as SunCalc from 'suncalc'
 import timezone from 'dayjs/plugin/timezone'
 import { GetTimesResult, GetMoonIlluminationResult } from "suncalc";
-import { air_mass, get_day_times, get_suncalc_times, ra_dec_to_az_alt, ra_dec_to_deg } from './sky_view_util';
+import { air_mass, get_day_times, get_suncalc_times, ra_dec_to_az_alt } from './sky_view_util';
 import { ROUND_MINUTES, SEMESTER_RANGES } from './constants';
 import { MoonVizChart } from './moon_viz_chart';
 dayjs.extend(utc)
@@ -168,16 +168,17 @@ export const VizDialog = (props: VizDialogProps) => {
             semester_visibility: [],
         }
 
-        const ra = target.ra_deg ?? target.ra ? ra_dec_to_deg(target.ra as string): 0 
-        const dec = target.dec_deg ?? target.dec ? ra_dec_to_deg(target.dec as string, true): 0 
         const lngLatEl = context.config.tel_lat_lng_el.keck
+        if (!target.ra_deg || !target.dec_deg) {
+            return
+        }
         tViz.semester_visibility = dates.map((date: Dayjs) => {
             let suncalc_times = get_suncalc_times(lngLatEl, date.toDate())
             const startTime = suncalc_times.sunset
             const endTime = suncalc_times.nightEnd
             const times = get_day_times(startTime, endTime, ROUND_MINUTES)
             const visibility = times.map((time: Date) => {
-                const [az, alt] = ra_dec_to_az_alt(ra, dec, time, lngLatEl)
+                const [az, alt] = ra_dec_to_az_alt(target.ra_deg as number, target.dec_deg as number, time, lngLatEl)
                 const air_mass_val = air_mass(alt, lngLatEl.el)
                 const moon_illumination = SunCalc.getMoonIllumination(time)
                 // const air_mass_val = air_mass(alt)
