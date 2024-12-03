@@ -208,13 +208,14 @@ const angular_separation = (lon1: number, lat1: number, lon2: number, lat2: numb
     const numerator2 = clat1 * slat2 - slat1 * clat2 * cdlon
     const denominator = slat1 * slat2 + clat1 * clat2 * cdlon
     const numerator = Math.sqrt(numerator1 * numerator1 + numerator2 * numerator2)
-    return Math.atan(numerator / denominator) * 180 / Math.PI
+    return Math.atan2(numerator, denominator) * 180 / Math.PI
 }
 
 export const lunar_angle = (ra: number, dec: number, date: Date, lngLatEl: LngLatEl) => {
     const sc = SunCalc.getMoonPosition(date, lngLatEl.lat, lngLatEl.lng)
     const moonPos = [sc.altitude, sc.azimuth] as [number, number]
     const [az, alt]= ra_dec_to_az_alt(ra, dec, date, lngLatEl)
+    console.log('az, alt', az, alt, moonPos)
     const angle = angular_separation(alt, az, moonPos[1], moonPos[0])
     return angle
 }
