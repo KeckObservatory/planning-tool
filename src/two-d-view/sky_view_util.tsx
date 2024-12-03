@@ -215,7 +215,7 @@ export const lunar_angle = (ra: number, dec: number, date: Date, lngLatEl: LngLa
     const sc = SunCalc.getMoonPosition(date, lngLatEl.lat, lngLatEl.lng)
     const moonPos = [sc.altitude * 180 / Math.PI, sc.azimuth * 180 / Math.PI] as [number, number]
     const [az, alt]= ra_dec_to_az_alt(ra, dec, date, lngLatEl)
-    const angle = angular_separation(alt, az, moonPos[1], moonPos[0])
+    const angle = angular_separation(alt, az, moonPos[0], moonPos[1])
     return angle
 }
 

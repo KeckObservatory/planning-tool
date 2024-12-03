@@ -20,7 +20,6 @@ export const MoonMarker = (props: Props) => {
     const width = '30px'
     const height = '30px'
     const theme = useTheme()
-    console.log('deg', deg, 'moon info', props.moonInfo)
     //@ts-ignore
     const outline = theme.palette.mode === 'dark' ? 'none' : '1px solid black'
 
