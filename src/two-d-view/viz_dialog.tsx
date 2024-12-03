@@ -206,8 +206,9 @@ export const VizDialog = (props: VizDialogProps) => {
 
     const onTargetNameSelect = (name: string) => {
         if (name !== props.targetName) {
-            const newTarget = context.targets.find((t: Target) => t.target_name === name || t._id === name)
-            setTarget(newTarget ?? {} as Target)
+            let newTarget = context.targets.find((t: Target) => t.target_name === name || t._id === name)
+            newTarget = (newTarget && newTarget.ra && newTarget.dec) ? newTarget : {} as Target
+            setTarget(newTarget)
         }
     }
 
