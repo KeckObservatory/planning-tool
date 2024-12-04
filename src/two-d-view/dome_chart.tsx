@@ -115,16 +115,15 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
         let [rr, tt] = [[] as number[], [] as number[]]
         const texts: string[] = []
         times.forEach((time: Date, idx: number) => {
-            const azel = SunCalc.getMoonPosition(time, lngLatEl.lat, lngLatEl.lng)
-            const ae = [(Math.PI + azel.azimuth) * 180 / Math.PI, azel.altitude * 180 / Math.PI]
+            const moon_position = util.get_moon_position(time, lngLatEl)
             const moonFraction = SunCalc.getMoonIllumination(time).fraction
-            const r = 90 - ae[1]
+            const r = 90 - moon_position.altitude 
             if (r <= traceRadiusLimit + 1) { //can be more tolerant than markers
-                rr.push(90 - ae[1])
-                tt.push(ae[0])
+                rr.push(r)
+                tt.push(moon_position.azimuth)
                 let txt = ""
-                txt += `Az: ${ae[0].toFixed(2)}<br>`
-                txt += `El: ${ae[1].toFixed(2)}<br>`
+                txt += `Az: ${moon_position.azimuth.toFixed(2)}<br>`
+                txt += `El: ${moon_position.altitude.toFixed(2)}<br>`
                 txt += `Moon Fraction: ${(100 * moonFraction).toFixed(2)} %<br>`
                 txt += `HT: ${dayjs(times[idx]).format(time_format)}`
                 texts.push(txt)
@@ -152,18 +151,17 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
         traces.push(moonTrace as Plotly.Data)
 
         if (showCurrLoc) {
-            const azel = SunCalc.getMoonPosition(time, lngLatEl.lat, lngLatEl.lng)
+            const moon_position = util.get_moon_position(time, lngLatEl)
             const moonFraction = SunCalc.getMoonIllumination(time).fraction
-            const ae = [(Math.PI + azel.azimuth) * 180 / Math.PI, azel.altitude * 180 / Math.PI]
-            const r = 90 - ae[1]
+            const r = 90 - moon_position.altitude 
             let txt = ""
-            txt += `Az: ${ae[0].toFixed(2)}<br>`
-            txt += `El: ${ae[1].toFixed(2)}<br>`
+            txt += `Az: ${moon_position.azimuth.toFixed(2)}<br>`
+            txt += `El: ${moon_position.altitude.toFixed(2)}<br>`
             txt += `Moon Fraction: ${(100 * moonFraction).toFixed(2)} %<br>`
             txt += `HT: ${dayjs(time).format(time_format)}`
             const moonMarkerTrace = {
                 r: [r],
-                theta: [ae[0]],
+                theta: [moon_position.azimuth],
                 text: r <= KG.trackLimit ? [txt] : [],
                 hovorinfo: 'text',
                 showlegend: false,

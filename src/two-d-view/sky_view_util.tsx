@@ -197,6 +197,7 @@ export const get_parallactic_angle = (ra: number, dec: number, times: Date[], ln
 }
 
 const angular_separation = (lon1: number, lat1: number, lon2: number, lat2: number): number => {
+    //Vincenty formula
     const sdlon = sind(lon2 - lon1)
     const cdlon = cosd(lon2 - lon1)
     const slat1 = sind(lat1)
@@ -207,8 +208,21 @@ const angular_separation = (lon1: number, lat1: number, lon2: number, lat2: numb
     const numerator1 = clat2 * sdlon
     const numerator2 = clat1 * slat2 - slat1 * clat2 * cdlon
     const denominator = slat1 * slat2 + clat1 * clat2 * cdlon
-    const numerator = Math.sqrt(numerator1 * numerator1 + numerator2 * numerator2)
-    return Math.atan(numerator/denominator) * 180 / Math.PI
+    const numerator = Math.sqrt(numerator1 ** 2 + numerator2 ** 2)
+    //return Math.atan(numerator/denominator) * 180 / Math.PI
+    return Math.atan2(numerator, denominator) * 180 / Math.PI
+}
+
+export const add_pi = (angle: number) => {
+    return angle + Math.PI
+} 
+
+export const get_moon_position = (date: Date, lngLatEl: LngLatEl) => {
+    // convert azel to degrees and set az coordinate such that 0 is north
+    let moon_position = SunCalc.getMoonPosition(date, lngLatEl.lat, lngLatEl.lng)
+    moon_position.azimuth = add_pi(moon_position.azimuth) * 180 / Math.PI
+    moon_position.altitude = moon_position.altitude * 180 / Math.PI
+    return moon_position 
 }
 
 export const lunar_angle = (ra: number, 
@@ -217,7 +231,7 @@ export const lunar_angle = (ra: number,
     mp: SunCalc.GetMoonPositionResult) => {
     const [az, alt]= ra_dec_to_az_alt(ra, dec, date, lngLatEl)
     console.log('az', az, 'alt', alt, 'mp', mp)
-    const angle = angular_separation(alt, az, mp.altitude * 180 / Math.PI, mp.azimuth * 180 / Math.PI)
+    const angle = angular_separation(az, alt, mp.azimuth, mp.altitude)
     return angle
 }
 

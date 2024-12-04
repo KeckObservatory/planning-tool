@@ -130,7 +130,7 @@ export const SkyChart = (props: Props) => {
             const azEl = util.ra_dec_to_az_alt(ra, dec, time, lngLatEl)
             //const viz = { az: azEl[0], alt: azEl[1], datetime: time, air_mass: util.air_mass(azEl[1], lngLatEl.el) }
             const moon_illumination = SunCalc.getMoonIllumination(time)
-            const moon_position = SunCalc.getMoonPosition(time, lngLatEl.lat, lngLatEl.lng)
+            let moon_position = util.get_moon_position(time, lngLatEl)
             const KG = context.config.tel_geometry.keck[dome]
             const {observable, reasons} = alt_az_observable(azEl[1], azEl[0], KG)
             const viz: VizRow = { az: azEl[0], 
