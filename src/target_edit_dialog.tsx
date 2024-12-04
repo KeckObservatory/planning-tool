@@ -128,7 +128,6 @@ export const format_edit_entry = (key: string, value?: string | number, isNumber
 
 export const format_tags = (tags: string[]) => {
     const pattern = /[,]/g
-    console.log('formatting tags', tags)
     tags = tags ?? [] //if tags is undefined, set to empty array
     tags = tags.map((tag) => tag.trim().replace(pattern, '')).filter((tag) => tag.length > 0) //no empty strings or whitespace
     tags = [...new Set(tags)]

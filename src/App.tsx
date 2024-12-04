@@ -195,16 +195,13 @@ function App() {
             "tic_id": ""
           }]
       }
-      console.log('targets', init_targets)
       const config = await get_config()
       const username = `${userinfo.FirstName} ${userinfo.LastName}`;
       const init_state = { config, username, obsid: userinfo.Id, is_admin: userinfo.is_admin ?? false }
-      console.log('setting state', init_state)
       setState(init_state)
       setTargets(init_targets)
     }
     fetch_data()
-    console.log('App mounted')
   }, [])
 
   const handleThemeChange = () => {

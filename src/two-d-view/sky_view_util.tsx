@@ -28,7 +28,6 @@ export const get_gmt = (date?: Date) => {
 }
 
 export const ra_dec_to_deg = (time: string, dec = false) => {
-    console.log('time', time, dec)
     let [hours, min, sec] = time.split(':')
     let deg
     if (dec) {
@@ -230,7 +229,6 @@ export const lunar_angle = (ra: number,
     lngLatEl: LngLatEl, 
     mp: SunCalc.GetMoonPositionResult) => {
     const [az, alt]= ra_dec_to_az_alt(ra, dec, date, lngLatEl)
-    console.log('az', az, 'alt', alt, 'mp', mp)
     const angle = angular_separation(az, alt, mp.azimuth, mp.altitude)
     return angle
 }

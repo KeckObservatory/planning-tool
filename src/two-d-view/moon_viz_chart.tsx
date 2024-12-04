@@ -50,7 +50,6 @@ const moon_irradiance = (rho: number, zenith_moon: number, zenith_object: number
     // zenith_moon = 90 - moon_alt [degrees]
     // zenith_object = 90 - object_alt [degrees]
     // phase_angle_moon = moon_phase [degrees]
-    console.log('rho', rho, 'zenith_moon', zenith_moon, 'zenith_object', zenith_object, 'phase_angle_moon', phase_angle_moon)
     const extinction_coeff = 0.172 // extinction coefficient [mag/airmass]
     const f_rho = scattering_equation(rho)
     const moon_ill = moon_illuminance(phase_angle_moon)
@@ -144,7 +143,6 @@ export const MoonVizChart = (props: Props) => {
     const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.PlotData[]
     //@ts-ignore
     traces = [...traces, ...lightTraces]
-    console.log('lunar traces', traces)
 
     const layout: Partial<Plotly.Layout> = {
         width: 1200,

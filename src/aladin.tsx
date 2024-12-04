@@ -106,11 +106,6 @@ const get_compass = async (aladin: any, height: number, width: number, positionA
         })
         const rotPnt = [width - margin, height - margin ]
         const compassAngle = -1 * (angle + positionAngle + aladinAngle)
-        // console.log('calculated map angle', angle, 
-        //     'aladin angle', aladinAngle, 
-        //     'position angle', positionAngle, 
-        //     'wcs', wcs,
-        //     'compass angle', compassAngle)
         polygon = rotate_multipolygon([polygon], compassAngle, rotPnt)[0]
         f.geometry.coordinates = polygon
     })
@@ -171,18 +166,8 @@ export default function AladinViewer(props: Props) {
         var cat = A.catalog({ name: name, shape: drawFunction });
         alad.addCatalog(cat);
 
-        alad.on('objectClicked', function (object: any) {
-            if (object) {
-                console.log('objectClicked', object)
-            }
-        })
-
         alad.on('zoomChanged', function (zoom: number) {
             setZoom(zoom)
-        })
-
-        alad.on('objectHovered', function (object: any) {
-            if (object) console.log('objectHovored', object.data?.id0)
         })
 
         for (let idx = 0; idx < targets.length; idx++) {
@@ -222,7 +207,7 @@ export default function AladinViewer(props: Props) {
     const debounced_update_shapes = useDebounceCallback(update_shapes, 250)
 
     const scriptloaded = async () => {
-        console.log('script loaded', props)
+        console.log('aladin script loaded', props)
         const firstRow = props.targets.at(0)
         let params: any = {
             survey: 'P/SDSS9/color',
@@ -234,14 +219,10 @@ export default function AladinViewer(props: Props) {
             target: firstRow?.target_name
         }
         params['target'] = firstRow?.ra?.replaceAll(':', " ") + ' ' + firstRow?.dec?.replaceAll(':', ' ')
-        console.log('params', params)
-
-
         A.init.then(async () => {
             const alad = A.aladin('#aladin-lite-div', params);
             if (!alad) return
             alad.on('positionChanged', function () {
-                // console.log('positionChanged', ra, dec)
                 debounced_update_shapes(alad, false, true)
             })
             const fovz = await get_fovz(alad, props.instrumentFOV, props.fovAngle)

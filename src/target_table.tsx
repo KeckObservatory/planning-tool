@@ -39,7 +39,6 @@ function convert_schema_to_columns(colWidth: number) {
     const valueParser: GridValueParser = (value: unknown) => {
       value = format_target_property(key as keyof Target, value, valueProps)
       if (value && valueProps.type === 'array') { //convert array to string for display
-        console.log('array value parser', value)
         value = Array.isArray(value) ? (value as string[]).join(',') : value as string
       }
       return value
@@ -324,7 +323,6 @@ export default function TargetTable() {
               toolbar: EditToolbar,
             }}
             onRowSelectionModelChange={(newRowSelectionModel) => {
-              console.log('row selection', newRowSelectionModel)
               setRowSelectionModel(newRowSelectionModel);
             }}
             rowSelectionModel={rowSelectionModel}

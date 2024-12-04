@@ -186,7 +186,6 @@ const parse_csv = (contents: string) => {
 
     const tgtValues = lines.map(line => csv_to_array(line)).filter((item) => item !== null) as string[][]
     const tgts = tgtValues.map(line => {
-        console.log('line', line)
         if (line.length !== header.length) {
             console.warn('invalid csv line', line)
             return

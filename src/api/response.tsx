@@ -23,7 +23,7 @@ export function intError(error: AxiosError) {
     console.error('intError', error)
     const status = error.response?.status
     if (status === 400) {
-        console.log('interceptor error detail', error)
+        console.error('interceptor error detail', error)
     }
     else if (status === 401) {
         // toast.error('Authentication error')
