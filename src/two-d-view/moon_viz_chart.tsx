@@ -95,13 +95,13 @@ export const MoonVizChart = (props: Props) => {
             txt += `UT: ${dayjs(viz.datetime).utc(false).format(context.config.date_time_format)}<br>`
             txt += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`
             txt += `Lunar Angle: ${lunarAngle.toFixed(2)}<br>`
-            txt += `Moon Irradiance: ${moonIrradiance.toFixed(2)} [nanoLamberts]<br>`
+            txt += `Moon Irradiance: ${moonIrradiance.toFixed(2)} [nL]<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
 
             color.push(reason_to_color_mapping(viz.reasons))
             const daytime = date_normalize(viz.datetime)
             y.push(daytime)
-            z.push(Math.log(moonIrradiance))
+            z.push(moonIrradiance)
             text.push(txt)
         })
         const ydate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
@@ -125,7 +125,7 @@ export const MoonVizChart = (props: Props) => {
         },
         colorbar: {
             x: 1.05,
-            title: '[Log nanoLamberts]',
+            title: '[nL]',
         },
         //@ts-ignore
         // coloraxis: 'coloraxis',
