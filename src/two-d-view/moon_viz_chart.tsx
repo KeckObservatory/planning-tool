@@ -90,7 +90,6 @@ export const MoonVizChart = (props: Props) => {
                  zenith_object,
                  phase_angle_moon)
             const eclipse = lunarAngle < MOON_RADIUS 
-            //z.push(Math.abs(lunarAngle))
             let txt = ""
             txt += `Az: ${viz.az.toFixed(2)}<br>`
             txt += `El: ${viz.alt.toFixed(2)}<br>`
@@ -108,7 +107,9 @@ export const MoonVizChart = (props: Props) => {
             color.push(reason_to_color_mapping(viz.reasons))
             const daytime = date_normalize(viz.datetime)
             y.push(daytime)
-            z.push(moonIrradiance)
+            // z.push(moonIrradiance)
+            z.push(Math.log(moonIrradiance))
+            //z.push(Math.abs(lunarAngle))
             text.push(txt)
         })
         const ydate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
@@ -132,7 +133,7 @@ export const MoonVizChart = (props: Props) => {
         },
         colorbar: {
             x: 1.05,
-            title: '[nL]',
+            title: '[log nL]',
         },
         //@ts-ignore
         // coloraxis: 'coloraxis',
