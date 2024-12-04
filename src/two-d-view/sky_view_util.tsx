@@ -211,19 +211,13 @@ const angular_separation = (lon1: number, lat1: number, lon2: number, lat2: numb
     return Math.atan(numerator/denominator) * 180 / Math.PI
 }
 
-export const lunar_angle = (ra: number, dec: number, date: Date, lngLatEl: LngLatEl) => {
-    const sc = SunCalc.getMoonPosition(date, lngLatEl.lat, lngLatEl.lng)
-    const moonPos = [sc.altitude * 180 / Math.PI, sc.azimuth * 180 / Math.PI] as [number, number]
+export const lunar_angle = (ra: number, 
+    dec: number, date: Date, 
+    lngLatEl: LngLatEl, 
+    mp: SunCalc.GetMoonPositionResult) => {
     const [az, alt]= ra_dec_to_az_alt(ra, dec, date, lngLatEl)
-    const angle = angular_separation(alt, az, moonPos[0], moonPos[1])
+    console.log('az', az, 'alt', alt, 'mp', mp)
+    const angle = angular_separation(alt, az, mp.altitude * 180 / Math.PI, mp.azimuth * 180 / Math.PI)
     return angle
 }
 
-export const get_lunar_angle = (ra: number, dec: number, times: Date[], lngLatEl: LngLatEl): number[] => {
-    let ang: number[] = []
-    times.forEach((date: Date) => {
-        const angle = lunar_angle(ra, dec, date, lngLatEl)
-        ang.push(angle)
-    })
-    return ang
-}

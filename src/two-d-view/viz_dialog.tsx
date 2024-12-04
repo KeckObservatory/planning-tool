@@ -190,9 +190,9 @@ export const VizDialog = (props: VizDialogProps) => {
                     alt,
                     ...alt_az_observable(alt, az, KG),
                     datetime: time,
+                    air_mass: air_mass_val,
                     moon_illumination,
-                    moon_position,
-                    air_mass: air_mass_val
+                    moon_position
                 }
                 return vis
             })

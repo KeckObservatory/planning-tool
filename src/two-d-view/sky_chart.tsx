@@ -2,7 +2,7 @@ import Plot from "react-plotly.js";
 import * as util from './sky_view_util.tsx'
 import { Dome, hidate, TargetView } from "./two_d_view";
 import { useStateContext } from "../App";
-import { reason_to_color_mapping } from "./target_viz_chart.tsx";
+import { alt_az_observable, reason_to_color_mapping } from "./target_viz_chart.tsx";
 import { DayViz, VizRow } from "./viz_dialog.tsx";
 import { LngLatEl } from "../App";
 import dayjs from "dayjs";
@@ -44,7 +44,7 @@ const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType: SkyCha
             break;
         }
         case 'Lunar Angle': {
-            val = util.lunar_angle(ra, dec, viz.datetime, lngLatEl)
+            val = util.lunar_angle(ra, dec, viz.datetime, lngLatEl, viz.moon_position)
             break;
         }
         case 'Azimuth': {
@@ -92,8 +92,8 @@ export const SkyChart = (props: Props) => {
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
             texts.push(txt)
             color.push(reason_to_color_mapping(viz.reasons))
-            const datum = get_chart_datum(tgtv.ra_deg, tgtv.dec_deg, viz, chartType, lngLatEl)
-            y.push(datum)
+            const datum = viz.moon_position ? get_chart_datum(tgtv.ra_deg, tgtv.dec_deg, viz, chartType, lngLatEl): null
+            y.push(datum as number)
             return txt
         })
 
@@ -130,12 +130,18 @@ export const SkyChart = (props: Props) => {
             const azEl = util.ra_dec_to_az_alt(ra, dec, time, lngLatEl)
             //const viz = { az: azEl[0], alt: azEl[1], datetime: time, air_mass: util.air_mass(azEl[1], lngLatEl.el) }
             const moon_illumination = SunCalc.getMoonIllumination(time)
-            const viz = { az: azEl[0], 
+            const moon_position = SunCalc.getMoonPosition(time, lngLatEl.lat, lngLatEl.lng)
+            const KG = context.config.tel_geometry.keck[dome]
+            const {observable, reasons} = alt_az_observable(azEl[1], azEl[0], KG)
+            const viz: VizRow = { az: azEl[0], 
                 alt: azEl[1], 
                 datetime: time, 
                 moon_illumination,
+                moon_position,
+                observable,
+                reasons,
                 air_mass: util.air_mass(azEl[1], lngLatEl.el) }
-            const datum = get_chart_datum(ra, dec, viz as VizRow, chartType, lngLatEl)
+            const datum = get_chart_datum(ra, dec, viz, chartType, lngLatEl)
             const currTime = hidate(time, context.config.timezone)
             const airmass = util.air_mass(azEl[1], lngLatEl.el)
             maxAirmass = Math.max(maxAirmass, airmass)
@@ -171,9 +177,6 @@ export const SkyChart = (props: Props) => {
             traces.push(trace)
             })
     }
-
-    //show twilight times
-    // console.log('suncalcTimes', suncalcTimes)
 
     const shapes: Partial<Plotly.Shape>[] = [
         {

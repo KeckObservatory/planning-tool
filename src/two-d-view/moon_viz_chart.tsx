@@ -50,6 +50,7 @@ const moon_irradiance = (rho: number, zenith_moon: number, zenith_object: number
     // zenith_moon = 90 - moon_alt [degrees]
     // zenith_object = 90 - object_alt [degrees]
     // phase_angle_moon = moon_phase [degrees]
+    console.log('rho', rho, 'zenith_moon', zenith_moon, 'zenith_object', zenith_object, 'phase_angle_moon', phase_angle_moon)
     const extinction_coeff = 0.172 // extinction coefficient [mag/airmass]
     const f_rho = scattering_equation(rho)
     const moon_ill = moon_illuminance(phase_angle_moon)
@@ -76,7 +77,9 @@ export const MoonVizChart = (props: Props) => {
             const lunarAngle = lunar_angle(targetViz.ra_deg as number,
                 targetViz.dec_deg as number,
                 viz.datetime,
-                context.config.tel_lat_lng_el.keck)
+                context.config.tel_lat_lng_el.keck, 
+                viz.moon_position,
+            )
 
             const zenith_moon = 90 - viz.moon_position.altitude
             const zenith_object = 90 - viz.alt
