@@ -123,6 +123,7 @@ export const MoonVizChart = (props: Props) => {
         },
         colorbar: {
             x: 1.05,
+            title: '[Log nanoLamberts]',
         },
         //@ts-ignore
         // coloraxis: 'coloraxis',
@@ -132,6 +133,7 @@ export const MoonVizChart = (props: Props) => {
         colorscale: 'Hot',
         // reversescale: true,
         type: 'contour',
+        name: name,
         showlegend: false,
     }
     let traces = [trace]
