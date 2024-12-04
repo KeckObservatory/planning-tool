@@ -38,3 +38,4 @@ export const MARKER_SIZE = 10 //pxl radius
 export const XAXIS_DTICK = 15 * 24 * 60 * 60 * 1000 // milliseconds
 export const MOON_MARKER_LINE_WIDTH = 2 //pxl
 export const MOON_MARKER_SIZE = 2 //pxl
+export const MOON_RADIUS = .52 // degrees

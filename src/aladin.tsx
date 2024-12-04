@@ -1,5 +1,5 @@
 import React from "react"
-import { ra_dec_to_deg, cosd, sind } from './two-d-view/sky_view_util.tsx'
+import { ra_dec_to_deg, cosd, sind, r2d } from './two-d-view/sky_view_util.tsx'
 import { Target } from "./App"
 import A from 'aladin-lite'
 import { useDebounceCallback } from "./use_debounce_callback.tsx"
@@ -85,7 +85,7 @@ const get_angle = (aladin: any) => {
     const [x0, y0] = aladin.world2pix(ra, dec) // originate compass on center of screen
     const [x1, y1] = aladin.world2pix(ra, dec + ddec) //point up 
     const [x2, y2] = aladin.world2pix(ra + dra, dec) //point left 
-    const angle = (180 / Math.PI) * (Math.atan2((y2 - x0) * (x1 - x0) - (y1 - y0) * (x2 - x0), (x1 - x0) * (x2 - x0) + (y1 - y0) * (y2 - y0)))
+    const angle = r2d(Math.atan2((y2 - x0) * (x1 - x0) - (y1 - y0) * (x2 - x0), (x1 - x0) * (x2 - x0) + (y1 - y0) * (y2 - y0)))
     return angle
 }
 

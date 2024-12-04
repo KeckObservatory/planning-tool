@@ -50,16 +50,24 @@ export const ra_dec_to_deg = (time: string, dec = false) => {
     return deg
 }
 
+export const d2r = (deg: number) => {
+    return deg * Math.PI / 180
+}
+
+export const r2d = (rad: number) => {
+    return rad / d2r(1) 
+}
+
 export const cosd = (deg: number): number => {
-    return Math.cos(Math.PI / 180 * deg)
+    return Math.cos(d2r(deg))
 }
 
 export const sind = (deg: number): number => {
-    return Math.sin(Math.PI / 180 * deg)
+    return Math.sin(d2r(deg))
 }
 
 export const tand = (deg: number): number => {
-    return Math.tan(Math.PI / 180 * deg)
+    return Math.tan(d2r(deg))
 }
 
 export const ra_dec_to_az_alt = (ra: number, dec: number, date: Date, lngLatEl: LngLatEl): [number, number] => {
@@ -72,7 +80,7 @@ export const ra_dec_to_az_alt = (ra: number, dec: number, date: Date, lngLatEl: 
     // const az = Math.atan(tanAzNum/tanAzDen) //radians
     const sinEl = sind(lngLatEl.lat) * sind(dec) + cosd(lngLatEl.lat) * cosd(dec) * cosd(hourAngle)
     const el = Math.asin(sinEl) // radians
-    return [(180 / Math.PI * az), (180 / Math.PI * el)]
+    return [r2d(az), r2d(el)]
 }
 
 export const add_hours = (date: Date, hours: number): Date => {
@@ -184,7 +192,7 @@ export const parallatic_angle = (ra: number, dec: number, date: Date, lngLatEl: 
     const denominator: number = tand(lngLatEl.lat)
         * cosd(dec)
         - sind(dec) * cosd(hourAngle)
-    return Math.atan2(numerator, denominator) * 180 / Math.PI 
+    return r2d(Math.atan2(numerator, denominator))
 }
 
 export const get_parallactic_angle = (ra: number, dec: number, times: Date[], lngLatEl: LngLatEl): number[] => {
@@ -209,7 +217,7 @@ const angular_separation = (lon1: number, lat1: number, lon2: number, lat2: numb
     const denominator = slat1 * slat2 + clat1 * clat2 * cdlon
     const numerator = Math.sqrt(numerator1 ** 2 + numerator2 ** 2)
     //return Math.atan(numerator/denominator) * 180 / Math.PI
-    return Math.atan2(numerator, denominator) * 180 / Math.PI
+    return r2d(Math.atan2(numerator,denominator))
 }
 
 export const add_pi = (angle: number) => {
@@ -219,8 +227,8 @@ export const add_pi = (angle: number) => {
 export const get_moon_position = (date: Date, lngLatEl: LngLatEl) => {
     // convert azel to degrees and set az coordinate such that 0 is north
     let moon_position = SunCalc.getMoonPosition(date, lngLatEl.lat, lngLatEl.lng)
-    moon_position.azimuth = add_pi(moon_position.azimuth) * 180 / Math.PI
-    moon_position.altitude = moon_position.altitude * 180 / Math.PI
+    moon_position.azimuth = r2d(add_pi(moon_position.azimuth))
+    moon_position.altitude = r2d(moon_position.altitude)
     return moon_position 
 }
 

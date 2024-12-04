@@ -2,8 +2,9 @@ import { DayViz, TargetViz, VizRow } from "./viz_dialog";
 import Plot from "react-plotly.js";
 import { useStateContext } from "../App";
 import dayjs from "dayjs";
-import { cosd, lunar_angle, sind } from "./sky_view_util";
+import { cosd, lunar_angle, r2d, sind } from "./sky_view_util";
 import { reason_to_color_mapping, create_dawn_dusk_traces, date_normalize } from "./target_viz_chart";
+import { MOON_RADIUS } from "./constants";
 
 
 interface Props {
@@ -16,7 +17,8 @@ const scattering_equation = (rho: number) => {
     const rayleigh_scattering =  reyleigh_constant * (1.06 + cosd(rho) ** 2)
     const mei_constant = 6.2e7 //used for small separation angles
     const mei_scattering = rho > 10 ? Math.pow(10, 6.15 - rho / 40) : mei_constant * Math.pow(rho, -2)
-    return  rayleigh_scattering + mei_scattering
+    const scatter = rayleigh_scattering + mei_scattering
+    return scatter 
 }
 
 const moon_illuminance = (phase_angle_moon: number) => {
@@ -70,23 +72,24 @@ export const MoonVizChart = (props: Props) => {
     let z: number[] = []
     let x: Date[] = []
     let color: string[] = []
+    const lngLatEl = context.config.tel_lat_lng_el.keck
     targetViz.semester_visibility.forEach((dayViz: DayViz) => {
-        //let color: number[] = []
+        if (!targetViz.ra_deg || !targetViz.dec_deg) {
+            return
+        } 
         dayViz.visibility.forEach((viz: VizRow) => {
-            const lunarAngle = lunar_angle(targetViz.ra_deg as number,
-                targetViz.dec_deg as number,
-                viz.datetime,
-                context.config.tel_lat_lng_el.keck, 
-                viz.moon_position,
+            const [ ra, dec ]= [targetViz.ra_deg as number, targetViz.dec_deg as number]
+            const lunarAngle = lunar_angle(ra, dec, viz.datetime, lngLatEl, viz.moon_position,
             )
 
             const zenith_moon = 90 - viz.moon_position.altitude
             const zenith_object = 90 - viz.alt
-            const phase_angle_moon = viz.moon_illumination.angle * 180 / Math.PI
-            const moonIrradiance = moon_irradiance(lunarAngle,
+            const phase_angle_moon = r2d(viz.moon_illumination.angle)
+            let moonIrradiance = moon_irradiance(lunarAngle,
                  zenith_moon,
                  zenith_object,
                  phase_angle_moon)
+            const eclipse = lunarAngle < MOON_RADIUS 
             //z.push(Math.abs(lunarAngle))
             let txt = ""
             txt += `Az: ${viz.az.toFixed(2)}<br>`
@@ -97,6 +100,10 @@ export const MoonVizChart = (props: Props) => {
             txt += `Lunar Angle: ${lunarAngle.toFixed(2)}<br>`
             txt += `Moon Irradiance: ${moonIrradiance.toFixed(2)} [nL]<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
+            if (eclipse) {
+                console.log('lunarAngle eclipse', lunarAngle)
+                txt += `<br>Moon Eclipses Target`
+            }
 
             color.push(reason_to_color_mapping(viz.reasons))
             const daytime = date_normalize(viz.datetime)
@@ -111,7 +118,7 @@ export const MoonVizChart = (props: Props) => {
     })
 
     let name =  targetViz.target_name ?? 'Target'
-    name += ' Lunar Angle' 
+    name += ' Lunar Irradiance' 
     const trace: Partial<Plotly.PlotData> = {
         x,
         y,
