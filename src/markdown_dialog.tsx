@@ -1,10 +1,8 @@
 import * as React from 'react';
-import DialogTitle from '@mui/material/DialogTitle';
-import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
-import DialogContent from '@mui/material/DialogContent';
 import Tooltip from '@mui/material/Tooltip';
 import ReactMarkdown from 'react-markdown';
+import { DialogComponent } from './dialog_component';
 
 
 export interface MarkdownDialogProps {
@@ -17,15 +15,24 @@ export interface MarkdownDialogProps {
 function MarkdownDialog(props: MarkdownDialogProps) {
   const { open, handleClose } = props;
 
+  const dialogContent = (
+    <ReactMarkdown>{props.msg}</ReactMarkdown>
+  );
+
+  const titleContent = (
+    <div>
+      {props.header}
+    </div>
+  )
+
   return (
-    <Dialog 
-    maxWidth='xl'
-    onClose={() => handleClose()} open={open}>
-      <DialogTitle>{props.header}</DialogTitle>
-      <DialogContent dividers>
-        <ReactMarkdown>{props.msg}</ReactMarkdown>
-        </DialogContent>
-    </Dialog>
+      <DialogComponent
+          maxWidth={'xl'}
+          handleClose={handleClose}
+          open={open}
+          titleContent={titleContent}
+          children={dialogContent}
+      />
   );
 }
 

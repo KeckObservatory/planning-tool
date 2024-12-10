@@ -178,8 +178,8 @@ export default function AladinViewer(props: Props) {
                 size: 4,
                 popupDesc: `<t> RA: ${tgt.ra} <br /> Dec: ${tgt.dec}</t>`
             }
-            const ra = tgt.ra ? ra_dec_to_deg(tgt.ra as string) : tgt.ra_deg
-            const dec = tgt.dec ? ra_dec_to_deg(tgt.ra as string, true) : tgt.dec_deg
+            const ra = tgt.ra_deg ? tgt.ra_deg : ra_dec_to_deg(tgt.ra as string)
+            const dec = tgt.dec_deg ? tgt.dec_deg : ra_dec_to_deg(tgt.dec as string, true)
             if (ra && dec) {
                 cat.addSources(A.marker(ra, dec, options));
             }
@@ -209,6 +209,7 @@ export default function AladinViewer(props: Props) {
     const scriptloaded = async () => {
         console.log('aladin script loaded', props)
         const firstRow = props.targets.at(0)
+        const startPos = firstRow ? `${firstRow.ra_deg ?? '0'} ${firstRow.dec_deg ?? 0}` : '0 0'
         let params: any = {
             survey: 'P/SDSS9/color',
             projection: 'MOL',
@@ -216,9 +217,8 @@ export default function AladinViewer(props: Props) {
             showCooGrid: false,
             showCooGridControl: true,
             showReticle: false,
-            target: firstRow?.target_name
+            target: startPos
         }
-        params['target'] = firstRow?.ra?.replaceAll(':', " ") + ' ' + firstRow?.dec?.replaceAll(':', ' ')
         A.init.then(async () => {
             const alad = A.aladin('#aladin-lite-div', params);
             if (!alad) return

@@ -1,6 +1,6 @@
 
 import Tooltip from '@mui/material/Tooltip';
-import { IconButton } from '@mui/material';
+import { Button, IconButton } from '@mui/material';
 import { get_simbad } from './api/api_root.tsx';
 import ModeStandbyIcon from '@mui/icons-material/ModeStandby';
 import { Target } from './App';
@@ -11,6 +11,7 @@ export interface Props {
     target: Target
     setTarget: Function
     hasSimbad: boolean
+    label: boolean
 }
 
 export interface SimbadTargetData {
@@ -36,7 +37,7 @@ export const get_simbad_data = async (targetName: string): Promise<SimbadTargetD
     const simbadData: SimbadTargetData = {}
 
     const simbadLines = simbad_output.split('\n')
-    let currDr = 0 
+    let currDr = 0
     for (let line of simbadLines) {
         line.startsWith('Bib') && (bibcodesSection = true)
         line.startsWith('Identifiers (') && (identifiersSection = true)
@@ -96,11 +97,21 @@ export default function SimbadButton(props: Props) {
         }
     }
 
+    const color = props.hasSimbad ? 'success' : 'inherit'
+
     return (
         <Tooltip title={`Click to add Simbad info to target ${targetName}`}>
-            <IconButton onClick={handleClickOpen}>
-                <ModeStandbyIcon color={props.hasSimbad ? 'success' : 'inherit'} />
-            </IconButton>
+            {props.label ?
+                (<Button
+                    onClick={handleClickOpen}
+                    variant='contained'
+                    startIcon={<ModeStandbyIcon color={color} />}>
+                    Simbad Resolver
+                </Button>) :
+                (<IconButton onClick={handleClickOpen}>
+                    <ModeStandbyIcon color={props.hasSimbad ? 'success' : 'inherit'} />
+                </IconButton>)
+        }
         </Tooltip>
     );
 }

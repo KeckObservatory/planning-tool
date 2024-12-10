@@ -44,6 +44,7 @@ export interface Target extends SimbadTargetData {
   ra_offset?: number,
   dec_offset?: number,
   rotator_mode?: RotatorMode,
+  rotator_pa?: number,
   telescope_wrap?: TelescopeWrap
   d_ra?: number,
   d_dec?: number,

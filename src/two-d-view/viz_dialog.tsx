@@ -16,11 +16,12 @@ import { GetTimesResult, GetMoonIlluminationResult, GetMoonPositionResult } from
 import { air_mass, get_day_times, get_moon_position, get_suncalc_times, ra_dec_to_az_alt } from './sky_view_util';
 import { ROUND_MINUTES, SEMESTER_RANGES } from './constants';
 import { MoonVizChart } from './moon_viz_chart';
+import { DialogComponent } from '../dialog_component';
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
 interface ButtonProps {
-    targetName: string 
+    targetName: string
     targetNames: string[]
 }
 
@@ -46,7 +47,7 @@ export interface VizRow {
     observable: boolean
     air_mass: number
     reasons: string[]
-    moon_illumination: GetMoonIlluminationResult 
+    moon_illumination: GetMoonIlluminationResult
     moon_position: GetMoonPositionResult
 }
 
@@ -69,7 +70,7 @@ const get_curr_semester = (date: Date) => {
 
 interface VizDialogProps {
     open: boolean,
-    targetName: string 
+    targetName: string
     targetNames: string[]
     handleClose: () => void
 }
@@ -180,7 +181,7 @@ export const VizDialog = (props: VizDialogProps) => {
             const times = get_day_times(startTime, endTime, ROUND_MINUTES)
             const visibility = times.map((time: Date) => {
                 const [az, alt] = ra_dec_to_az_alt(target.ra_deg as number,
-                     target.dec_deg as number, time, lngLatEl)
+                    target.dec_deg as number, time, lngLatEl)
                 const air_mass_val = air_mass(alt, lngLatEl.el)
                 const moon_position = get_moon_position(time, lngLatEl)
                 const moon_illumination = SunCalc.getMoonIllumination(time)
@@ -217,44 +218,45 @@ export const VizDialog = (props: VizDialogProps) => {
         }
     }
 
+    const dialogTitle = (
+        <span>Target Visability Chart</span>
+    )
+
+    const dialogContent = (
+        <Stack
+            sx={{
+                paddingTop: '16px',
+                display: 'flex',
+                flexWrap: 'wrap',
+            }}
+            direction='column'>
+            <Stack direction='row'>
+                <SemesterSelect semester={semester} setSemester={setSemester} />
+                <DomeSelect dome={dome} setDome={setDome} />
+                <Tooltip title={'Target'}>
+                    <Autocomplete
+                        disablePortal
+                        id="selected-target"
+                        value={props.targetName}
+                        onChange={(_, value) => value && onTargetNameSelect(value)}
+                        options={props.targetNames ?? []}
+                        sx={{ width: 250 }}
+                        renderInput={(params) => <TextField {...params} label={'Selected Target'} />}
+                    />
+                </Tooltip>
+            </Stack>
+            {target && <TargetVizChart targetViz={targetViz} />}
+            {target && <MoonVizChart targetViz={targetViz} />}
+        </Stack>
+    )
+
     return (
-        <Dialog
-            maxWidth={false}
-            onClose={() => props.handleClose()}
+        <DialogComponent 
             open={props.open}
-        >
-            <DialogTitle>
-                <>
-                    <span>Target Visability Chart</span>
-                </>
-            </DialogTitle>
-            <DialogContent >
-                <Stack
-                    sx={{
-                        paddingTop: '16px',
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                    }}
-                    direction='column'>
-                    <Stack direction='row'>
-                        <SemesterSelect semester={semester} setSemester={setSemester} />
-                        <DomeSelect dome={dome} setDome={setDome} />
-                        <Tooltip title={'Target'}>
-                            <Autocomplete
-                                disablePortal
-                                id="selected-target"
-                                value={props.targetName}
-                                onChange={(_, value) => value && onTargetNameSelect(value)}
-                                options={props.targetNames ?? []}
-                                sx={{ width: 250 }}
-                                renderInput={(params) => <TextField {...params} label={'Selected Target'} />}
-                            />
-                        </Tooltip>
-                    </Stack>
-                    {target && <TargetVizChart targetViz={targetViz} />}
-                    {target && <MoonVizChart targetViz={targetViz} />}
-                </Stack>
-            </DialogContent>
-        </Dialog>
+            handleClose={props.handleClose}
+            titleContent={dialogTitle}
+            children={dialogContent}
+            maxWidth="xl"
+        />
     )
 }

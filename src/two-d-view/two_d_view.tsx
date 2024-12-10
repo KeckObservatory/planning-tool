@@ -146,9 +146,11 @@ const TwoDView = ({ targets }: Props) => {
 
     React.useEffect(() => {
         const fun = async () => {
-            const fc = await get_shapes('fov')
-            const features = fc['features'].filter((f: any) => f['properties'].type === 'FOV')
-            const newFovs = features.map((f: any) => f['properties'].instrument) as string[]
+            const featureCollection = await get_shapes('fov')
+            const features = featureCollection['features'].filter((feature: any) => {
+                return feature['properties'].type === 'FOV'
+            })
+            const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
             setFOVs(newFovs)
         }
         fun()
@@ -199,6 +201,19 @@ const TwoDView = ({ targets }: Props) => {
                 tviz.push(tgtv)
             }
         })
+
+        const fun = async () => {
+            const featureCollection = await get_shapes('fov')
+            const features = featureCollection['features'].filter((feature: any) => {
+                return feature['properties'].type === 'FOV' && feature['properties'].dome === dome
+            })
+            const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
+            console.log('new fovs', newFovs, 'dome', dome)
+            !newFovs.includes(instrumentFOV) && setInstrumentFOV(newFovs[0])
+            setFOVs(newFovs)
+        }
+
+        fun()
         setTargetView(tviz)
         setSuncalcTimes(newSuncalcTimes)
         setTime(newSuncalcTimes.nadir)

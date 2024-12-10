@@ -11,6 +11,7 @@ import { RotatorMode, Target, TelescopeWrap, useStateContext } from './App';
 import target_schema from './target_schema.json'
 import { v4 as randomId } from 'uuid';
 import { format_tags, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog';
+import { DialogComponent } from './dialog_component';
 
 interface Props {
     setTargets: Function
@@ -60,7 +61,7 @@ export const format_target_property = (key: keyof Target, value: unknown, props:
     }
     else if (key === 'tags') {
         //@ts-ignore
-        fmtValue = format_tags(fmtValue as Array<string>) 
+        fmtValue = format_tags(fmtValue as Array<string>)
     }
     return fmtValue
 }
@@ -74,14 +75,14 @@ export const format_targets = (tgts: UploadedTarget[], targetProps: TargetProps)
             tgt[key] = fmtValue
         })
         return tgt
-    }) 
-    return fmtTgts 
+    })
+    return fmtTgts
 }
 
 interface StarListOptionalKeys {
     gmag?: number,
     jmag?: number,
-    epoch?:  string,
+    epoch?: string,
     raoffset?: number,
     decoffset?: number,
     pmra?: number,
@@ -161,9 +162,9 @@ const csv_to_array = (text: string) => {
     var a = [];                     // Initialize array to receive values.
     text.replace(re_value, // "Walk" the string using replace with callback.
         //@ts-ignore
-        function(m0, m1, m2, m3) {
+        function (m0, m1, m2, m3) {
             // Remove backslash from \' in single quoted values.
-            if      (m1 !== undefined) a.push(m1.replace(/\\'/g, "'"));
+            if (m1 !== undefined) a.push(m1.replace(/\\'/g, "'"));
             // Remove backslash from \" in double quoted values.
             else if (m2 !== undefined) a.push(m2.replace(/\\"/g, '"'));
             else if (m3 !== undefined) a.push(m3);
@@ -202,18 +203,30 @@ const parse_csv = (contents: string) => {
     return tgts
 }
 
-const split_at = (index: number, str: string) => [str.slice(0, index), str.slice(index+1)] 
+const split_at = (index: number, str: string) => {
+    const tabidx = str.lastIndexOf('\t')
+    console.log('tabidx', tabidx)
+    if (tabidx > 0) { // tab(s) in target name
+        console.log('targetName', str.slice(0, tabidx))
+        const targetName = str.slice(0, tabidx).replaceAll('\t', ' ').padEnd(15, ' ')
+        console.log('targetName', targetName)
+        return [targetName, str.slice(tabidx + 1)]
+    }
+
+    return [str.slice(0, index), str.slice(index + 1)]
+}
 
 const parse_txt = (contents: string, obsid: number) => {
     let tgts = [] as UploadedTarget[]
-    contents.split('\n').forEach((row) => {
-        if (row === '') return
+    contents.split(/\r\n|\n/).forEach((row) => {
+        if (row === '' || !row) return
         if (row.startsWith('#')) return
-        const [target_name, tail] = split_at(15, row) 
+        const [target_name, tail] = split_at(15, row)
         const [rah, ram, ras, dech, decm, decs, epoch, ...opts] = tail.replace(/\s\s+/g, ' ').split(' ')
-        const ra = `${rah.padStart(2,'0')}:${ram.padStart(2,'0')}:${ras}`
-        const dec = `${dech.padStart(2,'0')}:${decm.padStart(2,'0')}:${decs}`
+        const ra = `${rah.padStart(2, '0')}:${ram.padStart(2, '0')}:${ras}`
+        const dec = `${dech.padStart(2, '0')}:${decm.padStart(2, '0')}:${decs}`
         const coordValid = ra.match(targetProps.ra.pattern as string) && dec.match(targetProps.dec.pattern as string)
+        console.log('ra', ra, 'dec', dec, 'coordValid', coordValid)
         if (!coordValid) {
             console.warn('ra', ra, 'dec', dec)
             return
@@ -228,7 +241,7 @@ const parse_txt = (contents: string, obsid: number) => {
         };
         opts.forEach((opt) => {
             const [key, value] = opt.split('=')
-            const tgtKey = starlistToKeyMapping[key as keyof StarListOptionalKeys] as keyof Target 
+            const tgtKey = starlistToKeyMapping[key as keyof StarListOptionalKeys] as keyof Target
             //@ts-ignore
             tgt[tgtKey] = value
         })
@@ -254,7 +267,7 @@ export function UploadComponent(props: UploadProps) {
         fileReader.readAsText(file, "UTF-8");
         fileReader.onload = e => {
             const contents = e.target?.result as string
-            let uploadedTargets : UploadedTarget[] = [] 
+            let uploadedTargets: UploadedTarget[] = []
             switch (ext) {
                 case 'json':
                     uploadedTargets = parse_json(contents)
@@ -263,6 +276,7 @@ export function UploadComponent(props: UploadProps) {
                     uploadedTargets = parse_csv(contents)
                     break;
                 case 'txt':
+                    console.log('txt', contents, context.obsid)
                     uploadedTargets = parse_txt(contents, context.obsid)
                     break;
                 default:
@@ -309,33 +323,40 @@ export default function UploadDialog(props: Props) {
         setOpen(false);
     };
 
-    return (
+    const titleContent = (
         <div>
+            {"Upload Targets from .csv, .json, or .txt file"}
+        </div>
+    )
+
+    const dialogContent = (
+        <DialogContentText id="alert-dialog-description">
+            Select the file to upload
+        </DialogContentText>
+    )
+
+    const dialogActions = (
+        <UploadComponent
+            label={label}
+            setLabel={setLabel}
+            setOpen={setOpen}
+            setTargets={props.setTargets} />
+    )
+
+    return (
+        <>
             <Tooltip title="Upload Targets from .csv file">
                 <Button onClick={handleClickOpen} startIcon={<UploadIcon />}>
                     {label}
                 </Button>
             </Tooltip>
-            <Dialog
+            <DialogComponent
                 open={open}
-                onClose={handleClose}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-            >
-                <DialogTitle id="alert-dialog-title">{"Upload Targets from .csvfile"}</DialogTitle>
-                <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                        Select the file to upload
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <UploadComponent
-                        label={label}
-                        setLabel={setLabel}
-                        setOpen={setOpen}
-                        setTargets={props.setTargets} />
-                </DialogActions>
-            </Dialog>
-        </div>
+                handleClose={handleClose}
+                titleContent={titleContent}
+                children={dialogContent}
+                actions={dialogActions}
+                />
+        </>
     );
 }
