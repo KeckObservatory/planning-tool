@@ -13,7 +13,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import SimbadButton from './simbad_button';
 import target_schema from './target_schema.json'
-import { Status, Target } from './App';
+import { Magnitude, Status, Target } from './App';
 import { MuiChipsInput } from 'mui-chips-input';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util';
 
@@ -27,15 +27,21 @@ interface TargetEditProps extends Props {
     open: boolean
 }
 
+interface Items extends PropertyProps {
+    properties?: { [key: string]: PropertyProps }
+}
+
 export interface PropertyProps {
     description: string,
     type: string | string[],
     short_description?: string,
     default?: unknown,
     pattern?: string,
+    minLength?: number,
+    maxLength?: number,
     not_editable_by_user?: boolean,
     enum?: string[],
-    items?: PropertyProps
+    items?: Items
 }
 
 export interface TargetProps {
@@ -86,8 +92,27 @@ function deg_to_hms(deg: number) {
     return `${hours}:${minutes}:${seconds}`
 }
 
-
 export const rowSetter = (tgt: Target, key: string, value?: string | number | boolean | string[]) => {
+
+    //TODO: handle custom magnitude array
+    // if (key.includes('.') && idx!==undefined) { //used for custom magnitude array
+    //     const [parent, child] = key.split('.') as [keyof Target, keyof Magnitude]
+    //     if (Object.keys(tgt).includes(parent)) {
+    //         const elem = (tgt[parent] as Array<Magnitude>)?.at(idx) as Magnitude
+    //         //@ts-ignore
+    //         elem && (tgt[parent][idx] = { ...elem, [child]: value})
+    //         //@ts-ignore
+    //         !elem && (tgt[parent][0] = { 'mag': undefined, 'band': undefined, [child]: value})
+    //     }
+    //     else {
+    //         //@ts-ignore
+    //         tgt[parent] = [{ 'mag': undefined, 'band': undefined, [child]: value}]
+    //     }
+    //     const newTgt = { ...tgt, 'status': 'EDITED' as Status}
+    //     console.log('newTgt', newTgt)
+    //     return newTgt 
+    // }
+
     let newTgt = { ...tgt, 'status': 'EDITED' as Status, [key]: value }
     switch (key) {
         case 'ra':
@@ -142,6 +167,10 @@ export const format_edit_entry = (key: string, value?: string | number, isNumber
         key === 'ra' && String(value).replace(/[^+-]/, "")
         value = raDecFormat(value as string)
     }
+    if (value && key === 'target_name') {
+        value = String(value).replace(/[^\w^\-^\s]+/g, '') //remove non alphanumeric characters
+        value = value.slice(0, 15) //truncate to 15 characters
+    }
 
     value = String(value).replace(/\t/, '') //remove tabs
     return value
@@ -181,6 +210,16 @@ export const TargetEditDialog = (props: TargetEditProps) => {
     }
 
     const input_label = (param: keyof Target, tooltip = false): string => {
+        //TODO: handle custom magnitude array
+        // if (param.includes('.')) {
+        //     const [parent, child] = param.split('.')
+        //     const properties = targetProps[parent].items?.properties as any
+        //     const itemProperties = properties[child] as PropertyProps
+        //     const childLabel = tooltip ? itemProperties.description 
+        //     : 
+        //     itemProperties.short_description ?? itemProperties.description
+        //     return childLabel
+        // }
         return tooltip ?
             targetProps[param].description
             :
@@ -214,6 +253,56 @@ export const TargetEditDialog = (props: TargetEditProps) => {
             <SimbadButton target={target} label={true} setTarget={handleSimbadChange} hasSimbad={hasSimbad} />
         </Stack>
     )
+
+    //TODO: add custom magnitude array
+    // const custom_mag_field = (idx=0, mag?: Magnitude) => {
+    //     const jdx = idx + 1
+    //     return (
+    //         <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2} key={jdx}>
+    //             <Tooltip title={input_label('custom_mag.band' as keyof Target, true)}>
+    //                 <TextField
+    //                     label={input_label('custom_mag.band' as keyof Target)}
+    //                     id={`custom-band-${idx}`}
+    //                     value={mag?.band}
+    //                     sx={{ width: 100 }}
+    //                     onChange={(event) => handleTextChange('custom_mag.band', event.target.value, false, jdx)}
+    //                 />
+    //             </Tooltip>
+    //             <Tooltip title={input_label('custom_mag.mag' as keyof Target, true)}>
+    //                 <TextField
+    //                     label={input_label('custom_mag.mag' as keyof Target)}
+    //                     id={`custom-mag-${idx}`}
+    //                     value={mag?.mag}
+    //                     sx={{ width: 100 }}
+    //                     onChange={(event) => handleTextChange('custom_mag.mag', event.target.value, true, jdx)}
+    //                 />
+    //             </Tooltip>
+    //         </Stack>
+    //     )
+    // }
+
+    // let magOptions = target.custom_mag ? target.custom_mag.map((mag, idx) => {
+    //     return custom_mag_field(idx, mag)
+    // }) : []
+
+    // React.useEffect(() => {
+    //     console.log('mag changed', props.target.custom_mag)
+    //     //if no blank field
+    //     const custom_mag = props.target.custom_mag ?? []
+    //     const hasEmptyMag = custom_mag.find((mag: Magnitude) => mag.mag===undefined && mag.band===undefined)
+    //     if(!hasEmptyMag) {
+    //         console.log('adding empty mag row')
+    //         magOptions.push(custom_mag_field())
+    //     }
+    // }, props.target.custom_mag)
+
+    // magOptions.push(custom_mag_field())
+
+    // const magContent = (
+    //     <Stack sx={{ marginBottom: '24px' }} width="100%" direction="column" justifyContent='center' spacing={2}>
+    //         {magOptions}
+    //     </Stack>
+    // )
 
     const dialogContent = (
         <Stack sx={{
@@ -423,6 +512,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             />
                         </Tooltip>
                     </Stack>
+                    {/* {magContent} */}
                     <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
                         <Tooltip title={input_label('tags', true)}>
                             <MuiChipsInput

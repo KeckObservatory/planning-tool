@@ -7,7 +7,9 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 15,
-            "description": "Target Name"
+            "pattern": "[\\w\\-\\s]+",
+            "short_description": "Target Name",
+            "description": "Target Name. Alpha-numeric, hyphen, underscore, and space characters only"
         },
         "tags": {
             "type": "array",
@@ -49,6 +51,31 @@
             "type":  ["number", "string"],
             "description": "G Magnitude",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+        },
+        "custom_mag": {
+            "type":  "array",
+            "description": "Custom Magnitudes",
+            "items": {
+                "description": "Band and Magnitude of custom band",
+                "type": "object",
+                "properties": {
+                    "band": {
+                        "type": "string",
+                        "description": "Band",
+                        "minLength": 1,
+                        "maxLength": 15
+                    },
+                    "mag": {
+                        "type":  ["number", "string"],
+                        "description": "Magnitude",
+                        "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+                    }
+                },
+                "required": [
+                    "band",
+                    "mag"
+                ]
+            }
         },
         "epoch": {
             "type":  "string",

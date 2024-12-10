@@ -38,7 +38,7 @@ export const DialogComponent = (props: Props) => {
             <DialogContent >
                 {props.children}
             </DialogContent>
-            (props.actions && <DialogActions>{props.actions}</DialogActions>)
+            {props.actions && (<DialogActions>{props.actions}</DialogActions>)}
         </Dialog>
     )
 }
