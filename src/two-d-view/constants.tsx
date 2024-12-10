@@ -39,3 +39,7 @@ export const XAXIS_DTICK = 15 * 24 * 60 * 60 * 1000 // milliseconds
 export const MOON_MARKER_LINE_WIDTH = 2 //pxl
 export const MOON_MARKER_SIZE = 2 //pxl
 export const MOON_RADIUS = .52 // degrees
+
+
+export const DEFAULT_OPACITY = 'FF' //Hex values appended to color
+export const NON_OBSERVABLE_OPACITY = '80' //Hex values appended to color
