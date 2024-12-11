@@ -4,7 +4,7 @@ import { useStateContext } from "../App";
 import dayjs from "dayjs";
 import { cosd, lunar_angle, r2d, sind } from "./sky_view_util";
 import { reason_to_color_mapping, create_dawn_dusk_traces, date_normalize } from "./target_viz_chart";
-import { MOON_RADIUS } from "./constants";
+import { DARK_ZENITH_SKY_BRIGHTNESS, EXTINCTION_COEFF, MOON_RADIUS } from "./constants";
 
 
 interface Props {
@@ -27,7 +27,7 @@ const moon_illuminance = (phase_angle_moon: number) => {
     return Math.pow(10, exponent)
 }
 
-// const moon_illuminance_bak = (mag: number) => {
+// const moon_brightness_bak = (mag: number) => {
 //     // Krisciunas and Schaefer 1991 eq 8 
 //     return Math.pow(10, -0.4 * mag + 16.57)
 // }
@@ -42,25 +42,41 @@ const optical_pathlength = (zenith: number) => {
      return (1 - 0.96 * sind(zenith) ** 2 ) ** -0.5
 }
 
-const differentical_volume_decay = (pathlength: number, k: number) => {
-    return Math.pow(10, -0.4 * k * pathlength)
+const differentical_volume_decay = (pathlength: number) => {
+    return Math.pow(10, -0.4 * EXTINCTION_COEFF * pathlength)
 }
 
-const moon_irradiance = (rho: number, zenith_moon: number, zenith_object: number, phase_angle_moon: number) => {
+const moon_brightness = (rho: number, zenith_moon: number, zenith_object: number, phase_angle_moon: number) => {
     //Krisciunas and Schaefer 1991 eq 15
     // rho = separation angle [degrees]
     // zenith_moon = 90 - moon_alt [degrees]
     // zenith_object = 90 - object_alt [degrees]
     // phase_angle_moon = moon_phase [degrees]
-    const extinction_coeff = 0.172 // extinction coefficient [mag/airmass]
     const f_rho = scattering_equation(rho)
     const moon_ill = moon_illuminance(phase_angle_moon)
     const pathlength = optical_pathlength(zenith_object)
     const moon_pathlength = optical_pathlength(zenith_moon)
-    const dvd_moon = differentical_volume_decay(moon_pathlength, extinction_coeff)
-    const dvd_object = differentical_volume_decay(pathlength, extinction_coeff)
-    const irradiance = f_rho * moon_ill * dvd_moon * (1 - dvd_object)
-    return irradiance
+    const dvd_moon = differentical_volume_decay(moon_pathlength)
+    const dvd_object = differentical_volume_decay(pathlength)
+    const brightness = f_rho * moon_ill * dvd_moon * (1 - dvd_object)
+    return brightness 
+}
+
+const nighttime_sky_brightness = (zenith_object: number) => {
+    // Krisciunas and Schaefer 1991 eq 2
+    // dark zenith sky brightness taken from
+    //https://www.cfht.hawaii.edu/Instruments/ObservatoryManual/CFHT_ObservatoryManual_(Sec_2).html
+    const pathlength = optical_pathlength(zenith_object) 
+    const dvd_object = differentical_volume_decay((pathlength-1))
+    return DARK_ZENITH_SKY_BRIGHTNESS * dvd_object * pathlength
+
+}
+
+const delta_v_mag = (rho: number, zenith_moon: number, zenith_object: number, phase_angle_moon: number) => {
+    // Krisciunas and Schaefer 1991 eq 22
+    const B_moon = moon_brightness(rho, zenith_moon, zenith_object, phase_angle_moon)
+    const B_0 = nighttime_sky_brightness(zenith_object)
+    return -2.5 * Math.log10( ( B_moon + B_0) / B_0 )
 }
 
 export const MoonVizChart = (props: Props) => {
@@ -85,10 +101,7 @@ export const MoonVizChart = (props: Props) => {
             const zenith_moon = 90 - viz.moon_position.altitude
             const zenith_object = 90 - viz.alt
             const phase_angle_moon = r2d(viz.moon_illumination.angle)
-            let moonIrradiance = moon_irradiance(lunarAngle,
-                 zenith_moon,
-                 zenith_object,
-                 phase_angle_moon)
+            let moonBrightness = delta_v_mag(lunarAngle, zenith_moon, zenith_object, phase_angle_moon)
             const eclipse = lunarAngle < MOON_RADIUS 
             let txt = ""
             txt += `Az: ${viz.az.toFixed(2)}<br>`
@@ -97,7 +110,7 @@ export const MoonVizChart = (props: Props) => {
             txt += `UT: ${dayjs(viz.datetime).utc(false).format(context.config.date_time_format)}<br>`
             txt += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`
             txt += `Lunar Angle: ${lunarAngle.toFixed(2)}<br>`
-            txt += `Moon Irradiance: ${moonIrradiance.toFixed(2)} [nL]<br>`
+            txt += `Moon brightness: ${moonBrightness.toFixed(2)} [vmag/arcsec^2]<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
             if (eclipse) {
                 console.log('lunarAngle eclipse', lunarAngle)
@@ -107,8 +120,10 @@ export const MoonVizChart = (props: Props) => {
             color.push(reason_to_color_mapping(viz.reasons))
             const daytime = date_normalize(viz.datetime)
             y.push(daytime)
-            // z.push(moonIrradiance)
-            z.push(Math.log(moonIrradiance))
+            // z.push(moonbrightness)
+            //z.push(Math.log(moonbrightness))
+            // z.push(moonbrightness/NORMALIZED_MOON_brightness)
+            z.push(moonBrightness)
             //z.push(Math.abs(lunarAngle))
             text.push(txt)
         })
@@ -133,7 +148,7 @@ export const MoonVizChart = (props: Props) => {
         },
         colorbar: {
             x: 1.05,
-            title: '[log nL]',
+            title: '[vmag/arcsec^2]',
         },
         //@ts-ignore
         // coloraxis: 'coloraxis',
@@ -141,7 +156,7 @@ export const MoonVizChart = (props: Props) => {
         textposition: 'top left',
         //colorscale: 'YlGnBu',
         colorscale: 'Hot',
-        // reversescale: true,
+        reversescale: true,
         type: 'contour',
         name: name,
         showlegend: false,

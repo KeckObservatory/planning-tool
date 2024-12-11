@@ -86,8 +86,8 @@ export const SkyChartSelect = (props: SkyChartSelectProps) => {
                 value={skyChart}
                 onChange={handleSkyChartChange}
             >
-                <FormControlLabel value="Elevation" control={<Radio />} label="Elevation" />
                 <FormControlLabel value="Airmass" control={<Radio />} label="Airmass" />
+                <FormControlLabel value="Elevation" control={<Radio />} label="Elevation" />
                 <FormControlLabel value="Parallactic" control={<Radio />} label="Parallactic Angle" />
                 <FormControlLabel value="Lunar Angle" control={<Radio />} label="Lunar Angle" />
                 <FormControlLabel value="Azimuth" control={<Radio />} label="Azimuth" />
@@ -130,7 +130,7 @@ const TwoDView = ({ targets }: Props) => {
     const today = hidate(new Date(), context.config.timezone).toDate()
     const [obsdate, setObsdate] = React.useState<Date>(today)
     const [dome, setDome] = React.useState<Dome>("K2")
-    const [skyChart, setSkyChart] = React.useState<SkyChart>("Elevation")
+    const [skyChart, setSkyChart] = React.useState<SkyChart>("Airmass")
     const [showMoon, setShowMoon] = React.useState(true)
     const [showCurrLoc, setShowCurrLoc] = React.useState(true)
     const [showLimits, setShowLimits] = React.useState(true)
@@ -324,6 +324,16 @@ const TwoDView = ({ targets }: Props) => {
             <Grid2 size={{ xs: 8 }}>
                 {/* TODO: Work on Vertical Spacing */}
                 <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={1}>
+                    <DomeChart
+                        height={height}
+                        width={width}
+                        targetView={targetView}
+                        showMoon={showMoon}
+                        showCurrLoc={showCurrLoc}
+                        times={times}
+                        time={time}
+                        dome={dome}
+                    />
                     <SkyChart
                         height={height}
                         width={width}
@@ -334,16 +344,6 @@ const TwoDView = ({ targets }: Props) => {
                         showCurrLoc={showCurrLoc}
                         times={times}
                         suncalcTimes={suncalcTimes}
-                        time={time}
-                        dome={dome}
-                    />
-                    <DomeChart
-                        height={height}
-                        width={width}
-                        targetView={targetView}
-                        showMoon={showMoon}
-                        showCurrLoc={showCurrLoc}
-                        times={times}
                         time={time}
                         dome={dome}
                     />

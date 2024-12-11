@@ -43,3 +43,10 @@ export const MOON_RADIUS = .52 // degrees
 
 export const DEFAULT_OPACITY = 'FF' //Hex values appended to color
 export const NON_OBSERVABLE_OPACITY = '80' //Hex values appended to color
+export const AIRMASS_LIMIT = 5
+
+export const EXTINCTION_COEFF = 0.172 // extinction coefficient [mag/airmass]
+
+// dark zenith sky brightness taken from
+//https://www.cfht.hawaii.edu/Instruments/ObservatoryManual/CFHT_ObservatoryManual_(Sec_2).html
+export const DARK_ZENITH_SKY_BRIGHTNESS = 21.1 // mag/arcsec^2 

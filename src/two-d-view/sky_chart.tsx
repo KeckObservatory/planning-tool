@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import * as SunCalc from "suncalc";
-import { DEFAULT_OPACITY, NON_OBSERVABLE_OPACITY } from "./constants.tsx";
+import { AIRMASS_LIMIT, DEFAULT_OPACITY, NON_OBSERVABLE_OPACITY } from "./constants.tsx";
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -110,8 +110,8 @@ export const generateData = (tgtv: TargetView,
     return data
 }
 
-const make_trace = (data: Datum[], target_name: string): Plotly.Data => {
-    const lineColor = data[0].line_color + data[0].opacity //line color is same for all data points
+export const make_trace = (data: Datum[], target_name: string, lineColor?: string): Plotly.Data => {
+    const lc = lineColor ?? data[0].line_color + data[0].opacity //line color is same for all data points
     const trace: Plotly.Data = {
         x: data.map((datum: Datum) => datum.x),
         y: data.map((datum: Datum) => datum.y),
@@ -124,7 +124,7 @@ const make_trace = (data: Datum[], target_name: string): Plotly.Data => {
         },
         line: {
             width: 5,
-            color: lineColor,
+            color: lc,
         },
         textposition: 'top left',
         type: 'scatter',
@@ -133,6 +133,28 @@ const make_trace = (data: Datum[], target_name: string): Plotly.Data => {
         name: target_name
     }
     return trace
+}
+
+export const split_traces_into_blocked_visible = (data: Datum[]): [Datum[], Datum[]] => {
+    let blockedData: Datum[] = []
+    let visibleData: Datum[] = []
+    let prevOpac = data[0].opacity
+    data.forEach((datum: Datum, idx: number) => {
+        if (datum.opacity === NON_OBSERVABLE_OPACITY) {
+            blockedData.push(datum)
+            if (datum.opacity !== prevOpac) { //connect traces at boundary change
+                blockedData.push(data[idx - 1])
+            }
+        }
+        else if (datum.opacity === DEFAULT_OPACITY) {
+            visibleData.push(datum)
+            if (datum.opacity !== prevOpac) { //connect traces at boundary change
+                visibleData.push(data[idx - 1])
+            }
+        }
+        prevOpac = datum.opacity
+    })
+    return [blockedData, visibleData]
 }
 
 export const SkyChart = (props: Props) => {
@@ -145,31 +167,24 @@ export const SkyChart = (props: Props) => {
             chartType, context.config.date_time_format,
             lngLatEl, idx)
 
-        //TODO connect traces at boundaries
-        let blockedData: Datum[] = []
-        let visibleData: Datum[] = []
-        let prevOpac = data[0].opacity
-        data.forEach((datum: Datum, idx: number) => {
-            if (datum.opacity === NON_OBSERVABLE_OPACITY) {
-                blockedData.push(datum)
-                if (datum.opacity !== prevOpac) { //connect traces at boundary change
-                    blockedData.push(data[idx-1])
-                }
-            }
-            else if (datum.opacity === DEFAULT_OPACITY) {
-                visibleData.push(datum)
-                if (datum.opacity !== prevOpac) { //connect traces at boundary change
-                    visibleData.push(data[idx-1])
-                }
-            }
-            prevOpac = datum.opacity 
-        })
-
+        const [blockedData, visibleData] = split_traces_into_blocked_visible(data)
         const blockedTrace = make_trace(blockedData, tgtv.target_name ?? "Target")
         const visibleTrace = make_trace(visibleData, tgtv.target_name ?? "Target")
         traces.push(blockedTrace)
         traces.push(visibleTrace)
     })
+
+    //add elevation axis for airmass charts only
+    if (chartType.includes('Airmass') && targetView.length > 0) {
+        const data = generateData(targetView[0], 'Elevation', context.config.date_time_format, lngLatEl, 0)
+        const newTrace = make_trace(data, 'Elevation axis for airmass', '#00000000')
+        //@ts-ignore
+        newTrace.yaxis = 'y2'
+        //@ts-ignore
+        newTrace.showlegend = false
+        traces.push(newTrace)
+        console.log('newTrace', newTrace, 'traces', traces)
+    }
 
     //get curr marker
     let maxAirmass = 10;
@@ -377,10 +392,21 @@ export const SkyChart = (props: Props) => {
     else if (chartType === 'Elevation' && showLimits) {
         shapes.push(...el_shapes)
     }
+    // else if (chartType === 'Airmass' && showLimits) {
 
-    const yRange = chartType.includes('Airmass') ? [0, Math.min(30, maxAirmass)] : undefined
+    // }
 
-    const layout: Partial<Plotly.Layout> = {
+    const yRange = chartType.includes('Airmass') ? [0, Math.min(AIRMASS_LIMIT, maxAirmass)] : undefined
+    const y2Axis: Partial<Plotly.LayoutAxis> = {
+        title: 'Altitude [deg]',
+        gridwidth: 0,
+        overlaying: 'y',
+        side: 'right',
+        layer: 'above traces',
+        tickformat: '%H:%M',
+    }
+
+    let layout: Partial<Plotly.Layout> = {
         width,
         height,
         shapes,
@@ -405,6 +431,10 @@ export const SkyChart = (props: Props) => {
             t: 40,
             pad: 4
         },
+    }
+
+    if (chartType.includes('Airmass')) {
+        layout.yaxis2 = y2Axis
     }
 
     return (
