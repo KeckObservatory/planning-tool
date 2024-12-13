@@ -2,45 +2,47 @@ import * as React from 'react';
 import target_schema from './target_schema.json';
 import AddIcon from '@mui/icons-material/Add';
 import { TargetWizardButton } from './target_wizard';
-import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
+import { TargetVizButton } from './two-d-view/viz_dialog.tsx';
 import {
-    GridToolbarContainer,
-    GridToolbarExportContainer,
-    GridCsvExportMenuItem,
-    GridCsvExportOptions,
-    GridExportMenuItemProps,
-    useGridApiContext,
-    gridFilteredSortedRowIdsSelector,
-    gridVisibleColumnFieldsSelector,
-    GridApi,
-    GridRowsProp,
-    GridRowModel,
+  GridToolbarContainer,
+  GridToolbarExportContainer,
+  GridCsvExportMenuItem,
+  GridCsvExportOptions,
+  GridExportMenuItemProps,
+  useGridApiContext,
+  gridFilteredSortedRowIdsSelector,
+  gridVisibleColumnFieldsSelector,
+  GridApi,
+  GridRowsProp,
+  GridRowModel,
+  GridToolbar,
 } from '@mui/x-data-grid-pro';
 import { v4 as randomId } from 'uuid';
 import MenuItem from '@mui/material/MenuItem';
 import Button, { ButtonProps } from '@mui/material/Button';
 import { Target, useStateContext } from './App.tsx';
 import { submit_one_target } from './target_table.tsx';
+import { Stack } from '@mui/material';
 
 const getJson = (apiRef: React.MutableRefObject<GridApi>) => {
-    // Select rows and columns
-    const filteredSortedRowIds = gridFilteredSortedRowIdsSelector(apiRef);
-    const visibleColumnsField = gridVisibleColumnFieldsSelector(apiRef);
+  // Select rows and columns
+  const filteredSortedRowIds = gridFilteredSortedRowIdsSelector(apiRef);
+  const visibleColumnsField = gridVisibleColumnFieldsSelector(apiRef);
 
-    // Format the data. Here we only keep the value
-    let data: Record<string, any> = []
-    filteredSortedRowIds.forEach((id) => {
-        const row: Record<string, any> = {};
-        visibleColumnsField.forEach((field) => {
-            row[field] = apiRef.current.getCellParams(id, field).value;
-        });
-        //TODO: format types
-        delete row.__check__
-        if (Object.keys(row).length > 0) {
-          data.push(row)
-        }
+  // Format the data. Here we only keep the value
+  let data: Record<string, any> = []
+  filteredSortedRowIds.forEach((id) => {
+    const row: Record<string, any> = {};
+    visibleColumnsField.forEach((field) => {
+      row[field] = apiRef.current.getCellParams(id, field).value;
     });
-    return data
+    //TODO: format types
+    delete row.__check__
+    if (Object.keys(row).length > 0) {
+      data.push(row)
+    }
+  });
+  return data
 };
 
 const convert_target_to_targetlist_row = (target: Target) => {
@@ -48,13 +50,13 @@ const convert_target_to_targetlist_row = (target: Target) => {
   const name = target.target_name?.slice(0, 14).padEnd(15, " ")
   const ra = target.ra?.replaceAll(':', ' ')
   const dec = target.dec?.replaceAll(':', ' ')
-  const epoch = target.epoch ?? 'J2000' 
+  const epoch = target.epoch ?? 'J2000'
   let row = `${name} ${ra} ${dec} ${epoch}`
   const valid = target.target_name && target.ra && target.dec && target.epoch
   row = valid ? row : '# INVALID row: ' + row
   //optional params
-  row = target.g_mag? row + ` gmag=${target.g_mag}` : row
-  row = target.j_mag? row + ` jmag=${target.j_mag}` : row
+  row = target.g_mag ? row + ` gmag=${target.g_mag}` : row
+  row = target.j_mag ? row + ` jmag=${target.j_mag}` : row
   row = target.ra_offset ? row + ` raoffset=${target.ra_offset}` : row
   row = target.dec_offset ? row + ` decoffset=${target.dec_offset}` : row
   row = target.rotator_mode ? row + ` rotmode=${target.rotator_mode}` : row
@@ -65,73 +67,73 @@ const convert_target_to_targetlist_row = (target: Target) => {
 }
 
 const getStarlist = (apiRef: React.MutableRefObject<GridApi>) => {
-    // Select rows and columns
-    let rows = ""
-    apiRef.current.getRowModels().forEach((target) => {
-      const row = convert_target_to_targetlist_row(target as Target)
-      rows += row + '\n'
-    })
-    return rows
+  // Select rows and columns
+  let rows = ""
+  apiRef.current.getRowModels().forEach((target) => {
+    const row = convert_target_to_targetlist_row(target as Target)
+    rows += row + '\n'
+  })
+  return rows
 }
 
 const exportBlob = (blob: Blob, filename: string) => {
-    // Save the blob in a json file
-    const url = URL.createObjectURL(blob);
+  // Save the blob in a json file
+  const url = URL.createObjectURL(blob);
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
 
-    setTimeout(() => {
-        URL.revokeObjectURL(url);
-    });
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  });
 };
 
 function StarListExportMenu(props: GridExportMenuItemProps<{}>) {
-    const apiRef = useGridApiContext();
+  const apiRef = useGridApiContext();
 
-    const { hideMenu } = props;
+  const { hideMenu } = props;
 
-    return (
-        <MenuItem
-            onClick={() => {
-                const txt = getStarlist(apiRef);
-                const blob = new Blob([txt], {
-                    type: 'text/json',
-                });
-                exportBlob(blob, 'starlist.txt');
-                // Hide the export menu after the export
-                hideMenu?.();
-            }}
-        >
-            Export Starlist Text File
-        </MenuItem>
-    );
+  return (
+    <MenuItem
+      onClick={() => {
+        const txt = getStarlist(apiRef);
+        const blob = new Blob([txt], {
+          type: 'text/json',
+        });
+        exportBlob(blob, 'starlist.txt');
+        // Hide the export menu after the export
+        hideMenu?.();
+      }}
+    >
+      Export Starlist Text File
+    </MenuItem>
+  );
 }
 
 
 function JsonExportMenuItem(props: GridExportMenuItemProps<{}>) {
-    const apiRef = useGridApiContext();
+  const apiRef = useGridApiContext();
 
-    const { hideMenu } = props;
+  const { hideMenu } = props;
 
-    return (
-        <MenuItem
-            onClick={() => {
-                const json = getJson(apiRef);
-                const blob = new Blob([JSON.stringify(json, null, 2)], {
-                    type: 'text/json',
-                });
-                exportBlob(blob, 'targets.json');
+  return (
+    <MenuItem
+      onClick={() => {
+        const json = getJson(apiRef);
+        const blob = new Blob([JSON.stringify(json, null, 2)], {
+          type: 'text/json',
+        });
+        exportBlob(blob, 'targets.json');
 
-                // Hide the export menu after the export
-                hideMenu?.();
-            }}
-        >
-            Export JSON
-        </MenuItem>
-    );
+        // Hide the export menu after the export
+        hideMenu?.();
+      }}
+    >
+      Export JSON
+    </MenuItem>
+  );
 }
 
 
@@ -142,7 +144,7 @@ interface ExportButtonProps extends ButtonProps {
 function CustomExportButton(props: ExportButtonProps) {
   return (
     <GridToolbarExportContainer {...props}>
-      <GridCsvExportMenuItem options={props.csvOptions} /> 
+      <GridCsvExportMenuItem options={props.csvOptions} />
       <JsonExportMenuItem />
       <StarListExportMenu />
     </GridToolbarExportContainer>
@@ -193,17 +195,29 @@ export function EditToolbar(props: EditToolbarProps) {
     });
   };
 
+  const targetNames = props.selectedTargets ? 
+  props.selectedTargets.map((t: Target) => t.target_name && t._id) as string[] :
+  context.targets.map((t: Target) => t.target_name && t._id) as string[]
+
+
+  const targetName = targetNames.length > 0 ? targetNames[0] : "" 
+
   return (
-    <GridToolbarContainer sx={{ justifyContent: 'center' }}>
-      <Button color="primary" startIcon={<AddIcon />} onClick={handleAddTarget}>
-        Add Target
-      </Button>
-      <ViewTargetsDialogButton targets={props.selectedTargets} />
-      <CustomExportButton csvOptions={csvOptions}/>
-      {/* <GridToolbar
-        csvOptions={csvOptions}
-      /> */}
-      <TargetWizardButton />
+    // <GridToolbarContainer sx={{ justifyContent: 'center' }}>
+    <GridToolbarContainer sx={{ justifyContent: 'space-between' }}>
+      <Stack justifyContent={'left'} direction="row" spacing={0}>
+        <Button color="primary" startIcon={<AddIcon />} onClick={handleAddTarget}>
+          Add Target
+        </Button>
+        {/* <ViewTargetsDialogButton targets={props.selectedTargets} /> */}
+        <TargetVizButton targetName={ targetName } targetNames={ targetNames } />
+        <CustomExportButton csvOptions={csvOptions} />
+        <TargetWizardButton />
+      </Stack>
+      <GridToolbar
+        printOptions={{disableToolbarButton: true }}
+        csvOptions={{disableToolbarButton: true }}
+      />
     </GridToolbarContainer>
   );
 }

@@ -27,7 +27,7 @@ import SimbadButton from './simbad_button';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
 import { Target, useSnackbarContext, useStateContext } from './App.tsx';
 import TargetEditDialogButton, { format_tags, format_edit_entry, PropertyProps, rowSetter, TargetProps } from './target_edit_dialog.tsx';
-import { TargetVizButton } from './two-d-view/viz_dialog.tsx';
+import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 import { format_target_property } from './upload_targets_dialog.tsx';
 
@@ -261,10 +261,11 @@ export default function TargetTable() {
 
     return [
       <SimbadButton hasSimbad={hasSimbad} target={editTarget} setTarget={setEditTarget} />,
-      <TargetVizButton
-        targetName={editTarget.target_name ?? editTarget._id}
-        targetNames={targetNames}
-      />,
+      <ViewTargetsDialogButton targets={[editTarget]} />,
+      // <TargetVizButton
+      //   targetName={editTarget.target_name ?? editTarget._id}
+      //   targetNames={targetNames}
+      // />,
       <ValidationDialogButton errors={errors} target={editTarget} />,
       <TargetEditDialogButton
         target={editTarget}
@@ -332,7 +333,7 @@ export default function TargetTable() {
                 processRowUpdate,
                 setRowModesModel,
                 obsid: context.obsid, //TODO: allow admin to edit obsid
-                csvOptions: { fields: csvExportColumns, allColumns: true, fileName: `MyTargets` },
+                csvOptions: { disableToolbarButton: true, fields: csvExportColumns, allColumns: true, fileName: `MyTargets` },
                 selectedTargets: rowSelectionModel.map((id) => {
                   return rows.find((row) => row._id === id)
                 })

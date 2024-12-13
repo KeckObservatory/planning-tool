@@ -11,7 +11,7 @@ export interface Props {
     target: Target
     setTarget: Function
     hasSimbad: boolean
-    label: boolean
+    label?: boolean
 }
 
 export interface SimbadTargetData {
