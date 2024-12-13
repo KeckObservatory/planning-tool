@@ -64,7 +64,8 @@ const convert_target_to_targetlist_row = (target: Target) => {
   row = target.telescope_wrap ? row + ` wrap=${target.telescope_wrap}` : row
   //comment goes before the row
   row = target.comment ? `# ${name} comment: ${target.comment}\n` + row : row
-  row = target.tags ? `# ${name} tags: ${target.tags.join(', ')}\n` + row : row
+  const tags = target.tags ?? []
+  row = tags ? `# ${name} tags: ${tags.join(', ')}\n` + row : row
   return row
 }
 
