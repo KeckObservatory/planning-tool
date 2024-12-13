@@ -37,6 +37,7 @@ function ViewTargetsDialog(props: VTDProps) {
 
 interface Props {
   targets: Target[];
+  color?: 'inherit' | 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
 }
 
 export default function ViewTargetsDialogButton(props: Props) {
@@ -53,7 +54,7 @@ export default function ViewTargetsDialogButton(props: Props) {
   return (
     <>
       <Tooltip title="Display charts of selected target">
-        <IconButton aria-label="help" onClick={handleClickOpen}>
+        <IconButton aria-label="help" color={props.color ?? 'default'} onClick={handleClickOpen}>
           <MultilineChartIcon />
         </IconButton>
       </Tooltip>
