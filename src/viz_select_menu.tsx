@@ -1,7 +1,8 @@
 import * as React from 'react';
 import Button from '@mui/material/Button';
-import Menu from '@mui/material/Menu';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import Box from '@mui/material/Box';
 
 interface Props {
     vizType: VizChart
@@ -26,39 +27,24 @@ export const visibility_chart_options: VizChart[] = [
 ]
 
 export const VizSelectMenu = (props: Props) => {
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const open = Boolean(anchorEl);
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
+
+
+
+    const handleChange = (event: SelectChangeEvent) => {
+        props.setVizType(event.target.value as VizChart);
+    }
 
     return (
-        <div>
-            <Button
-                id="basic-button"
-                aria-controls={open ? 'basic-menu' : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? 'true' : undefined}
-                onClick={handleClick}
-            >
-                {props.vizType} 
-            </Button>
-            <Menu
-                id="basic-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-                MenuListProps={{
-                    'aria-labelledby': 'basic-button',
-                }}
+        <Box sx={{midWidth: 200}}>
+            <Select
+                id="viz-select-menu"
+                defaultValue={props.vizType}
+                onChange={handleChange}
             >
                 {visibility_chart_options.map((option: VizChart) => {
-                    return <MenuItem onClick={() => {props.setVizType(option); handleClose()}}>{option}</MenuItem>
+                    return <MenuItem value={option}>{option}</MenuItem>
                 })}
-            </Menu>
-        </div>
+            </Select>
+        </Box>
     );
 }
