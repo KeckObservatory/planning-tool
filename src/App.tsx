@@ -119,7 +119,7 @@ interface ConfigFile {
   tel_lat_lng_el: { [key: string]: LngLatEl }
 }
 
-interface State {
+export interface State {
   username: string;
   obsid: number;
   is_admin: boolean;

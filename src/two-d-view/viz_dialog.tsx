@@ -17,6 +17,7 @@ import { air_mass, get_day_times, get_moon_position, get_suncalc_times, ra_dec_t
 import { ROUND_MINUTES, SEMESTER_RANGES } from './constants';
 import { MoonVizChart } from './moon_viz_chart';
 import { DialogComponent } from '../dialog_component';
+import { VizChart, VizSelectMenu } from '../viz_select_menu';
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -146,6 +147,7 @@ export const VizDialog = (props: VizDialogProps) => {
     const [dome, setDome] = useState<Dome>("K2")
     const default_semester = get_curr_semester(new Date())
     const [semester, setSemester] = useQueryParam('semester', withDefault(StringParam, default_semester))
+    const [vizType, setVizType] = useState<VizChart>("Target Visibility")
     const context = useStateContext()
     const targetContext = useTargetContext()
     let initTarget = targetContext.targets.find((t: Target) => t.target_name === props.targetName || t._id === props.targetName)
@@ -244,14 +246,16 @@ export const VizDialog = (props: VizDialogProps) => {
                         renderInput={(params) => <TextField {...params} label={'Selected Target'} />}
                     />
                 </Tooltip>
+                <VizSelectMenu vizType={vizType} setVizType={setVizType} />
             </Stack>
-            {target && <TargetVizChart targetViz={targetViz} />}
-            {target && <MoonVizChart targetViz={targetViz} />}
+            {vizType === "Target Visibility" ? <TargetVizChart targetViz={targetViz} />
+                : <MoonVizChart targetViz={targetViz} vizType={vizType} />
+            }
         </Stack>
     )
 
     return (
-        <DialogComponent 
+        <DialogComponent
             open={props.open}
             handleClose={props.handleClose}
             titleContent={dialogTitle}

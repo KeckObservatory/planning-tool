@@ -2,29 +2,42 @@ import { DayViz, TargetViz, VizRow } from "./viz_dialog";
 import Plot from "react-plotly.js";
 import { useStateContext } from "../App";
 import dayjs from "dayjs";
+import { State } from "../App";
 import { cosd, lunar_angle, r2d, sind } from "./sky_view_util";
 import { reason_to_color_mapping, create_dawn_dusk_traces, date_normalize } from "./target_viz_chart";
 import { DARK_ZENITH_SKY_BRIGHTNESS, EXTINCTION_COEFF, MOON_RADIUS } from "./constants";
-
+import { VizChart } from "../viz_select_menu";
 
 interface Props {
     targetViz: TargetViz
+    vizType: VizChart 
+}
+
+const rayleigh_scattering = (rho: number) => {
+    // Krisciunas and Schaefer 1991 eq 18, 19
+    const reyleigh_constant = Math.pow(10, 5.36) // ~2.27e5
+    return reyleigh_constant * (1.06 + cosd(rho) ** 2)
+}
+
+const mei_scattering = (rho: number) => {
+    // Krisciunas and Schaefer 1991 eq 18, 19
+    const mei_constant = 6.2e7 //used for small separation angles
+    return rho > 10 ? Math.pow(10, 6.15 - rho / 40) : mei_constant / (rho ** 2)
 }
 
 const scattering_equation = (rho: number) => {
     // Krisciunas and Schaefer 1991 eq 18, 19
-    const reyleigh_constant = Math.pow(10, 5.36) // ~2.27e5
-    const rayleigh_scattering =  reyleigh_constant * (1.06 + cosd(rho) ** 2)
-    const mei_constant = 6.2e7 //used for small separation angles
-    const mei_scattering = rho > 10 ? Math.pow(10, 6.15 - rho / 40) : mei_constant * Math.pow(rho, -2)
-    const scatter = rayleigh_scattering + mei_scattering
+    const meiScattering = mei_scattering(rho)
+    const rayleighScattering = rayleigh_scattering(rho)
+    const scatter = rayleighScattering + meiScattering
     return scatter 
 }
 
 const moon_illuminance = (phase_angle_moon: number) => {
+    // Moon magnitude as an equation of phase Allen 1976 p. 144
+    const mag = 3.84 + 0.026 * Math.abs(phase_angle_moon) + 4e-9 * (phase_angle_moon ** 4)
     // Krisciunas and Schaefer 1991 eq 20
-    const exponent = -0.4 * (3.84 + 0.026 * Math.abs(phase_angle_moon) + 4e-9 * Math.pow(phase_angle_moon, 4))
-    return Math.pow(10, exponent)
+    return Math.pow(10, -0.4 * mag)
 }
 
 // const moon_brightness_bak = (mag: number) => {
@@ -79,16 +92,16 @@ const delta_v_mag = (rho: number, zenith_moon: number, zenith_object: number, ph
     return -2.5 * Math.log10( ( B_moon + B_0) / B_0 )
 }
 
-export const MoonVizChart = (props: Props) => {
-    const { targetViz } = props
 
-    const context = useStateContext()
+export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart: VizChart) => {
     let text: string[] = []
     let y: Date[] = []
     let z: number[] = []
     let x: Date[] = []
     let color: string[] = []
     const lngLatEl = context.config.tel_lat_lng_el.keck
+    let units = '[]'
+    const reverseAxis = [ 'Moon Brightness', 'Lunar Angle', 'Lunar Phase'].includes(vizChart)
     targetViz.semester_visibility.forEach((dayViz: DayViz) => {
         if (!targetViz.ra_deg || !targetViz.dec_deg) {
             return
@@ -97,7 +110,6 @@ export const MoonVizChart = (props: Props) => {
             const [ ra, dec ]= [targetViz.ra_deg as number, targetViz.dec_deg as number]
             const lunarAngle = lunar_angle(ra, dec, viz.datetime, lngLatEl, viz.moon_position,
             )
-
             const zenith_moon = 90 - viz.moon_position.altitude
             const zenith_object = 90 - viz.alt
             const phase_angle_moon = r2d(viz.moon_illumination.angle)
@@ -116,21 +128,62 @@ export const MoonVizChart = (props: Props) => {
                 console.log('lunarAngle eclipse', lunarAngle)
                 txt += `<br>Moon Eclipses Target`
             }
-
             color.push(reason_to_color_mapping(viz.reasons))
             const daytime = date_normalize(viz.datetime)
+            let datum: number 
+            switch (vizChart) {
+                case 'Moon Brightness':
+                    datum = moonBrightness
+                    units = '[vmag/arcsec^2]'
+                    break
+                case 'Lunar Angle':
+                    datum = lunarAngle
+                    units = '[degrees]'
+                    break
+                case 'Lunar Phase':
+                    datum = Math.abs(phase_angle_moon)
+                    units = '[|degrees|]'
+                    break
+                case 'rayleigh_scattering':
+                    datum = Math.log10(rayleigh_scattering(lunarAngle))
+                    units = "log10"
+                    break
+                case 'mei_scattering':
+                    datum = Math.log10(mei_scattering(lunarAngle))
+                    units = "log10"
+                    break
+                case 'scattering_equation':
+                    datum = Math.log10(scattering_equation(lunarAngle))
+                    units = "log10"
+                    break
+                case 'moon_illuminance':
+                    //TODO: verify that this is correct
+                    datum = moon_illuminance(phase_angle_moon)
+                    break
+                case 'target_pathlength':
+                    datum = optical_pathlength(zenith_object)
+                    break
+                case 'moon_pathlength':
+                    datum = optical_pathlength(zenith_moon)
+                    break
+                case 'dvd_moon':
+                    datum = differentical_volume_decay(optical_pathlength(zenith_moon))
+                    break
+                case 'dvd_object':
+                    datum = differentical_volume_decay(optical_pathlength(zenith_object))
+                    break
+                default:
+                    datum = moonBrightness
+                    units = '[vmag/arcsec^2]'
+                    break
+            }
             y.push(daytime)
-            // z.push(moonbrightness)
-            //z.push(Math.log(moonbrightness))
-            // z.push(moonbrightness/NORMALIZED_MOON_brightness)
-            z.push(moonBrightness)
-            //z.push(Math.abs(lunarAngle))
+            z.push(datum)
             text.push(txt)
         })
         const ydate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
         const xvals = Array.from({ length: dayViz.visibility.length }, () => ydate)
         x = [...x, ...xvals]
-
     })
 
     let name =  targetViz.target_name ?? 'Target'
@@ -148,7 +201,7 @@ export const MoonVizChart = (props: Props) => {
         },
         colorbar: {
             x: 1.05,
-            title: '[vmag/arcsec^2]',
+            title: units,
         },
         //@ts-ignore
         // coloraxis: 'coloraxis',
@@ -156,7 +209,7 @@ export const MoonVizChart = (props: Props) => {
         textposition: 'top left',
         //colorscale: 'YlGnBu',
         colorscale: 'Hot',
-        reversescale: true,
+        reversescale: reverseAxis,
         type: 'contour',
         name: name,
         showlegend: false,
@@ -213,6 +266,14 @@ export const MoonVizChart = (props: Props) => {
         },
         // hovermode: "closest",
     }
+    return { traces, layout }
+}
+
+export const MoonVizChart = (props: Props) => {
+
+    const context = useStateContext()
+    const { traces, layout } = make_contour_plot(context, props.targetViz, props.vizType)
+
 
     return (
         <Plot
