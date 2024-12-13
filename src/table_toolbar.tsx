@@ -63,7 +63,8 @@ const convert_target_to_targetlist_row = (target: Target) => {
   row = target.rotator_mode ? row + ` rotmode=${target.rotator_mode}` : row
   row = target.telescope_wrap ? row + ` wrap=${target.telescope_wrap}` : row
   //comment goes before the row
-  row = target.comment ? `# ${target.comment}\n` + row : row
+  row = target.comment ? `# ${name} comment: ${target.comment}\n` + row : row
+  row = target.tags ? `# ${name} tags: ${target.tags.join(', ')}\n` + row : row
   return row
 }
 
