@@ -110,7 +110,7 @@ export const TargetVizButton = (props: ButtonProps) => {
     return (
         <>
             <Tooltip title={`Click to view target visibility for ${targetName}`}>
-                <IconButton onClick={handleClickOpen}>
+                <IconButton color="primary" onClick={handleClickOpen}>
                     <VisibilityIcon />
                 </IconButton>
             </Tooltip>
