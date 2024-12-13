@@ -6,7 +6,7 @@ import { DomeSelect, Dome } from "./two_d_view";
 import { StringParam, useQueryParam, withDefault } from 'use-query-params';
 import { useTargetContext } from '../target_table';
 import { Target, useStateContext } from '../App';
-import { Autocomplete, Dialog, DialogContent, DialogTitle, Stack, TextField } from '@mui/material';
+import { Autocomplete, Stack, TextField } from '@mui/material';
 import { alt_az_observable, TargetVizChart } from './target_viz_chart';
 import dayjs, { Dayjs, ManipulateType } from 'dayjs';
 import utc from 'dayjs/plugin/utc'

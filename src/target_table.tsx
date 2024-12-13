@@ -205,8 +205,6 @@ export default function TargetTable() {
     return validate.errors ?? []
   }
 
-  const targetNames = rows.map((row) => row.target_name ?? 'undefined target name')
-
   const ActionsCell = (params: GridRowParams<Target>) => {
     const { id, row } = params;
     const [editTarget, setEditTarget] = React.useState<Target>(row);

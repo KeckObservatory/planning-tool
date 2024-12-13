@@ -13,7 +13,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import SimbadButton from './simbad_button';
 import target_schema from './target_schema.json'
-import { Magnitude, Status, Target } from './App';
+import { Status, Target } from './App';
 import { MuiChipsInput } from 'mui-chips-input';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util';
 
