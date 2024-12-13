@@ -53,7 +53,7 @@ export default function ViewTargetsDialogButton(props: Props) {
 
   return (
     <>
-      <Tooltip title="Display charts of selected target">
+      <Tooltip title="Display charts of selected target(s)">
         <IconButton aria-label="help" color={props.color ?? 'default'} onClick={handleClickOpen}>
           <MultilineChartIcon />
         </IconButton>

@@ -1,5 +1,3 @@
-import * as React from 'react';
-import Button from '@mui/material/Button';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Box from '@mui/material/Box';
@@ -27,8 +25,6 @@ export const visibility_chart_options: VizChart[] = [
 ]
 
 export const VizSelectMenu = (props: Props) => {
-
-
 
     const handleChange = (event: SelectChangeEvent) => {
         props.setVizType(event.target.value as VizChart);
