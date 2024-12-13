@@ -195,10 +195,9 @@ export function EditToolbar(props: EditToolbarProps) {
     });
   };
 
-  const targetNames = props.selectedTargets ? 
+  const targetNames = props.selectedTargets.length > 0 ? 
   props.selectedTargets.map((t: Target) => t.target_name && t._id) as string[] :
   context.targets.map((t: Target) => t.target_name && t._id) as string[]
-
 
   const targetName = targetNames.length > 0 ? targetNames[0] : "" 
 
