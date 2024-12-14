@@ -232,7 +232,7 @@ export const VizDialog = (props: VizDialogProps) => {
                 flexWrap: 'wrap',
             }}
             direction='column'>
-            <Stack direction='row'>
+            <Stack direction='row' spacing={1}>
                 <SemesterSelect semester={semester} setSemester={setSemester} />
                 <DomeSelect dome={dome} setDome={setDome} />
                 <Tooltip title={'Target'}>

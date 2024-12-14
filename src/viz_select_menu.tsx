@@ -1,17 +1,18 @@
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import Box from '@mui/material/Box';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 
 interface Props {
     vizType: VizChart
     setVizType: Function
 }
 
-export type VizChart = "Moon visibility" | "Target Visibility" | "Moon Brightness" | "Lunar Angle" | "Lunar Phase" | string 
+export type VizChart = "Moon visibility" | "Target Visibility" | "Moon Brightness" | "Lunar Angle" | "Lunar Phase" | string
 
 export const visibility_chart_options: VizChart[] = [
     "Target Visibility",
-    "Moon Brightness", 
+    "Moon Brightness",
     "Lunar Angle",
     "Lunar Phase",
     // "rayleigh_scattering",
@@ -31,10 +32,10 @@ export const VizSelectMenu = (props: Props) => {
     }
 
     return (
-        <Box sx={{midWidth: 200}}>
+        <FormControl sx={{ m: 0, minWidth: 200 }}>
+            <InputLabel id="viz-select-label">Chart Type</InputLabel>
             <Select
                 id="viz-select-menu"
-                label="Chart Type"
                 defaultValue={props.vizType}
                 onChange={handleChange}
             >
@@ -42,6 +43,6 @@ export const VizSelectMenu = (props: Props) => {
                     return <MenuItem value={option}>{option}</MenuItem>
                 })}
             </Select>
-        </Box>
+        </FormControl>
     );
 }

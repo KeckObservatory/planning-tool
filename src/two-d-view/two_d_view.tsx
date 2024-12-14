@@ -289,7 +289,7 @@ const TwoDView = ({ targets }: Props) => {
                 </>
             </Grid2>
             <Grid2 size={{ xs: 4 }}>
-                <Stack sx={{}} width="100%" direction="column" justifyContent='center' spacing={0}>
+                <Stack width="100%" direction="column" justifyContent='center' spacing={1}>
                     <Tooltip placement="top" title="Select instrument field of view">
                         <Autocomplete
                             disablePortal
