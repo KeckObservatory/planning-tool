@@ -210,15 +210,15 @@ export function EditToolbar(props: EditToolbarProps) {
   return (
     // <GridToolbarContainer sx={{ justifyContent: 'center' }}>
     <GridToolbarContainer sx={{ justifyContent: 'space-between' }}>
-      <Stack justifyContent={'left'} direction="row" spacing={0}>
+      <Stack justifyContent={'left'} direction="row" spacing={1}>
         <Button color="primary" startIcon={<AddIcon />} onClick={handleAddTarget}>
           Add Target
         </Button>
         <ViewTargetsDialogButton targets={props.selectedTargets} color='primary'/>
         <TargetVizButton targetName={ targetName } targetNames={ targetNames } />
-        <CustomExportButton csvOptions={csvOptions} />
         <TargetWizardButton />
       </Stack>
+      <CustomExportButton csvOptions={csvOptions} />
       <GridToolbar
         printOptions={{disableToolbarButton: true }}
         csvOptions={{disableToolbarButton: true }}
