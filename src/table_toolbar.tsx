@@ -218,11 +218,13 @@ export function EditToolbar(props: EditToolbarProps) {
         <TargetVizButton targetName={ targetName } targetNames={ targetNames } />
         <TargetWizardButton />
       </Stack>
+      <Stack justifyContent={'right'} direction="row" spacing={1}>
       <CustomExportButton csvOptions={csvOptions} />
       <GridToolbar
         printOptions={{disableToolbarButton: true }}
         csvOptions={{disableToolbarButton: true }}
       />
+      </Stack>
     </GridToolbarContainer>
   );
 }
