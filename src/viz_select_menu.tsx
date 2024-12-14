@@ -34,6 +34,7 @@ export const VizSelectMenu = (props: Props) => {
         <Box sx={{midWidth: 200}}>
             <Select
                 id="viz-select-menu"
+                label="Chart Type"
                 defaultValue={props.vizType}
                 onChange={handleChange}
             >
