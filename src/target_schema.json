@@ -37,7 +37,7 @@
             "short_description": "Pointing Angle",
             "description": "Rotator Pointing Angle in degrees"
         },
-        "observer_id": {
+        "obsid": {
             "type": "number",
             "description": "Keck Observer ID",
             "not_editable_by_user": false
@@ -45,6 +45,11 @@
         "j_mag": {
             "type":  ["number", "string"],
             "description": "J Magnitude",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+        },
+        "v_mag": {
+            "type":  ["number", "string"],
+            "description": "V Magnitude",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "g_mag": {

@@ -206,7 +206,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
         setTarget((prev: Target) => {
             return rowSetter(prev, key, value)
         })
-
     }
 
     const input_label = (param: keyof Target, tooltip = false): string => {

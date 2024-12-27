@@ -203,7 +203,12 @@ function App() {
       }
       const config = await get_config()
       const username = `${userinfo.FirstName} ${userinfo.LastName}`;
-      const init_state = { config, username, obsid: userinfo.Id, is_admin: userinfo.is_admin ?? false }
+      const init_state = {
+        config,
+        username,
+        obsid: userinfo.Id ?? 1234,
+        is_admin: userinfo.is_admin ?? false
+      }
       setState(init_state)
       setTargets(init_targets)
     }

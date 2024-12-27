@@ -66,6 +66,7 @@ export const format_targets = (tgts: UploadedTarget[], targetProps: TargetProps)
     const fmtTgts = tgts.map((tgt) => {
         Object.entries(tgt).forEach(([key, value]) => {
             const props = targetProps[key]
+            if (!props) console.log('tgt', tgt) 
             const fmtValue = format_target_property(key as keyof Target, value, props)
             //@ts-ignore
             tgt[key] = fmtValue
@@ -92,12 +93,14 @@ interface StarListOptionalKeys {
 let starlistToKeyMapping = {
     'gmag': 'g_mag',
     'jmag': 'j_mag',
+    'vmag': 'v_mag',
     'epoch': 'epoch',
     'raoffset': 'ra_offset',
     'decoffset': 'dec_offset',
     'pmra': 'pm_ra',
     'pmdec': 'pm_dec',
     'rotmode': 'rotator_mode',
+    'rotdest': 'rotator_pa',
     'wrap': 'telescope_wrap',
     'dra': 'd_ra',
     'ddec': 'd_dec',
@@ -201,7 +204,6 @@ const parse_csv = (contents: string) => {
 
 const split_at = (index: number, str: string) => {
     const tabidx = str.lastIndexOf('\t')
-    console.log('tabidx', tabidx)
     if (tabidx > 0) { // tab(s) in target name
         console.log('targetName', str.slice(0, tabidx))
         const targetName = str.slice(0, tabidx).replaceAll('\t', ' ').padEnd(15, ' ')
@@ -218,26 +220,44 @@ const parse_txt = (contents: string, obsid: number) => {
         if (row === '' || !row) return
         if (row.startsWith('#')) return
         const [target_name, tail] = split_at(15, row)
-        const [rah, ram, ras, dech, decm, decs, epoch, ...opts] = tail.replace(/\s\s+/g, ' ').split(' ')
+        let [rah, ram, ras, dech, decm, decs, epoch, ...opts] = tail.replace(/\s\s+/g, ' ').split(' ')
+        ras = ras.split('.')[0].padStart(2, '0') + '.' + ras.split('.')[1]
+        decs = decs.split('.')[0].padStart(2, '0') + '.' + decs.split('.')[1]
         const ra = `${rah.padStart(2, '0')}:${ram.padStart(2, '0')}:${ras}`
         const dec = `${dech.padStart(2, '0')}:${decm.padStart(2, '0')}:${decs}`
         const coordValid = ra.match(targetProps.ra.pattern as string) && dec.match(targetProps.dec.pattern as string)
-        console.log('ra', ra, 'dec', dec, 'coordValid', coordValid)
         if (!coordValid) {
             console.warn('ra', ra, 'dec', dec)
             return
         }
+        // ignore anything after # in the row
+        //inline comments are added to comments field
+        const inlineComment = opts.findIndex((opt) => opt.startsWith('#'))
+        let comment: string = ''
+        if (inlineComment > 0 && opts.length>0) {
+            opts = opts.slice(0, inlineComment)
+            comment = opts.slice(inlineComment).join(' ')
+        }
+        opts = opts.find((opt) => opt.startsWith('#')) ? opts.slice(0, opts.findIndex((opt) => opt.startsWith('#'))) : opts
         let tgt: UploadedTarget = {
             _id: randomId(),
-            target_name,
+            target_name: target_name.trimEnd(),
             obsid: String(obsid),
             ra,
             dec,
-            epoch
+            epoch,
         };
+        if (comment.length>0) {
+            tgt.comment = comment
+        }
         opts.forEach((opt) => {
+            if (!opt.includes('=')) return
             const [key, value] = opt.split('=')
             const tgtKey = starlistToKeyMapping[key as keyof StarListOptionalKeys] as keyof Target
+            if (!tgtKey) {
+                console.warn('invalid key', key, value, opts, row)
+                return
+            }
             //@ts-ignore
             tgt[tgtKey] = value
         })
