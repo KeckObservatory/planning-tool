@@ -132,7 +132,7 @@ export const make_trace = (data: Datum[], target_name: string, lineColor?: strin
         textposition: 'top left',
         type: 'scatter',
         mode: 'lines+markers',
-        showlegend: data[0].opacity === DEFAULT_OPACITY,
+        showlegend: data ? data[0].opacity === DEFAULT_OPACITY: false,
         name: target_name
     }
     return trace
