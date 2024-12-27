@@ -16,6 +16,7 @@ import { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import { MoonMarker } from './moon_marker.tsx';
 import * as SunCalc from "suncalc";
 import { FOVlink, STEP_SIZE } from './constants.tsx';
+import { QueryParamConfig, StringParam, useQueryParam, withDefault } from 'use-query-params';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -125,11 +126,13 @@ export const hidate = (date: Date, timezone: string) => {
 }
 
 
+export declare const DomeParam: QueryParamConfig<Dome | null | undefined>;
+
 const TwoDView = ({ targets }: Props) => {
     const context = useStateContext()
     const today = hidate(new Date(), context.config.timezone).toDate()
     const [obsdate, setObsdate] = React.useState<Date>(today)
-    const [dome, setDome] = React.useState<Dome>("K2")
+    const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'K2' as Dome))
     const [skyChart, setSkyChart] = React.useState<SkyChart>("Airmass")
     const [showMoon, setShowMoon] = React.useState(true)
     const [showCurrLoc, setShowCurrLoc] = React.useState(true)
@@ -142,7 +145,8 @@ const TwoDView = ({ targets }: Props) => {
     const [time, setTime] = React.useState(suncalcTimes.nadir)
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
     const [fovs, setFOVs] = React.useState<string[]>([])
-    const [instrumentFOV, setInstrumentFOV] = React.useState('MOSFIRE')
+    //const [instrumentFOV, setInstrumentFOV] = React.useState('MOSFIRE')
+    const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam,'MOSFIRE'))
 
     React.useEffect(() => {
         const fun = async () => {

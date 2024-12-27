@@ -144,7 +144,7 @@ export const SemesterSelect = (props: SemesterSelectProps) => {
 
 
 export const VizDialog = (props: VizDialogProps) => {
-    const [dome, setDome] = useState<Dome>("K2")
+    const [dome, setDome] = useQueryParam<Dome>("K2")
     const default_semester = get_curr_semester(new Date())
     const [semester, setSemester] = useQueryParam('semester', withDefault(StringParam, default_semester))
     const [vizType, setVizType] = useState<VizChart>("Target Visibility")
