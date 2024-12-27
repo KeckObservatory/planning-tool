@@ -16,7 +16,8 @@ import { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import { MoonMarker } from './moon_marker.tsx';
 import * as SunCalc from "suncalc";
 import { FOVlink, STEP_SIZE } from './constants.tsx';
-import { QueryParamConfig, StringParam, useQueryParam, withDefault } from 'use-query-params';
+import { createEnumParam, QueryParamConfig, StringParam, useQueryParam, withDefault } from 'use-query-params';
+import { encode } from 'punycode';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -125,8 +126,7 @@ export const hidate = (date: Date, timezone: string) => {
     return dayjs(date).tz(timezone)
 }
 
-
-export declare const DomeParam: QueryParamConfig<Dome | null | undefined>;
+export const DomeParam = createEnumParam<Dome>(['K1', 'K2'])
 
 const TwoDView = ({ targets }: Props) => {
     const context = useStateContext()
