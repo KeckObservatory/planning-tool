@@ -143,7 +143,7 @@ export const make_trace = (data: Datum[], target_name: string, lineColor?: strin
 export const split_traces_into_blocked_visible = (data: Datum[]): [Datum[], Datum[]] => {
     let blockedData: Datum[] = []
     let visibleData: Datum[] = []
-    let prevOpac = data[0].opacity
+    let prevOpac = data.at(0)?.opacity ?? DEFAULT_OPACITY
     data.forEach((datum: Datum, idx: number) => {
         if (datum.opacity === NON_OBSERVABLE_OPACITY) {
             blockedData.push(datum)
