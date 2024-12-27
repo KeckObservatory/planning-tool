@@ -16,8 +16,7 @@ import { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import { MoonMarker } from './moon_marker.tsx';
 import * as SunCalc from "suncalc";
 import { FOVlink, STEP_SIZE } from './constants.tsx';
-import { createEnumParam, QueryParamConfig, StringParam, useQueryParam, withDefault } from 'use-query-params';
-import { encode } from 'punycode';
+import { createEnumParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
