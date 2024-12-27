@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
-import { DomeSelect, Dome } from "./two_d_view";
+import { DomeSelect, Dome, DomeParam } from "./two_d_view";
 import { StringParam, useQueryParam, withDefault } from 'use-query-params';
 import { useTargetContext } from '../target_table';
 import { Target, useStateContext } from '../App';
@@ -144,7 +144,7 @@ export const SemesterSelect = (props: SemesterSelectProps) => {
 
 
 export const VizDialog = (props: VizDialogProps) => {
-    const [dome, setDome] = useQueryParam<Dome>("K2")
+    const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'K2' as Dome))
     const default_semester = get_curr_semester(new Date())
     const [semester, setSemester] = useQueryParam('semester', withDefault(StringParam, default_semester))
     const [vizType, setVizType] = useState<VizChart>("Target Visibility")
