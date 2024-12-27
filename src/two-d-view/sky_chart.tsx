@@ -112,9 +112,11 @@ export const generateData = (tgtv: TargetView,
 
 export const make_trace = (data: Datum[], target_name: string, lineColor?: string): Plotly.Data => {
     //line color is same for all data points
-    if (lineColor === undefined) {
-        lineColor = data ? data[0].line_color + data[0].opacity : 'black'
+    if (lineColor === undefined && data.length > 0) {
+        lineColor = data[0].line_color + data[0].opacity
     }
+
+    const showlegend = data.at(0) ? data[0].opacity === DEFAULT_OPACITY: false
     const trace: Plotly.Data = {
         x: data.map((datum: Datum) => datum.x),
         y: data.map((datum: Datum) => datum.y),
@@ -132,7 +134,7 @@ export const make_trace = (data: Datum[], target_name: string, lineColor?: strin
         textposition: 'top left',
         type: 'scatter',
         mode: 'lines+markers',
-        showlegend: data ? data[0].opacity === DEFAULT_OPACITY: false,
+        showlegend,
         name: target_name
     }
     return trace
