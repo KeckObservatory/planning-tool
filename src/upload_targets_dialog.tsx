@@ -8,6 +8,7 @@ import target_schema from './target_schema.json'
 import { v4 as randomId } from 'uuid';
 import { format_tags, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog';
 import { DialogComponent } from './dialog_component';
+import { ra_dec_to_deg } from './two-d-view/sky_view_util';
 
 interface Props {
     setTargets: Function
@@ -244,6 +245,8 @@ const parse_txt = (contents: string, obsid: number) => {
             target_name: target_name.trimEnd(),
             obsid: String(obsid),
             ra,
+            ra_deg: ra_dec_to_deg(ra),
+            dec_deg: ra_dec_to_deg(dec, true),
             dec,
             epoch,
         };
@@ -259,7 +262,7 @@ const parse_txt = (contents: string, obsid: number) => {
                 return
             }
             //@ts-ignore
-            tgt[tgtKey] = value
+            tgt[tgtKey] = value.toLowerCase()
         })
         tgts.push(tgt);
     });
@@ -267,7 +270,7 @@ const parse_txt = (contents: string, obsid: number) => {
 }
 
 interface UploadedTarget {
-    [key: string]: string
+    [key: string]: string | number
 }
 
 export function UploadComponent(props: UploadProps) {
