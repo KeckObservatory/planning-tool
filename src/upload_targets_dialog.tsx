@@ -102,6 +102,7 @@ let starlistToKeyMapping = {
     'pmdec': 'pm_dec',
     'rotmode': 'rotator_mode',
     'rotdest': 'rotator_pa',
+    'pa': 'rotator_pa',
     'wrap': 'telescope_wrap',
     'dra': 'd_ra',
     'ddec': 'd_dec',
@@ -221,7 +222,9 @@ const parse_txt = (contents: string, obsid: number) => {
         if (row === '' || !row) return
         if (row.startsWith('#')) return
         const [target_name, tail] = split_at(15, row)
-        let [rah, ram, ras, dech, decm, decs, epoch, ...opts] = tail.replace(/\s\s+/g, ' ').split(' ')
+        let [rah, ram, ras, dech, decm, decs, epoch, ...opts] = tail.trimStart().replace(/\s\s+/g, ' ').split(' ')
+        console.log(`tail:${tail}`, 'ras', ras, 'decs', decs)
+        console.log('rah', rah, 'ram', ram, 'ras', ras, 'dech', dech, 'decm', decm, 'decs', decs)
         ras = ras.split('.')[0].padStart(2, '0') + '.' + ras.split('.')[1]
         decs = decs.split('.')[0].padStart(2, '0') + '.' + decs.split('.')[1]
         const ra = `${rah.padStart(2, '0')}:${ram.padStart(2, '0')}:${ras}`
