@@ -324,6 +324,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                         <Tooltip title={input_label('target_name', true)}>
                             <TextField
                                 label={input_label('target_name')}
+                                focused={target.target_name ? true : false}
                                 id="target-name"
                                 value={target.target_name}
                                 sx={{ width: 200 }}
@@ -336,6 +337,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('ra')}
                                 id="ra"
+                                focused={target.ra? true : false}
                                 value={target.ra}
                                 sx={{ width: 150 }}
                                 onChange={(event) => handleTextChange('ra', event.target.value)}
@@ -345,6 +347,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('dec')}
                                 id="dec"
+                                focused={target.dec? true : false}
                                 value={target.dec}
                                 sx={{ width: 150 }}
                                 onChange={(event) => handleTextChange('dec', event.target.value)}
@@ -354,6 +357,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('ra_deg')}
                                 id="ra_deg"
+                                focused={target.ra_deg? true : false}
                                 value={target.ra_deg}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('ra_deg', event.target.value, true)}
@@ -363,6 +367,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('dec_deg')}
                                 id="dec_deg"
+                                focused={target.dec_deg? true : false}
                                 value={target.dec_deg}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('dec_deg', event.target.value)}
