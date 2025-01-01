@@ -379,6 +379,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('j_mag')}
                                 id="j-magnitude"
+                                focused={target.j_mag? true : false}
                                 value={target.j_mag}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('j_mag', event.target.value, true)}
@@ -388,6 +389,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('g_mag')}
                                 id="g-magnitude"
+                                focused={target.g_mag? true : false}
                                 value={target.g_mag}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('g_mag', event.target.value, true)}
@@ -399,6 +401,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('ra_offset')}
                                 id="ra_offset"
+                                focused={target.ra_offset? true : false}
                                 value={target.ra_offset}
                                 sx={{ width: 150 }}
                                 onChange={(event) => handleTextChange('ra_offset', event.target.value, true)}
@@ -408,6 +411,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('dec_offset')}
                                 id="dec_offset"
+                                focused={target.dec_offset? true : false}
                                 value={target.dec_offset}
                                 sx={{ width: 150 }}
                                 onChange={(event) => handleTextChange('dec_offset', event.target.value, true)}
@@ -456,6 +460,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('d_ra')}
                                 id="dra"
+                                focused={target.d_ra? true : false}
                                 value={target.d_ra}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('d_ra', event.target.value, true)}
@@ -465,6 +470,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('d_dec')}
                                 id="d_dec"
+                                focused={target.d_dec? true : false}
                                 value={target.d_dec}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('d_dec', event.target.value, true)}
@@ -474,6 +480,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('gaia_id')}
                                 id="gaia-id"
+                                focused={target.gaia_id? true : false}
                                 value={target.gaia_id}
                                 onChange={(event) => handleTextChange('gaia_id', event.target.value)}
                             />
@@ -482,6 +489,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('tic_id')}
                                 id="tic"
+                                focused={target.tic? true : false}
                                 value={target.tic}
                                 onChange={(event) => handleTextChange('tic_id', event.target.value)}
                             />
@@ -492,6 +500,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('pm_ra')}
                                 id="pm-ra"
+                                focused={target.pm_ra? true : false}
                                 value={target.pm_ra}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('pm_ra', event.target.value, true)}
@@ -501,6 +510,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('pm_dec')}
                                 id="pm-dec"
+                                focused={target.pm_dec? true : false}
                                 value={target.pm_dec}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('pm_dec', event.target.value, true)}
@@ -510,6 +520,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('epoch')}
                                 id="epoch"
+                                focused={target.epoch? true : false}
                                 value={target.epoch}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('epoch', event.target.value)}
