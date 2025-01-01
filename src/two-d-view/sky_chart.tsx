@@ -447,7 +447,7 @@ export const SkyChart = (props: Props) => {
         yaxis: {
             title: chartType.includes('Airmass') ? 'Airmass' : 'Degrees',
             range: yRange,
-            autorange: chartType.includes('Airmass') && 'reversed',
+            autorange: !chartType.includes('Airmass') ? true : 'reversed'
         },
         xaxis: {
             title: 'Time [Hr:Min]',
