@@ -339,7 +339,7 @@ export const SkyChart = (props: Props) => {
             yref: 'y',
             x0: 0,
             label: {
-                text: 'Elevation Limit',
+                text: 'Bottom Shutter Limit',
                 textposition: 'top center',
             },
             y0: context.config.tel_geometry.keck[dome].r1,
