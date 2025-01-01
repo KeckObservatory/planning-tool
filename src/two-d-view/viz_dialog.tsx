@@ -41,13 +41,15 @@ export interface DayViz extends GetTimesResult {
     astronomicalDusk: Date, // Sun is 18 degrees below the horizon
 }
 
+export type BlockReason = 'Deck Blocking' | 'Below Horizon' | 'Above Tracking Limits'
+
 export interface VizRow {
     datetime: Date
     alt: number
     az: number
     observable: boolean
     air_mass: number
-    reasons: string[]
+    reasons: BlockReason[]
     moon_illumination: GetMoonIlluminationResult
     moon_position: GetMoonPositionResult
 }

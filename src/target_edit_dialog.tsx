@@ -375,6 +375,26 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                         </Tooltip>
                     </Stack>
                     <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
+                        <Tooltip title={input_label('v_mag', true)}>
+                            <TextField
+                                label={input_label('v_mag')}
+                                id="v-magnitude"
+                                focused={target.v_mag? true : false}
+                                value={target.v_mag}
+                                sx={{ width: 125 }}
+                                onChange={(event) => handleTextChange('v_mag', event.target.value, true)}
+                            />
+                        </Tooltip>
+                        <Tooltip title={input_label('r_mag', true)}>
+                            <TextField
+                                label={input_label('r_mag')}
+                                id="r-magnitude"
+                                focused={target.r_mag? true : false}
+                                value={target.r_mag}
+                                sx={{ width: 125 }}
+                                onChange={(event) => handleTextChange('r_mag', event.target.value, true)}
+                            />
+                        </Tooltip>
                         <Tooltip title={input_label('j_mag', true)}>
                             <TextField
                                 label={input_label('j_mag')}

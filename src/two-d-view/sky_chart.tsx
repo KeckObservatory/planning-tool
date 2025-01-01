@@ -167,10 +167,14 @@ export const SkyChart = (props: Props) => {
     const context = useStateContext()
     let traces: Plotly.Data[] = []
     const lngLatEl = context.config.tel_lat_lng_el.keck
+    let deckBlocking = false
     targetView.forEach((tgtv: TargetView, idx: number) => {
         const data = generateData(tgtv,
             chartType, context.config.date_time_format,
             lngLatEl, idx)
+            if (tgtv.visibility.find((viz) => viz.reasons.includes('Deck Blocking'))) {
+                deckBlocking = true
+            }
 
         const [blockedData, visibleData] = split_traces_into_blocked_visible(data)
         const blockedTrace = make_trace(blockedData, tgtv.target_name ?? "Target")
@@ -350,6 +354,26 @@ export const SkyChart = (props: Props) => {
         },
     ]
 
+    const nasdeck_shapes: Partial<Plotly.Shape>[] = [{
+        type: 'rect',
+        xref: 'paper',
+        yref: 'y',
+        x0: 0,
+        label: {
+            text: 'Nasmuth Limit',
+            textposition: 'top center',
+        },
+        y0: context.config.tel_geometry.keck[dome].r3,
+        x1: 1,
+        y1: context.config.tel_geometry.keck[dome].r3,
+        fillcolor: '#eeeeee',
+        layer: 'above',
+        opacity: 0.5,
+        line: {
+            width: 1
+        }
+    }]
+
     const az_shapes: Partial<Plotly.Shape>[] = [
         {
             type: 'rect',
@@ -396,6 +420,9 @@ export const SkyChart = (props: Props) => {
     }
     else if (chartType === 'Elevation' && showLimits) {
         shapes.push(...el_shapes)
+        if (deckBlocking) {
+            shapes.push(...nasdeck_shapes)
+        }
     }
     // else if (chartType === 'Airmass' && showLimits) {
 
@@ -420,7 +447,7 @@ export const SkyChart = (props: Props) => {
         yaxis: {
             title: chartType.includes('Airmass') ? 'Airmass' : 'Degrees',
             range: yRange,
-            autorange: !chartType.includes('Airmass')
+            autorange: chartType.includes('Airmass') && 'reversed',
         },
         xaxis: {
             title: 'Time [Hr:Min]',

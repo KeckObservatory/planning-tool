@@ -9,7 +9,7 @@ import Plot from "react-plotly.js";
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
-import { DayViz, TargetViz, VizRow } from "./viz_dialog";
+import { BlockReason, DayViz, TargetViz, VizRow } from "./viz_dialog";
 import { air_mass } from "./sky_view_util";
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -19,6 +19,7 @@ interface Props{
     targetViz: TargetViz,
 }
 
+
 export const alt_az_observable = (alt: number, az: number, KG: GeoModel) => {
     const minDeckAz = KG.t2
     const maxDeckAz = KG.t3
@@ -26,7 +27,7 @@ export const alt_az_observable = (alt: number, az: number, KG: GeoModel) => {
     const deckAlt = KG.r3
     const trackLimit = KG.trackLimit
 
-    const reasons: Array<string> = []
+    const reasons: Array<BlockReason> = []
     //nasdeck is blocking the target?
     const targetOverlapsDeck = az >= minDeckAz && az <= maxDeckAz
     const targetBelowDeck = alt >= minAlt && alt <= deckAlt
@@ -228,6 +229,7 @@ export const TargetVizChart = (props: Props) => {
             txt += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`
             txt += `Visible for: ${dayViz.visible_hours.toFixed(2)} hours<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
+
 
             color.push(reason_to_color_mapping(viz.reasons))
             const daytime = date_normalize(viz.datetime)

@@ -45,6 +45,8 @@ export interface Target extends SimbadTargetData {
   _id: string,
   obsid: number,
   target_name?: string,
+  v_mag?: number,
+  r_mag?: number,
   ra_offset?: number,
   dec_offset?: number,
   rotator_mode?: RotatorMode,
