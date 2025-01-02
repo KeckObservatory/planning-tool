@@ -4,7 +4,7 @@ import Cookies from 'js-cookie'
 import { handleResponse, handleError, intResponse, intError } from './response.tsx';
 import { Target } from '../App.tsx';
 const SIMBAD_ADDR = "https://simbad.u-strasbg.fr/simbad/sim-id?NbIdent=1&submit=submit+id&output.format=ASCII&obj.bibsel=off&Ident="
-const BASE_URL = "/api/proposals"
+const BASE_URL = "/api/pToolTesting"
 
 
 export interface UserInfo {
