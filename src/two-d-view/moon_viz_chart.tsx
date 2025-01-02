@@ -125,7 +125,6 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
             txt += `Moon brightness: ${moonBrightness.toFixed(2)} [vmag/arcsec^2]<br>`
             txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
             if (eclipse) {
-                console.log('lunarAngle eclipse', lunarAngle)
                 txt += `<br>Moon Eclipses Target`
             }
             color.push(reason_to_color_mapping(viz.reasons))
@@ -203,11 +202,8 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
             x: 1.05,
             title: units,
         },
-        //@ts-ignore
-        // coloraxis: 'coloraxis',
         hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
         textposition: 'top left',
-        //colorscale: 'YlGnBu',
         colorscale: 'Hot',
         reversescale: reverseAxis,
         type: 'contour',

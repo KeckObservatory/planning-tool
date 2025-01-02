@@ -78,7 +78,6 @@ export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: 
 
     const trace = {
         yaxis: 'y2',
-        hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
         textposition: 'top left',
         mode: 'lines+markers',
         showlegend: false,

@@ -32,9 +32,10 @@ export const VizSelectMenu = (props: Props) => {
     }
 
     return (
-        <FormControl sx={{ m: 0, minWidth: 200 }}>
+        <FormControl sx={{ m: 0, minWidth: 200, display: 'flex' }}>
             <InputLabel id="viz-select-label">Chart Type</InputLabel>
             <Select
+                label={"Chart Type"}
                 id="viz-select-menu"
                 defaultValue={props.vizType}
                 onChange={handleChange}
