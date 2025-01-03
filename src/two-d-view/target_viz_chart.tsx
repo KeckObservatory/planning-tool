@@ -74,14 +74,35 @@ const create_dawn_dusk_text = (date: Date, date_time_format: string) => {
     return txt
 }
 
+export const get_browser_name = () => {
+    const userAgent = navigator.userAgent;
+  
+    if (userAgent.includes("Chrome")) {
+      return "Chrome";
+    } else if (userAgent.includes("Firefox")) {
+      return "Firefox";
+    } else if (userAgent.includes("Safari") && !userAgent.includes("Chrome")) {
+      return "Safari";
+    } else if (userAgent.includes("Edg")) {
+      return "Microsoft Edge";
+    } else if (userAgent.includes("Opera") || userAgent.includes("Opr")) {
+      return "Opera";
+    } else {
+      return "Unknown Browser";
+    }
+  }
+  
+
 export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: string) => {
 
+    const browserName = get_browser_name();
+    const chart_type = browserName === "Safari" ? 'scatter' : 'scattergl'
     const trace = {
         yaxis: 'y2',
         textposition: 'top left',
         mode: 'lines+markers',
         showlegend: false,
-        type: 'scatter',
+        type: chart_type,
         marker: {
             size: MOON_MARKER_SIZE,
             symbol: 'square',
