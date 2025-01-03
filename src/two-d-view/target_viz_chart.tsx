@@ -81,7 +81,7 @@ export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: 
         textposition: 'top left',
         mode: 'lines+markers',
         showlegend: false,
-        type: 'scattergl',
+        type: 'scatter',
         marker: {
             size: MOON_MARKER_SIZE,
             symbol: 'square',
