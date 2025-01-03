@@ -96,6 +96,8 @@ export const get_browser_name = () => {
 export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: string) => {
 
     const browserName = get_browser_name();
+    // scattergl is a hack which is needed to overlap markers
+    // Safari disables WebGL by default, so just let it be scatter.
     const chart_type = browserName === "Safari" ? 'scatter' : 'scattergl'
     const trace = {
         yaxis: 'y2',
