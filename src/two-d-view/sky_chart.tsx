@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import * as SunCalc from "suncalc";
-import { AIRMASS_LIMIT, DEFAULT_OPACITY, NON_OBSERVABLE_OPACITY } from "./constants.tsx";
+import { AIRMASS_LIMIT, DEFAULT_OPACITY, NON_OBSERVABLE_OPACITY, STEP_SIZE } from "./constants.tsx";
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -140,6 +140,25 @@ export const make_trace = (data: Datum[], target_name: string, lineColor?: strin
     return trace
 }
 
+export const split_blocked_data = (data: Datum[]): Array<Datum[]> => {
+    let segmentedData: Array<Datum[]> = []
+    if (data.length < 2) { //no data to split
+        return [data, []]
+    }
+    let prevTime = data[0].x.valueOf()
+    const dStep = STEP_SIZE * 3600 * 1000 //ms
+    data.forEach((datum: Datum, idx: number) => {
+        const dt = Math.abs(datum.x.valueOf() - prevTime)
+        if (dt > dStep * 2) { //if time gap is greater than 2 steps
+            const leftData = data.slice(0, idx - 1)
+            const rightData = data.slice(idx)
+            segmentedData = [leftData, ...split_blocked_data(rightData)]
+        }
+    })
+    console.log('segmentedData', segmentedData)
+    return segmentedData
+}
+
 export const split_traces_into_blocked_visible = (data: Datum[]): [Datum[], Datum[]] => {
     let blockedData: Datum[] = []
     let visibleData: Datum[] = []
@@ -177,9 +196,12 @@ export const SkyChart = (props: Props) => {
             }
 
         const [blockedData, visibleData] = split_traces_into_blocked_visible(data)
-        const blockedTrace = make_trace(blockedData, tgtv.target_name ?? "Target")
+        //TODO: split blocked data into two traces to prevent connecting lines 
+        const blockedDataChunks = split_blocked_data(blockedData)
+        console.log('blockedDataChunks', blockedDataChunks)
+        const blockedTraces = blockedDataChunks.map(blockedData => make_trace(blockedData, tgtv.target_name ?? "Target"))
         const visibleTrace = make_trace(visibleData, tgtv.target_name ?? "Target")
-        traces.push(blockedTrace)
+        blockedTraces.map(blockedTrace => traces.push(blockedTrace))
         traces.push(visibleTrace)
     })
 
