@@ -154,7 +154,11 @@ export const split_blocked_data = (data: Datum[]): Array<Datum[]> => {
             const rightData = data.slice(idx)
             segmentedData = [leftData, ...split_blocked_data(rightData)]
         }
+        prevTime = datum.x.valueOf()
     })
+    if (segmentedData.length === 0) {
+        segmentedData = [data]
+    }
     console.log('segmentedData', segmentedData)
     return segmentedData
 }
