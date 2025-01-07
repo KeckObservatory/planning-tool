@@ -140,28 +140,6 @@ export const make_trace = (data: Datum[], target_name: string, lineColor?: strin
     return trace
 }
 
-export const split_blocked_data = (data: Datum[]): Array<Datum[]> => {
-    let segmentedData: Array<Datum[]> = []
-    if (data.length < 2) { //no data to split
-        return [data, []]
-    }
-    let prevTime = data[0].x.valueOf()
-    const dStep = STEP_SIZE * 3600 * 1000 //ms
-    data.forEach((datum: Datum, idx: number) => {
-        const dt = Math.abs(datum.x.valueOf() - prevTime)
-        if (dt > dStep * 2) { //if time gap is greater than 2 steps
-            const leftData = data.slice(0, idx - 1)
-            const rightData = data.slice(idx)
-            segmentedData = [leftData, ...split_blocked_data(rightData)]
-        }
-        prevTime = datum.x.valueOf()
-    })
-    if (segmentedData.length === 0) {
-        segmentedData = [data]
-    }
-    return segmentedData
-}
-
 export const split_into_segments = (data: Datum[]): Array<Datum[]> => {
     if (data.length < 2) { //no data to split
         return [data]
@@ -194,7 +172,15 @@ export const SkyChart = (props: Props) => {
                 deckBlocking = true
             }
         const segmentedData = split_into_segments(data)
-        traces = segmentedData.map(segment => make_trace(segment, tgtv.target_name ?? "Target"))
+        let tgtTraces = segmentedData.map(segment => make_trace(segment, tgtv.target_name ?? "Target"))
+        tgtTraces = tgtTraces.map((trace, idx) => {//allow only one legend per target
+            if (idx > 0) {
+                //@ts-ignore
+                trace.showlegend = false
+            }
+            return trace
+        })
+        traces = [...traces, ...tgtTraces]
     })
 
     //add elevation axis for airmass charts only
