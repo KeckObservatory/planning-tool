@@ -32,9 +32,12 @@
         "left": [
             "selected",
             "actions",
-            "target_name"
+            "target_name",
+            "ra",
+            "dec",
+            "epoch"
         ],
-        "right": []
+        "right": ["tags"]
     },
     "table_column_width": 140,
     "help_msg_filename": "helpMsg.md",

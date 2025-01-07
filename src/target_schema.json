@@ -129,14 +129,14 @@
         },
         "ra": {
             "type": "string",
-            "short_description": "RA [sexagesimal]",
-            "description": "Right Ascension [sexagesimal]",
+            "short_description": "RA [HH:MM:SS.SSSS]",
+            "description": "Right Ascension [HH:MM:SS.SSSS]",
             "pattern": "^([\\-\\+]?\\d{2}:\\d{2}:\\d{2}\\.?\\d*)$"
         },
         "dec": {
             "type": "string",
-            "short_description": "Dec [sexagesimal]",
-            "description": "Declination [sexagesimal]",
+            "short_description": "Dec [(+/-)DD:MM:SS.SSSS]",
+            "description": "Declination [(+/-)DD:MM:SS.SSSS]",
             "pattern": "^([\\-\\+]?\\d{2}:\\d{2}:\\d{2}\\.?\\d*)$"
         },
         "ra_deg": {
