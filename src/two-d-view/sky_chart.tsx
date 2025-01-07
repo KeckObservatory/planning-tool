@@ -173,12 +173,10 @@ export const split_into_segments = (data: Datum[]): Array<Datum[]> => {
         segment.push(datum)
         if (datum.opacity !== prevDatum.opacity) { //time for a new segment
             const rightData = data.slice(idx)
-            console.log('segment', segment, 'rightData', rightData)
             return [segment, ...split_into_segments(rightData)]
         }
         prevDatum = datum
     }
-    console.log('no transition segment:', segment)
     return [segment]  //no change in opacity means there is only one segment
 }
 
@@ -195,18 +193,8 @@ export const SkyChart = (props: Props) => {
             if (tgtv.visibility.find((viz) => viz.reasons.includes('Deck Blocking'))) {
                 deckBlocking = true
             }
-
-        //TODO: split blocked data into two traces to prevent connecting lines 
         const segmentedData = split_into_segments(data)
-        console.log('data', data, 'segmentedData', segmentedData)
         segmentedData.forEach(segment => traces.push(make_trace(segment, tgtv.target_name ?? "Target")))
-        // const [blockedData, visibleData] = split_traces_into_blocked_visible(data)
-        // const blockedDataChunks = split_blocked_data(blockedData)
-        // console.log('blockedDataChunks', blockedDataChunks, 'visibleData', visibleData)
-        // const blockedTraces = blockedDataChunks.map(blockedData => make_trace(blockedData, tgtv.target_name ?? "Target"))
-        // const visibleTrace = make_trace(visibleData, tgtv.target_name ?? "Target")
-        // blockedTraces.map(blockedTrace => traces.push(blockedTrace))
-        // traces.push(visibleTrace)
     })
 
     //add elevation axis for airmass charts only
