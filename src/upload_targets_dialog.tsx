@@ -30,14 +30,14 @@ let hdrToKeyMapping = Object.fromEntries(Object.entries(targetProps).map(([key, 
 
 const convert_value_to_type = (props: PropertyProps, value: unknown): unknown => {
     const type = props.type
-    if (type.includes('number') || type.includes('integer')) {
+    if (type.includes('string')) { // multitypes default to string
+        //@ts-ignore
+        return String(value)
+    }
+    else if (type.includes('number') || type.includes('integer')) {
         //@ts-ignore
         typeof value === 'string' && (value = value.replaceAll('\'', ''))
         return Number(value)
-    }
-    else if (type.includes('string')) {
-        //@ts-ignore
-        return String(value)
     }
     else if (type.includes('boolean')) {
         //@ts-ignore

@@ -30,6 +30,7 @@ import TargetEditDialogButton, { format_tags, format_edit_entry, PropertyProps, 
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 import { format_target_property } from './upload_targets_dialog.tsx';
+import { Tooltip } from '@mui/material';
 
 
 function convert_schema_to_columns(colWidth: number) {
@@ -53,6 +54,8 @@ function convert_schema_to_columns(colWidth: number) {
       return tgt
     }
 
+    let type = valueProps.type === 'array' ? 'string' : valueProps.type
+    type = type.includes('string') ? 'string' : type //multiple typed fields are cast as string and formatted later on
     let col = {
       field: key,
       valueParser,
@@ -60,7 +63,7 @@ function convert_schema_to_columns(colWidth: number) {
       description: valueProps.description,
       type: valueProps.type === 'array' ? 'string' : valueProps.type, //array cells are cast as string
       headerName: valueProps.short_description ?? valueProps.description,
-      width: valueProps.type === 'array' ? colWidth * 2 : colWidth, 
+      width: valueProps.type === 'array' ? colWidth * 2 : colWidth,
       editable: valueProps.editable ?? true,
     } as GridColDef
 
@@ -88,7 +91,7 @@ interface Duplicate {
 
 const check_for_duplicates = (targets: Target[]) => {
   const duplicates: Duplicate[] = []
-  for (let index = 0; index< targets.length; index++) {
+  for (let index = 0; index < targets.length; index++) {
     const target = targets[index]
     const duplicateNames = targets.some((t, idx) => {
       return t.target_name === target.target_name && idx !== index
@@ -260,17 +263,17 @@ export default function TargetTable() {
     return [
       <SimbadButton hasSimbad={hasSimbad} target={editTarget} setTarget={setEditTarget} />,
       <ViewTargetsDialogButton targets={[editTarget]} />,
-      // <TargetVizButton
-      //   targetName={editTarget.target_name ?? editTarget._id}
-      //   targetNames={targetNames}
-      // />,
       <ValidationDialogButton errors={errors} target={editTarget} />,
       <TargetEditDialogButton
         target={editTarget}
         setTarget={setEditTarget}
       />,
       <GridActionsCellItem
-        icon={<DeleteIcon />}
+        icon={
+          <Tooltip title="Delete target from database">
+            <DeleteIcon />
+          </Tooltip>
+        }
         label="Delete"
         onClick={() => handleDeleteClick(id)}
         color="inherit"
