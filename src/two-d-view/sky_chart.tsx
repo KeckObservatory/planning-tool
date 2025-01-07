@@ -159,30 +159,27 @@ export const split_blocked_data = (data: Datum[]): Array<Datum[]> => {
     if (segmentedData.length === 0) {
         segmentedData = [data]
     }
-    console.log('segmentedData', segmentedData)
     return segmentedData
 }
 
-export const split_traces_into_blocked_visible = (data: Datum[]): [Datum[], Datum[]] => {
-    let blockedData: Datum[] = []
-    let visibleData: Datum[] = []
-    let prevOpac = data.at(0)?.opacity ?? DEFAULT_OPACITY
-    data.forEach((datum: Datum, idx: number) => {
-        if (datum.opacity === NON_OBSERVABLE_OPACITY) {
-            blockedData.push(datum)
-            if (datum.opacity !== prevOpac) { //connect traces at boundary change
-                blockedData.push(data[idx - 1])
-            }
+export const split_into_segments = (data: Datum[]): Array<Datum[]> => {
+    if (data.length < 2) { //no data to split
+        return [data]
+    }
+    let prevDatum = data[0]
+    let segment = [prevDatum]
+    for (let idx = 1; idx < data.length; idx++) {
+        const datum = data[idx]
+        segment.push(datum)
+        if (datum.opacity !== prevDatum.opacity) { //time for a new segment
+            const rightData = data.slice(idx)
+            console.log('segment', segment, 'rightData', rightData)
+            return [segment, ...split_into_segments(rightData)]
         }
-        else if (datum.opacity === DEFAULT_OPACITY) {
-            visibleData.push(datum)
-            if (datum.opacity !== prevOpac) { //connect traces at boundary change
-                visibleData.push(data[idx - 1])
-            }
-        }
-        prevOpac = datum.opacity
-    })
-    return [blockedData, visibleData]
+        prevDatum = datum
+    }
+    console.log('no transition segment:', segment)
+    return [segment]  //no change in opacity means there is only one segment
 }
 
 export const SkyChart = (props: Props) => {
@@ -199,14 +196,17 @@ export const SkyChart = (props: Props) => {
                 deckBlocking = true
             }
 
-        const [blockedData, visibleData] = split_traces_into_blocked_visible(data)
         //TODO: split blocked data into two traces to prevent connecting lines 
-        const blockedDataChunks = split_blocked_data(blockedData)
-        console.log('blockedDataChunks', blockedDataChunks)
-        const blockedTraces = blockedDataChunks.map(blockedData => make_trace(blockedData, tgtv.target_name ?? "Target"))
-        const visibleTrace = make_trace(visibleData, tgtv.target_name ?? "Target")
-        blockedTraces.map(blockedTrace => traces.push(blockedTrace))
-        traces.push(visibleTrace)
+        const segmentedData = split_into_segments(data)
+        console.log('data', data, 'segmentedData', segmentedData)
+        segmentedData.forEach(segment => traces.push(make_trace(segment, tgtv.target_name ?? "Target")))
+        // const [blockedData, visibleData] = split_traces_into_blocked_visible(data)
+        // const blockedDataChunks = split_blocked_data(blockedData)
+        // console.log('blockedDataChunks', blockedDataChunks, 'visibleData', visibleData)
+        // const blockedTraces = blockedDataChunks.map(blockedData => make_trace(blockedData, tgtv.target_name ?? "Target"))
+        // const visibleTrace = make_trace(visibleData, tgtv.target_name ?? "Target")
+        // blockedTraces.map(blockedTrace => traces.push(blockedTrace))
+        // traces.push(visibleTrace)
     })
 
     //add elevation axis for airmass charts only
