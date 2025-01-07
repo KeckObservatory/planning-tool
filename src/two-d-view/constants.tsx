@@ -44,6 +44,9 @@ export const MOON_RADIUS = .52 // degrees
 export const DEFAULT_OPACITY = 'FF' //Hex values appended to color
 export const NON_OBSERVABLE_OPACITY = '80' //Hex values appended to color
 export const AIRMASS_LIMIT = 5
+export const TWILIGHT_SHADE= '#BFBFBF'
+export const AMATEUR_TWILIGHT_SHADE = '#9f9f9f'
+export const ASTRONOMICAL_TWILIGHT_SHADE = '#818181'
 
 export const EXTINCTION_COEFF = 0.172 // extinction coefficient [mag/airmass]
 

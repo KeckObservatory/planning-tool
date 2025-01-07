@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import * as SunCalc from "suncalc";
-import { AIRMASS_LIMIT, DEFAULT_OPACITY, NON_OBSERVABLE_OPACITY, STEP_SIZE } from "./constants.tsx";
+import { AIRMASS_LIMIT, AMATEUR_TWILIGHT_SHADE, ASTRONOMICAL_TWILIGHT_SHADE, DEFAULT_OPACITY, NON_OBSERVABLE_OPACITY, STEP_SIZE, TWILIGHT_SHADE } from "./constants.tsx";
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -194,7 +194,7 @@ export const SkyChart = (props: Props) => {
                 deckBlocking = true
             }
         const segmentedData = split_into_segments(data)
-        segmentedData.forEach(segment => traces.push(make_trace(segment, tgtv.target_name ?? "Target")))
+        traces = segmentedData.map(segment => make_trace(segment, tgtv.target_name ?? "Target"))
     })
 
     //add elevation axis for airmass charts only
@@ -206,8 +206,18 @@ export const SkyChart = (props: Props) => {
         //@ts-ignore
         newTrace.showlegend = false
         traces.push(newTrace)
-        console.log('newTrace', newTrace, 'traces', traces)
     }
+
+    // //add UT trace for xaxis2
+    // if (targetView.length > 0) {
+    //     const data = generateData(targetView[0], 'UT', context.config.date_time_format, lngLatEl, 0)
+    //     const newTrace = make_trace(data, 'UT axis', '#00000000')
+    //     //@ts-ignore
+    //     newTrace.xaxis = 'x2'
+    //     //@ts-ignore
+    //     newTrace.showlegend = false
+    //     traces.push(newTrace)
+    // }
 
     //get curr marker
     let maxAirmass = 10;
@@ -276,7 +286,7 @@ export const SkyChart = (props: Props) => {
             y0: 0,
             x1: suncalcTimes.amateurDusk.getTime(),
             y1: 1,
-            fillcolor: '#eeeeee',
+            fillcolor: TWILIGHT_SHADE,
             layer: 'below',
             opacity: 0.5,
             line: {
@@ -291,7 +301,7 @@ export const SkyChart = (props: Props) => {
             y0: 0,
             x1: suncalcTimes.astronomicalDusk.getTime(),
             y1: 1,
-            fillcolor: '#dddddd',
+            fillcolor: AMATEUR_TWILIGHT_SHADE,
             layer: 'below',
             opacity: 0.5,
             line: {
@@ -306,7 +316,7 @@ export const SkyChart = (props: Props) => {
             y0: 0,
             x1: suncalcTimes.astronomicalDawn.getTime(),
             y1: 1,
-            fillcolor: '#cccccc',
+            fillcolor: ASTRONOMICAL_TWILIGHT_SHADE,
             layer: 'below',
             opacity: 0.5,
             line: {
@@ -321,7 +331,7 @@ export const SkyChart = (props: Props) => {
             y0: 0,
             x1: suncalcTimes.amateurDawn.getTime(),
             y1: 1,
-            fillcolor: '#dddddd',
+            fillcolor: AMATEUR_TWILIGHT_SHADE,
             layer: 'below',
             opacity: 0.5,
             line: {
@@ -336,7 +346,7 @@ export const SkyChart = (props: Props) => {
             y0: 0,
             x1: suncalcTimes.dawn.getTime(),
             y1: 1,
-            fillcolor: '#eeeeee',
+            fillcolor: TWILIGHT_SHADE,
             layer: 'below',
             opacity: 0.5,
             line: {
@@ -452,6 +462,21 @@ export const SkyChart = (props: Props) => {
         tickformat: '%H:%M',
     }
 
+    //creates ticvals and ticktext for xaxis. 
+    // to take into account timezones HST and UT
+    let t0 = suncalcTimes.dusk
+    t0.setMinutes(0)
+    t0.setSeconds(0)
+    t0.setMilliseconds(0)
+    const tick0 = t0.getTime()
+    const dtick = 2 * 3600000
+    const tickVals = [tick0, tick0 + dtick, tick0 + 2 * dtick, tick0 + 3 * dtick, tick0 + 4 * dtick, tick0 + 5 * dtick, tick0 + 6 * dtick, tick0 + 7 * dtick]
+    const tickText = tickVals.map((val) => {
+        const hst = dayjs(val).tz(context.config.timezone).format('HH:mm') 
+        const ut = dayjs(val).utc().format('HH:mm')
+        return `${hst}[HST]<br>${ut}[UT]`
+    })
+
     let layout: Partial<Plotly.Layout> = {
         width,
         height,
@@ -464,10 +489,20 @@ export const SkyChart = (props: Props) => {
             autorange: !chartType.includes('Airmass') ? true : 'reversed'
         },
         xaxis: {
-            title: 'Time [Hr:Min]',
+            type: 'date',
+            tickfont: {
+                size: 8 
+            },
+            tickvals: tickVals,
+            ticktext: tickText,
+            // dtick: 2 * 3600000, //milliseconds in an hour
+            // range: [suncalcTimes.dusk.getTime(), suncalcTimes.dawn.getTime()],
+        },
+        xaxis2: {
+            title: 'UT [Hr:Min]',
             type: 'date',
             tickformat: '%H:%M',
-            dtick: 2 * 3600000, //milliseconds in an hour
+            dtick: 3600000, //milliseconds in an hour
             range: [suncalcTimes.dusk.getTime(), suncalcTimes.dawn.getTime()],
         },
         margin: {
