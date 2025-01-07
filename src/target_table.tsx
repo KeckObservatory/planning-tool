@@ -63,7 +63,7 @@ function convert_schema_to_columns(colWidth: number) {
       description: valueProps.description,
       type: valueProps.type === 'array' ? 'string' : valueProps.type, //array cells are cast as string
       headerName: valueProps.short_description ?? valueProps.description,
-      width: valueProps.type === 'array' ? colWidth * 2 : colWidth,
+      //width: valueProps.type === 'array' ? colWidth * 2 : colWidth,
       editable: valueProps.editable ?? true,
     } as GridColDef
 
@@ -208,6 +208,13 @@ export default function TargetTable() {
     return validate.errors ?? []
   }
 
+  const autosizeOptions = {
+    includeHeaders: true,
+    includeOutliers: false,
+    outliersFactor: 1.5,
+    expand: false
+  }
+
   const ActionsCell = (params: GridRowParams<Target>) => {
     const { id, row } = params;
     const [editTarget, setEditTarget] = React.useState<Target>(row);
@@ -315,6 +322,7 @@ export default function TargetTable() {
             getRowId={(row) => row._id}
             //disableRowSelectionOnClick // turned off for now to allow row edit
             processRowUpdate={processRowUpdate}
+            autosizeOptions={autosizeOptions}
             checkboxSelection
             rows={rows ?? []}
             columns={columns}

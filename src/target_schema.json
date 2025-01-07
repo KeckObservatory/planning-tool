@@ -129,13 +129,13 @@
         },
         "ra": {
             "type": "string",
-            "short_description": "RA [HH:MM:SS.SSSS]",
+            "short_description": "RA",
             "description": "Right Ascension [HH:MM:SS.SSSS]",
             "pattern": "^([\\-\\+]?\\d{2}:\\d{2}:\\d{2}\\.?\\d*)$"
         },
         "dec": {
             "type": "string",
-            "short_description": "Dec [(+/-)DD:MM:SS.SSSS]",
+            "short_description": "Dec",
             "description": "Declination [(+/-)DD:MM:SS.SSSS]",
             "pattern": "^([\\-\\+]?\\d{2}:\\d{2}:\\d{2}\\.?\\d*)$"
         },
