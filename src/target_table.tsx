@@ -33,7 +33,7 @@ import { format_target_property } from './upload_targets_dialog.tsx';
 import { Tooltip } from '@mui/material';
 
 
-function convert_schema_to_columns(colWidth: number) {
+function convert_schema_to_columns() {
   const columns: GridColDef[] = []
   Object.entries(target_schema.properties).forEach(([key, valueProps]: [string, any]) => {
     // format value for display
@@ -135,7 +135,7 @@ export default function TargetTable() {
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
   const cfg = context.config
-  let columns = convert_schema_to_columns(cfg.table_column_width);
+  let columns = convert_schema_to_columns();
   const sortOrder = cfg.default_table_columns
   columns = columns.sort((a, b) => {
     return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);
