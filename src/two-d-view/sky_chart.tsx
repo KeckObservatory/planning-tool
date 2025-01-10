@@ -181,12 +181,12 @@ export const SkyChart = (props: Props) => {
             }
             return trace
         })
-        console.log('traces', tgtTraces)
         traces = [...traces, ...tgtTraces]
     })
 
     //add elevation axis for airmass charts only
-    if (chartType.includes('Airmass') && targetView.length > 0) {
+    const isAirmass = chartType.includes('Airmass')
+    if (isAirmass && targetView.length > 0) {
         const data = generateData(targetView[0], 'Elevation', context.config.date_time_format, lngLatEl, 0)
         const newTrace = make_trace(data, 'Elevation axis for airmass', '#00000000')
         //@ts-ignore
@@ -440,7 +440,6 @@ export const SkyChart = (props: Props) => {
 
     // }
 
-    const isAirmass = chartType.includes('Airmass')
     const yRange = isAirmass ? [0, Math.min(AIRMASS_LIMIT, maxAirmass)] : undefined
     console.log('yRange', yRange)
     const y2Axis: Partial<Plotly.LayoutAxis> = {
@@ -506,7 +505,7 @@ export const SkyChart = (props: Props) => {
     }
 
     if (isAirmass) {
-        layout.yaxis2 = y2Axis
+        //layout.yaxis2 = y2Axis
     }
 
     console.log('layout', layout, isAirmass, chartType)
