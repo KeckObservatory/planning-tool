@@ -300,7 +300,7 @@ const TwoDView = ({ targets }: Props) => {
                             value={{ label: instrumentFOV }}
                             onChange={(_, value) => onInstrumentFOVChange(value?.label)}
                             options={fovs.map((instr) => { return { label: instr } })}
-                            sx={{ width: '200px', margin: '6px' }}
+                            sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
                             renderInput={(params) => <TextField {...params} label="Instrument FOV" />}
                         />
                     </Tooltip>
