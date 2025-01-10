@@ -474,7 +474,7 @@ export const SkyChart = (props: Props) => {
         yaxis: {
             title: chartType.includes('Airmass') ? 'Airmass' : 'Degrees',
             range: yRange,
-            autorange: !chartType.includes('Airmass') ? true : 'reversed'
+            autorange: chartType.includes('Airmass') ? 'reversed' : true
         },
         xaxis: {
             type: 'date',
@@ -505,6 +505,8 @@ export const SkyChart = (props: Props) => {
     if (chartType.includes('Airmass')) {
         layout.yaxis2 = y2Axis
     }
+
+    console.log('layout', layout)
 
     return (
         <Plot
