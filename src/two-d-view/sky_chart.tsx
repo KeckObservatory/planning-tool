@@ -436,9 +436,6 @@ export const SkyChart = (props: Props) => {
             shapes.push(...nasdeck_shapes)
         }
     }
-    // else if (chartType === 'Airmass' && showLimits) {
-
-    // }
 
     const yRange = isAirmass ? [0, Math.min(AIRMASS_LIMIT, maxAirmass)] : undefined
     console.log('yRange', yRange)
@@ -467,7 +464,7 @@ export const SkyChart = (props: Props) => {
     })
 
 
-    const layout: Partial<Plotly.Layout> = {
+    const sclayout: Partial<Plotly.Layout> = {
         width,
         height,
         shapes,
@@ -475,7 +472,7 @@ export const SkyChart = (props: Props) => {
         hovermode: "closest",
         yaxis: {
             title: isAirmass ? 'Airmass' : 'Degrees',
-            range: [0, 5],
+            range: yRange,
             autorange: isAirmass ? 'reversed' : true
         },
         xaxis: {
@@ -505,16 +502,15 @@ export const SkyChart = (props: Props) => {
     }
 
     if (isAirmass) {
-        //layout.yaxis2 = y2Axis
-        console.log('y2axis', y2Axis)
+        sclayout.yaxis2 = y2Axis
     }
 
-    console.log('layout', layout, isAirmass, chartType)
+    console.log('layout', sclayout, isAirmass, chartType)
 
     return (
         <Plot
             data={traces}
-            layout={layout}
+            layout={sclayout}
         />
     )
 }
