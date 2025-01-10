@@ -193,20 +193,8 @@ export const SkyChart = (props: Props) => {
         newTrace.yaxis = 'y2'
         //@ts-ignore
         newTrace.showlegend = false
-        console.log('y2 trace', newTrace)
         traces.push(newTrace)
     }
-
-    // //add UT trace for xaxis2
-    // if (targetView.length > 0) {
-    //     const data = generateData(targetView[0], 'UT', context.config.date_time_format, lngLatEl, 0)
-    //     const newTrace = make_trace(data, 'UT axis', '#00000000')
-    //     //@ts-ignore
-    //     newTrace.xaxis = 'x2'
-    //     //@ts-ignore
-    //     newTrace.showlegend = false
-    //     traces.push(newTrace)
-    // }
 
     //get curr marker
     let maxAirmass = 10;
@@ -438,8 +426,8 @@ export const SkyChart = (props: Props) => {
         }
     }
 
+    //set yRange for airmass charts. order to reverse axis
     const yRange = isAirmass ? [Math.min(AIRMASS_LIMIT, maxAirmass), 0] : undefined
-    console.log('yRange', yRange)
     const y2Axis: Partial<Plotly.LayoutAxis> = {
         title: 'Altitude [deg]',
         gridwidth: 0,
@@ -467,9 +455,6 @@ export const SkyChart = (props: Props) => {
     const scyaxis: Partial<Plotly.LayoutAxis> = {
         title: isAirmass ? 'Airmass' : 'Degrees',
         range: yRange,
-        // autorange: isAirmass ? 'min reversed' : undefined,
-        // tickvals: isAirmass ? [0, 1, 2, 3, 4, 5].reverse() : undefined,
-        // ticktext: isAirmass ? [0, 1, 2, 3, 4, 5].reverse().map(v => String(v)) : undefined,
     }
 
     let sclayout: Partial<Plotly.Layout> = {
@@ -508,8 +493,6 @@ export const SkyChart = (props: Props) => {
     if (isAirmass) {
         sclayout.yaxis2 = y2Axis
     }
-
-    console.log('layout', sclayout, scyaxis, isAirmass, chartType)
 
     return (
         <Plot
