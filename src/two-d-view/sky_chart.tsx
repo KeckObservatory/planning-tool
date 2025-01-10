@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import * as SunCalc from "suncalc";
-import { AIRMASS_LIMIT, AMATEUR_TWILIGHT_SHADE, ASTRONOMICAL_TWILIGHT_SHADE, DEFAULT_OPACITY, NON_OBSERVABLE_OPACITY, STEP_SIZE, TWILIGHT_SHADE } from "./constants.tsx";
+import { AIRMASS_LIMIT, AMATEUR_TWILIGHT_SHADE, ASTRONOMICAL_TWILIGHT_SHADE, DEFAULT_OPACITY, NON_OBSERVABLE_OPACITY, TWILIGHT_SHADE } from "./constants.tsx";
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -173,13 +173,15 @@ export const SkyChart = (props: Props) => {
             }
         const segmentedData = split_into_segments(data)
         let tgtTraces = segmentedData.map(segment => make_trace(segment, tgtv.target_name ?? "Target"))
+        //TODO: debug this.
         tgtTraces = tgtTraces.map((trace, idx) => {//allow only one legend per target
             if (idx > 0) {
                 //@ts-ignore
-                trace.showlegend = false
+                trace.showLegend = false
             }
             return trace
         })
+        console.log('traces', tgtTraces)
         traces = [...traces, ...tgtTraces]
     })
 

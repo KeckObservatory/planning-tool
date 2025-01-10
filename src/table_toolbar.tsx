@@ -24,6 +24,7 @@ import { Target, useStateContext } from './App.tsx';
 import { submit_one_target } from './target_table.tsx';
 import { Stack } from '@mui/material';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
+import DeleteDialogButton from './delete_rows_dialog.tsx';
 
 const getJson = (apiRef: React.MutableRefObject<GridApi>) => {
   // Select rows and columns
@@ -213,6 +214,7 @@ export function EditToolbar(props: EditToolbarProps) {
         <Button color="primary" startIcon={<AddIcon />} onClick={handleAddTarget}>
           Add Target
         </Button>
+        <DeleteDialogButton targets={props.selectedTargets} color='primary'/>
         <ViewTargetsDialogButton targets={props.selectedTargets} color='primary'/>
         <TargetVizButton targetName={ targetName } targetNames={ targetNames } />
         <TargetWizardButton />
