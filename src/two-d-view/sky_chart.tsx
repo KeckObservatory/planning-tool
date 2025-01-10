@@ -506,7 +506,7 @@ export const SkyChart = (props: Props) => {
         layout.yaxis2 = y2Axis
     }
 
-    console.log('layout', layout)
+    console.log('layout', layout, chartType.includes('Airmass'), chartType)
 
     return (
         <Plot
