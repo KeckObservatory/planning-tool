@@ -466,6 +466,8 @@ export const SkyChart = (props: Props) => {
         return `${hst}[HST]<br>${ut}[UT]`
     })
 
+    console.log('tickvals', tickVals, tickText)
+
     let layout: Partial<Plotly.Layout> = {
         width,
         height,
