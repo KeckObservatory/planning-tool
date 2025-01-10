@@ -504,6 +504,10 @@ export const SkyChart = (props: Props) => {
 
     if (chartType.includes('Airmass')) {
         layout.yaxis2 = y2Axis
+        //@ts-ignore
+        layout.yaxis.autorange = 'reversed'
+        //@ts-ignore
+        layout.range = [0, Math.min(AIRMASS_LIMIT, maxAirmass)]
     }
 
     console.log('layout', layout, chartType.includes('Airmass'), chartType)
