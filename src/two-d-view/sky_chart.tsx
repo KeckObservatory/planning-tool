@@ -193,7 +193,7 @@ export const SkyChart = (props: Props) => {
         newTrace.yaxis = 'y2'
         //@ts-ignore
         newTrace.showlegend = false
-        //traces.push(newTrace)
+        traces.push(newTrace)
     }
 
     // //add UT trace for xaxis2
