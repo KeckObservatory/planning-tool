@@ -438,7 +438,7 @@ export const SkyChart = (props: Props) => {
         }
     }
 
-    const yRange = isAirmass ? [0, Math.min(AIRMASS_LIMIT, maxAirmass)] : undefined
+    const yRange = isAirmass ? [Math.min(AIRMASS_LIMIT, maxAirmass), 0] : undefined
     console.log('yRange', yRange)
     const y2Axis: Partial<Plotly.LayoutAxis> = {
         title: 'Altitude [deg]',
@@ -467,9 +467,9 @@ export const SkyChart = (props: Props) => {
     const scyaxis: Partial<Plotly.LayoutAxis> = {
         title: isAirmass ? 'Airmass' : 'Degrees',
         range: yRange,
-        autorange: isAirmass ? 'min reversed' : undefined,
-        tickvals: isAirmass ? [0, 1, 2, 3, 4, 5].reverse() : undefined,
-        ticktext: isAirmass ? [0, 1, 2, 3, 4, 5].reverse().map(v => String(v)) : undefined,
+        // autorange: isAirmass ? 'min reversed' : undefined,
+        // tickvals: isAirmass ? [0, 1, 2, 3, 4, 5].reverse() : undefined,
+        // ticktext: isAirmass ? [0, 1, 2, 3, 4, 5].reverse().map(v => String(v)) : undefined,
     }
 
     let sclayout: Partial<Plotly.Layout> = {
