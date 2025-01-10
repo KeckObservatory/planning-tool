@@ -466,9 +466,8 @@ export const SkyChart = (props: Props) => {
         return `${hst}[HST]<br>${ut}[UT]`
     })
 
-    console.log('tickvals', tickVals, tickText)
 
-    let layout: Partial<Plotly.Layout> = {
+    const layout: Partial<Plotly.Layout> = {
         width,
         height,
         shapes,
@@ -484,10 +483,10 @@ export const SkyChart = (props: Props) => {
             tickfont: {
                 size: 8 
             },
-            // tickvals: tickVals,
-            // ticktext: tickText,
-            dtick: 2 * 3600000, //milliseconds in an hour
-            range: [suncalcTimes.dusk.getTime(), suncalcTimes.dawn.getTime()],
+            tickvals: tickVals,
+            ticktext: tickText,
+            // dtick: 2 * 3600000, //milliseconds in an hour
+            // range: [suncalcTimes.dusk.getTime(), suncalcTimes.dawn.getTime()],
         },
         xaxis2: {
             title: 'UT [Hr:Min]',
@@ -507,11 +506,6 @@ export const SkyChart = (props: Props) => {
 
     if (isAirmass) {
         layout.yaxis2 = y2Axis
-        //@ts-ignore
-        layout.yaxis.autorange = 'reversed'
-        //@ts-ignore
-        layout.range = [0, Math.min(AIRMASS_LIMIT, maxAirmass)]
-        console.log('layout', layout)
     }
 
     console.log('layout', layout, isAirmass, chartType)
