@@ -161,6 +161,7 @@ export const split_into_segments = (data: Datum[]): Array<Datum[]> => {
 export const SkyChart = (props: Props) => {
     const { targetView, chartType, time, showCurrLoc, showLimits, width, height, dome, suncalcTimes } = props
     const context = useStateContext()
+    const isAirmass = chartType.includes('Airmass')
     let traces: Plotly.Data[] = []
     const lngLatEl = context.config.tel_lat_lng_el.keck
     let deckBlocking = false
@@ -185,7 +186,6 @@ export const SkyChart = (props: Props) => {
     })
 
     //add elevation axis for airmass charts only
-    const isAirmass = chartType.includes('Airmass')
     if (isAirmass && targetView.length > 0) {
         const data = generateData(targetView[0], 'Elevation', context.config.date_time_format, lngLatEl, 0)
         const newTrace = make_trace(data, 'Elevation axis for airmass', '#00000000')
@@ -467,7 +467,7 @@ export const SkyChart = (props: Props) => {
     const scyaxis: Partial<Plotly.LayoutAxis> = {
         title: isAirmass ? 'Airmass' : 'Degrees',
         range: yRange,
-        autorange: isAirmass ? 'reversed' : undefined,
+        autorange: isAirmass ? 'min reversed' : undefined,
         tickvals: isAirmass ? [0, 1, 2, 3, 4, 5].reverse() : undefined,
         ticktext: isAirmass ? [0, 1, 2, 3, 4, 5].reverse().map(v => String(v)) : undefined,
     }
