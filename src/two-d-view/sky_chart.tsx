@@ -468,8 +468,8 @@ export const SkyChart = (props: Props) => {
         title: isAirmass ? 'Airmass' : 'Degrees',
         range: yRange,
         //autorange: isAirmass ? 'reversed' : undefined 
-        tickvals: isAirmass ? [0, 1, 2, 3, 4, 5] : undefined,
-        ticktext: isAirmass ? [0, 1, 2, 3, 4, 5].map(v => String(v)) : undefined,
+        tickvals: isAirmass ? [0, 1, 2, 3, 4, 5].reverse() : undefined,
+        ticktext: isAirmass ? [0, 1, 2, 3, 4, 5].reverse().map(v => String(v)) : undefined,
     }
 
     let sclayout: Partial<Plotly.Layout> = {
