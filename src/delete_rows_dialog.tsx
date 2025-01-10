@@ -2,7 +2,7 @@ import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import { Target, useSnackbarContext, useStateContext } from './App';
+import { Target, useSnackbarContext } from './App';
 import { DialogComponent } from './dialog_component';
 import { Button, Typography } from '@mui/material';
 import { delete_target, submit_target } from './api/api_root';
