@@ -193,6 +193,7 @@ export const SkyChart = (props: Props) => {
         newTrace.yaxis = 'y2'
         //@ts-ignore
         newTrace.showlegend = false
+        console.log('y2 trace', newTrace)
         traces.push(newTrace)
     }
 
@@ -445,7 +446,7 @@ export const SkyChart = (props: Props) => {
         overlaying: 'y',
         side: 'right',
         layer: 'above traces',
-        tickformat: 'HH:MM',
+        tickformat: '%H:%M',
     }
 
     //creates ticvals and ticktext for xaxis. 
@@ -488,7 +489,7 @@ export const SkyChart = (props: Props) => {
         xaxis2: {
             title: 'UT [Hr:Min]',
             type: 'date',
-            tickformat: 'HH:MM',
+            tickformat: '%H:%M',
             dtick: 3600000, //milliseconds in an hour
             range: [suncalcTimes.dusk.getTime(), suncalcTimes.dawn.getTime()],
         },

@@ -236,7 +236,7 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
             layer: 'above traces',
             autorange: 'reversed',
             // tickmode: 'auto',
-            tickformat: 'HH:MM',
+            tickformat: '%H:%M',
         },
         yaxis: {
             title: 'Time [HT]',
@@ -247,7 +247,7 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
             autorange: 'reversed',
             layer: 'above traces',
             // tickmode: 'auto',
-            tickformat: 'HH:MM',
+            tickformat: '%H:%M',
         },
         xaxis: {
             title: 'Date',
