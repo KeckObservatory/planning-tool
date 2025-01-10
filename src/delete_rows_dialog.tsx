@@ -31,7 +31,12 @@ function DeleteTargets(props: { targets: Target[] }) {
       console.error('error submitting target')
       return
     }
-    context.setTargets((oldTargets) => oldTargets.filter((row) => !ids.includes(row._id)))
+    context.setTargets((oldTargets) => {
+      const newTgts = oldTargets.filter((row) => !ids.includes(row._id))
+      console.log('newTgts:', newTgts)
+      console.log('oldTgts:', oldTargets)
+      return newTgts
+    })
   }
 
   const targetList = targets.map((target, index) => {
