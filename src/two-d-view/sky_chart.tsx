@@ -442,6 +442,7 @@ export const SkyChart = (props: Props) => {
 
     const isAirmass = chartType.includes('Airmass')
     const yRange = isAirmass ? [0, Math.min(AIRMASS_LIMIT, maxAirmass)] : undefined
+    console.log('yRange', yRange)
     const y2Axis: Partial<Plotly.LayoutAxis> = {
         title: 'Altitude [deg]',
         gridwidth: 0,
