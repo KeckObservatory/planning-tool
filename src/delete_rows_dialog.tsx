@@ -26,6 +26,7 @@ function DeleteTargets(props: { targets: Target[], setRows: Function }) {
   const { targets, setRows } = props;
   const snackbarContext = useSnackbarContext()
   const [enableUndo, setEnableUndo] = React.useState(false);
+  const [deletedTargets, setDeletedTargets] = React.useState<Target[]>([]);
 
   const onDeleteClick = async () => {
     const ids = targets.map((target) => target._id);
@@ -35,6 +36,7 @@ function DeleteTargets(props: { targets: Target[], setRows: Function }) {
       snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error deleting targets' })
       return
     }
+    setDeletedTargets(targets)
     setRows((oldRows: Target[]) => {
       const newRows = oldRows.filter((row: any) => !ids.includes(row._id))
       return newRows
@@ -43,7 +45,7 @@ function DeleteTargets(props: { targets: Target[], setRows: Function }) {
   }
 
   const onUndoClick = async () => {
-    const resp = await submit_target(targets)
+    const resp = await submit_target(deletedTargets)
     if (resp.errors.length>0) {
       console.error('error while undoing target delete', resp)
       const msg = 'error when undoing deleted targets: ' + resp.errors.join(', ')
