@@ -325,7 +325,6 @@ const TwoDView = ({ targets }: Props) => {
                 </Stack>
             </Grid2>
             <Grid2 size={{ xs: 8 }}>
-                {/* TODO: Work on Vertical Spacing */}
                 <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={1}>
                     <DomeChart
                         height={height}

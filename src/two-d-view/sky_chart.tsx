@@ -445,7 +445,7 @@ export const SkyChart = (props: Props) => {
         overlaying: 'y',
         side: 'right',
         layer: 'above traces',
-        tickformat: '%H:%M',
+        tickformat: 'HH:MM',
     }
 
     //creates ticvals and ticktext for xaxis. 
@@ -488,7 +488,7 @@ export const SkyChart = (props: Props) => {
         xaxis2: {
             title: 'UT [Hr:Min]',
             type: 'date',
-            tickformat: '%H:%M',
+            tickformat: 'HH:MM',
             dtick: 3600000, //milliseconds in an hour
             range: [suncalcTimes.dusk.getTime(), suncalcTimes.dawn.getTime()],
         },
