@@ -464,17 +464,19 @@ export const SkyChart = (props: Props) => {
     })
 
 
+    const scyaxis: Partial<Plotly.LayoutAxis> = {
+        title: isAirmass ? 'Airmass' : 'Degrees',
+        range: yRange,
+        autorange: isAirmass ? 'reversed' : undefined 
+    }
+
     let sclayout: Partial<Plotly.Layout> = {
         width,
         height,
         shapes,
         title: `Target ${chartType} vs Time`,
         hovermode: "closest",
-        yaxis: {
-            title: isAirmass ? 'Airmass' : 'Degrees',
-            range: yRange,
-            autorange: isAirmass ? 'reversed' : true
-        },
+        yaxis: scyaxis,
         xaxis: {
             type: 'date',
             tickfont: {
@@ -505,12 +507,12 @@ export const SkyChart = (props: Props) => {
         sclayout.yaxis2 = y2Axis
     }
 
-    console.log('layout', sclayout, isAirmass, chartType)
+    console.log('layout', sclayout, scyaxis, isAirmass, chartType)
 
     return (
         <Plot
             data={traces}
-            layout={{...sclayout}}
+            layout={sclayout}
         />
     )
 }
