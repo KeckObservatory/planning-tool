@@ -214,7 +214,7 @@ export function EditToolbar(props: EditToolbarProps) {
         <Button color="primary" startIcon={<AddIcon />} onClick={handleAddTarget}>
           Add Target
         </Button>
-        <DeleteDialogButton targets={props.selectedTargets} color='primary'/>
+        <DeleteDialogButton setRows={setRows} targets={props.selectedTargets} color='primary'/>
         <ViewTargetsDialogButton targets={props.selectedTargets} color='primary'/>
         <TargetVizButton targetName={ targetName } targetNames={ targetNames } />
         <TargetWizardButton />
