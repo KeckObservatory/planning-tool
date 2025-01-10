@@ -446,7 +446,6 @@ export const SkyChart = (props: Props) => {
         overlaying: 'y',
         side: 'right',
         layer: 'above traces',
-        tickformat: '%H:%M',
     }
 
     //creates ticvals and ticktext for xaxis. 
