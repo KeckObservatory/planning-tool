@@ -13,15 +13,17 @@ export interface VTDProps {
   open: boolean;
   handleClose: Function;
   targets: Target[];
+  setRows: Function;
 }
 
 interface Props {
   targets: Target[];
+  setRows: Function;
   color?: 'inherit' | 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
 }
 
-function DeleteTargets(props: { targets: Target[] }) {
-  const { targets } = props;
+function DeleteTargets(props: { targets: Target[], setRows: Function }) {
+  const { targets, setRows } = props;
   const context = useStateContext()
 
   const onClick = async () => {
@@ -37,6 +39,10 @@ function DeleteTargets(props: { targets: Target[] }) {
       console.log('oldTgts:', oldTargets)
       return newTgts
     })
+    setRows((oldRows: any) => {
+      const newRows = oldRows.filter((row: any) => !ids.includes(row._id))
+      return newRows
+    });
   }
 
   const targetList = targets.map((target, index) => {
@@ -57,14 +63,14 @@ function DeleteTargets(props: { targets: Target[] }) {
 }
 
 function DeleteTargetsDialog(props: VTDProps) {
-  const { open, handleClose, targets } = props;
+  const { open, handleClose, targets, setRows } = props;
 
   const dialogTitle = (
     <div>Delete Targets</div>
   );
 
   const dialogContent = (
-    <DeleteTargets targets={targets} />
+    <DeleteTargets targets={targets} setRows={setRows} />
   )
 
   return (
@@ -98,6 +104,7 @@ export default function DeleteDialogButton(props: Props) {
       </Tooltip>
       <DeleteTargetsDialog
         open={open}
+        setRows={props.setRows}
         targets={props.targets}
         handleClose={handleClose}
       />
