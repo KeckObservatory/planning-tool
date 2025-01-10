@@ -476,7 +476,7 @@ export const SkyChart = (props: Props) => {
         hovermode: "closest",
         yaxis: {
             title: isAirmass ? 'Airmass' : 'Degrees',
-            range: yRange,
+            range: [0, 5],
             autorange: isAirmass ? 'reversed' : true
         },
         xaxis: {
