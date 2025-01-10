@@ -468,6 +468,7 @@ export const SkyChart = (props: Props) => {
         title: 'Airmass',
         //range: yRange,
         range: [0, 5],
+        autorange: 'reversed'
     }
 
     let sclayout: Partial<Plotly.Layout> = {
