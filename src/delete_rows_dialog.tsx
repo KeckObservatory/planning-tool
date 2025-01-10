@@ -2,10 +2,10 @@ import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import { Target, useStateContext } from './App';
+import { Target, useSnackbarContext, useStateContext } from './App';
 import { DialogComponent } from './dialog_component';
 import { Button, Typography } from '@mui/material';
-import { delete_target } from './api/api_root';
+import { delete_target, submit_target } from './api/api_root';
 
 
 
@@ -24,25 +24,37 @@ interface Props {
 
 function DeleteTargets(props: { targets: Target[], setRows: Function }) {
   const { targets, setRows } = props;
-  const context = useStateContext()
+  const snackbarContext = useSnackbarContext()
+  const [enableUndo, setEnableUndo] = React.useState(false);
 
-  const onClick = async () => {
+  const onDeleteClick = async () => {
     const ids = targets.map((target) => target._id);
     const resp = await delete_target(ids)
-    if (!resp) {
-      console.error('error submitting target')
+    if (resp.status !== 'SUCCESS') {
+      console.error('error deleting targets', resp)
+      snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error deleting targets' })
       return
     }
-    context.setTargets((oldTargets) => {
-      const newTgts = oldTargets.filter((row) => !ids.includes(row._id))
-      console.log('newTgts:', newTgts)
-      console.log('oldTgts:', oldTargets)
-      return newTgts
-    })
     setRows((oldRows: any) => {
       const newRows = oldRows.filter((row: any) => !ids.includes(row._id))
       return newRows
     });
+    setEnableUndo(true)
+  }
+
+  const onUndoClick = async () => {
+    const resp = await submit_target(targets)
+    if (resp.errors.length>0) {
+      console.error('error while undoing target delete', resp)
+      const msg = 'error when undoing deleted targets: ' + resp.errors.join(', ')
+      snackbarContext.setSnackbarMessage({ severity: 'error', message: msg })
+      return
+    }
+    snackbarContext.setSnackbarMessage({ severity: 'info', message: 'Resubmitted deleted targets' })
+    setRows((oldRows: any) => {
+      return [...targets, ...oldRows]
+    });
+    setEnableUndo(false)
   }
 
   const targetList = targets.map((target, index) => {
@@ -55,7 +67,10 @@ function DeleteTargets(props: { targets: Target[], setRows: Function }) {
 
   return (
     <div>
-      <Button onClick={onClick}>Confirm Delete?</Button>
+      <Button onClick={onDeleteClick}>Confirm Delete?</Button>
+      {enableUndo && (
+        <Button onClick={onUndoClick}>Undo Delete?</Button>
+      )}
       <Typography>Targets to be deleted:</Typography>
       {targetList}
     </div>

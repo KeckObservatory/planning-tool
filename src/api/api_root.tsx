@@ -52,7 +52,11 @@ export const get_userinfo = (): Promise<UserInfo> => {
         .catch(handleError)
 }
 
-export const delete_target = (target_ids: string[]): Promise<string> => {
+export interface DeleteResponse {
+    status: string
+}
+
+export const delete_target = (target_ids: string[]): Promise<DeleteResponse> => {
     const url = BASE_URL + "/deletePlanningToolTarget"
     const obsid_cookie = Cookies.get('observer')
     return axiosInstance.put(url, {obsid_cookie, target_ids})
