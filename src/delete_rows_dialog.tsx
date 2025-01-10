@@ -35,7 +35,7 @@ function DeleteTargets(props: { targets: Target[], setRows: Function }) {
       snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error deleting targets' })
       return
     }
-    setRows((oldRows: any) => {
+    setRows((oldRows: Target[]) => {
       const newRows = oldRows.filter((row: any) => !ids.includes(row._id))
       return newRows
     });
