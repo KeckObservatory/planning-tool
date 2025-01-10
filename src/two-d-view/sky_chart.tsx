@@ -464,7 +464,7 @@ export const SkyChart = (props: Props) => {
     })
 
 
-    const sclayout: Partial<Plotly.Layout> = {
+    let sclayout: Partial<Plotly.Layout> = {
         width,
         height,
         shapes,
