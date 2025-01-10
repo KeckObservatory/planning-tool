@@ -208,8 +208,10 @@ export default function AladinViewer(props: Props) {
 
     const scriptloaded = async () => {
         console.log('aladin script loaded', props)
-        const firstRow = props.targets.at(0)
-        const startPos = firstRow ? `${firstRow.ra_deg ?? '0'} ${firstRow.dec_deg ?? 0}` : '0 0'
+        const firstRow = props.targets.at(0) ?? { ra: '0', dec: '0', ra_deg: 0, dec_deg: 0 }
+        const ra = firstRow.ra_deg ?? ra_dec_to_deg(firstRow.ra ?? '0')
+        const dec = firstRow.dec_deg ?? ra_dec_to_deg(firstRow.dec ?? '0', true)
+        const startPos = `${ra} ${dec}`
         let params: any = {
             survey: 'P/SDSS9/color',
             projection: 'MOL',
