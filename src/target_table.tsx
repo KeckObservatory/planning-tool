@@ -345,7 +345,7 @@ export default function TargetTable() {
                 csvOptions: { disableToolbarButton: true, fields: csvExportColumns, allColumns: true, fileName: `MyTargets` },
                 selectedTargets: rowSelectionModel.map((id) => {
                   return rows.find((row) => row._id === id)
-                })
+                }).filter((row) => row !== undefined) as Target[]
               },
             }}
             initialState={{
