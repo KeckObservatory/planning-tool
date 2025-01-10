@@ -465,9 +465,9 @@ export const SkyChart = (props: Props) => {
 
 
     const scyaxis: Partial<Plotly.LayoutAxis> = {
-        title: isAirmass ? 'Airmass' : 'Degrees',
-        range: yRange,
-        autorange: isAirmass ? 'reversed' : undefined 
+        title: 'Airmass',
+        //range: yRange,
+        range: [0, 5],
     }
 
     let sclayout: Partial<Plotly.Layout> = {
