@@ -47,11 +47,6 @@
             "description": "J Magnitude",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
-        "r_mag": {
-            "type":  ["number", "string"],
-            "description": "R Magnitude",
-            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
-        },
         "v_mag": {
             "type":  ["number", "string"],
             "description": "V Magnitude",
