@@ -13,9 +13,10 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import SimbadButton from './simbad_button';
 import target_schema from './target_schema.json'
-import { Status, Target } from './App';
+import { Magnitude, Status, Target } from './App';
 import { MuiChipsInput } from 'mui-chips-input';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util';
+import { BAND_LIMIT, BANDS } from './two-d-view/constants';
 
 interface Props {
     target: Target
@@ -184,10 +185,10 @@ export const format_tags = (tags: string[]) => {
     return tags
 }
 
-
 export const TargetEditDialog = (props: TargetEditProps) => {
 
     const { target, setTarget } = props
+    const magnitudes = target.magnitudes ?? {} as Magnitude
     const [hasSimbad, setHasSimbad] = React.useState(target.tic_id || target.gaia_id ? true : false)
 
     React.useEffect(() => {
@@ -208,17 +209,28 @@ export const TargetEditDialog = (props: TargetEditProps) => {
         })
     }
 
+    const handleObjectChange = (key: string, value: string) => {
+        const [parent, child] = key.split('.')
+        let parObj = target[parent as keyof Target] as Magnitude ?? {} as Magnitude//initialize object if it doesn't exist
+        parObj = child ? { ...parObj, [child]: value } : { ...parObj, [value]: undefined } //set child value if it exists else set to undefined
+        setTarget((prev: Target) => {
+            return { ...prev, [parent]: parObj }
+        })
+    }
+
     const input_label = (param: keyof Target, tooltip = false): string => {
-        //TODO: handle custom magnitude array
-        // if (param.includes('.')) {
-        //     const [parent, child] = param.split('.')
-        //     const properties = targetProps[parent].items?.properties as any
-        //     const itemProperties = properties[child] as PropertyProps
-        //     const childLabel = tooltip ? itemProperties.description 
-        //     : 
-        //     itemProperties.short_description ?? itemProperties.description
-        //     return childLabel
-        // }
+        if (param.includes('.')) {
+            const [parent, child] = param.split('.')
+            const properties = (targetProps[parent as keyof Target] as unknown as TargetProps).properties
+            const itemProperties = properties[child as keyof PropertyProps] as PropertyProps
+            if (!itemProperties) {
+                return ''
+            }
+            const childLabel = tooltip ? itemProperties.description
+                :
+                itemProperties?.short_description ?? itemProperties.description
+            return childLabel
+        }
         return tooltip ?
             targetProps[param].description
             :
@@ -253,55 +265,63 @@ export const TargetEditDialog = (props: TargetEditProps) => {
         </Stack>
     )
 
-    //TODO: add custom magnitude array
-    // const custom_mag_field = (idx=0, mag?: Magnitude) => {
-    //     const jdx = idx + 1
-    //     return (
-    //         <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2} key={jdx}>
-    //             <Tooltip title={input_label('custom_mag.band' as keyof Target, true)}>
-    //                 <TextField
-    //                     label={input_label('custom_mag.band' as keyof Target)}
-    //                     id={`custom-band-${idx}`}
-    //                     value={mag?.band}
-    //                     sx={{ width: 100 }}
-    //                     onChange={(event) => handleTextChange('custom_mag.band', event.target.value, false, jdx)}
-    //                 />
-    //             </Tooltip>
-    //             <Tooltip title={input_label('custom_mag.mag' as keyof Target, true)}>
-    //                 <TextField
-    //                     label={input_label('custom_mag.mag' as keyof Target)}
-    //                     id={`custom-mag-${idx}`}
-    //                     value={mag?.mag}
-    //                     sx={{ width: 100 }}
-    //                     onChange={(event) => handleTextChange('custom_mag.mag', event.target.value, true, jdx)}
-    //                 />
-    //             </Tooltip>
-    //         </Stack>
-    //     )
-    // }
+    const magnitudes_field = (band?: keyof Magnitude, mag?: number) => {
+        const inputLabel = input_label(`magnitudes`)
+        const options = BANDS.map((b) => { 
+            return { label: b.toUpperCase(), value: b } 
+        })
 
-    // let magOptions = target.custom_mag ? target.custom_mag.map((mag, idx) => {
-    //     return custom_mag_field(idx, mag)
-    // }) : []
+        const lbl = band ? band.toUpperCase() : ""
+        const value = { label: lbl, value: band }
+        return (
+            <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
+                <Tooltip title={input_label(`magnitudes` as keyof Target, true)}>
+                    <Autocomplete
+                        disablePortal
+                        id={`custom-band-${band}`}
+                        value={value}
+                        onChange={(_, value) => value && handleObjectChange(`magnitudes`, value.value ?? "")}
+                        sx={{ width: 100 }}
+                        options={options ?? []}
+                        renderInput={(params) => <TextField {...params} label={inputLabel} />}
+                    />
+                </Tooltip>
+                <Tooltip title={input_label(`magnitudes.${band}` as keyof Target, true)}>
+                    <TextField
+                        label={input_label(`magnitudes.${band}` as keyof Target)}
+                        id={`custom-mag-${mag}`}
+                        value={mag}
+                        sx={{ width: 100 }}
+                        onChange={(event) => handleObjectChange(`magnitudes.${band}`, event.target.value)}
+                    />
+                </Tooltip>
+            </Stack>
+        )
+    }
 
-    // React.useEffect(() => {
-    //     console.log('mag changed', props.target.custom_mag)
-    //     //if no blank field
-    //     const custom_mag = props.target.custom_mag ?? []
-    //     const hasEmptyMag = custom_mag.find((mag: Magnitude) => mag.mag===undefined && mag.band===undefined)
-    //     if(!hasEmptyMag) {
-    //         console.log('adding empty mag row')
-    //         magOptions.push(custom_mag_field())
-    //     }
-    // }, props.target.custom_mag)
+    let magOptions = Object.entries(magnitudes).sort().map(kv => {
+        const [k, v] = kv
+        return magnitudes_field(k as keyof Magnitude, v)
+    })
 
-    // magOptions.push(custom_mag_field())
+    const notBandLimited = magOptions.length < BAND_LIMIT 
+    console.log('notBandLimited', notBandLimited, magOptions, magnitudes)
+    notBandLimited && magOptions.push(magnitudes_field())
 
-    // const magContent = (
-    //     <Stack sx={{ marginBottom: '24px' }} width="100%" direction="column" justifyContent='center' spacing={2}>
-    //         {magOptions}
-    //     </Stack>
-    // )
+    React.useEffect(() => {
+        //if no blank field
+        //there can only be one undefined mag at a time.
+        // const notBandLimited = magOptions.length < BAND_LIMIT 
+        // console.log('mag changed', props.target.magnitudes, notBandLimited)
+        // notBandLimited && magOptions.push(magnitudes_field())
+    }, [props.target.magnitudes])
+
+
+    const magContent = (
+        <Stack sx={{ marginBottom: '24px' }} width="100%" direction="column" justifyContent='center' spacing={2}>
+            {magOptions}
+        </Stack>
+    )
 
     const dialogContent = (
         <Stack sx={{
@@ -337,7 +357,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('ra')}
                                 id="ra"
-                                focused={target.ra? true : false}
+                                focused={target.ra ? true : false}
                                 value={target.ra}
                                 sx={{ width: 150 }}
                                 onChange={(event) => handleTextChange('ra', event.target.value)}
@@ -347,7 +367,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('dec')}
                                 id="dec"
-                                focused={target.dec? true : false}
+                                focused={target.dec ? true : false}
                                 value={target.dec}
                                 sx={{ width: 150 }}
                                 onChange={(event) => handleTextChange('dec', event.target.value)}
@@ -357,7 +377,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('ra_deg')}
                                 id="ra_deg"
-                                focused={target.ra_deg? true : false}
+                                focused={target.ra_deg ? true : false}
                                 value={target.ra_deg}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('ra_deg', event.target.value, true)}
@@ -367,7 +387,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('dec_deg')}
                                 id="dec_deg"
-                                focused={target.dec_deg? true : false}
+                                focused={target.dec_deg ? true : false}
                                 value={target.dec_deg}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('dec_deg', event.target.value)}
@@ -379,7 +399,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('v_mag')}
                                 id="v-magnitude"
-                                focused={target.v_mag? true : false}
+                                focused={target.v_mag ? true : false}
                                 value={target.v_mag}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('v_mag', event.target.value, true)}
@@ -389,7 +409,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('r_mag')}
                                 id="r-magnitude"
-                                focused={target.r_mag? true : false}
+                                focused={target.r_mag ? true : false}
                                 value={target.r_mag}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('r_mag', event.target.value, true)}
@@ -399,7 +419,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('j_mag')}
                                 id="j-magnitude"
-                                focused={target.j_mag? true : false}
+                                focused={target.j_mag ? true : false}
                                 value={target.j_mag}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('j_mag', event.target.value, true)}
@@ -409,19 +429,20 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('g_mag')}
                                 id="g-magnitude"
-                                focused={target.g_mag? true : false}
+                                focused={target.g_mag ? true : false}
                                 value={target.g_mag}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('g_mag', event.target.value, true)}
                             />
                         </Tooltip>
                     </Stack>
+                    {magContent}
                     <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
                         <Tooltip title={input_label('ra_offset', true)}>
                             <TextField
                                 label={input_label('ra_offset')}
                                 id="ra_offset"
-                                focused={target.ra_offset? true : false}
+                                focused={target.ra_offset ? true : false}
                                 value={target.ra_offset}
                                 sx={{ width: 150 }}
                                 onChange={(event) => handleTextChange('ra_offset', event.target.value, true)}
@@ -431,7 +452,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('dec_offset')}
                                 id="dec_offset"
-                                focused={target.dec_offset? true : false}
+                                focused={target.dec_offset ? true : false}
                                 value={target.dec_offset}
                                 sx={{ width: 150 }}
                                 onChange={(event) => handleTextChange('dec_offset', event.target.value, true)}
@@ -480,7 +501,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('d_ra')}
                                 id="dra"
-                                focused={target.d_ra? true : false}
+                                focused={target.d_ra ? true : false}
                                 value={target.d_ra}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('d_ra', event.target.value, true)}
@@ -490,7 +511,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('d_dec')}
                                 id="d_dec"
-                                focused={target.d_dec? true : false}
+                                focused={target.d_dec ? true : false}
                                 value={target.d_dec}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('d_dec', event.target.value, true)}
@@ -500,7 +521,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('gaia_id')}
                                 id="gaia-id"
-                                focused={target.gaia_id? true : false}
+                                focused={target.gaia_id ? true : false}
                                 value={target.gaia_id}
                                 onChange={(event) => handleTextChange('gaia_id', event.target.value)}
                             />
@@ -509,7 +530,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('tic_id')}
                                 id="tic"
-                                focused={target.tic? true : false}
+                                focused={target.tic ? true : false}
                                 value={target.tic}
                                 onChange={(event) => handleTextChange('tic_id', event.target.value)}
                             />
@@ -520,7 +541,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('pm_ra')}
                                 id="pm-ra"
-                                focused={target.pm_ra? true : false}
+                                focused={target.pm_ra ? true : false}
                                 value={target.pm_ra}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('pm_ra', event.target.value, true)}
@@ -530,7 +551,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('pm_dec')}
                                 id="pm-dec"
-                                focused={target.pm_dec? true : false}
+                                focused={target.pm_dec ? true : false}
                                 value={target.pm_dec}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('pm_dec', event.target.value, true)}
@@ -540,7 +561,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('epoch')}
                                 id="epoch"
-                                focused={target.epoch? true : false}
+                                focused={target.epoch ? true : false}
                                 value={target.epoch}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('epoch', event.target.value)}

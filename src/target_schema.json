@@ -62,30 +62,48 @@
             "description": "G Magnitude",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
-        "custom_mag": {
-            "type":  "array",
-            "description": "Custom Magnitudes",
-            "items": {
-                "description": "Band and Magnitude of custom band",
-                "type": "object",
-                "properties": {
-                    "band": {
-                        "type": "string",
-                        "description": "Band",
-                        "minLength": 1,
-                        "maxLength": 15
-                    },
-                    "mag": {
-                        "type":  ["number", "string"],
-                        "description": "Magnitude",
-                        "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
-                    }
+        "magnitudes": {
+            "type":  "object",
+            "description": "Magnitudes",
+            "properties": {
+                "r": {
+                    "type":  ["number", "string"],
+                    "description": "R Magnitude. Relavent for AO observations with the optical WFS.",
+                    "short_description": "R Magnitude",
+                    "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
                 },
-                "required": [
-                    "band",
-                    "mag"
-                ]
-            }
+                "b": {
+                    "type":  ["number", "string"],
+                    "description": "B Magnitude. Relavent for AO observations with the optical WFS.",
+                    "short_description": "B Magnitude",
+                    "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+                },
+                "h": {
+                    "type":  ["number", "string"],
+                    "description": "H Magnitude. Relavent fro AO observations with TRICK.",
+                    "short_description": "H Magnitude",
+                    "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+                },
+                "k": {
+                    "type":  ["number", "string"],
+                    "description": "K Magnitude relavent for AO observations with TRICK.",
+                    "short_description": "K Magnitude",
+                    "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+                },
+                "g": {
+                    "type":  ["number", "string"],
+                    "description": "G Magnitude usually imported from SIMBAD.",
+                    "short_description": "G Magnitude",
+                    "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+                },
+                "j": {
+                    "type":  ["number", "string"],
+                    "description": "G Magnitude usually imported from SIMBAD.",
+                    "short_description": "J Magnitude",
+                    "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+                }
+            },
+            "required": ["v"]
         },
         "epoch": {
             "type":  "string",

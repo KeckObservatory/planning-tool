@@ -37,8 +37,12 @@ export type Status = "EDITED" | "CREATED"
 export type RotatorMode = "pa" | "vertical" | "stationary"
 export type TelescopeWrap = "shortest" | "south" | "north"
 export interface Magnitude {
-  band: string,
-  mag: number
+  'r'?: number,
+  'b'?: number,
+  'j'?: number,
+  'h'?: number,
+  'k'?: number,
+  'g'?: number,
 }
 
 export interface Target extends SimbadTargetData {
@@ -53,7 +57,7 @@ export interface Target extends SimbadTargetData {
   rotator_pa?: number,
   telescope_wrap?: TelescopeWrap
   d_ra?: number,
-  custom_mag?: Magnitude[],
+  magnitudes?: Magnitude,
   d_dec?: number,
   t_eff?: number,
   comment?: string,
