@@ -304,9 +304,9 @@ export const TargetEditDialog = (props: TargetEditProps) => {
         return magnitudes_field(k as keyof Magnitude, v)
     })
 
-    const notBandLimited = magOptions.length < BAND_LIMIT 
-    console.log('notBandLimited', notBandLimited, magOptions, magnitudes)
-    notBandLimited && magOptions.push(magnitudes_field())
+    const bandLimited = magOptions.length >= BAND_LIMIT 
+    console.log('bandLimited', bandLimited, magOptions, magnitudes)
+    !bandLimited && magOptions.push(magnitudes_field())
 
     React.useEffect(() => {
         //if no blank field
