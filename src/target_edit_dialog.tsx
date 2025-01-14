@@ -13,10 +13,9 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import SimbadButton from './simbad_button';
 import target_schema from './target_schema.json'
-import { Magnitude, Status, Target } from './App';
+import { Status, Target } from './App';
 import { MuiChipsInput } from 'mui-chips-input';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util';
-import { BAND_LIMIT, BANDS } from './two-d-view/constants';
 
 interface Props {
     target: Target
@@ -188,7 +187,6 @@ export const format_tags = (tags: string[]) => {
 export const TargetEditDialog = (props: TargetEditProps) => {
 
     const { target, setTarget } = props
-    const magnitudes = target.magnitudes ?? {} as Magnitude
     const [hasSimbad, setHasSimbad] = React.useState(target.tic_id || target.gaia_id ? true : false)
 
     React.useEffect(() => {
@@ -206,15 +204,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
         value = format_tags(value)
         setTarget((prev: Target) => {
             return rowSetter(prev, key, value)
-        })
-    }
-
-    const handleObjectChange = (key: string, value: string) => {
-        const [parent, child] = key.split('.')
-        let parObj = target[parent as keyof Target] as Magnitude ?? {} as Magnitude//initialize object if it doesn't exist
-        parObj = child ? { ...parObj, [child]: value } : { ...parObj, [value]: undefined } //set child value if it exists else set to undefined
-        setTarget((prev: Target) => {
-            return { ...prev, [parent]: parObj }
         })
     }
 
@@ -262,64 +251,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                 Edit Target
             </Typography>
             <SimbadButton target={target} label={true} setTarget={handleSimbadChange} hasSimbad={hasSimbad} />
-        </Stack>
-    )
-
-    const magnitudes_field = (band?: keyof Magnitude, mag?: number) => {
-        const inputLabel = input_label(`magnitudes`)
-        const options = BANDS.map((b) => { 
-            return { label: b.toUpperCase(), value: b } 
-        })
-
-        const lbl = band ? band.toUpperCase() : ""
-        const value = { label: lbl, value: band }
-        return (
-            <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
-                <Tooltip title={input_label(`magnitudes` as keyof Target, true)}>
-                    <Autocomplete
-                        disablePortal
-                        id={`custom-band-${band}`}
-                        value={value}
-                        onChange={(_, value) => value && handleObjectChange(`magnitudes`, value.value ?? "")}
-                        sx={{ width: 100 }}
-                        options={options ?? []}
-                        renderInput={(params) => <TextField {...params} label={inputLabel} />}
-                    />
-                </Tooltip>
-                <Tooltip title={input_label(`magnitudes.${band}` as keyof Target, true)}>
-                    <TextField
-                        label={input_label(`magnitudes.${band}` as keyof Target)}
-                        id={`custom-mag-${mag}`}
-                        value={mag}
-                        sx={{ width: 100 }}
-                        onChange={(event) => handleObjectChange(`magnitudes.${band}`, event.target.value)}
-                    />
-                </Tooltip>
-            </Stack>
-        )
-    }
-
-    let magOptions = Object.entries(magnitudes).sort().map(kv => {
-        const [k, v] = kv
-        return magnitudes_field(k as keyof Magnitude, v)
-    })
-
-    const bandLimited = magOptions.length >= BAND_LIMIT 
-    console.log('bandLimited', bandLimited, magOptions, magnitudes)
-    !bandLimited && magOptions.push(magnitudes_field())
-
-    React.useEffect(() => {
-        //if no blank field
-        //there can only be one undefined mag at a time.
-        // const notBandLimited = magOptions.length < BAND_LIMIT 
-        // console.log('mag changed', props.target.magnitudes, notBandLimited)
-        // notBandLimited && magOptions.push(magnitudes_field())
-    }, [props.target.magnitudes])
-
-
-    const magContent = (
-        <Stack sx={{ marginBottom: '24px' }} width="100%" direction="column" justifyContent='center' spacing={2}>
-            {magOptions}
         </Stack>
     )
 
@@ -426,7 +357,50 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             />
                         </Tooltip>
                     </Stack>
-                    {magContent}
+                    <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
+                        <Tooltip title={input_label('r_mag', true)}>
+                            <TextField
+                                label={input_label('r_mag')}
+                                id="r-magnitude"
+                                focused={target.r_mag ? true : false}
+                                value={target.r_mag}
+                                sx={{ width: 125 }}
+                                onChange={(event) => handleTextChange('r_mag', event.target.value, true)}
+                            />
+                        </Tooltip>
+                        <Tooltip title={input_label('b_mag', true)}>
+                            <TextField
+                                label={input_label('b_mag')}
+                                id="b-magnitude"
+                                focused={target.b_mag ? true : false}
+                                value={target.b_mag}
+                                sx={{ width: 125 }}
+                                onChange={(event) => handleTextChange('b_mag', event.target.value, true)}
+                            />
+                        </Tooltip>
+                    </Stack>
+                    <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
+                        <Tooltip title={input_label('h_mag', true)}>
+                            <TextField
+                                label={input_label('h_mag')}
+                                id="h-magnitude"
+                                focused={target.h_mag ? true : false}
+                                value={target.h_mag}
+                                sx={{ width: 125 }}
+                                onChange={(event) => handleTextChange('h_mag', event.target.value, true)}
+                            />
+                        </Tooltip>
+                        <Tooltip title={input_label('k_mag', true)}>
+                            <TextField
+                                label={input_label('k_mag')}
+                                id="k-magnitude"
+                                focused={target.k_mag ? true : false}
+                                value={target.k_mag}
+                                sx={{ width: 125 }}
+                                onChange={(event) => handleTextChange('k._mag', event.target.value, true)}
+                            />
+                        </Tooltip>
+                    </Stack>
                     <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
                         <Tooltip title={input_label('ra_offset', true)}>
                             <TextField

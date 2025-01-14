@@ -42,67 +42,51 @@
             "description": "Keck Observer ID",
             "not_editable_by_user": false
         },
-        "j_mag": {
-            "type":  ["number", "string"],
-            "description": "J Magnitude",
-            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
-        },
         "v_mag": {
             "type":  ["number", "string"],
             "description": "V Magnitude",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
-        "g_mag": {
+        "r_mag": {
             "type":  ["number", "string"],
-            "description": "G Magnitude",
+            "description": "R Magnitude. Relavent for AO observations with the optical WFS.",
+            "short_description": "R Magnitude",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
-        "magnitudes": {
-            "type":  "object",
-            "description": "Magnitudes",
-            "properties": {
-                "r": {
-                    "type":  ["number", "string"],
-                    "description": "R Magnitude. Relavent for AO observations with the optical WFS.",
-                    "short_description": "R Magnitude",
-                    "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
-                },
-                "b": {
-                    "type":  ["number", "string"],
-                    "description": "B Magnitude. Relavent for AO observations with the optical WFS.",
-                    "short_description": "B Magnitude",
-                    "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
-                },
-                "h": {
-                    "type":  ["number", "string"],
-                    "description": "H Magnitude. Relavent fro AO observations with TRICK.",
-                    "short_description": "H Magnitude",
-                    "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
-                },
-                "k": {
-                    "type":  ["number", "string"],
-                    "description": "K Magnitude relavent for AO observations with TRICK.",
-                    "short_description": "K Magnitude",
-                    "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
-                },
-                "g": {
-                    "type":  ["number", "string"],
-                    "description": "G Magnitude usually imported from SIMBAD.",
-                    "short_description": "G Magnitude",
-                    "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
-                },
-                "j": {
-                    "type":  ["number", "string"],
-                    "description": "G Magnitude usually imported from SIMBAD.",
-                    "short_description": "J Magnitude",
-                    "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
-                }
-            },
-            "required": ["v"]
+        "b_mag": {
+            "type":  ["number", "string"],
+            "description": "B Magnitude. Relavent for AO observations with the optical WFS.",
+            "short_description": "B Magnitude",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+        },
+        "h_mag": {
+            "type":  ["number", "string"],
+            "description": "H Magnitude. Relavent fro AO observations with TRICK.",
+            "short_description": "H Magnitude",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+        },
+        "k_mag": {
+            "type":  ["number", "string"],
+            "description": "K Magnitude relavent for AO observations with TRICK.",
+            "short_description": "K Magnitude",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+        },
+        "g_mag": {
+            "type":  ["number", "string"],
+            "description": "G Magnitude usually imported from SIMBAD.",
+            "short_description": "G Magnitude",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+        },
+        "j_mag": {
+            "type":  ["number", "string"],
+            "description": "G Magnitude usually imported from SIMBAD.",
+            "short_description": "J Magnitude",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "epoch": {
             "type":  "string",
-            "description": "Epoch"
+            "description": "Epoch",
+            "pattern": "^\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "d_dec": {
             "type":  ["number", "string"],

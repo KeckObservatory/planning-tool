@@ -165,7 +165,6 @@ export const create_new_target = (id?: string, obsid?: number, target_name?: str
     obsid: obsid,
     _id: id,
     target_name: target_name,
-    magnitudes: { },
     status: 'CREATED'
   }
   return newTarget as Target

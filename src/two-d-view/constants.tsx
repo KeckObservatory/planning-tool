@@ -1,5 +1,3 @@
-import { Magnitude } from "../App"
-
 export const FOVlink = 'FEATURES.json'
 export const ROUND_MINUTES = 10 // minutes
 export const STEP_SIZE = 1/6 //hours
@@ -51,8 +49,6 @@ export const AMATEUR_TWILIGHT_SHADE = '#9f9f9f'
 export const ASTRONOMICAL_TWILIGHT_SHADE = '#818181'
 
 export const EXTINCTION_COEFF = 0.172 // extinction coefficient [mag/airmass]
-export const BANDS: Array<keyof Magnitude> = ['r', 'b', 'h', 'k' ] // allowable bands
-export const BAND_LIMIT = 4 // the max number of bands to display
 
 // dark zenith sky brightness taken from
 //https://www.cfht.hawaii.edu/Instruments/ObservatoryManual/CFHT_ObservatoryManual_(Sec_2).html
