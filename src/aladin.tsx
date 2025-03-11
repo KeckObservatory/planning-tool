@@ -109,7 +109,6 @@ const get_compass = async (aladin: any, height: number, width: number, positionA
         polygon = rotate_multipolygon([polygon], compassAngle, rotPnt)[0]
         f.geometry.coordinates = polygon
     })
-
     return fc
 }
 
