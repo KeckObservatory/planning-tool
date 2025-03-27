@@ -22,7 +22,6 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 interface ButtonProps {
-    targetName: string
     targetNames: string[]
 }
 
@@ -74,6 +73,7 @@ const get_curr_semester = (date: Date) => {
 interface VizDialogProps {
     open: boolean,
     targetName: string
+    setTargetName: (name: string) => void
     targetNames: string[]
     handleClose: () => void
 }
@@ -97,8 +97,11 @@ const get_semester_dates = (semester: string) => {
 }
 
 export const TargetVizButton = (props: ButtonProps) => {
-    const { targetName, targetNames } = props
+    const { targetNames } = props
 
+    const initTargetName = targetNames.at(0) ??  "" 
+
+    const [targetName, setTargetName] = useState<string>(initTargetName)
     const [open, setOpen] = React.useState(false);
 
     const handleClickOpen = () => {
@@ -119,6 +122,7 @@ export const TargetVizButton = (props: ButtonProps) => {
             <VizDialog
                 open={open}
                 targetName={targetName}
+                setTargetName={setTargetName}
                 targetNames={targetNames}
                 handleClose={handleClose}
             />
@@ -221,6 +225,7 @@ export const VizDialog = (props: VizDialogProps) => {
             let newTarget = context.targets.find((t: Target) => t.target_name === name || t._id === name)
             newTarget = (newTarget && newTarget.ra && newTarget.dec) ? newTarget : {} as Target
             setTarget(newTarget)
+            props.setTargetName(name)
         }
     }
 

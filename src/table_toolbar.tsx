@@ -204,9 +204,6 @@ export function EditToolbar(props: EditToolbarProps) {
     context.targets.map((t: Target) => t.target_name ?? t._id) as string[]
 
 
-
-  const targetName = targetNames.at(0) ??  "" 
-
   return (
     // <GridToolbarContainer sx={{ justifyContent: 'center' }}>
     <GridToolbarContainer sx={{ justifyContent: 'space-between' }}>
@@ -216,7 +213,7 @@ export function EditToolbar(props: EditToolbarProps) {
         </Button>
         <DeleteDialogButton setRows={setRows} targets={props.selectedTargets} color='primary'/>
         <ViewTargetsDialogButton targets={props.selectedTargets} color='primary'/>
-        <TargetVizButton targetName={ targetName } targetNames={ targetNames } />
+        <TargetVizButton targetNames={ targetNames } />
         <TargetWizardButton />
       </Stack>
       <Stack justifyContent={'right'} direction="row" spacing={1}>
