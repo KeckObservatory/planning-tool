@@ -164,12 +164,10 @@ export const VizDialog = (props: VizDialogProps) => {
     const regexp = new RegExp("^[12][0-9]{3}[AB]$")
     useEffect(() => {
         const validSemester = regexp.test(semester)
-        console.log('semester', semester, 'valid', validSemester)
         if (!validSemester) {
             return
         }
         const dates = get_semester_dates(semester)
-        console.log('dates', dates)
         let tViz: TargetViz = {
             ...target,
             semester: semester,
@@ -180,7 +178,6 @@ export const VizDialog = (props: VizDialogProps) => {
         if (!target.ra_deg || !target.dec_deg) {
             return
         }
-        console.log('target', target)
 
         tViz.semester_visibility = dates.map((date: Dayjs) => {
             let suncalc_times = get_suncalc_times(lngLatEl, date.toDate())
@@ -214,12 +211,12 @@ export const VizDialog = (props: VizDialogProps) => {
 
             return { ...suncalc_times, date: date.toDate(), visibility, visible_hours }
         })
-        console.log('setting target viz', tViz)
 
         setTargetView(tViz as TargetViz)
     }, [target, semester, dome])
 
     const onTargetNameSelect = (name: string) => {
+        console.log('name', name, 'targetName', props.targetName)
         if (name !== props.targetName) {
             let newTarget = context.targets.find((t: Target) => t.target_name === name || t._id === name)
             newTarget = (newTarget && newTarget.ra && newTarget.dec) ? newTarget : {} as Target
