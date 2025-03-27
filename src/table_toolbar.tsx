@@ -155,6 +155,11 @@ function CustomExportButton(props: ExportButtonProps) {
   );
 }
 
+export const get_targets_from_selected_targets = (selectedTargets: Target[], targets: Target[]): Target[] => {
+  const selectedTargetIds = new Set(selectedTargets.map((target) => target._id))
+  return targets.filter((target) => selectedTargetIds.has(target._id))
+}
+
 export const create_new_target = (id?: string, obsid?: number, target_name?: string) => {
   let newTarget: Partial<Target> = {}
   Object.entries(target_schema.properties).forEach(([key, value]: [string, any]) => {
@@ -181,6 +186,19 @@ interface EditToolbarProps {
 export function EditToolbar(props: EditToolbarProps) {
   const { setRows, processRowUpdate, csvOptions } = props;
   const context = useStateContext()
+  const initTargets = props.selectedTargets.length > 0 ?
+    get_targets_from_selected_targets(props.selectedTargets, context.targets)
+    : context.targets
+  const [targets, setTargets] = React.useState(initTargets);
+
+  React.useEffect(() => {
+    const newTargets = props.selectedTargets.length > 0 ?
+      get_targets_from_selected_targets(props.selectedTargets, context.targets)
+      : context.targets
+    setTargets(newTargets);
+  }, [
+    context.targets, props.selectedTargets
+  ]);
 
   const handleAddTarget = async () => {
     const id = randomId();
@@ -199,9 +217,6 @@ export function EditToolbar(props: EditToolbarProps) {
     });
   };
 
-  const targetNames = props.selectedTargets.length > 0 ? 
-    props.selectedTargets.map((t: Target) => t.target_name ?? t._id) as string[] :
-    context.targets.map((t: Target) => t.target_name ?? t._id) as string[]
 
 
   return (
@@ -211,17 +226,17 @@ export function EditToolbar(props: EditToolbarProps) {
         <Button color="primary" startIcon={<AddIcon />} onClick={handleAddTarget}>
           Add Target
         </Button>
-        <DeleteDialogButton setRows={setRows} targets={props.selectedTargets} color='primary'/>
-        <ViewTargetsDialogButton targets={props.selectedTargets} color='primary'/>
-        <TargetVizButton targetNames={ targetNames } />
+        <DeleteDialogButton setRows={setRows} targets={props.selectedTargets} color='primary' />
+        <ViewTargetsDialogButton targets={props.selectedTargets} color='primary' />
+        <TargetVizButton targets={targets} />
         <TargetWizardButton />
       </Stack>
       <Stack justifyContent={'right'} direction="row" spacing={1}>
-      <CustomExportButton csvOptions={csvOptions} />
-      <GridToolbar
-        printOptions={{disableToolbarButton: true }}
-        csvOptions={{disableToolbarButton: true }}
-      />
+        <CustomExportButton csvOptions={csvOptions} />
+        <GridToolbar
+          printOptions={{ disableToolbarButton: true }}
+          csvOptions={{ disableToolbarButton: true }}
+        />
       </Stack>
     </GridToolbarContainer>
   );

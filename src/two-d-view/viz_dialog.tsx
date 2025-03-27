@@ -4,7 +4,6 @@ import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import { DomeSelect, Dome, DomeParam } from "./two_d_view";
 import { StringParam, useQueryParam, withDefault } from 'use-query-params';
-import { useTargetContext } from '../target_table';
 import { Target, useStateContext } from '../App';
 import { Autocomplete, Stack, TextField } from '@mui/material';
 import { alt_az_observable, TargetVizChart } from './target_viz_chart';
@@ -22,7 +21,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 interface ButtonProps {
-    targetNames: string[]
+    targets: Target[]
 }
 
 export interface TargetViz extends Target {
@@ -72,9 +71,9 @@ const get_curr_semester = (date: Date) => {
 
 interface VizDialogProps {
     open: boolean,
-    targetName: string
-    setTargetName: (name: string) => void
-    targetNames: string[]
+    target: Target,
+    setTarget: (t: Target) => void
+    targets: Target[]
     handleClose: () => void
 }
 
@@ -97,11 +96,11 @@ const get_semester_dates = (semester: string) => {
 }
 
 export const TargetVizButton = (props: ButtonProps) => {
-    const { targetNames } = props
+    const { targets } = props
 
-    const initTargetName = targetNames.at(0) ??  "" 
 
-    const [targetName, setTargetName] = useState<string>(initTargetName)
+    let initTarget = targets.at(0) ?? {} as Target
+    const [target, setTarget] = useState<Target>(initTarget)
     const [open, setOpen] = React.useState(false);
 
     const handleClickOpen = () => {
@@ -114,16 +113,16 @@ export const TargetVizButton = (props: ButtonProps) => {
 
     return (
         <>
-            <Tooltip title={`Click to view target visibility for ${targetName}`}>
+            <Tooltip title={`Click to view target visibility for ${target.target_name ?? target._id}`}>
                 <IconButton color="primary" onClick={handleClickOpen}>
                     <VisibilityIcon />
                 </IconButton>
             </Tooltip>
             <VizDialog
                 open={open}
-                targetName={targetName}
-                setTargetName={setTargetName}
-                targetNames={targetNames}
+                target={target}
+                setTarget={setTarget}
+                targets={targets}
                 handleClose={handleClose}
             />
         </>
@@ -155,11 +154,10 @@ export const VizDialog = (props: VizDialogProps) => {
     const [semester, setSemester] = useQueryParam('semester', withDefault(StringParam, default_semester))
     const [vizType, setVizType] = useState<VizChart>("Target Visibility")
     const context = useStateContext()
-    const targetContext = useTargetContext()
-    let initTarget = targetContext.targets.find((t: Target) => t.target_name === props.targetName || t._id === props.targetName)
+
     // target must have ra dec and be defined
-    initTarget = (initTarget && initTarget.ra && initTarget.dec) ? initTarget : {} as Target
-    const [target, setTarget] = useState<Target>(initTarget)
+    const { target, setTarget, targets } = props
+    const targetValid = target && target.ra && target.dec
 
     const init_target_viz = { semester, dome, ...target, semester_visibility: [] }
     const [targetViz, setTargetView] = useState<TargetViz>(init_target_viz)
@@ -220,12 +218,12 @@ export const VizDialog = (props: VizDialogProps) => {
     }, [target, semester, dome])
 
     const onTargetNameSelect = (name: string) => {
-        console.log('name', name, 'targetName', props.targetName)
-        if (name !== props.targetName) {
-            let newTarget = context.targets.find((t: Target) => t.target_name === name || t._id === name)
+        console.log('name', name, 'targetName',)
+        const targetName = target.target_name ?? target._id
+        if (name !== targetName) {
+            let newTarget = targets.find((t: Target) => t.target_name === name || t._id === name)
             newTarget = (newTarget && newTarget.ra && newTarget.dec) ? newTarget : {} as Target
             setTarget(newTarget)
-            props.setTargetName(name)
         }
     }
 
@@ -248,18 +246,21 @@ export const VizDialog = (props: VizDialogProps) => {
                     <Autocomplete
                         disablePortal
                         id="selected-target"
-                        value={props.targetName}
+                        value={target.target_name ?? target._id}
                         onChange={(_, value) => value && onTargetNameSelect(value)}
-                        options={props.targetNames ?? []}
+                        options={targets.map(target => target.target_name ?? target._id)}
                         sx={{ width: 250 }}
                         renderInput={(params) => <TextField {...params} label={'Selected Target'} />}
                     />
                 </Tooltip>
                 <VizSelectMenu vizType={vizType} setVizType={setVizType} />
             </Stack>
-            {vizType === "Target Visibility" ? <TargetVizChart targetViz={targetViz} />
-                : <MoonVizChart targetViz={targetViz} vizType={vizType} />
-            }
+            {targetValid &&
+                (vizType === "Target Visibility" ? 
+                    <TargetVizChart targetViz={targetViz} />
+                    :
+                    <MoonVizChart targetViz={targetViz} vizType={vizType} />
+                )}
         </Stack>
     )
 
