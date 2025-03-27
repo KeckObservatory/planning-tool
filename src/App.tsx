@@ -8,7 +8,6 @@ import Stack from '@mui/material/Stack';
 import React, { useEffect, useState } from 'react';
 import { BooleanParam, useQueryParam, withDefault } from 'use-query-params';
 import TargetTable from './target_table.tsx';
-import { SimbadTargetData } from './simbad_button.tsx';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { LicenseInfo } from '@mui/x-license';
@@ -16,6 +15,7 @@ import licenseKey from './license.json'
 import Skeleton from '@mui/material/Skeleton';
 import { get_targets, get_userinfo } from './api/api_root.tsx';
 import { AxiosError } from 'axios';
+import { SimbadTargetData } from './catalog_button.tsx';
 
 const CONFIG_PATH = './config.json'
 
@@ -191,7 +191,8 @@ function App() {
             "dec": "20:00:00.00",
             "dec_deg": 20.0,
             "ra": "10:40:07",
-            "epoch": "J2000",
+            "ra_deg": 15.029,
+            "epoch": "2000",
             "g_mag": 12.84409,
             "gaia_id": "3.70038690560506E+018",
             "j_mag": 11.692,

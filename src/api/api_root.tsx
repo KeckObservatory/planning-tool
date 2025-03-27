@@ -16,6 +16,23 @@ export interface UserInfo {
     is_admin?: boolean; //added by backend
 }
 
+export interface GaiaParams {
+    ra_deg?: number,
+    dec_deg?: number,
+    parallax?: number,
+    systemic_velocity?: number,
+    g_mag?: number,
+    t_eff?: number,
+}
+
+export interface GaiaResp {
+    success: string,
+    message: string,
+    gaia_id: string,
+    details?: string,
+    gaia_params?: GaiaParams
+}
+
 
 const axiosInstance = axios.create({
     withCredentials: false,
@@ -39,6 +56,13 @@ export interface GetLogsArgs {
 
 export const get_simbad = (obj: string): Promise<string> => {
     const url = SIMBAD_ADDR + obj
+    return axiosInstance.get(url)
+        .then(handleResponse)
+        .catch(handleError)
+}
+
+export const get_gaia = (gaia_id: string): Promise<GaiaResp> => {
+    const url = BASE_URL + `/getGaiaParameters?gaia_id=${gaia_id}`
     return axiosInstance.get(url)
         .then(handleResponse)
         .catch(handleError)

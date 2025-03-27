@@ -284,6 +284,7 @@ export const TargetVizChart = (props: Props) => {
         return trace
     })
 
+    console.log('targetViz', targetViz, 'traces', traces)
     const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.PlotData[]
     //@ts-ignore
     traces = [...traces, ...lightTraces]

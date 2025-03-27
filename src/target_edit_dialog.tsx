@@ -11,7 +11,7 @@ import {
     Typography
 } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit';
-import SimbadButton from './simbad_button';
+import CatalogButton from './catalog_button';
 import target_schema from './target_schema.json'
 import { Status, Target } from './App';
 import { MuiChipsInput } from 'mui-chips-input';
@@ -187,10 +187,10 @@ export const format_tags = (tags: string[]) => {
 export const TargetEditDialog = (props: TargetEditProps) => {
 
     const { target, setTarget } = props
-    const [hasSimbad, setHasSimbad] = React.useState(target.tic_id || target.gaia_id ? true : false)
+    const [hasCatalog, setHasCatalog] = React.useState(target.tic_id || target.gaia_id ? true : false)
 
     React.useEffect(() => {
-        setHasSimbad(target.tic_id || target.gaia_id ? true : false)
+        setHasCatalog(target.tic_id || target.gaia_id ? true : false)
     }, [target.tic_id, target.gaia_id])
 
     const handleTextChange = (key: string, value?: string | number, isNumber = false) => {
@@ -226,12 +226,12 @@ export const TargetEditDialog = (props: TargetEditProps) => {
             targetProps[param].short_description ?? targetProps[param].description
     }
 
-    const handleSimbadChange = (tgt: Target) => {
+    const handleCatalogChange = (tgt: Target) => {
         setTarget((prev: Target) => {
             tgt = { ...prev, ...tgt, status: 'EDITED' }
             return tgt
         })
-        setHasSimbad(tgt.tic_id || tgt.gaia_id ? true : false)
+        setHasCatalog(tgt.tic_id || tgt.gaia_id ? true : false)
         handleTextChange('ra', tgt.ra)
     }
 
@@ -250,7 +250,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
             >
                 Edit Target
             </Typography>
-            <SimbadButton target={target} label={true} setTarget={handleSimbadChange} hasSimbad={hasSimbad} />
+            <CatalogButton target={target} label={true} setTarget={handleCatalogChange} hasCatalog={hasCatalog} />
         </Stack>
     )
 

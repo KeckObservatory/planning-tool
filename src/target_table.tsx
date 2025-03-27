@@ -23,7 +23,7 @@ import {
 } from '@mui/x-data-grid-pro';
 import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
-import SimbadButton from './simbad_button';
+import CatalogButton from './catalog_button.tsx';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
 import { Target, useSnackbarContext, useStateContext } from './App.tsx';
 import TargetEditDialogButton, { format_tags, format_edit_entry, PropertyProps, rowSetter, TargetProps } from './target_edit_dialog.tsx';
@@ -219,7 +219,7 @@ export default function TargetTable() {
     const { id, row } = params;
     const [editTarget, setEditTarget] = React.useState<Target>(row);
     const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
-    const [hasSimbad, setHasSimbad] = React.useState(row.tic_id || row.gaia_id ? true : false);
+    const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
     const [errors, setErrors] = React.useState<ErrorObject<string, Record<string, any>, unknown>[]>(validate_sanitized_target(row));
     const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
     const apiRef = useGridApiContext();
@@ -231,14 +231,14 @@ export default function TargetTable() {
         processRowUpdate(editTarget) //TODO: May want to wait till save is successful
         if (isEdited) newTgt = await debounced_save(editTarget)
         if (newTgt) {
-          newTgt.tic_id || newTgt.gaia_id && setHasSimbad(true)
+          newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
           debounced_edit_click(id)
         }
       }
     }
 
 
-    React.useEffect(() => { // when targed is edited in target edit dialog or simbad dialog
+    React.useEffect(() => { // when targed is edited in target edit dialog or catalog dialog
       handleRowChange()
       setErrors(validate_sanitized_target(editTarget))
       setCount((prev: number) => prev + 1)
@@ -268,7 +268,7 @@ export default function TargetTable() {
     useGridApiEventHandler(apiRef, 'cellEditStop', handleEvent)
 
     return [
-      <SimbadButton hasSimbad={hasSimbad} target={editTarget} setTarget={setEditTarget} />,
+      <CatalogButton hasCatalog={hasCatalog} target={editTarget} setTarget={setEditTarget} />,
       <ViewTargetsDialogButton targets={[editTarget]} />,
       <ValidationDialogButton errors={errors} target={editTarget} />,
       <TargetEditDialogButton
