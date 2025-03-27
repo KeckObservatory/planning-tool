@@ -11,7 +11,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 import { UploadComponent } from './upload_targets_dialog';
-import { get_simbad_data } from './simbad_button.tsx';
+import { get_simbad_data } from './catalog_button.tsx';
 import Tooltip from '@mui/material/Tooltip';
 import Stack from '@mui/material/Stack';
 import { useStateContext } from './App.tsx';
