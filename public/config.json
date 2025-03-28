@@ -4,7 +4,7 @@
         "target_name",
         "ra",
         "dec",
-        "epoch",
+        "equinox",
         "j_mag",
         "g_mag",
         "pm_ra",
@@ -15,7 +15,7 @@
         "target_name",
         "ra",
         "dec",
-        "epoch",
+        "equinox",
         "j_mag",
         "g_mag",
         "pm_ra",
@@ -35,7 +35,7 @@
             "target_name",
             "ra",
             "dec",
-            "epoch"
+            "equinox"
         ],
         "right": ["tags"]
     },

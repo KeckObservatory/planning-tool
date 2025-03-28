@@ -80,7 +80,7 @@ export const format_targets = (tgts: UploadedTarget[], targetProps: TargetProps)
 interface StarListOptionalKeys {
     gmag?: number,
     jmag?: number,
-    epoch?: string,
+    equinox?: string,
     raoffset?: number,
     decoffset?: number,
     pmra?: number,
@@ -95,7 +95,7 @@ let starlistToKeyMapping = {
     'gmag': 'g_mag',
     'jmag': 'j_mag',
     'vmag': 'v_mag',
-    'epoch': 'epoch',
+    'equinox': 'equinox',
     'raoffset': 'ra_offset',
     'decoffset': 'dec_offset',
     'pmra': 'pm_ra',
@@ -222,7 +222,7 @@ const parse_txt = (contents: string, obsid: number) => {
         if (row === '' || !row) return
         if (row.startsWith('#')) return
         const [target_name, tail] = split_at(15, row)
-        let [rah, ram, ras, dech, decm, decs, epoch, ...opts] = tail.trimStart().replace(/\s\s+/g, ' ').split(' ')
+        let [rah, ram, ras, dech, decm, decs, equinox, ...opts] = tail.trimStart().replace(/\s\s+/g, ' ').split(' ')
         console.log(`tail:${tail}`, 'ras', ras, 'decs', decs)
         console.log('rah', rah, 'ram', ram, 'ras', ras, 'dech', dech, 'decm', decm, 'decs', decs)
         ras = ras.split('.')[0].padStart(2, '0') + '.' + ras.split('.')[1]
@@ -251,7 +251,7 @@ const parse_txt = (contents: string, obsid: number) => {
             ra_deg: ra_dec_to_deg(ra),
             dec_deg: ra_dec_to_deg(dec, true),
             dec,
-            epoch,
+            equinox,
         };
         if (comment.length>0) {
             tgt.comment = comment

@@ -51,8 +51,8 @@ export interface SimbadTargetData {
     dec_deg?: number,
     pm_ra?: number,
     pm_dec?: number,
-    epoch?: number | string,
-    equinox?: string,
+    equinox?: number | string,
+    epoch?: string,
     parallax?: number,
     tic?: string,
     j_mag?: number,
@@ -85,8 +85,8 @@ export const get_simbad_data = async (targetName: string): Promise<SimbadTargetD
             simbadData['dec'] = line.split(': ')[1].split(' ').slice(4, 7).join(':')
             simbadData['ra_deg'] = ra_dec_to_deg(simbadData['ra'])
             simbadData['dec_deg'] = ra_dec_to_deg(simbadData['dec'], true)
-            simbadData['equinox'] = line.match( new RegExp("ep=(\\w+)"))?.at(1) // simbad swapped equinox and epoch
-            simbadData['epoch'] = Number(line.match( new RegExp("eq=(\\w+)"))?.at(1)) // simbad swapped equinox and epoch
+            simbadData['equinox'] = line.match( new RegExp("eq=(\\w+)"))?.at(1)
+            simbadData['epoch'] = line.match( new RegExp("ep=(\\w+)"))?.at(1)
         }
         else if (line.startsWith('Radial Velocity')) {
             const sysRv = Number(line.split(' ')[2].replace(' ', ''))

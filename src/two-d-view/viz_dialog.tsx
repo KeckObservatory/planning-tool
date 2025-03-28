@@ -255,12 +255,11 @@ export const VizDialog = (props: VizDialogProps) => {
                 </Tooltip>
                 <VizSelectMenu vizType={vizType} setVizType={setVizType} />
             </Stack>
-            {targetValid &&
-                (vizType === "Target Visibility" ? 
-                    <TargetVizChart targetViz={targetViz} />
-                    :
-                    <MoonVizChart targetViz={targetViz} vizType={vizType} />
-                )}
+            (vizType === "Target Visibility" ?
+            <TargetVizChart targetViz={targetViz} />
+            :
+            <MoonVizChart targetViz={targetViz} vizType={vizType} />
+            )
         </Stack>
     )
 

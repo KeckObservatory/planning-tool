@@ -83,11 +83,15 @@
             "short_description": "J Magnitude",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
+        "equinox": {
+            "type":  "string",
+            "description": "Equinox",
+            "pattern": "^\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+        },
         "epoch": {
             "type":  "string",
             "description": "Epoch",
-            "pattern": "^\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
-        },
+            "pattern": "^\\w?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"},
         "d_dec": {
             "type":  ["number", "string"],
             "short_description": "dDec",
@@ -190,7 +194,7 @@
         "target_name",
         "ra",
         "dec",
-        "epoch"
+        "equinox"
     ],
     "additionalProperties": true
 }

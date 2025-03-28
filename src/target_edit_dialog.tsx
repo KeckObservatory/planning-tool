@@ -521,14 +521,14 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 onChange={(event) => handleTextChange('pm_dec', event.target.value, true)}
                             />
                         </Tooltip>
-                        <Tooltip title={input_label('epoch', true)}>
+                        <Tooltip title={input_label('equinox', true)}>
                             <TextField
-                                label={input_label('epoch')}
-                                id="epoch"
-                                focused={target.epoch ? true : false}
-                                value={target.epoch}
+                                label={input_label('equinox')}
+                                id="equinox"
+                                focused={target.equinox ? true : false}
+                                value={target.equinox}
                                 sx={{ width: 125 }}
-                                onChange={(event) => handleTextChange('epoch', event.target.value)}
+                                onChange={(event) => handleTextChange('equinox', event.target.value)}
                             />
                         </Tooltip>
                     </Stack>

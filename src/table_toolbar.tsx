@@ -52,9 +52,9 @@ const convert_target_to_targetlist_row = (target: Target) => {
   const name = target.target_name?.slice(0, 14).padEnd(15, " ")
   const ra = target.ra?.replaceAll(':', ' ')
   const dec = target.dec?.replaceAll(':', ' ')
-  const epoch = target.epoch ?? 'J2000'
-  let row = `${name} ${ra} ${dec} ${epoch}`
-  const valid = target.target_name && target.ra && target.dec && target.epoch
+  const equinox = target.equinox ?? '2000'
+  let row = `${name} ${ra} ${dec} ${equinox}`
+  const valid = target.target_name && target.ra && target.dec && target.equinox
   row = valid ? row : '# INVALID row: ' + row
   //optional params
   row = target.g_mag ? row + ` gmag=${target.g_mag}` : row
@@ -157,7 +157,8 @@ function CustomExportButton(props: ExportButtonProps) {
 
 export const get_targets_from_selected_targets = (selectedTargets: Target[], targets: Target[]): Target[] => {
   const selectedTargetIds = new Set(selectedTargets.map((target) => target._id))
-  return targets.filter((target) => selectedTargetIds.has(target._id))
+  //filter out targets that don't have ra and dec
+  return targets.filter((target) => selectedTargetIds.has(target._id) && target.ra && target.dec)
 }
 
 export const create_new_target = (id?: string, obsid?: number, target_name?: string) => {
@@ -188,7 +189,7 @@ export function EditToolbar(props: EditToolbarProps) {
   const context = useStateContext()
   const initTargets = props.selectedTargets.length > 0 ?
     get_targets_from_selected_targets(props.selectedTargets, context.targets)
-    : context.targets
+    : context.targets.filter((target) => target.ra && target.dec)
   const [targets, setTargets] = React.useState(initTargets);
 
   React.useEffect(() => {

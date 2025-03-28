@@ -17,7 +17,7 @@ export const date_to_juld = (date: Date) => {
 }
 
 export const get_gmt = (date?: Date) => {
-    //NOTE: This uses the J2000 Epoch. This is the same as the GMST at 0h UT on 1 January 2000
+    //NOTE: This uses the 2000.00 equinox. This is the same as the GMST at 0h UT on 1 January 2000
     if (!date) date = new Date()
     const JD = date_to_juld(date)
     const T = (JD - 2451545) / 36525;
