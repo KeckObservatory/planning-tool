@@ -90,7 +90,8 @@
         },
         "epoch": {
             "type":  "string",
-            "description": "Epoch",
+            "description": "Epoch specific date and time (J2000)",
+            "short_description": "Epoch",
             "pattern": "^\\w?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"},
         "d_dec": {
             "type":  ["number", "string"],
