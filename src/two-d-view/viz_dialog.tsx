@@ -157,7 +157,6 @@ export const VizDialog = (props: VizDialogProps) => {
 
     // target must have ra dec and be defined
     const { target, setTarget, targets } = props
-    const targetValid = target && target.ra && target.dec
 
     const init_target_viz = { semester, dome, ...target, semester_visibility: [] }
     const [targetViz, setTargetView] = useState<TargetViz>(init_target_viz)
