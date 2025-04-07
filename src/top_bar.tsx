@@ -2,6 +2,7 @@ import AppBar from '@mui/material/AppBar';
 import HelpIcon from '@mui/icons-material/Help';
 import Switch from "@mui/material/Switch"
 import Tooltip from '@mui/material/Tooltip';
+import Button from '@mui/material/Button';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography'
 import DoorFrontIcon from '@mui/icons-material/DoorFront';
@@ -44,6 +45,11 @@ export function TopBar(props: Props) {
 
   const handlePortalClick = () => {
     window.open(piPortal, "_self")
+  }
+
+  const handleSurveyClick = () => {
+
+    window.open('https://docs.google.com/forms/d/e/1FAIpQLSduMTA4YBCa2zrO7736u8BpztXqsUu2W9zkdTuLx8UJ8Ry4dA/viewform?usp=dialog', '_blank')
   }
 
   const color = props.darkState ? 'primary' : 'secondary'
@@ -89,6 +95,11 @@ export function TopBar(props: Props) {
             <LogoutIcon />
           </IconButton>
         </Tooltip> */}
+        <Button
+          variant='contained'
+          onClick={handleSurveyClick}>
+          Submit Survey
+        </Button>
         <Tooltip title="Return to Observer Portal">
           <IconButton
             aria-label="open drawer"
