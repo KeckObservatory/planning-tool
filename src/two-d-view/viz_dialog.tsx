@@ -159,6 +159,7 @@ export const VizDialog = (props: VizDialogProps) => {
     const { target, setTarget, targets } = props
 
     const init_target_viz = { semester, dome, ...target, semester_visibility: [] }
+    console.log('init_target_viz', init_target_viz) 
     const [targetViz, setTargetView] = useState<TargetViz>(init_target_viz)
     const KG = context.config.tel_geometry.keck[dome as Dome]
 
@@ -212,12 +213,14 @@ export const VizDialog = (props: VizDialogProps) => {
 
             return { ...suncalc_times, date: date.toDate(), visibility, visible_hours }
         })
+        console.log('targetViz', tViz)
 
         setTargetView(tViz as TargetViz)
     }, [target, semester, dome])
 
     const onTargetNameSelect = (name: string) => {
         console.log('name', name, 'targetName',)
+        console.log('targets', targets)
         const targetName = target.target_name ?? target._id
         if (name !== targetName) {
             let newTarget = targets.find((t: Target) => t.target_name === name || t._id === name)
