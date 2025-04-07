@@ -337,6 +337,7 @@ export default function TargetTable() {
             }}
             rowSelectionModel={rowSelectionModel}
             slotProps={{
+              // @ts-ignore
               toolbar: {
                 setRows,
                 processRowUpdate,
