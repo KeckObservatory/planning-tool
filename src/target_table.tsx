@@ -301,7 +301,17 @@ export default function TargetTable() {
     }
   ];
 
-  columns = [...addColumns, ...columns];
+  columns = [...addColumns, ...columns]; 
+
+  const selectedRows = rowSelectionModel.map((id) => {
+                  return rows.find((tgt) => tgt._id === id)
+                }).filter((tgt) => tgt!== undefined) as Target[]
+
+  const selectedTargets = rowSelectionModel.map((id) => {
+                  return rows.find((tgt) => tgt._id === id)
+                }).filter((tgt) => tgt!== undefined) as Target[]
+
+  console.log('selected targets', selectedTargets, 'selectedRows', selectedRows)
 
   return (
     <TargetContext.Provider value={{ targets: rows, setTargets: setRows }}>
@@ -344,9 +354,7 @@ export default function TargetTable() {
                 setRowModesModel,
                 obsid: context.obsid, //TODO: allow admin to edit obsid
                 csvOptions: { disableToolbarButton: true, fields: csvExportColumns, allColumns: true, fileName: `MyTargets` },
-                selectedTargets: rowSelectionModel.map((id) => {
-                  return rows.find((row) => row._id === id)
-                }).filter((row) => row !== undefined) as Target[]
+                selectedTargets
               } as EditToolbarProps,
             }}
             initialState={{

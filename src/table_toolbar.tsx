@@ -187,20 +187,21 @@ export interface EditToolbarProps extends Partial<GridToolbarProps & ToolbarProp
 }
 
 export function EditToolbar(props: EditToolbarProps) {
-  const { setRows, processRowUpdate, csvOptions } = props;
+  const { setRows, processRowUpdate, csvOptions, selectedTargets } = props;
   const context = useStateContext()
-  const initTargets = props.selectedTargets.length > 0 ?
-    get_targets_from_selected_targets(props.selectedTargets, context.targets)
+  const initTargets = selectedTargets.length > 0 ?
+    get_targets_from_selected_targets(selectedTargets, context.targets)
     : context.targets.filter((target) => target.ra && target.dec)
   const [targets, setTargets] = React.useState(initTargets);
 
+
   React.useEffect(() => {
-    const newTargets = props.selectedTargets.length > 0 ?
-      get_targets_from_selected_targets(props.selectedTargets, context.targets)
+    const newTargets = selectedTargets.length > 0 ?
+      get_targets_from_selected_targets(selectedTargets, context.targets)
       : context.targets
     setTargets(newTargets);
   }, [
-    context.targets, props.selectedTargets
+    context.targets, selectedTargets
   ]);
 
   const handleAddTarget = async () => {
