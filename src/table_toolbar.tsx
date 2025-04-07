@@ -16,6 +16,8 @@ import {
   GridRowsProp,
   GridRowModel,
   GridToolbar,
+  GridToolbarProps,
+  ToolbarPropsOverrides
 } from '@mui/x-data-grid-pro';
 import { v4 as randomId } from 'uuid';
 import MenuItem from '@mui/material/MenuItem';
@@ -176,7 +178,7 @@ export const create_new_target = (id?: string, obsid?: number, target_name?: str
   return newTarget as Target
 }
 
-interface EditToolbarProps {
+export interface EditToolbarProps extends Partial<GridToolbarProps & ToolbarPropsOverrides>{
   setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
   obsid: number;
   processRowUpdate: (newRow: GridRowModel<Target>) => Promise<GridRowModel<Target>>;

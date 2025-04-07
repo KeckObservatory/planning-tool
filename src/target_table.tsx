@@ -346,7 +346,7 @@ export default function TargetTable() {
                 selectedTargets: rowSelectionModel.map((id) => {
                   return rows.find((row) => row._id === id)
                 }).filter((row) => row !== undefined) as Target[]
-              } as any,
+              },
             }}
             initialState={{
               pinnedColumns: pinnedColumns,
