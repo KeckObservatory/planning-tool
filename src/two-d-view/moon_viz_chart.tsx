@@ -40,16 +40,6 @@ const moon_illuminance = (phase_angle_moon: number) => {
     return Math.pow(10, -0.4 * mag)
 }
 
-// const moon_brightness_bak = (mag: number) => {
-//     // Krisciunas and Schaefer 1991 eq 8 
-//     return Math.pow(10, -0.4 * mag + 16.57)
-// }
-
-// const moon_mag = (phase_angle_moon: number) => {
-//     // Krisciunas and Schaefer 1991 eq 9 
-//     return -12.73 + 0.026 * Math.abs(phase_angle_moon)  + 4e-9 * Math.pow(phase_angle_moon, 4)
-// }
-
 const optical_pathlength = (zenith: number) => {
      // Krisciunas and Schaefer 1991 eq 3
      return (1 - 0.96 * sind(zenith) ** 2 ) ** -0.5
@@ -185,8 +175,8 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
         x = [...x, ...xvals]
     })
 
-    let name =  targetViz.target_name ?? 'Target'
-    name += ` ${vizChart}`
+    let titleText =  targetViz.target_name ?? 'Target'
+    titleText += ` ${vizChart}`
     const trace: Partial<Plotly.PlotData> = {
         x,
         y,
@@ -207,7 +197,7 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
         colorscale: 'Hot',
         reversescale: reverseAxis,
         type: 'contour',
-        name: name,
+        name: titleText,
         showlegend: false,
     }
     let traces = [trace]
@@ -215,11 +205,12 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
     const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.PlotData[]
     //@ts-ignore
     traces = [...traces, ...lightTraces]
+    titleText = `<b>${titleText}</b>`
 
     const layout: Partial<Plotly.Layout> = {
         width: 1200,
         height: 400,
-        title: {text: name},
+        title: {text: titleText},
         plot_bgcolor: 'black',
         //@ts-ignore
         // coloraxis: {

@@ -236,27 +236,27 @@ export const TargetVizChart = (props: Props) => {
     const { targetViz } = props
     const context = useStateContext()
     let traces = targetViz.semester_visibility.map((dayViz: DayViz) => {
-        let text: string[] = []
+        let texts: string[] = []
         let y: Date[] = []
         let color: string[] = []
         //let color: number[] = []
         dayViz.visibility.forEach((viz: VizRow) => {
-            let txt = ""
-            txt += `Az: ${viz.az.toFixed(2)}<br>`
-            txt += `El: ${viz.alt.toFixed(2)}<br>`
-            txt += `Airmass: ${air_mass(viz.alt, context.config.tel_lat_lng_el.keck.el).toFixed(2)}<br>`
-            // txt += `Airmass: ${air_mass(viz.alt).toFixed(2)}<br>`
-            txt += `HT: ${dayjs(viz.datetime).format(context.config.date_time_format)}<br>`
-            txt += `UT: ${dayjs(viz.datetime).utc(false).format(context.config.date_time_format)}<br>`
-            txt += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`
-            txt += `Visible for: ${dayViz.visible_hours.toFixed(2)} hours<br>`
-            txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
+            let text = `<b>${targetViz.target_name} Visibility</b><br>` 
+            text += `Az: ${viz.az.toFixed(2)}<br>`
+            text += `El: ${viz.alt.toFixed(2)}<br>`
+            text += `Airmass: ${air_mass(viz.alt, context.config.tel_lat_lng_el.keck.el).toFixed(2)}<br>`
+            // text += `Airmass: ${air_mass(viz.alt).toFixed(2)}<br>`
+            text += `HT: ${dayjs(viz.datetime).format(context.config.date_time_format)}<br>`
+            text += `UT: ${dayjs(viz.datetime).utc(false).format(context.config.date_time_format)}<br>`
+            text += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`
+            text += `Visible for: ${dayViz.visible_hours.toFixed(2)} hours<br>`
+            text += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
 
 
             color.push(reason_to_color_mapping(viz.reasons))
             const daytime = date_normalize(viz.datetime)
             y.push(daytime)
-            text.push(txt)
+            texts.push(text)
         })
         const ydate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
         const x = Array.from({ length: y.length }, () => ydate)
@@ -264,7 +264,7 @@ export const TargetVizChart = (props: Props) => {
         const trace: Partial<Plotly.PlotData> = {
             x,
             y,
-            text,
+            text: texts,
             marker: {
                 color,
                 size: MARKER_SIZE,
@@ -289,6 +289,7 @@ export const TargetVizChart = (props: Props) => {
     traces = [...traces, ...lightTraces]
     let titleText = targetViz.target_name ?? 'Target' 
     titleText += ' Visibility'
+    titleText = `<b>${titleText}</b>`
 
     const layout: Partial<Plotly.Layout> = {
         width: 1200,
