@@ -145,7 +145,6 @@ export default function TargetTable(props: TargetTableProps) {
   const submit_one_target = async (target: Target) => {
     const resp = await submit_target([target])
     if (resp.errors.length > 0) {
-      console.error('errors', resp)
       throw new Error('error updating target')
     }
     const submittedTarget = resp.targets.at(0)
@@ -160,7 +159,6 @@ export default function TargetTable(props: TargetTableProps) {
 
 
   const edit_target = async (target: Target) => {
-    console.log('debounced save', target)
     const resp = await submit_one_target(target)
     return resp
   }
@@ -213,7 +211,6 @@ export default function TargetTable(props: TargetTableProps) {
     })
 
     validate(sanitizedTgt as Target)
-    validate.errors && console.log('errors', validate.errors, sanitizedTgt)
     return validate.errors ?? []
   }
 
@@ -229,10 +226,9 @@ export default function TargetTable(props: TargetTableProps) {
     const [editTarget, setEditTarget] = React.useState<Target>(row);
     const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
     const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
-    //const [errors, setErrors] = React.useState<ErrorObject<string, Record<string, any>, unknown>[]>(validate_sanitized_target(row));
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
       return validate_sanitized_target(row);
-    }, [editTarget])
+    }, [editTarget, count])
 
     const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
     const apiRef = useGridApiContext();
@@ -242,7 +238,6 @@ export default function TargetTable(props: TargetTableProps) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTarget.status?.includes('EDITED')
         if (isEdited) newTgt = await debounced_save(editTarget)
-        console.log('newTgt', newTgt, editTarget)
         processRowUpdate(editTarget) //TODO: May want to wait till save is successful
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
@@ -280,7 +275,7 @@ export default function TargetTable(props: TargetTableProps) {
 
     const catalogSetTarget = async (newTgt: Target) => {
       await setEditTarget(newTgt)
-      handleRowChange(count === 0) //override save
+      handleRowChange(true) //override save
       setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
       setCount((prev: number) => prev + 1)
     }
@@ -331,7 +326,6 @@ export default function TargetTable(props: TargetTableProps) {
     return rows.find((tgt) => tgt._id === id)
   }).filter((tgt) => tgt !== undefined) as Target[]
 
-  console.log('selected targets', selectedTargets, 'selectedRows', selectedRows)
 
   return (
     <RowsContext.Provider value={{ rows: rows, setRows: setRows }}>
