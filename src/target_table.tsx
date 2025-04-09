@@ -73,17 +73,6 @@ function convert_schema_to_columns() {
   return columns;
 }
 
-
-export const submit_one_target = async (target: Target) => {
-  const resp = await submit_target([target])
-  if (resp.errors.length > 0) {
-    console.error('errors', resp)
-    throw new Error('error updating target')
-  }
-  const submittedTarget = resp.targets[0]
-  return submittedTarget
-}
-
 interface Duplicate {
   target_name: string,
   reason: string
@@ -115,23 +104,28 @@ const check_for_duplicates = (targets: Target[]) => {
   return duplicates
 }
 
-export interface TargetsContext {
+export interface RowsContext {
+  rows: Target[];
+  setRows: React.Dispatch<React.SetStateAction<Target[]>>;
+}
+
+const init_rows_context = {
+  rows: [],
+  setRows: () => { }
+}
+
+const RowsContext = React.createContext<RowsContext>(init_rows_context);
+export const useRowsContext = () => React.useContext(RowsContext);
+
+interface TargetTableProps {
   targets: Target[];
-  setTargets: React.Dispatch<React.SetStateAction<Target[]>>;
 }
 
-const init_target_context = {
-  targets: [],
-  setTargets: () => { }
-}
-
-const TargetContext = React.createContext<TargetsContext>(init_target_context);
-export const useTargetContext = () => React.useContext(TargetContext);
-
-export default function TargetTable() {
+export default function TargetTable(props: TargetTableProps) {
+  const { targets } = props
   const context = useStateContext()
   const sbcontext = useSnackbarContext();
-  const [rows, setRows] = React.useState(context.targets as Target[]);
+  const [rows, setRows] = React.useState(targets as Target[]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
   const cfg = context.config
@@ -144,14 +138,31 @@ export default function TargetTable() {
     const visible = cfg.default_table_columns.includes(col.field)
     return [col.field, visible]
   }));
-  const csvExportColumns = cfg.csv_order
   let pinnedColumns = cfg.pinned_table_columns
   const leftPin = [...new Set([GRID_CHECKBOX_SELECTION_COL_DEF.field, ...cfg.pinned_table_columns.left])]
   pinnedColumns.left = leftPin
 
+  const submit_one_target = async (target: Target) => {
+    const resp = await submit_target([target])
+    if (resp.errors.length > 0) {
+      console.error('errors', resp)
+      throw new Error('error updating target')
+    }
+    const submittedTarget = resp.targets.at(0)
+    //update target in rows 
+    const newTargets = rows.map((tgt) => {
+      return tgt._id === submittedTarget?._id ?
+        submittedTarget : tgt
+    })
+    setRows(newTargets)
+    return submittedTarget
+  }
+
+
   const edit_target = async (target: Target) => {
     console.log('debounced save', target)
-    return await submit_one_target(target)
+    const resp = await submit_one_target(target)
+    return resp
   }
 
   React.useEffect(() => {
@@ -175,10 +186,8 @@ export default function TargetTable() {
     const delRow = rows.find((row) => row._id === id);
     console.log('deleting', id, delRow)
     delRow && delete_target([delRow._id as string])
-    setRows(() => {
-      const newRows = rows.filter((row) => row._id !== id)
-      return newRows
-    });
+    const newRows = rows.filter((row) => row._id !== id)
+    setRows(newRows);
   };
 
   const processRowUpdate = async (newRow: GridRowModel<Target>) => {
@@ -220,16 +229,21 @@ export default function TargetTable() {
     const [editTarget, setEditTarget] = React.useState<Target>(row);
     const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
     const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
-    const [errors, setErrors] = React.useState<ErrorObject<string, Record<string, any>, unknown>[]>(validate_sanitized_target(row));
+    //const [errors, setErrors] = React.useState<ErrorObject<string, Record<string, any>, unknown>[]>(validate_sanitized_target(row));
+    const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
+      return validate_sanitized_target(row);
+    }, [editTarget])
+
     const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
     const apiRef = useGridApiContext();
 
-    const handleRowChange = async () => {
-      if (count > 0) {
+    const handleRowChange = async (override = false) => {
+      if (count > 0 || override) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTarget.status?.includes('EDITED')
-        processRowUpdate(editTarget) //TODO: May want to wait till save is successful
         if (isEdited) newTgt = await debounced_save(editTarget)
+        console.log('newTgt', newTgt, editTarget)
+        processRowUpdate(editTarget) //TODO: May want to wait till save is successful
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
           debounced_edit_click(id)
@@ -240,7 +254,6 @@ export default function TargetTable() {
 
     React.useEffect(() => { // when targed is edited in target edit dialog or catalog dialog
       handleRowChange()
-      setErrors(validate_sanitized_target(editTarget))
       setCount((prev: number) => prev + 1)
     }, [editTarget])
 
@@ -265,10 +278,17 @@ export default function TargetTable() {
       }, 300)
     }
 
+    const catalogSetTarget = async (newTgt: Target) => {
+      await setEditTarget(newTgt)
+      handleRowChange(count === 0) //override save
+      setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
+      setCount((prev: number) => prev + 1)
+    }
+
     useGridApiEventHandler(apiRef, 'cellEditStop', handleEvent)
 
     return [
-      <CatalogButton hasCatalog={hasCatalog} target={editTarget} setTarget={setEditTarget} />,
+      <CatalogButton hasCatalog={hasCatalog} target={editTarget} setTarget={catalogSetTarget} />,
       <ViewTargetsDialogButton targets={[editTarget]} />,
       <ValidationDialogButton errors={errors} target={editTarget} />,
       <TargetEditDialogButton
@@ -301,20 +321,20 @@ export default function TargetTable() {
     }
   ];
 
-  columns = [...addColumns, ...columns]; 
+  columns = [...addColumns, ...columns];
 
   const selectedRows = rowSelectionModel.map((id) => {
-                  return rows.find((tgt) => tgt._id === id)
-                }).filter((tgt) => tgt!== undefined) as Target[]
+    return rows.find((tgt) => tgt._id === id)
+  }).filter((tgt) => tgt !== undefined) as Target[]
 
   const selectedTargets = rowSelectionModel.map((id) => {
-                  return rows.find((tgt) => tgt._id === id)
-                }).filter((tgt) => tgt!== undefined) as Target[]
+    return rows.find((tgt) => tgt._id === id)
+  }).filter((tgt) => tgt !== undefined) as Target[]
 
   console.log('selected targets', selectedTargets, 'selectedRows', selectedRows)
 
   return (
-    <TargetContext.Provider value={{ targets: rows, setTargets: setRows }}>
+    <RowsContext.Provider value={{ rows: rows, setRows: setRows }}>
       <Box
         sx={{
           height: 500,
@@ -349,11 +369,12 @@ export default function TargetTable() {
             slotProps={{
               // @ts-ignore
               toolbar: {
+                rows,
                 setRows,
                 processRowUpdate,
                 setRowModesModel,
                 obsid: context.obsid, //TODO: allow admin to edit obsid
-                csvOptions: { disableToolbarButton: true, fields: csvExportColumns, allColumns: true, fileName: `MyTargets` },
+                submit_one_target,
                 selectedTargets
               } as EditToolbarProps,
             }}
@@ -367,6 +388,6 @@ export default function TargetTable() {
           />
         )}
       </Box>
-    </TargetContext.Provider>
+    </RowsContext.Provider>
   );
 }

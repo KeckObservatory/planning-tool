@@ -18,7 +18,7 @@ import { useStateContext } from './App.tsx';
 // import { save_target } from './api/api_root';
 import LinearProgress, { LinearProgressProps } from '@mui/material/LinearProgress';
 import { Target } from './App.tsx'
-import { useTargetContext } from './target_table.tsx';
+import { useRowsContext } from './target_table.tsx';
 import { v4 as randomId } from 'uuid';
 import { submit_target } from './api/api_root.tsx';
 import { FormControlLabel, FormGroup, Switch } from '@mui/material';
@@ -113,7 +113,7 @@ const TargetStepper = (props: Props) => {
     const [targets, setTargets] = React.useState([] as Target[])
     const [canContinue, setCanContinue] = React.useState(false)
     const [saveMessage, setSaveMessage] = React.useState('All steps completed - Targets are ready to be saved')
-    const targetContext = useTargetContext()
+    const RowsContext = useRowsContext()
     const context = useStateContext()
 
     React.useEffect(() => {
@@ -133,7 +133,7 @@ const TargetStepper = (props: Props) => {
             // console.error('errors', resp.errors)
         }
 
-        targetContext.setTargets((curTgts) => [...tgts, ...curTgts])
+        RowsContext.setRows((curTgts) => [...tgts, ...curTgts])
         props.setOpen(false)
     }
 

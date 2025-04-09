@@ -6,8 +6,6 @@ import { TargetVizButton } from './two-d-view/viz_dialog.tsx';
 import {
   GridToolbarContainer,
   GridToolbarExportContainer,
-  GridCsvExportMenuItem,
-  GridCsvExportOptions,
   GridExportMenuItemProps,
   useGridApiContext,
   gridFilteredSortedRowIdsSelector,
@@ -22,8 +20,7 @@ import {
 import { v4 as randomId } from 'uuid';
 import MenuItem from '@mui/material/MenuItem';
 import Button, { ButtonProps } from '@mui/material/Button';
-import { Target, useStateContext } from './App.tsx';
-import { submit_one_target } from './target_table.tsx';
+import { Target } from './App.tsx';
 import { Stack } from '@mui/material';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import DeleteDialogButton from './delete_rows_dialog.tsx';
@@ -144,13 +141,11 @@ function JsonExportMenuItem(props: GridExportMenuItemProps<{}>) {
 
 
 interface ExportButtonProps extends ButtonProps {
-  csvOptions: GridCsvExportOptions;
 }
 
 function CustomExportButton(props: ExportButtonProps) {
   return (
     <GridToolbarExportContainer {...props}>
-      <GridCsvExportMenuItem options={props.csvOptions} />
       <JsonExportMenuItem />
       <StarListExportMenu />
     </GridToolbarExportContainer>
@@ -178,31 +173,17 @@ export const create_new_target = (id?: string, obsid?: number, target_name?: str
   return newTarget as Target
 }
 
-export interface EditToolbarProps extends Partial<GridToolbarProps & ToolbarPropsOverrides>{
+export interface EditToolbarProps extends Partial<GridToolbarProps & ToolbarPropsOverrides> {
+  rows: Target[];
   setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
   obsid: number;
   processRowUpdate: (newRow: GridRowModel<Target>) => Promise<GridRowModel<Target>>;
-  csvOptions: GridCsvExportOptions
+  submit_one_target: Function
   selectedTargets: Target[]
 }
 
 export function EditToolbar(props: EditToolbarProps) {
-  const { setRows, processRowUpdate, csvOptions, selectedTargets } = props;
-  const context = useStateContext()
-  const initTargets = selectedTargets.length > 0 ?
-    get_targets_from_selected_targets(selectedTargets, context.targets)
-    : context.targets.filter((target) => target.ra && target.dec)
-  const [targets, setTargets] = React.useState(initTargets);
-
-
-  React.useEffect(() => {
-    const newTargets = selectedTargets.length > 0 ?
-      get_targets_from_selected_targets(selectedTargets, context.targets)
-      : context.targets
-    setTargets(newTargets);
-  }, [
-    context.targets, selectedTargets
-  ]);
+  const { rows, setRows, processRowUpdate, selectedTargets, submit_one_target } = props;
 
   const handleAddTarget = async () => {
     const id = randomId();
@@ -212,16 +193,17 @@ export function EditToolbar(props: EditToolbarProps) {
       console.error('error submitting target')
       return
     }
-    context.setTargets((oldTargets) => [submittedTarget, ...oldTargets]);
     processRowUpdate(submittedTarget)
-
     setRows((oldRows) => {
       const newRows = [submittedTarget, ...oldRows];
       return newRows
     });
   };
 
-
+  const vizTargets = selectedTargets.length > 0 ?
+    get_targets_from_selected_targets(selectedTargets, rows)
+    :
+    rows.filter((target) => target.ra && target.dec)
 
   return (
     // <GridToolbarContainer sx={{ justifyContent: 'center' }}>
@@ -232,11 +214,11 @@ export function EditToolbar(props: EditToolbarProps) {
         </Button>
         <DeleteDialogButton setRows={setRows} targets={props.selectedTargets} color='primary' />
         <ViewTargetsDialogButton targets={props.selectedTargets} color='primary' />
-        <TargetVizButton targets={targets} />
+        <TargetVizButton targets={vizTargets} />
         <TargetWizardButton />
       </Stack>
       <Stack justifyContent={'right'} direction="row" spacing={1}>
-        <CustomExportButton csvOptions={csvOptions} />
+        <CustomExportButton/>
         <GridToolbar
           printOptions={{ disableToolbarButton: true }}
           csvOptions={{ disableToolbarButton: true }}

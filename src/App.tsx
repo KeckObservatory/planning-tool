@@ -19,6 +19,29 @@ import { SimbadTargetData } from './catalog_button.tsx';
 
 const CONFIG_PATH = './config.json'
 
+const DEFAULT_TARGETS = [
+          {
+            "_id": "3272fa23-b4eb-4781-8f60-7b9dc706190d",
+            "comment": "",
+            "target_name": "High Boi",
+            "dec": "20:00:00.00",
+            "dec_deg": 20.0,
+            "ra": "10:40:07",
+            "ra_deg": 15.029,
+            "equinox": "2000",
+            "g_mag": 12.84409,
+            "gaia_id": "3.70038690560506E+018",
+            "j_mag": 11.692,
+            "obsid": 4866,
+            "pm_dec": 0.098,
+            "pm_ra": 3,
+            "tags": [
+              "asdf quer",
+              "asdf"
+            ],
+            "tic_id": ""
+          }]
+
 LicenseInfo.setLicenseKey(
   licenseKey.license_key
 )
@@ -126,11 +149,6 @@ export interface State {
   config: ConfigFile;
 }
 
-interface StateContextProps extends State {
-  targets: Target[];
-  setTargets: React.Dispatch<React.SetStateAction<Target[]>>;
-}
-
 export interface UserInfo {
   status: string;
   Id: number;
@@ -160,7 +178,7 @@ export interface UserInfo {
   is_admin: boolean; //added by backend
 }
 
-const StateContext = React.createContext<StateContextProps>({} as StateContextProps)
+const StateContext = React.createContext<State>({} as State)
 export const useStateContext = () => React.useContext(StateContext)
 
 function App() {
@@ -173,40 +191,8 @@ function App() {
 
   useEffect(() => {
     const fetch_data = async () => {
-      // const userinfo = await get_userinfo_mock();
-      const userinfo = await get_userinfo();
-      let init_targets = await get_targets(userinfo.Id)
-      if ((init_targets as unknown as AxiosError).message) {
-        console.warn('error fetching targets', init_targets)
-        init_targets = [
-          {
-            "_id": "3272fa23-b4eb-4781-8f60-7b9dc706190d",
-            "comment": "",
-            // "target_name": "3C 273",
-            // "dec": "82:03:08.597629980",
-            // "dec_deg": 82.052,
-            // "ra": "12:29:06.6998257176",
-            // "ra_deg": 187.275,
-            "target_name": "High Boi",
-            "dec": "20:00:00.00",
-            "dec_deg": 20.0,
-            "ra": "10:40:07",
-            "ra_deg": 15.029,
-            "equinox": "2000",
-            "g_mag": 12.84409,
-            "gaia_id": "3.70038690560506E+018",
-            "j_mag": 11.692,
-            "obsid": 4866,
-            "pm_dec": 0.098,
-            "pm_ra": 3,
-            "tags": [
-              "asdf quer",
-              "asdf"
-            ],
-            "tic_id": ""
-          }]
-      }
       const config = await get_config()
+      const userinfo = await get_userinfo();
       const username = `${userinfo.FirstName} ${userinfo.LastName}`;
       const init_state = {
         config,
@@ -215,7 +201,13 @@ function App() {
         is_admin: userinfo.is_admin ?? false
       }
       setState(init_state)
-      setTargets(init_targets)
+      // const userinfo = await get_userinfo_mock();
+      let tgts = await get_targets(init_state.obsid)
+      if ((tgts as unknown as AxiosError).message) {
+        console.warn('error fetching targets', tgts)
+        tgts = DEFAULT_TARGETS
+      }
+      setTargets(tgts)
     }
     fetch_data()
   }, [])
@@ -227,7 +219,7 @@ function App() {
   return (
     <ThemeProvider theme={theme} >
       <CssBaseline />
-      <StateContext.Provider value={{ ...state, targets, setTargets }}>
+      <StateContext.Provider value={state}>
         <SnackbarContext.Provider value={{
           snackbarOpen: openSnackbar,
           setSnackbarOpen: setOpenSnackbar,
@@ -259,7 +251,7 @@ function App() {
                 flexDirection: 'column',
               }}
             >
-              {Object.keys(state).length > 0 ? (<TargetTable />) :
+              {Object.keys(targets).length > 0 ? (<TargetTable targets={targets}/>) :
                 (<Skeleton variant="rectangular" width="100%" height={500} />)}
             </Paper>
           </Stack>

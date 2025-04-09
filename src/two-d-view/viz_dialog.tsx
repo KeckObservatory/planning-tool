@@ -103,6 +103,13 @@ export const TargetVizButton = (props: ButtonProps) => {
     const [target, setTarget] = useState<Target>(initTarget)
     const [open, setOpen] = React.useState(false);
 
+    useEffect(() => {
+        if (targets.length > 0) {
+            const target = targets.at(0) ?? {} as Target
+            setTarget(target)
+        }
+    }, [targets])
+
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -118,13 +125,15 @@ export const TargetVizButton = (props: ButtonProps) => {
                     <VisibilityIcon />
                 </IconButton>
             </Tooltip>
-            <VizDialog
-                open={open}
-                target={target}
-                setTarget={setTarget}
-                targets={targets}
-                handleClose={handleClose}
-            />
+            {open &&
+                <VizDialog
+                    open={open}
+                    target={target}
+                    setTarget={setTarget}
+                    targets={targets}
+                    handleClose={handleClose}
+                />
+            }
         </>
     );
 }
@@ -155,30 +164,27 @@ export const VizDialog = (props: VizDialogProps) => {
     const [vizType, setVizType] = useState<VizChart>("Target Visibility")
     const context = useStateContext()
 
+    const lngLatEl = context.config.tel_lat_lng_el.keck
     // target must have ra dec and be defined
-    const { target, setTarget, targets } = props
-
-    const init_target_viz = { semester, dome, ...target, semester_visibility: [] }
-    console.log('init_target_viz', init_target_viz) 
-    const [targetViz, setTargetView] = useState<TargetViz>(init_target_viz)
+    const { target, setTarget, targets, open } = props
     const KG = context.config.tel_geometry.keck[dome as Dome]
-
     const regexp = new RegExp("^[12][0-9]{3}[AB]$")
-    useEffect(() => {
+
+    const targetViz = React.useMemo(() => {
+        let tViz = {
+            ...target,
+            semester,
+            dome,
+            semester_visibility: []} as TargetViz
+
         const validSemester = regexp.test(semester)
         if (!validSemester) {
-            return
+            return tViz 
         }
         const dates = get_semester_dates(semester)
-        let tViz: TargetViz = {
-            ...target,
-            semester: semester,
-            semester_visibility: [],
-        }
 
-        const lngLatEl = context.config.tel_lat_lng_el.keck
         if (!target.ra_deg || !target.dec_deg) {
-            return
+            return tViz
         }
 
         tViz.semester_visibility = dates.map((date: Dayjs) => {
@@ -214,9 +220,8 @@ export const VizDialog = (props: VizDialogProps) => {
             return { ...suncalc_times, date: date.toDate(), visibility, visible_hours }
         })
         console.log('targetViz', tViz)
-
-        setTargetView(tViz as TargetViz)
-    }, [target, semester, dome])
+        return tViz
+    }, [semester, dome, target])
 
     const onTargetNameSelect = (name: string) => {
         console.log('name', name, 'targetName',)
@@ -257,17 +262,17 @@ export const VizDialog = (props: VizDialogProps) => {
                 </Tooltip>
                 <VizSelectMenu vizType={vizType} setVizType={setVizType} />
             </Stack>
-            {vizType === "Target Visibility" ?
-            (<TargetVizChart targetViz={targetViz} />)
-            :
-            (<MoonVizChart targetViz={targetViz} vizType={vizType} />)
+            {vizType === "Target Visibility" && targetViz.ra_deg && targetViz.dec_deg ?
+                (<TargetVizChart targetViz={targetViz} />)
+                :
+                (<MoonVizChart targetViz={targetViz} vizType={vizType} />)
             }
         </Stack>
     )
 
     return (
         <DialogComponent
-            open={props.open}
+            open={open}
             handleClose={props.handleClose}
             titleContent={dialogTitle}
             children={dialogContent}

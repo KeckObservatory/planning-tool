@@ -41,7 +41,7 @@ export const VizSelectMenu = (props: Props) => {
                 onChange={handleChange}
             >
                 {visibility_chart_options.map((option: VizChart) => {
-                    return <MenuItem value={option}>{option}</MenuItem>
+                    return <MenuItem key={option} value={option}>{option}</MenuItem>
                 })}
             </Select>
         </FormControl>
