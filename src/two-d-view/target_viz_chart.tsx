@@ -287,7 +287,8 @@ export const TargetVizChart = (props: Props) => {
     const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.PlotData[]
     //@ts-ignore
     traces = [...traces, ...lightTraces]
-    const titleText = targetViz.target_name ?? 'Target' + ' Visibility'
+    let titleText = targetViz.target_name ?? 'Target' 
+    titleText += ' Visibility'
 
     const layout: Partial<Plotly.Layout> = {
         width: 1200,
