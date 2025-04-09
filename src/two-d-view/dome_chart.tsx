@@ -287,7 +287,7 @@ export const DomeChart = (props: DomeChartProps) => {
     const layout: Partial<Plotly.Layout> = {
         width,
         height,
-        title: 'Target Trajectories',
+        title: {text: 'Target Trajectories'},
         hovermode: "closest",
         polar: {
             radialaxis: {

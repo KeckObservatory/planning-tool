@@ -15,7 +15,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 
-interface Props{ 
+interface Props {
     targetViz: TargetViz,
 }
 
@@ -76,22 +76,22 @@ const create_dawn_dusk_text = (date: Date, date_time_format: string) => {
 
 export const get_browser_name = () => {
     const userAgent = navigator.userAgent;
-  
+
     if (userAgent.includes("Chrome")) {
-      return "Chrome";
+        return "Chrome";
     } else if (userAgent.includes("Firefox")) {
-      return "Firefox";
+        return "Firefox";
     } else if (userAgent.includes("Safari") && !userAgent.includes("Chrome")) {
-      return "Safari";
+        return "Safari";
     } else if (userAgent.includes("Edg")) {
-      return "Microsoft Edge";
+        return "Microsoft Edge";
     } else if (userAgent.includes("Opera") || userAgent.includes("Opr")) {
-      return "Opera";
+        return "Opera";
     } else {
-      return "Unknown Browser";
+        return "Unknown Browser";
     }
-  }
-  
+}
+
 
 export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: string) => {
 
@@ -110,7 +110,7 @@ export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: 
             symbol: 'square',
         },
         line: {
-            width: MOON_MARKER_LINE_WIDTH 
+            width: MOON_MARKER_LINE_WIDTH
         }
     }
     let dawn_dusk_traces: { [key: string]: any } = {
@@ -271,7 +271,7 @@ export const TargetVizChart = (props: Props) => {
                 symbol: 'square',
                 opacity: 1 // too dense to see ticks
             },
-            hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+            // hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
             line: {
                 width: 0,
             },
@@ -287,14 +287,15 @@ export const TargetVizChart = (props: Props) => {
     const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.PlotData[]
     //@ts-ignore
     traces = [...traces, ...lightTraces]
+    const titleText = targetViz.target_name ?? 'Target' + ' Visibility'
 
     const layout: Partial<Plotly.Layout> = {
         width: 1200,
         height: 400,
-        title: `${targetViz.target_name ?? 'Target'} Visibility`,
+        title: { text: titleText },
         plot_bgcolor: 'black',
         yaxis2: {
-            title: 'Time [UT]',
+            title: { text: 'Time [UT]' },
             type: 'date',
             gridwidth: 0,
             overlaying: 'y',
@@ -306,7 +307,7 @@ export const TargetVizChart = (props: Props) => {
             tickformat: '%H:%M',
         },
         yaxis: {
-            title: 'Time [HT]',
+            title: { text: 'Time [HT]' },
             type: 'date',
             gridwidth: 2,
             gridcolor: 'white',
@@ -317,12 +318,12 @@ export const TargetVizChart = (props: Props) => {
             tickformat: '%H:%M',
         },
         xaxis: {
-            title: 'Date',
+            title: { text: 'Date' },
             type: 'date',
             gridwidth: 2,
             gridcolor: 'white',
             layer: 'above traces',
-            dtick: XAXIS_DTICK, 
+            dtick: XAXIS_DTICK,
             tickformat: '%Y-%m-%d',
             tickmode: 'auto',
             //nticks: 0

@@ -429,7 +429,7 @@ export const SkyChart = (props: Props) => {
     //set yRange for airmass charts. order to reverse axis
     const yRange = isAirmass ? [Math.min(AIRMASS_LIMIT, maxAirmass), 0] : undefined
     const y2Axis: Partial<Plotly.LayoutAxis> = {
-        title: 'Altitude [deg]',
+        title: {text: 'Altitude [deg]'},
         gridwidth: 0,
         overlaying: 'y',
         side: 'right',
@@ -453,7 +453,7 @@ export const SkyChart = (props: Props) => {
 
 
     const scyaxis: Partial<Plotly.LayoutAxis> = {
-        title: isAirmass ? 'Airmass' : 'Degrees',
+        title: {text: isAirmass ? 'Airmass' : 'Degrees'},
         range: yRange,
     }
 
@@ -461,7 +461,7 @@ export const SkyChart = (props: Props) => {
         width,
         height,
         shapes,
-        title: `Target ${chartType} vs Time`,
+        title: {text: `Target ${chartType} vs Time`},
         hovermode: "closest",
         yaxis: scyaxis,
         xaxis: {
@@ -475,7 +475,7 @@ export const SkyChart = (props: Props) => {
             // range: [suncalcTimes.dusk.getTime(), suncalcTimes.dawn.getTime()],
         },
         xaxis2: {
-            title: 'UT [Hr:Min]',
+            title: {text: 'UT [Hr:Min]'},
             type: 'date',
             tickformat: '%H:%M',
             dtick: 3600000, //milliseconds in an hour

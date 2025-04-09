@@ -227,7 +227,7 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
         //     cmax: 30,
         // },
         yaxis2: {
-            title: 'Time [UT]',
+            title: {text: 'Time [UT]'},
             type: 'date',
             gridwidth: 0,
             overlaying: 'y',
@@ -239,7 +239,7 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
             tickformat: '%H:%M',
         },
         yaxis: {
-            title: 'Time [HT]',
+            title: {text: 'Time [HT]'},
             type: 'date',
             gridwidth: 2,
             gridcolor: 'white',
@@ -250,7 +250,7 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
             tickformat: '%H:%M',
         },
         xaxis: {
-            title: 'Date',
+            title: {text: 'Date'},
             type: 'date',
             gridwidth: 2,
             gridcolor: 'white',
