@@ -121,8 +121,7 @@ export const make_trace = (data: Datum[], target_name: string, lineColor?: strin
         x: data.map((datum: Datum) => datum.x),
         y: data.map((datum: Datum) => datum.y),
         text: data.map((datum: Datum) => datum.text),
-        //hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
-        hovertemplate: '', //disable to show xyz coords
+        hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
         marker: {
             opacity: 0,
             size: 4,
@@ -234,9 +233,7 @@ export const SkyChart = (props: Props) => {
                 x: [currTime.toDate()],
                 y: [datum],
                 text: [text],
-                // hovorinfo: 'text',
-                //hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
-                hovertemplate: '', //disable to show xyz coords
+                hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
                 showlegend: false,
                 marker: {
                     size: 12,

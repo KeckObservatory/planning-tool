@@ -202,7 +202,8 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
             x: 1.05,
             title: units,
         },
-        hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+        //hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+        hovertemplate: '', //disable to show xyz coords
         textposition: 'top left',
         colorscale: 'Hot',
         reversescale: reverseAxis,

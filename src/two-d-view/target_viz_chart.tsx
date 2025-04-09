@@ -272,6 +272,7 @@ export const TargetVizChart = (props: Props) => {
                 opacity: 1 // too dense to see ticks
             },
             // hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+            hovertemplate: '',
             line: {
                 width: 0,
             },
