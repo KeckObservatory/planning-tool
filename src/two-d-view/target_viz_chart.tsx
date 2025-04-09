@@ -271,8 +271,7 @@ export const TargetVizChart = (props: Props) => {
                 symbol: 'square',
                 opacity: 1 // too dense to see ticks
             },
-            // hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
-            hovertemplate: '',
+            hovertemplate: '<extra></extra>', //disable to show xyz coords
             line: {
                 width: 0,
             },
