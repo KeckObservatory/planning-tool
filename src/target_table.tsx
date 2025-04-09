@@ -318,10 +318,6 @@ export default function TargetTable(props: TargetTableProps) {
 
   columns = [...addColumns, ...columns];
 
-  const selectedRows = rowSelectionModel.map((id) => {
-    return rows.find((tgt) => tgt._id === id)
-  }).filter((tgt) => tgt !== undefined) as Target[]
-
   const selectedTargets = rowSelectionModel.map((id) => {
     return rows.find((tgt) => tgt._id === id)
   }).filter((tgt) => tgt !== undefined) as Target[]
