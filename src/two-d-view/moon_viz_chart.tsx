@@ -94,7 +94,7 @@ const delta_v_mag = (rho: number, zenith_moon: number, zenith_object: number, ph
 
 
 export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart: VizChart) => {
-    let text: string[] = []
+    let texts: string[] = []
     let y: Date[] = []
     let z: number[] = []
     let x: Date[] = []
@@ -115,17 +115,17 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
             const phase_angle_moon = r2d(viz.moon_illumination.angle)
             let moonBrightness = delta_v_mag(lunarAngle, zenith_moon, zenith_object, phase_angle_moon)
             const eclipse = lunarAngle < MOON_RADIUS 
-            let txt = ""
-            txt += `Az: ${viz.az.toFixed(2)}<br>`
-            txt += `El: ${viz.alt.toFixed(2)}<br>`
-            txt += `HT: ${dayjs(viz.datetime).format(context.config.date_time_format)}<br>`
-            txt += `UT: ${dayjs(viz.datetime).utc(false).format(context.config.date_time_format)}<br>`
-            txt += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`
-            txt += `Lunar Angle: ${lunarAngle.toFixed(2)}<br>`
-            txt += `Moon brightness: ${moonBrightness.toFixed(2)} [vmag/arcsec^2]<br>`
-            txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
+            let text = `<b>${targetViz.target_name} ${vizChart}</b><br>` 
+            text += `Az: ${viz.az.toFixed(2)}<br>`
+            text += `El: ${viz.alt.toFixed(2)}<br>`
+            text += `HT: ${dayjs(viz.datetime).format(context.config.date_time_format)}<br>`
+            text += `UT: ${dayjs(viz.datetime).utc(false).format(context.config.date_time_format)}<br>`
+            text += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`
+            text += `Lunar Angle: ${lunarAngle.toFixed(2)}<br>`
+            text += `Moon brightness: ${moonBrightness.toFixed(2)} [vmag/arcsec^2]<br>`
+            text += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
             if (eclipse) {
-                txt += `<br>Moon Eclipses Target`
+                text+= `<br>Moon Eclipses Target`
             }
             color.push(reason_to_color_mapping(viz.reasons))
             const daytime = date_normalize(viz.datetime)
@@ -178,7 +178,7 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
             }
             y.push(daytime)
             z.push(datum)
-            text.push(txt)
+            texts.push(text)
         })
         const ydate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
         const xvals = Array.from({ length: dayViz.visibility.length }, () => ydate)
@@ -186,12 +186,12 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
     })
 
     let name =  targetViz.target_name ?? 'Target'
-    name += ' Lunar Irradiance' 
+    name += ` ${vizChart}`
     const trace: Partial<Plotly.PlotData> = {
         x,
         y,
         z,
-        text,
+        text: texts,
         line: {
             smoothing: 0.85
         },
@@ -219,7 +219,7 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
     const layout: Partial<Plotly.Layout> = {
         width: 1200,
         height: 400,
-        title: name,
+        title: {text: name},
         plot_bgcolor: 'black',
         //@ts-ignore
         // coloraxis: {

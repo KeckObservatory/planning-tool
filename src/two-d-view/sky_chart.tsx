@@ -121,7 +121,8 @@ export const make_trace = (data: Datum[], target_name: string, lineColor?: strin
         x: data.map((datum: Datum) => datum.x),
         y: data.map((datum: Datum) => datum.y),
         text: data.map((datum: Datum) => datum.text),
-        hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+        //hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+        hovertemplate: '', //disable to show xyz coords
         marker: {
             opacity: 0,
             size: 4,
@@ -221,7 +222,7 @@ export const SkyChart = (props: Props) => {
             const currTime = hidate(time, context.config.timezone)
             const airmass = util.air_mass(azEl[1], lngLatEl.el)
             maxAirmass = Math.max(maxAirmass, airmass)
-            let text = ""
+            let text = `<b>${tgtv.target_name}</b><br>` 
             text += `Az: ${azEl[0].toFixed(2)}<br>`
             text += `El: ${azEl[1].toFixed(2)}<br>`
             text += `Airmass: ${airmass.toFixed(2)}<br>`
@@ -234,7 +235,8 @@ export const SkyChart = (props: Props) => {
                 y: [datum],
                 text: [text],
                 // hovorinfo: 'text',
-                hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+                //hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+                hovertemplate: '', //disable to show xyz coords
                 showlegend: false,
                 marker: {
                     size: 12,
