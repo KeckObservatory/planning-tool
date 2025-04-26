@@ -20,27 +20,27 @@ import { SimbadTargetData } from './catalog_button.tsx';
 const CONFIG_PATH = './config.json'
 
 const DEFAULT_TARGETS = [
-          {
-            "_id": "3272fa23-b4eb-4781-8f60-7b9dc706190d",
-            "comment": "",
-            "target_name": "High Boi",
-            "dec": "20:00:00.00",
-            "dec_deg": 20.0,
-            "ra": "10:40:07",
-            "ra_deg": 15.029,
-            "equinox": "2000",
-            "g_mag": 12.84409,
-            "gaia_id": "3.70038690560506E+018",
-            "j_mag": 11.692,
-            "obsid": 4866,
-            "pm_dec": 0.098,
-            "pm_ra": 3,
-            "tags": [
-              "asdf quer",
-              "asdf"
-            ],
-            "tic_id": ""
-          }]
+  {
+    "_id": "3272fa23-b4eb-4781-8f60-7b9dc706190d",
+    "comment": "",
+    "target_name": "High Boi",
+    "dec": "20:00:00.00",
+    "dec_deg": 20.0,
+    "ra": "10:40:07",
+    "ra_deg": 15.029,
+    "equinox": "2000",
+    "g_mag": 12.84409,
+    "gaia_id": "3.70038690560506E+018",
+    "j_mag": 11.692,
+    "obsid": 4866,
+    "pm_dec": 0.098,
+    "pm_ra": 3,
+    "tags": [
+      "asdf quer",
+      "asdf"
+    ],
+    "tic_id": ""
+  }]
 
 LicenseInfo.setLicenseKey(
   licenseKey.license_key
@@ -187,7 +187,7 @@ function App() {
   const [snackbarMessage, setSnackbarMessage] = useState<SnackbarMessage>({ message: 'default message' })
   const [state, setState] = useState<State>({} as State);
   const theme = handleTheme(darkState)
-  const [targets, setTargets] = useState<Target[]>([])
+  const [targets, setTargets] = useState<Target[] | undefined>(undefined)
 
   useEffect(() => {
     const fetch_data = async () => {
@@ -251,8 +251,8 @@ function App() {
                 flexDirection: 'column',
               }}
             >
-              {Object.keys(targets).length > 0 ? (<TargetTable targets={targets}/>) :
-                (<Skeleton variant="rectangular" width="100%" height={500} />)}
+              {targets === undefined ? (<Skeleton variant="rectangular" width="100%" height={500} />) :
+                <TargetTable targets={targets} />}
             </Paper>
           </Stack>
         </SnackbarContext.Provider>
