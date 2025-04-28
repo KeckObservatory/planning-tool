@@ -51,7 +51,7 @@ function LinearProgressWithLabel(props: LinearProgressProps &
         for (let idx = 0; idx < targets.length; idx++) {
             let tgt = targets[idx]
             const tgtName = tgt.target_name as string
-            setTargetName(`on row ${idx} target: ${tgtName}`)
+            setTargetName(`on row ${idx+1} target: ${tgtName}`)
             if (!tgtName) continue
             if (!open) break
             
