@@ -221,12 +221,12 @@ const parse_txt = (contents: string, obsid: number) => {
     contents.split(/\r\n|\n/).forEach((row) => {
         if (row === '' || !row) return
         if (row.startsWith('#')) return
-        const [target_name, tail] = split_at(15, row)
+        const [target_name, tail] = split_at(17, row)
         let [rah, ram, ras, dech, decm, decs, equinox, ...opts] = tail.trimStart().replace(/\s\s+/g, ' ').split(' ')
         console.log(`tail:${tail}`, 'ras', ras, 'decs', decs)
         console.log('rah', rah, 'ram', ram, 'ras', ras, 'dech', dech, 'decm', decm, 'decs', decs)
-        ras = ras.split('.')[0].padStart(2, '0') + '.' + ras.split('.')[1]
-        decs = decs.split('.')[0].padStart(2, '0') + '.' + decs.split('.')[1]
+        ras = ras.split('.')[0].padStart(2, '0') + '.' + (ras.split('.')[1] ?? '0')
+        decs = decs.split('.')[0].padStart(2, '0') + '.' + (decs.split('.')[1] ?? '0')
         const ra = `${rah.padStart(2, '0')}:${ram.padStart(2, '0')}:${ras}`
         const dec = `${dech.padStart(2, '0')}:${decm.padStart(2, '0')}:${decs}`
         const coordValid = ra.match(targetProps.ra.pattern as string) && dec.match(targetProps.dec.pattern as string)
@@ -245,7 +245,7 @@ const parse_txt = (contents: string, obsid: number) => {
         opts = opts.find((opt) => opt.startsWith('#')) ? opts.slice(0, opts.findIndex((opt) => opt.startsWith('#'))) : opts
         let tgt: UploadedTarget = {
             _id: randomId(),
-            target_name: target_name.trimEnd(),
+            target_name: target_name.trimEnd().trimStart(),
             obsid: String(obsid),
             ra,
             ra_deg: ra_dec_to_deg(ra),
