@@ -48,7 +48,7 @@ const getJson = (apiRef: React.MutableRefObject<GridApi>) => {
 
 const convert_target_to_targetlist_row = (target: Target) => {
   //required params
-  const name = target.target_name?.slice(0, 14).padEnd(15, " ")
+  const name = target.target_name?.slice(0, 16).padEnd(17, " ") //columns 1-16 are text last column is a space
   const ra = target.ra?.replaceAll(':', ' ')
   const dec = target.dec?.replaceAll(':', ' ')
   const equinox = target.equinox ?? '2000'
