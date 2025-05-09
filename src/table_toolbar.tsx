@@ -20,7 +20,7 @@ import {
 import { v4 as randomId } from 'uuid';
 import MenuItem from '@mui/material/MenuItem';
 import Button, { ButtonProps } from '@mui/material/Button';
-import { Target } from './App.tsx';
+import { Target, useSnackbarContext } from './App.tsx';
 import { Stack } from '@mui/material';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import DeleteDialogButton from './delete_rows_dialog.tsx';
@@ -185,12 +185,15 @@ export interface EditToolbarProps extends Partial<GridToolbarProps & ToolbarProp
 export function EditToolbar(props: EditToolbarProps) {
   const { rows, setRows, processRowUpdate, selectedTargets, submit_one_target } = props;
 
+  const snackbarContext = useSnackbarContext()
+
   const handleAddTarget = async () => {
     const id = randomId();
     const newTarget = create_new_target(id, props.obsid)
     const submittedTarget = await submit_one_target(newTarget)
     if (!submittedTarget) {
       console.error('error submitting target')
+      snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error adding target' })
       return
     }
     processRowUpdate(submittedTarget)

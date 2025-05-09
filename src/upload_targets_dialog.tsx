@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 import DialogContentText from '@mui/material/DialogContentText';
 import { Tooltip } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
-import { RotatorMode, Target, TelescopeWrap, useStateContext } from './App';
+import { RotatorMode, Target, TelescopeWrap, useStateContext, useSnackbarContext } from './App';
 import target_schema from './target_schema.json'
 import { v4 as randomId } from 'uuid';
 import { format_tags, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog';
@@ -279,6 +279,7 @@ interface UploadedTarget {
 export function UploadComponent(props: UploadProps) {
 
     const context = useStateContext()
+    const snackbarContext = useSnackbarContext()
 
     const fileLoad = (evt: React.ChangeEvent<HTMLInputElement>) => {
         let file: File = new File([], 'empty')
@@ -302,6 +303,7 @@ export function UploadComponent(props: UploadProps) {
                     uploadedTargets = parse_txt(contents, context.obsid)
                     break;
                 default:
+                    snackbarContext.setSnackbarMessage({severity: 'error', message: 'file type not supported. Use .txt or .json Please'}) 
                     console.error('file type not supported')
                     return
             }
@@ -314,7 +316,7 @@ export function UploadComponent(props: UploadProps) {
     return (
         <>
             <input
-                accept="*.csv,*.txt"
+                accept="*.json,*.txt"
                 style={{ display: 'none' }}
                 id="raised-button-file"
                 type="file"
@@ -347,7 +349,7 @@ export default function UploadDialog(props: Props) {
 
     const titleContent = (
         <div>
-            {"Upload Targets from .csv, .json, or .txt file"}
+            {"Upload Targets from .json, or .txt file"}
         </div>
     )
 
@@ -367,7 +369,7 @@ export default function UploadDialog(props: Props) {
 
     return (
         <>
-            <Tooltip title="Upload Targets from .csv file">
+            <Tooltip title="Upload Targets from .json or .txt file">
                 <Button onClick={handleClickOpen} startIcon={<UploadIcon />}>
                     {label}
                 </Button>

@@ -14,7 +14,7 @@ import { UploadComponent } from './upload_targets_dialog';
 import { get_simbad_data } from './catalog_button.tsx';
 import Tooltip from '@mui/material/Tooltip';
 import Stack from '@mui/material/Stack';
-import { useStateContext } from './App.tsx';
+import { useSnackbarContext, useStateContext } from './App.tsx';
 // import { save_target } from './api/api_root';
 import LinearProgress, { LinearProgressProps } from '@mui/material/LinearProgress';
 import { Target } from './App.tsx'
@@ -115,6 +115,7 @@ const TargetStepper = (props: Props) => {
     const [saveMessage, setSaveMessage] = React.useState('All steps completed - Targets are ready to be saved')
     const RowsContext = useRowsContext()
     const context = useStateContext()
+    const snackbarContext = useSnackbarContext()
 
     React.useEffect(() => {
         if (activeStep === 1) {
@@ -130,7 +131,8 @@ const TargetStepper = (props: Props) => {
 
         const resp = await submit_target(tgts)
         if (resp.errors) {
-            // console.error('errors', resp.errors)
+            console.error('errors', resp.errors)
+            snackbarContext.setSnackbarMessage({ severity: 'error', message: `Error saving targets ${resp.errors}` })
         }
 
         RowsContext.setRows((curTgts) => [...tgts, ...curTgts])
@@ -261,7 +263,7 @@ export const TargetWizardButton = () => {
     };
     return (
         <div>
-            <Tooltip title="Upload Targets from .csv file">
+            <Tooltip title="Upload Targets from .txt or .json files">
                 <Button onClick={handleClickOpen} startIcon={<UploadIcon />}>
                     Upload Targets
                 </Button>

@@ -26,13 +26,13 @@ export function intError(error: AxiosError) {
         console.error('interceptor error detail', error)
     }
     else if (status === 401) {
-        // toast.error('Authentication error')
+        console.error('Authentication error')
     }
     else if (status === 404) {
-        // toast.error('404 error. API not found')
+        console.error('404 error. API not found')
     }
     else { 
-        // toast.error(error.message)
+        console.error(error.message)
     }
 
     return Promise.reject(error) // send axios error
