@@ -25,6 +25,9 @@ import { Stack } from '@mui/material';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import DeleteDialogButton from './delete_rows_dialog.tsx';
 
+export const TARGET_LENGTH = 15 // 15 characters for target name
+export const TARGET_NAME_LENGTH_PADDED = 16 // 17 characters for target name
+
 const getJson = (apiRef: React.MutableRefObject<GridApi>) => {
   // Select rows and columns
   const filteredSortedRowIds = gridFilteredSortedRowIdsSelector(apiRef);
@@ -48,7 +51,7 @@ const getJson = (apiRef: React.MutableRefObject<GridApi>) => {
 
 const convert_target_to_targetlist_row = (target: Target) => {
   //required params
-  const name = target.target_name?.slice(0, 16).padEnd(17, " ") //columns 1-16 are text last column is a space
+  const name = target.target_name?.slice(0, TARGET_LENGTH-1).padEnd(TARGET_NAME_LENGTH_PADDED, " ") //columns 1-16 are text last column is a space
   const ra = target.ra?.replaceAll(':', ' ')
   const dec = target.dec?.replaceAll(':', ' ')
   const equinox = target.equinox ?? '2000'

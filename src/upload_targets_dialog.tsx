@@ -9,6 +9,7 @@ import { v4 as randomId } from 'uuid';
 import { format_tags, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog';
 import { DialogComponent } from './dialog_component';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util';
+import { TARGET_NAME_LENGTH_PADDED } from './table_toolbar';
 
 interface Props {
     setTargets: Function
@@ -208,7 +209,7 @@ const split_at = (index: number, str: string) => {
     const tabidx = str.lastIndexOf('\t')
     if (tabidx > 0) { // tab(s) in target name
         console.log('targetName', str.slice(0, tabidx))
-        const targetName = str.slice(0, tabidx).replaceAll('\t', ' ').padEnd(15, ' ')
+        const targetName = str.slice(0, tabidx-1).replaceAll('\t', ' ').padEnd(TARGET_NAME_LENGTH_PADDED, ' ')
         console.log('targetName', targetName)
         return [targetName, str.slice(tabidx + 1)]
     }

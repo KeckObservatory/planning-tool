@@ -16,6 +16,7 @@ import target_schema from './target_schema.json'
 import { Status, Target } from './App';
 import { MuiChipsInput } from 'mui-chips-input';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util';
+import { TARGET_LENGTH } from './table_toolbar';
 
 interface Props {
     target: Target
@@ -169,7 +170,7 @@ export const format_edit_entry = (key: string, value?: string | number, isNumber
     }
     if (value && key === 'target_name') {
         value = String(value).replace(/[^\w^\-^\s]+/g, '') //remove non alphanumeric characters
-        value = value.slice(0, 15) //truncate to 15 characters
+        value = value.slice(0, TARGET_LENGTH-1) //truncate to 15 characters
     }
 
     value = String(value).replace(/\t/, '') //remove tabs
