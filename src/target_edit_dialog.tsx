@@ -170,7 +170,7 @@ export const format_edit_entry = (key: string, value?: string | number, isNumber
     }
     if (value && key === 'target_name') {
         value = String(value).replace(/[^\w^\-^\s]+/g, '') //remove non alphanumeric characters
-        value = value.slice(0, TARGET_LENGTH-1) //truncate to 15 characters
+        value = value.slice(0, TARGET_LENGTH) //truncate to 15 characters
     }
 
     value = String(value).replace(/\t/, '') //remove tabs
