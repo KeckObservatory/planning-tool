@@ -206,11 +206,10 @@ const parse_csv = (contents: string) => {
 }
 
 const split_at = (index: number, str: string) => {
-    let tabIdx = str.lastIndexOf('\t')
-    while (tabIdx > 0 && tabIdx > index) { // find the last tab in the first 0..index characters. That
-        tabIdx = str.slice(0, tabIdx).lastIndexOf('\t') // get the next tab and check again
+    let tabidx = str.lastIndexOf('\t')
+    while (tabidx > 0 && tabidx > index) { // find the last tab in the first 0..index characters. That
+        tabidx = str.slice(0, tabidx).lastIndexOf('\t') // get the next tab and check again
     }
-    const tabidx = str.lastIndexOf('\t')
     if (tabidx > 0) { // tab(s) in target name
         console.log('targetName', str.slice(0, tabidx))
         const targetName = str.slice(0, tabidx-1).replaceAll('\t', ' ').padEnd(TARGET_NAME_LENGTH_PADDED, ' ')
