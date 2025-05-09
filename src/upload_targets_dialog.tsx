@@ -222,7 +222,7 @@ const parse_txt = (contents: string, obsid: number) => {
     contents.split(/\r\n|\n/).forEach((row) => {
         if (row === '' || !row) return
         if (row.startsWith('#')) return
-        const [target_name, tail] = split_at(17, row)
+        const [target_name, tail] = split_at(TARGET_NAME_LENGTH_PADDED, row)
         let [rah, ram, ras, dech, decm, decs, equinox, ...opts] = tail.trimStart().replace(/\s\s+/g, ' ').split(' ')
         console.log(`tail:${tail}`, 'ras', ras, 'decs', decs)
         console.log('rah', rah, 'ram', ram, 'ras', ras, 'dech', dech, 'decm', decm, 'decs', decs)
