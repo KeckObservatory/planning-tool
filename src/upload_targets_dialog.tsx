@@ -207,7 +207,7 @@ const parse_csv = (contents: string) => {
 
 const split_at = (index: number, str: string) => {
     let tabIdx = str.lastIndexOf('\t')
-    while (tabIdx > 0 && tabIdx < index) { // find the last tab in the first 0..index characters. That
+    while (tabIdx > 0 && tabIdx > index) { // find the last tab in the first 0..index characters. That
         tabIdx = str.slice(0, tabIdx).lastIndexOf('\t') // get the next tab and check again
     }
     const tabidx = str.lastIndexOf('\t')
