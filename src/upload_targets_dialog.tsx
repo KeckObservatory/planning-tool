@@ -208,10 +208,15 @@ const parse_csv = (contents: string) => {
 const split_at = (index: number, str: string) => {
     const tabidx = str.lastIndexOf('\t')
     if (tabidx > 0) { // tab(s) in target name
+        if (tabidx < index) {
+            console.warn('invalid target name', str)
+            return [str.slice(0, index).replaceAll('\t', ' '), str.slice(index + 1).replaceAll('\t', ' ')]
+        }
         console.log('targetName', str.slice(0, tabidx))
         const targetName = str.slice(0, tabidx-1).replaceAll('\t', ' ').padEnd(TARGET_NAME_LENGTH_PADDED, ' ')
-        console.log('targetName', targetName)
-        return [targetName, str.slice(tabidx + 1)]
+        const targetBody = str.slice(tabidx + 1).replaceAll('\t', ' ').trimStart()
+        console.log('targetName', targetName, 'targetBody', targetBody)
+        return [targetName, targetBody]
     }
 
     return [str.slice(0, index), str.slice(index + 1)]
