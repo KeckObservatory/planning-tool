@@ -211,21 +211,34 @@ const split_at = (index: number, str: string) => {
         tabidx = str.slice(0, tabidx).lastIndexOf('\t') // get the next tab and check again
     }
     if (tabidx > 0) { // tab(s) in target name
-        console.log('targetName', str.slice(0, tabidx))
+        console.log('tabs in target name: targetName', str.slice(0, tabidx))
         const targetName = str.slice(0, tabidx-1).replaceAll('\t', ' ').padEnd(TARGET_NAME_LENGTH_PADDED, ' ')
         const targetBody = str.slice(tabidx + 1).replaceAll('\t', ' ').trimStart()
         console.log('targetName', targetName, 'targetBody', targetBody)
         return [targetName, targetBody]
     }
 
-    return [str.slice(0, index), str.slice(index + 1)]
+
+    // older files may have names longer than be longer than the 15 char limit. This relaxes this constraint
+    let sliceIdx = index
+    let substr = str.slice(index-1)
+    while (substr[0].trim() !== '' && substr.length > 0) {
+        substr = substr.slice(1)
+        sliceIdx += 1
+    }
+
+    let [targetName, targetBody] = [str.slice(0, sliceIdx).slice(0, index), str.slice(sliceIdx)]
+    targetBody = targetBody.replaceAll('\t', ' ') // remove tabs from the body (not allowed but throw them a bone)
+    console.log('idx', sliceIdx, 'targetName', targetName, 'targetBody', targetBody)
+
+    return [targetName, targetBody]
 }
 
 const parse_txt = (contents: string, obsid: number) => {
     let tgts = [] as UploadedTarget[]
     contents.split(/\r\n|\n/).forEach((row) => {
-        if (row === '' || !row) return
-        if (row.startsWith('#')) return
+        if (row.startsWith('#')) return //skip comments
+        if (row.trim() === '' || !row) return //whitespace rows are ignored
         const [target_name, tail] = split_at(TARGET_NAME_LENGTH_PADDED, row)
         let [rah, ram, ras, dech, decm, decs, equinox, ...opts] = tail.trimStart().replace(/\s\s+/g, ' ').split(' ')
         console.log(`tail:${tail}`, 'ras', ras, 'decs', decs)
@@ -308,28 +321,33 @@ export function UploadComponent(props: UploadProps) {
                     uploadedTargets = parse_txt(contents, context.obsid)
                     break;
                 default:
-                    snackbarContext.setSnackbarMessage({severity: 'error', message: 'file type not supported. Use .txt or .json Please'}) 
-                    console.error('file type not supported')
-                    return
+                    snackbarContext.setSnackbarMessage({severity: 'warning', message: 'File type may not supported. Attempting to parse as .txt'}) 
+                    try {
+                        uploadedTargets = parse_txt(contents, context.obsid)
+                    }
+                    catch (e) {
+                        console.error('file type not supported', e)
+                        return
+                    }
             }
             console.log('uploaded tgts', uploadedTargets)
             props.setOpen && props.setOpen(false)
             const fmtTgts = format_targets(uploadedTargets, targetProps)
+            props.setLabel && props.setLabel(`${file.name} Uploaded (${fmtTgts.length} targets)`)
             props.setTargets(fmtTgts)
         };
     };
     return (
         <>
             <input
-                accept="*.json,*.txt"
+                // accept="*.json,*.txt" // prefer .json but .txt is ok too
                 style={{ display: 'none' }}
-                id="raised-button-file"
+                id="target-file-input"
                 type="file"
-                multiple
                 onChange={fileLoad}
             />
-            <label htmlFor="raised-button-file">
-                <Button variant="outlined" component="span" color="primary"
+            <label htmlFor="target-file-input">
+                <Button id={'load-target-file'} variant="outlined" component="span" color="primary"
                 >
                     {props.label}
                 </Button>

@@ -42,6 +42,12 @@
             "description": "Keck Observer ID",
             "not_editable_by_user": false
         },
+        "lgs": {
+            "type":  "number",
+            "description": "Is LGS target",
+            "short_description": "LGS",
+            "pattern": "^[10]$"
+        },
         "v_mag": {
             "type":  ["number", "string"],
             "description": "V Magnitude",

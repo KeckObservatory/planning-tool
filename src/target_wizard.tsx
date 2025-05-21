@@ -264,7 +264,7 @@ export const TargetWizardButton = () => {
     return (
         <div>
             <Tooltip title="Upload Targets from .txt or .json files">
-                <Button onClick={handleClickOpen} startIcon={<UploadIcon />}>
+                <Button id={'upload-targets'} onClick={handleClickOpen} startIcon={<UploadIcon />}>
                     Upload Targets
                 </Button>
             </Tooltip>
