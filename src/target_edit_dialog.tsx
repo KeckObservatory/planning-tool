@@ -77,8 +77,8 @@ export const raDecFormat = (input: string) => {
 
 function deg_to_dms(degrees: number) {
     const sign = degrees < 0 ? "-" : ""
-    let deg = Math.floor(degrees)
-    deg = Math.abs(deg % 360)
+    let deg = Math.floor(Math.abs(degrees))
+    deg = deg % 360
     const min = Math.floor((degrees - deg) * 60)
     const sec = Math.floor((degrees - deg - min / 60) * 3600)
     return `${sign}${deg}:${min}:${sec}`
