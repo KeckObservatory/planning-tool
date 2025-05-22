@@ -426,13 +426,16 @@ export const SkyChart = (props: Props) => {
     }
 
     //set yRange for airmass charts. order to reverse axis
-    const yRange = isAirmass ? [Math.min(AIRMASS_LIMIT, maxAirmass), 0] : undefined
+    const yLower = Math.min(AIRMASS_LIMIT, maxAirmass)
+    const yRange = isAirmass ? [yLower, 0] : undefined
+    const y2Range = [util.air_mass(yLower), util.air_mass(0)]
     const y2Axis: Partial<Plotly.LayoutAxis> = {
         title: {text: 'Altitude [deg]'},
         gridwidth: 0,
         overlaying: 'y',
         side: 'right',
         layer: 'above traces',
+        range: y2Range,
     }
 
     //creates ticvals and ticktext for xaxis. 
