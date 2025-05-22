@@ -360,7 +360,7 @@ export const SkyChart = (props: Props) => {
         yref: 'y',
         x0: 0,
         label: {
-            text: 'Nasmuth Limit',
+            text: 'Nasmyth Limit',
             textposition: 'top center',
         },
         y0: context.config.tel_geometry.keck[dome].r3,
