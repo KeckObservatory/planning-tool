@@ -157,6 +157,10 @@ export const get_target_traj = (ra: number, dec: number, times: Date[], lngLatEl
     return traj
 }
 
+export function alt_from_air_mass(am: number) {
+    return 90 - r2d(Math.acos(1 / am))
+}
+
 export function air_mass(alt: number): number; //secant formula
 export function air_mass(alt: number, el: number): number; // Homogeneous spherical atmosphsere with elevated observer
 export function air_mass(alt: number, el?: number) {
