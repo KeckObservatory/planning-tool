@@ -162,21 +162,21 @@ export function alt_from_air_mass(am: number, el: number): number;
 export function alt_from_air_mass(am: number, el?: number) {
     console.log('am', am)
     if (el === undefined) {
-        return r2d(Math.acos(1 / am)) - 90
+        return 90 - r2d(Math.acos(1 / am))
     }
     const a = RADIUS_EARTH + el
     const b = ATMOSPHERE_HEIGHT + RADIUS_EARTH
     const s = am * ATMOSPHERE_HEIGHT
     const zenith = r2d(Math.acos(( a * a + s * s - b * b ) / (2 * a * s)))
     console.log('zenith', zenith)
-    return zenith - 90
+    return 90 - zenith
 }
 
 export function air_mass(alt: number): number; //secant formula
 export function air_mass(alt: number, el: number): number; // Homogeneous spherical atmosphsere with elevated observer
 export function air_mass(alt: number, el?: number) {
     if (el === undefined) {
-        const zenith = 90 - alt
+        const zenith = 90 + alt
         return 1 / cosd(zenith)
     }
     const y = el / ATMOSPHERE_HEIGHT
