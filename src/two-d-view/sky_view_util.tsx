@@ -157,8 +157,8 @@ export const get_target_traj = (ra: number, dec: number, times: Date[], lngLatEl
     return traj
 }
 
-export function alt_from_air_mass(am: number);
-export function alt_from_air_mass(am: number, el: number) {
+export function alt_from_air_mass(am: number): number;
+export function alt_from_air_mass(am: number, el: number): number;
 export function alt_from_air_mass(am: number, el?: number) {
     console.log('am', am)
     if (el === undefined) {
