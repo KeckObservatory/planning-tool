@@ -157,8 +157,19 @@ export const get_target_traj = (ra: number, dec: number, times: Date[], lngLatEl
     return traj
 }
 
-export function alt_from_air_mass(am: number) {
-    return 90 - r2d(Math.acos(1 / am))
+export function alt_from_air_mass(am: number);
+export function alt_from_air_mass(am: number, el: number) {
+export function alt_from_air_mass(am: number, el?: number) {
+    console.log('am', am)
+    if (el === undefined) {
+        return 90 - r2d(Math.acos(1 / am))
+    }
+    const a = RADIUS_EARTH + el
+    const b = ATMOSPHERE_HEIGHT + RADIUS_EARTH
+    const s = am * ATMOSPHERE_HEIGHT
+    const zenith = Math.acos((a * a + b * b - s * s) / (2 * a * b))
+    console.log('zenith', zenith)
+    return 90 - r2d(zenith)
 }
 
 export function air_mass(alt: number): number; //secant formula
