@@ -162,7 +162,7 @@ export function alt_from_air_mass(am: number, el: number): number;
 export function alt_from_air_mass(am: number, el?: number) {
     console.log('am', am)
     if (el === undefined) {
-        return 90 - r2d(Math.acos(1 / am))
+        return r2d(Math.acos(1 / am)) - 90
     }
     const a = RADIUS_EARTH + el
     const b = ATMOSPHERE_HEIGHT + RADIUS_EARTH
