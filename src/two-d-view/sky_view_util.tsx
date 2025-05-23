@@ -167,9 +167,9 @@ export function alt_from_air_mass(am: number, el?: number) {
     const a = RADIUS_EARTH + el
     const b = ATMOSPHERE_HEIGHT + RADIUS_EARTH
     const s = am * ATMOSPHERE_HEIGHT
-    const zenith = Math.acos(( a * a + s * s - b * b ) / (2 * a * s))
+    const zenith = r2d(Math.acos(( a * a + s * s - b * b ) / (2 * a * s)))
     console.log('zenith', zenith)
-    return 90 - r2d(zenith)
+    return 90 - zenith
 }
 
 export function air_mass(alt: number): number; //secant formula
