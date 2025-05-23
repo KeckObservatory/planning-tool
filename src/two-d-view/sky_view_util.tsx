@@ -167,7 +167,7 @@ export function alt_from_air_mass(am: number, el?: number) {
     const a = RADIUS_EARTH + el
     const b = ATMOSPHERE_HEIGHT + RADIUS_EARTH
     const s = am * ATMOSPHERE_HEIGHT
-    const zenith = Math.acos((a * a + b * b - s * s) / (2 * a * b))
+    const zenith = Math.acos((b * b - a * a - s * s) / (2 * a * b))
     console.log('zenith', zenith)
     return 90 - r2d(zenith)
 }
