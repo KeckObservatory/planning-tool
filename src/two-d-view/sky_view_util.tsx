@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import * as SunCalc from 'suncalc'
-import { DayViz } from './viz_dialog'
+import { DayViz, VizRow } from './viz_dialog'
 import {
     RADIUS_EARTH,
     ATMOSPHERE_HEIGHT,
@@ -9,7 +9,24 @@ import {
     TIMES_START,
     TIMES_END
 } from './constants'
-import { LngLatEl } from '../App'
+import {AMATEUR_TWILIGHT_SHADE, ASTRONOMICAL_TWILIGHT_SHADE, TWILIGHT_SHADE } from "./constants.tsx";
+import { GeoModel, LngLatEl } from '../App'
+import { SkyChart } from './sky_chart';
+import { alt_az_observable } from './target_viz_chart.tsx';
+import { hidate, TargetView } from './two_d_view.tsx';
+
+export const colors = [
+    '#1f77b4',  // muted blue
+    '#ff7f0e',  // safety orange
+    '#2ca02c',  // cooked asparagus green
+    '#d62728',  // brick 
+    '#9467bd',  // muted purple
+    '#8c564b',  // chestnut brown
+    '#e377c2',  // raspberry yogurt pink
+    '#7f7f7f',  // middle gray
+    '#bcbd22',  // curry yellow-green
+    '#17becf'   // blue-teal
+];
 
 
 export const date_to_juld = (date: Date) => {
@@ -256,3 +273,276 @@ export const lunar_angle = (ra: number,
     return angle
 }
 
+export const get_shapes = (suncalcTimes: DayViz, 
+    chartType: string, 
+    tel_geometry: GeoModel, 
+    deckBlocking: boolean, 
+    showLimits: boolean) => {
+    const shapes: Partial<Plotly.Shape>[] = [
+        {
+            type: 'rect',
+            xref: 'x',
+            yref: 'paper',
+            x0: suncalcTimes.dusk.getTime(),
+            y0: 0,
+            x1: suncalcTimes.amateurDusk.getTime(),
+            y1: 1,
+            fillcolor: TWILIGHT_SHADE,
+            layer: 'below',
+            opacity: 0.5,
+            line: {
+                width: 0
+            }
+        },
+        {
+            type: 'rect',
+            xref: 'x',
+            yref: 'paper',
+            x0: suncalcTimes.amateurDusk.getTime(),
+            y0: 0,
+            x1: suncalcTimes.astronomicalDusk.getTime(),
+            y1: 1,
+            fillcolor: AMATEUR_TWILIGHT_SHADE,
+            layer: 'below',
+            opacity: 0.5,
+            line: {
+                width: 0
+            }
+        },
+        {
+            type: 'rect',
+            xref: 'x',
+            yref: 'paper',
+            x0: suncalcTimes.astronomicalDusk.getTime(),
+            y0: 0,
+            x1: suncalcTimes.astronomicalDawn.getTime(),
+            y1: 1,
+            fillcolor: ASTRONOMICAL_TWILIGHT_SHADE,
+            layer: 'below',
+            opacity: 0.5,
+            line: {
+                width: 0
+            }
+        },
+        {
+            type: 'rect',
+            xref: 'x',
+            yref: 'paper',
+            x0: suncalcTimes.astronomicalDawn.getTime(),
+            y0: 0,
+            x1: suncalcTimes.amateurDawn.getTime(),
+            y1: 1,
+            fillcolor: AMATEUR_TWILIGHT_SHADE,
+            layer: 'below',
+            opacity: 0.5,
+            line: {
+                width: 0
+            }
+        },
+        {
+            type: 'rect',
+            xref: 'x',
+            yref: 'paper',
+            x0: suncalcTimes.amateurDawn.getTime(),
+            y0: 0,
+            x1: suncalcTimes.dawn.getTime(),
+            y1: 1,
+            fillcolor: TWILIGHT_SHADE,
+            layer: 'below',
+            opacity: 0.5,
+            line: {
+                width: 0
+            }
+        },
+    ]
+
+
+    const el_shapes: Partial<Plotly.Shape>[] = [
+        {
+            type: 'rect',
+            xref: 'paper',
+            yref: 'y',
+            x0: 0,
+            label: {
+                text: 'Bottom Shutter Limit',
+                textposition: 'top center',
+            },
+            y0: tel_geometry.r1,
+            x1: 1,
+            y1: tel_geometry.r1,
+            fillcolor: '#eeeeee',
+            layer: 'above',
+            opacity: 0.5,
+            line: {
+                width: 1
+            }
+        },
+    ]
+
+    const nasdeck_shapes: Partial<Plotly.Shape>[] = [{
+        type: 'rect',
+        xref: 'paper',
+        yref: 'y',
+        x0: 0,
+        label: {
+            text: 'Nasmyth Limit',
+            textposition: 'top center',
+        },
+        y0: tel_geometry.r3,
+        x1: 1,
+        y1: tel_geometry.r3,
+        fillcolor: '#eeeeee',
+        layer: 'above',
+        opacity: 0.5,
+        line: {
+            width: 1
+        }
+    }]
+
+    const az_shapes: Partial<Plotly.Shape>[] = [
+        {
+            type: 'rect',
+            xref: 'paper',
+            yref: 'y',
+            x0: 0,
+            label: {
+                text: 'Left/North Wrap limit',
+                textposition: 'top center',
+            },
+            y0: tel_geometry.left_north_wrap,
+            x1: 1,
+            y1: tel_geometry.left_north_wrap,
+            fillcolor: '#eeeeee',
+            layer: 'above',
+            opacity: 0.5,
+            line: {
+                width: 1
+            }
+        },
+        {
+            type: 'rect',
+            xref: 'paper',
+            yref: 'y',
+            x0: 0,
+            label: {
+                text: 'Right/South Wrap limit',
+                textposition: 'top center',
+            },
+            y0: tel_geometry.right_south_wrap,
+            x1: 1,
+            y1: tel_geometry.right_south_wrap,
+            fillcolor: '#eeeeee',
+            layer: 'above',
+            opacity: 0.5,
+            line: {
+                width: 1
+            }
+        },
+    ]
+
+    if (chartType === 'Azimuth' && showLimits) {
+        shapes.push(...az_shapes)
+    }
+    else if (chartType === 'Elevation' && showLimits) {
+        shapes.push(...el_shapes)
+        if (deckBlocking) {
+            shapes.push(...nasdeck_shapes)
+        }
+    }
+    return shapes
+}
+
+export const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType: SkyChart, lngLatEl: LngLatEl): number => {
+    let val;
+    switch (chartType) {
+        case 'Elevation': {
+            val = viz.alt
+            break;
+        }
+        case 'Airmass': {
+            val = viz.air_mass
+            break;
+        }
+        case 'Parallactic': {
+            val = parallatic_angle(ra, dec, viz.datetime, lngLatEl)
+            break;
+        }
+        case 'Lunar Angle': {
+            val = lunar_angle(ra, dec, viz.datetime, lngLatEl, viz.moon_position)
+            break;
+        }
+        case 'Azimuth': {
+            val = viz.az
+            break;
+        }
+        default: {
+            val = viz.alt
+        }
+    }
+    return val
+}
+
+export const get_curr_loc_trace = (targetView: TargetView[], 
+    maxAirmass: number,
+    minAirmass: number,
+    time: Date, 
+    lngLatEl: LngLatEl, 
+    chartType: SkyChart, 
+    KG: GeoModel, 
+    timezone: string, 
+    date_time_format: string) => {
+    //get curr marker
+    const traces = targetView.map((tgtv: TargetView, idx: number) => { //add current location trace
+            const ra = tgtv.ra_deg as number
+            const dec = tgtv.dec_deg as number
+            const azEl = ra_dec_to_az_alt(ra, dec, time, lngLatEl)
+            const moon_illumination = SunCalc.getMoonIllumination(time)
+            let moon_position = get_moon_position(time, lngLatEl)
+            const { observable, reasons } = alt_az_observable(azEl[1], azEl[0], KG)
+            const viz: VizRow = {
+                az: azEl[0],
+                alt: azEl[1],
+                datetime: time,
+                moon_illumination,
+                moon_position,
+                observable,
+                reasons,
+                air_mass: air_mass(azEl[1], lngLatEl.el)
+            }
+            const datum = get_chart_datum(ra, dec, viz, chartType, lngLatEl)
+            const currTime = hidate(time, timezone)
+            const airmass = air_mass(azEl[1], lngLatEl.el)
+            maxAirmass = Math.max(maxAirmass, airmass)
+            minAirmass = Math.min(minAirmass, airmass)
+            let text = `<b>${tgtv.target_name}</b><br>` 
+            text += `Az: ${azEl[0].toFixed(2)}<br>`
+            text += `El: ${azEl[1].toFixed(2)}<br>`
+            text += `Airmass: ${airmass.toFixed(2)}<br>`
+            chartType.includes('Lunar Angle') && (text += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`)
+            // text += `Airmass: ${util.air_mass(azEl[1]).toFixed(2)}<br>`
+            text += `HT: ${currTime.format(date_time_format)}`
+
+            const trace: Plotly.Data = {
+                x: [currTime.toDate()],
+                y: [datum],
+                text: [text],
+                hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+                showlegend: false,
+                marker: {
+                    size: 12,
+                    // color: 'red',
+                    color: colors[idx % colors.length],
+                    line: {
+                        color: 'black',
+                        width: 3
+                    }
+                },
+                textposition: 'top left',
+                type: 'scatter',
+                mode: 'markers',
+                name: tgtv.target_name
+            }
+            return trace
+        })
+    return traces
+}

@@ -24,7 +24,7 @@ export interface Props {
   target : Target
 }
 
-const ajv = new AJV2019({allErrors:true})
+const ajv = new AJV2019({allErrors:true, allowUnionTypes: true})
 ajv.addKeyword("short_description")
 ajv.addKeyword("not_editable_by_user")
 let ts = target_schema as any
