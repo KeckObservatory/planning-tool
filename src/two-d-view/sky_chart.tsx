@@ -177,16 +177,13 @@ export const SkyChart = (props: Props) => {
             setTimeout(() => {
                 // Get the tickvals and ticktext from yaxis
                 const leftTicks = plotlyFigure.props.layout.yaxis.tickvals as number[];
-                const leftTickText = plotlyFigure.props.layout.yaxis.ticktext;
 
                 // If not set, try to get from the actual plotly instance
                 // (Plotly stores the latest tickvals in the fullLayout)
                 const gd = plotlyFigure?.el?.current;
                 let tickvals = leftTicks;
-                let ticktext = leftTickText;
                 if (gd && gd._fullLayout && gd._fullLayout.yaxis) {
                     tickvals = gd._fullLayout.yaxis.tickvals;
-                    ticktext = gd._fullLayout.yaxis.ticktext;
                 }
 
                 let el_vals = tickvals.map(val => util.alt_from_air_mass(val, lngLatEl.el));
@@ -224,17 +221,17 @@ export const SkyChart = (props: Props) => {
         traces = [...traces, ...tgtTraces]
     })
 
-    //add elevation axis for airmass charts only
-    // if (isAirmass && targetView.length > 0) {
-    //     const data = generateData(targetView[0], 'Elevation', context.config.date_time_format, lngLatEl, 0)
-    //     const newTrace = make_trace(data, 'Elevation axis for airmass', '#00000000')
-    //     console.log('targetView', targetView[0], 'elevation trace', newTrace, 'elevation data', data)
-    //     //@ts-ignore
-    //     newTrace.yaxis = 'y2'
-    //     //@ts-ignore
-    //     newTrace.showlegend = false
-    //     traces.push(newTrace)
-    // }
+    // add elevation axis for airmass charts only
+    if (isAirmass && targetView.length > 0) {
+        const data = generateData(targetView[0], 'Airmass', context.config.date_time_format, lngLatEl, 0)
+        const newTrace = make_trace(data, 'Elevation axis for airmass', '#00000000')
+        console.log('targetView', targetView[0], 'elevation trace', newTrace, 'elevation data', data)
+        //@ts-ignore
+        newTrace.yaxis = 'y2'
+        //@ts-ignore
+        newTrace.showlegend = false
+        traces.push(newTrace)
+    }
 
     //get curr marker
     let maxAirmass = 10;
@@ -481,7 +478,7 @@ export const SkyChart = (props: Props) => {
         overlaying: 'y',
         side: 'right',
         layer: 'above traces',
-        // range: y2Range,
+        range: yRange,
     }
 
     //creates ticvals and ticktext for xaxis. 
