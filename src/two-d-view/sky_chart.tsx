@@ -213,7 +213,7 @@ export const SkyChart = (props: Props) => {
             const plotlyFigure = plotRef.current;
             // If not set, try to get from the actual plotly instance
             // (Plotly stores the latest tickvals in the fullLayout)
-            const gd = plotlyFigure?.el?.current;
+            const gd = plotlyFigure?.el;
             if (!gd) {
                 console.error('Plotly figure not found', plotlyFigure);
                 return;
