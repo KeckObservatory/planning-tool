@@ -152,7 +152,7 @@ export const SkyChart = (props: Props) => {
 
     // add elevation axis for airmass charts only
     if (isAirmass && targetView.length > 0) {
-        const data = generateData(targetView[0], 'Airmass', context.config.date_time_format, lngLatEl, 0)
+        const data = generateData(targetView[0], 'Elevation', context.config.date_time_format, lngLatEl, 0)
         const newTrace = make_trace(data, 'Elevation axis for airmass', '#00000000')
         //@ts-ignore
         newTrace.yaxis = 'y2'
