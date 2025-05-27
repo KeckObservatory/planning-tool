@@ -10,6 +10,7 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import * as SunCalc from "suncalc";
 import { AIRMASS_LIMIT, AMATEUR_TWILIGHT_SHADE, ASTRONOMICAL_TWILIGHT_SHADE, DEFAULT_OPACITY, NON_OBSERVABLE_OPACITY, TWILIGHT_SHADE } from "./constants.tsx";
+import { useEffect, useRef } from "react";
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -162,9 +163,47 @@ export const SkyChart = (props: Props) => {
     const { targetView, chartType, time, showCurrLoc, showLimits, width, height, dome, suncalcTimes } = props
     const context = useStateContext()
     const isAirmass = chartType.includes('Airmass')
+    const plotRef = useRef<any>(null);
     let traces: Plotly.Data[] = []
     const lngLatEl = context.config.tel_lat_lng_el.keck
     let deckBlocking = false
+
+    // 2. useEffect to update yaxis2 ticks after rendering
+    useEffect(() => {
+        if (plotRef.current && plotRef.current.props.layout?.yaxis && plotRef.current.props.layout?.yaxis2) {
+            // Get the left y-axis ticks from the plotly instance
+            const plotlyFigure = plotRef.current;
+            // Wait for the plot to be fully rendered
+            setTimeout(() => {
+                // Get the tickvals and ticktext from yaxis
+                const leftTicks = plotlyFigure.props.layout.yaxis.tickvals as number[];
+                const leftTickText = plotlyFigure.props.layout.yaxis.ticktext;
+
+                // If not set, try to get from the actual plotly instance
+                // (Plotly stores the latest tickvals in the fullLayout)
+                const gd = plotlyFigure?.el?.current;
+                let tickvals = leftTicks;
+                let ticktext = leftTickText;
+                if (gd && gd._fullLayout && gd._fullLayout.yaxis) {
+                    tickvals = gd._fullLayout.yaxis.tickvals;
+                    ticktext = gd._fullLayout.yaxis.ticktext;
+                }
+
+                let el_vals = tickvals.map(val => util.alt_from_air_mass(val, lngLatEl.el));
+                // 3. Update yaxis2 to match yaxis
+                if (tickvals) {
+                    window.Plotly.relayout(gd, {
+                        //@ts-ignore
+                        // "yaxis2.range": [util.alt_from_air_mass(tickvals[0], lngLatEl.el),
+                        //                     util.alt_from_air_mass(tickvals[tickvals.length - 1], lngLatEl.el)],
+                        "yaxis2.tickvals": tickvals,
+                        "yaxis2.ticktext": el_vals,
+                    });
+                }
+            }, 200); // Delay to ensure plot is rendered
+        }
+    }, [isAirmass, width, height]);
+
     targetView.forEach((tgtv: TargetView, idx: number) => {
         const data = generateData(tgtv,
             chartType, context.config.date_time_format,
@@ -186,16 +225,16 @@ export const SkyChart = (props: Props) => {
     })
 
     //add elevation axis for airmass charts only
-    if (isAirmass && targetView.length > 0) {
-        const data = generateData(targetView[0], 'Elevation', context.config.date_time_format, lngLatEl, 0)
-        const newTrace = make_trace(data, 'Elevation axis for airmass', '#00000000')
-        console.log('targetView', targetView[0], 'elevation trace', newTrace, 'elevation data', data)
-        //@ts-ignore
-        newTrace.yaxis = 'y2'
-        //@ts-ignore
-        newTrace.showlegend = false
-        traces.push(newTrace)
-    }
+    // if (isAirmass && targetView.length > 0) {
+    //     const data = generateData(targetView[0], 'Elevation', context.config.date_time_format, lngLatEl, 0)
+    //     const newTrace = make_trace(data, 'Elevation axis for airmass', '#00000000')
+    //     console.log('targetView', targetView[0], 'elevation trace', newTrace, 'elevation data', data)
+    //     //@ts-ignore
+    //     newTrace.yaxis = 'y2'
+    //     //@ts-ignore
+    //     newTrace.showlegend = false
+    //     traces.push(newTrace)
+    // }
 
     //get curr marker
     let maxAirmass = 10;
@@ -431,18 +470,18 @@ export const SkyChart = (props: Props) => {
     //set yRange for airmass charts. order to reverse axis
     const yLower = Math.min(AIRMASS_LIMIT, maxAirmass)
     const yRange = isAirmass ? [yLower, 1] : undefined
-    // const y2Range = [util.alt_from_air_mass(yRange?.at(0) ?? AIRMASS_LIMIT, lngLatEl.el),
-    //                  util.alt_from_air_mass(yRange?.at(1) ?? 1, lngLatEl.el)]
-    const y2Range = [util.alt_from_air_mass(yRange?.at(0) ?? AIRMASS_LIMIT),
-                     util.alt_from_air_mass(yRange?.at(1) ?? 1)]
-    console.log('y2Range', y2Range, 'yRange', yRange)
+    // // const y2Range = [util.alt_from_air_mass(yRange?.at(0) ?? AIRMASS_LIMIT, lngLatEl.el),
+    // //                  util.alt_from_air_mass(yRange?.at(1) ?? 1, lngLatEl.el)]
+    // const y2Range = [util.alt_from_air_mass(yRange?.at(0) ?? AIRMASS_LIMIT),
+    //                  util.alt_from_air_mass(yRange?.at(1) ?? 1)]
+    // console.log('y2Range', y2Range, 'yRange', yRange)
     const y2Axis: Partial<Plotly.LayoutAxis> = {
         title: {text: 'Altitude [deg]'},
         gridwidth: 0,
         overlaying: 'y',
         side: 'right',
         layer: 'above traces',
-        range: y2Range,
+        // range: y2Range,
     }
 
     //creates ticvals and ticktext for xaxis. 
