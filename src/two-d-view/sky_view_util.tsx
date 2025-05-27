@@ -54,9 +54,9 @@ export const ra_dec_to_deg = (time: string, dec = false) => {
             hours = hours.substring(1);
             sign = -1;
         }
-        deg = sign * parseInt(hours, 10) // dec is already in degrees
+        deg = sign * (parseInt(hours, 10) // dec is already in degrees
             + parseInt(min, 10) / 60
-            + parseInt(sec, 10) / 60 ** 2
+            + parseInt(sec, 10) / 60 ** 2)
     }
 
     else {
