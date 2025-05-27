@@ -293,9 +293,9 @@ export const SkyChart = (props: Props) => {
                                 ...layout,
                                 yaxis2: {
                                     ...y2Axis,
-                                    range: [util.alt_from_air_mass(tickvals[0], lngLatEl.el),
-                                        util.alt_from_air_mass(tickvals[tickvals.length - 1], lngLatEl.el)],
-                                    tickvals: tickvals,
+                                    // range: [util.alt_from_air_mass(tickvals[0], lngLatEl.el),
+                                    //     util.alt_from_air_mass(tickvals[tickvals.length - 1], lngLatEl.el)],
+                                    // tickvals: tickvals,
                                     ticktext: el_vals,
                                 },
                             });
