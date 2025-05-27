@@ -280,7 +280,7 @@ export const SkyChart = (props: Props) => {
         <Plot
             data={traces}
             ref={plotRef}
-            layout={sclayout}
+            layout={layout}
         />
     )
 }
