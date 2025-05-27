@@ -154,7 +154,6 @@ export const SkyChart = (props: Props) => {
     if (isAirmass && targetView.length > 0) {
         const data = generateData(targetView[0], 'Airmass', context.config.date_time_format, lngLatEl, 0)
         const newTrace = make_trace(data, 'Elevation axis for airmass', '#00000000')
-        console.log('targetView', targetView[0], 'elevation trace', newTrace, 'elevation data', data)
         //@ts-ignore
         newTrace.yaxis = 'y2'
         //@ts-ignore
@@ -265,7 +264,6 @@ export const SkyChart = (props: Props) => {
             ref={plotRef}
             layout={layout}
             onInitialized={(figure, graphDiv) => {
-                // console.log('onInitialized', figure, graphDiv)
                 console.log(figure, graphDiv)
                 if (plotRef.current && chartType === 'Airmass') {
                     console.log('plotRef.current', plotRef.current)
@@ -278,7 +276,7 @@ export const SkyChart = (props: Props) => {
 
                         // If not set, try to get from the actual plotly instance
                         // (Plotly stores the latest tickvals in the fullLayout)
-                        const gd = plotlyFigure?.el?.current;
+                        const gd = plotlyFigure?.el;
                         let tickvals = leftTicks;
                         if (gd && gd._fullLayout?.yaxis._vals) {
                             tickvals = gd._fullLayout.yaxis._vals.map((val: any) => {
