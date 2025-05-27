@@ -218,6 +218,7 @@ export const SkyChart = (props: Props) => {
                 console.error('Plotly figure not found', plotlyFigure);
                 return;
             }
+            console.log('gd', gd)
             const tickvals = gd._fullLayout.yaxis._vals.map((val: any) => {
                     return val.x
                 }) as number[];
