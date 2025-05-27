@@ -170,7 +170,8 @@ export const SkyChart = (props: Props) => {
 
     // 2. useEffect to update yaxis2 ticks after rendering
     useEffect(() => {
-        if (plotRef.current && plotRef.current.props.layout?.yaxis && plotRef.current.props.layout?.yaxis2) {
+        if (plotRef.current) {
+            console.log('plotRef.current', plotRef.current)
             // Get the left y-axis ticks from the plotly instance
             const plotlyFigure = plotRef.current;
             // Wait for the plot to be fully rendered
@@ -183,23 +184,24 @@ export const SkyChart = (props: Props) => {
                 const gd = plotlyFigure?.el?.current;
                 let tickvals = leftTicks;
                 if (gd && gd._fullLayout && gd._fullLayout.yaxis) {
-                    tickvals = gd._fullLayout.yaxis.tickvals;
+                    tickvals = gd._fullLayout.yaxis.tickvals as number[];
                 }
 
                 let el_vals = tickvals.map(val => util.alt_from_air_mass(val, lngLatEl.el));
+                console.log('tickvals', tickvals, 'leftTicks', leftTicks, 'el_vals', el_vals)
                 // 3. Update yaxis2 to match yaxis
                 if (tickvals) {
                     window.Plotly.relayout(gd, {
-                        //@ts-ignore
-                        // "yaxis2.range": [util.alt_from_air_mass(tickvals[0], lngLatEl.el),
-                        //                     util.alt_from_air_mass(tickvals[tickvals.length - 1], lngLatEl.el)],
+                        // @ts-ignore
+                        "yaxis2.range": [util.alt_from_air_mass(tickvals[0], lngLatEl.el),
+                                             util.alt_from_air_mass(tickvals[tickvals.length - 1], lngLatEl.el)],
                         "yaxis2.tickvals": tickvals,
                         "yaxis2.ticktext": el_vals,
                     });
                 }
             }, 200); // Delay to ensure plot is rendered
         }
-    }, [isAirmass, width, height]);
+    }, [targetView, chartType, time, lngLatEl.el]);
 
     targetView.forEach((tgtv: TargetView, idx: number) => {
         const data = generateData(tgtv,
