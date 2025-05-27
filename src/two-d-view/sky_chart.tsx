@@ -139,11 +139,13 @@ export const SkyChart = (props: Props) => {
                 // (Plotly stores the latest tickvals in the fullLayout)
                 const gd = plotlyFigure?.el?.current;
                 let tickvals = leftTicks;
-                if (gd && gd._fullLayout?.yaxis.tickvals) {
-                    tickvals = gd._fullLayout.yaxis.tickvals as number[];
+                if (gd && gd._fullLayout?.yaxis._vals) {
+                    tickvals = gd._fullLayout.yaxis._vals.map((val: any) => {
+                        return val.x 
+                    });
                 }
 
-                let el_vals = tickvals.map(val => util.alt_from_air_mass(val, lngLatEl.el));
+                let el_vals = tickvals.map(val => util.alt_from_air_mass(val, lngLatEl.el).toFixed(2));
                 console.log('tickvals', tickvals, 'leftTicks', leftTicks, 'el_vals', el_vals)
                 // 3. Update yaxis2 to match yaxis
                 if (tickvals) {
