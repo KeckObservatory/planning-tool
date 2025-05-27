@@ -214,6 +214,10 @@ export const SkyChart = (props: Props) => {
             // If not set, try to get from the actual plotly instance
             // (Plotly stores the latest tickvals in the fullLayout)
             const gd = plotlyFigure?.el?.current;
+            if (!gd) {
+                console.error('Plotly figure not found', plotlyFigure);
+                return;
+            }
             const tickvals = gd._fullLayout.yaxis._vals.map((val: any) => {
                     return val.x
                 }) as number[];
