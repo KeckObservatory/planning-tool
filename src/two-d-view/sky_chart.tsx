@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { AIRMASS_LIMIT, DEFAULT_OPACITY, NON_OBSERVABLE_OPACITY } from "./constants.tsx";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -118,7 +118,7 @@ export const split_into_segments = (data: Datum[]): Array<Datum[]> => {
 export const SkyChart = (props: Props) => {
     const { targetView, chartType, time, showCurrLoc, showLimits, width, height, dome, suncalcTimes } = props
 
-    const [layout, setLayout] = useState({})
+    const [layout, setLayout] = useState<Partial<Plotly.Layout>>({})
     const context = useStateContext()
     const isAirmass = chartType.includes('Airmass')
     const plotRef = useRef<any>(null);
