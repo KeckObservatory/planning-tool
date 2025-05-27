@@ -43,7 +43,7 @@
             "not_editable_by_user": false
         },
         "lgs": {
-            "type":  "number",
+            "type":  ["number", "string"],
             "description": "Is LGS target",
             "short_description": "LGS",
             "pattern": "^[10]$"
