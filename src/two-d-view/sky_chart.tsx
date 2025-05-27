@@ -284,8 +284,9 @@ export const SkyChart = (props: Props) => {
                             });
                         }
 
-                        let el_vals = tickvals.map(val => util.alt_from_air_mass(val, lngLatEl.el).toFixed(2));
-                        console.log('tickvals', tickvals, 'leftTicks', leftTicks, 'el_vals', el_vals)
+                        tickvals = tickvals.map(val => util.alt_from_air_mass(val));
+                        const ticktext = tickvals.map(val => val.toFixed(2));
+                        console.log('tickvals', tickvals, 'leftTicks', leftTicks, 'tickvals', tickvals, 'ticktext', ticktext);
                         // 3. Update yaxis2 to match yaxis
 
                         if (tickvals) {
@@ -293,9 +294,9 @@ export const SkyChart = (props: Props) => {
                                 ...layout,
                                 yaxis2: {
                                     ...y2Axis,
-                                    // range: [util.alt_from_air_mass(tickvals[0], lngLatEl.el),
-                                    //     util.alt_from_air_mass(tickvals[tickvals.length - 1], lngLatEl.el)],
-                                    // tickvals: tickvals,
+                                    range: [util.alt_from_air_mass(tickvals[0], lngLatEl.el),
+                                        util.alt_from_air_mass(tickvals[tickvals.length - 1], lngLatEl.el)],
+                                    tickvals: tickvals,
                                     ticktext: el_vals,
                                 },
                             });
