@@ -211,22 +211,15 @@ export const SkyChart = (props: Props) => {
             console.log('plotRef.current', plotRef.current)
             // Get the left y-axis ticks from the plotly instance
             const plotlyFigure = plotRef.current;
-            // Wait for the plot to be fully rendered
-            // Get the tickvals and ticktext from yaxis
-            const leftTicks = plotlyFigure.props.layout.yaxis.tickvals as number[];
-
             // If not set, try to get from the actual plotly instance
             // (Plotly stores the latest tickvals in the fullLayout)
             const gd = plotlyFigure?.el?.current;
-            let tickvals = leftTicks;
-            if (gd && gd._fullLayout?.yaxis._vals) {
-                tickvals = gd._fullLayout.yaxis._vals.map((val: any) => {
+            const tickvals = gd._fullLayout.yaxis._vals.map((val: any) => {
                     return val.x
-                });
-            }
+                }) as number[];
 
             let el_vals = tickvals.map(val => util.alt_from_air_mass(val, lngLatEl.el).toFixed(2));
-            console.log('tickvals', tickvals, 'leftTicks', leftTicks, 'el_vals', el_vals)
+            console.log('tickvals', tickvals, 'leftTicks', 'el_vals', el_vals)
             // 3. Update yaxis2 to match yaxis
             let y2Axis: Partial<Plotly.LayoutAxis> = {
                 title: { text: 'Altitude [deg]' },
