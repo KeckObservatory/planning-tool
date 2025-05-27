@@ -3,7 +3,6 @@ import * as SunCalc from 'suncalc'
 import * as util from './sky_view_util.tsx'
 import { Dome, TargetView } from "./two_d_view"
 import Plot from "react-plotly.js"
-import { colors } from "./sky_chart.tsx"
 import { LngLatEl, GeoModel, useStateContext } from "../App.tsx"
 import { reason_to_color_mapping } from "./target_viz_chart.tsx"
 import { VizRow } from "./viz_dialog.tsx"
@@ -93,12 +92,12 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
             hovorinfo: 'text',
             hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
             marker: {
-                color: colors[idx % colors.length],
+                color: util.colors[idx % util.colors.length],
                 opacity: 0,
                 size: 4
             },
             line: {
-                color: colors[idx % colors.length],
+                color: util.colors[idx % util.colors.length],
                 width: 5
             },
             textposition: 'top left',
@@ -218,13 +217,13 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
                 hovorinfo: 'text',
                 showlegend: false,
                 hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
-                color: colors[idx % colors.length],
+                color: util.colors[idx % util.colors.length],
                 textposition: 'top left',
                 type: 'scatterpolar',
                 mode: 'markers',
                 marker: {
                     size: 12,
-                    color: colors[idx % colors.length],
+                    color: util.colors[idx % util.colors.length],
                     line: {
                         color: 'black',
                         width: 2
