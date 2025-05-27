@@ -285,7 +285,7 @@ export const SkyChart = (props: Props) => {
                         }
 
                         const tickvals = otickvals.map(val => util.alt_from_air_mass(val));
-                        const ticktext = tickvals.map(val => val.toFixed(2));
+                        const ticktext = tickvals.map(val => val.toFixed(1));
                         // 3. Update yaxis2 to match yaxis
 
                         if (tickvals) {
@@ -293,6 +293,7 @@ export const SkyChart = (props: Props) => {
                                 ...layout,
                                 yaxis2: {
                                     ...y2Axis,
+                                    position: 0.95, // Adjust position to the right side
                                     tickvals: otickvals,
                                     ticktext: ticktext,
                                 },
