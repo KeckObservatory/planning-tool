@@ -135,6 +135,7 @@ const make_layout = (chartType: SkyChart,
         overlaying: 'y',
         side: 'right',
         layer: 'above traces',
+        autorange: false,
         range: yRange,
     }
 
@@ -209,10 +210,16 @@ export const SkyChart = (props: Props) => {
     const isAirmass = chartType.includes('Airmass')
     const plotRef = useRef<any>(null);
     //set layout for plotly. need to render after initialization for y2 axis
-    const [state, setState] = useState<State>({ layout: {}, y2Axis: {} } as State);
+    const shapes = util.get_shapes(suncalcTimes,
+        chartType,
+        context.config.tel_geometry.keck[dome],
+        false,
+        showLimits,)
+
+    const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, 5, suncalcTimes, context.config.timezone);
+    const [state, setState] = useState<State>({ layout: scLayout, y2Axis: y2Axis } as State);
 
     useEffect(() => {
-
         const shapes = util.get_shapes(suncalcTimes,
             chartType,
             context.config.tel_geometry.keck[dome],
@@ -279,7 +286,7 @@ export const SkyChart = (props: Props) => {
         <Plot
             data={traces}
             ref={plotRef}
-            layout={state.layout ?? {}}
+            layout={state.layout}
             onInitialized={() => {
                 if (plotRef.current && chartType === 'Airmass') {
                     // Get the left y-axis ticks from the plotly instance
@@ -315,14 +322,14 @@ export const SkyChart = (props: Props) => {
                             setState(
                                 {
                                     layout: {
-                                        ...(state.layout ?? {}),
+                                        ...(state.layout),
                                         yaxis2: newY2Axis
                                     },
                                     y2Axis: newY2Axis
                                 }
                             );
                         }
-                    }, 200); // Delay to ensure plot is rendered
+                    }, 100); // Delay to ensure plot is rendered
                 }
             }
             }
