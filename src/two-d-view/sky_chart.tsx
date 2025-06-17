@@ -284,6 +284,8 @@ export const SkyChart = (props: Props) => {
                 if (plotRef.current && chartType === 'Airmass') {
                     // Get the left y-axis ticks from the plotly instance
                     const plotlyFigure = plotRef.current;
+
+                    console.log("Plotly figure initialized:", plotlyFigure);
                     // Wait for the plot to be fully rendered
                     setTimeout(() => {
                         // Get the tickvals and ticktext from yaxis
