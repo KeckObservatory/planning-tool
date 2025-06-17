@@ -126,10 +126,6 @@ export const SkyChart = (props: Props) => {
     const lngLatEl = context.config.tel_lat_lng_el.keck
     let deckBlocking = false
 
-    // 2. useEffect to update yaxis2 ticks after rendering
-    useEffect(() => {
-    }, []);
-
     targetView.forEach((tgtv: TargetView, idx: number) => {
         const data = generateData(tgtv,
             chartType, context.config.date_time_format,
@@ -183,11 +179,6 @@ export const SkyChart = (props: Props) => {
     //set yRange for airmass charts. order to reverse axis
     const yLower = Math.min(AIRMASS_LIMIT, maxAirmass)
     const yRange = isAirmass ? [yLower, 1] : undefined
-    // // const y2Range = [util.alt_from_air_mass(yRange?.at(0) ?? AIRMASS_LIMIT, lngLatEl.el),
-    // //                  util.alt_from_air_mass(yRange?.at(1) ?? 1, lngLatEl.el)]
-    // const y2Range = [util.alt_from_air_mass(yRange?.at(0) ?? AIRMASS_LIMIT),
-    //                  util.alt_from_air_mass(yRange?.at(1) ?? 1)]
-    // console.log('y2Range', y2Range, 'yRange', yRange)
     const y2Axis: Partial<Plotly.LayoutAxis> = {
         title: { text: 'Altitude [deg]' },
         gridwidth: 0,
@@ -263,8 +254,7 @@ export const SkyChart = (props: Props) => {
             data={traces}
             ref={plotRef}
             layout={layout}
-            onInitialized={(figure, graphDiv) => {
-                console.log(figure, graphDiv)
+            onInitialized={() => {
                 if (plotRef.current && chartType === 'Airmass') {
                     console.log('plotRef.current', plotRef.current)
                     // Get the left y-axis ticks from the plotly instance

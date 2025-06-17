@@ -221,7 +221,7 @@ const TwoDView = ({ targets }: Props) => {
         setSuncalcTimes(newSuncalcTimes)
         setTime(newSuncalcTimes.nadir)
         setTimes(newTimes)
-    }, [obsdate, targets, dome])
+    }, [obsdate, targets, dome, skyChart])
 
     const handleDateChange = (newDate: Dayjs | null) => {
         if (!newDate) return

@@ -234,6 +234,7 @@ export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: 
 
 export const TargetVizChart = (props: Props) => {
     const { targetViz } = props
+    console.log('TargetVizChart', targetViz)
     const context = useStateContext()
     let traces = targetViz.semester_visibility.map((dayViz: DayViz) => {
         let texts: string[] = []
