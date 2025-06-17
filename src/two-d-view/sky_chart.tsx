@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { AIRMASS_LIMIT, DEFAULT_OPACITY, NON_OBSERVABLE_OPACITY } from "./constants.tsx";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
