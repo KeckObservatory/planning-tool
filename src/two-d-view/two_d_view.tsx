@@ -211,7 +211,7 @@ const TwoDView = ({ targets }: Props) => {
                 return feature['properties'].type === 'FOV' && feature['properties'].dome === dome
             })
             const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
-            console.log('new fovs', newFovs, 'dome', dome)
+            console.log('dome', dome, 'obsdate', obsdate, 'instrumentFOV', 'skychart', skyChart)
             !newFovs.includes(instrumentFOV) && setInstrumentFOV(newFovs[0])
             setFOVs(newFovs)
         }

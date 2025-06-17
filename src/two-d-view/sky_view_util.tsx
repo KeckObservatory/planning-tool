@@ -177,7 +177,6 @@ export const get_target_traj = (ra: number, dec: number, times: Date[], lngLatEl
 export function alt_from_air_mass(am: number): number;
 export function alt_from_air_mass(am: number, el: number): number;
 export function alt_from_air_mass(am: number, el?: number) {
-    console.log('am', am)
     if (el === undefined) {
         return 90 - r2d(Math.acos(1 / am))
     }
@@ -185,7 +184,6 @@ export function alt_from_air_mass(am: number, el?: number) {
     const b = ATMOSPHERE_HEIGHT + RADIUS_EARTH
     const s = am * ATMOSPHERE_HEIGHT
     const zenith = r2d(Math.acos(( a * a + s * s - b * b ) / (2 * a * s)))
-    console.log('zenith', zenith)
     return 90 - zenith
 }
 
