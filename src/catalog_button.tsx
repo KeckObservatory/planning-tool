@@ -24,7 +24,8 @@ export const ra_dec_to_deg = (time: string | number, dec = false): number => {
     (time as string).includes('+') || (time as string).includes('-') && (dec = true)
     try {
         let [hours, min, sec] = (time as string).split(':')
-        sigfig = sec.split('.')[1].length
+        const decimal = sec.split('.').at(1) //sometimes decimal is not present in seconds
+        sigfig = decimal ? decimal.length : 3 //if sec has decimal, use its length as sigfig
         if (dec) {
             const decDeg = Number(hours)
             let sign = Math.sign(decDeg)
