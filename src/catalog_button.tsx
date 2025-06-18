@@ -85,6 +85,7 @@ export const get_simbad_data = async (targetName: string): Promise<SimbadTargetD
             simbadData['dec'] = line.split(': ')[1].split(' ').slice(4, 7).join(':')
             simbadData['ra_deg'] = ra_dec_to_deg(simbadData['ra'])
             simbadData['dec_deg'] = ra_dec_to_deg(simbadData['dec'], true)
+            console.log('ra', simbadData['ra'], 'dec', simbadData['dec'], 'ra_deg', simbadData['ra_deg'], 'dec_deg', simbadData['dec_deg'])
             simbadData['equinox'] = line.match( new RegExp("eq=(\\w+)"))?.at(1)
             simbadData['epoch'] = line.match( new RegExp("ep=(\\w+)"))?.at(1)
         }
