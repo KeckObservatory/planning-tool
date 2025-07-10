@@ -76,8 +76,8 @@ export const get_userinfo = (): Promise<UserInfo> => {
         .catch(handleError)
 }
 
-export const submit_target_to_starlist_dir = (blob: Blob): Promise<string> => {
-    return axiosInstance.post(BASE_URL + '/uploadStarlistToDir', blob, {
+export const submit_target_to_starlist_dir = (formData: FormData): Promise<string> => {
+    return axiosInstance.post(BASE_URL + '/writeToStarlistDirectory', formData, {
         headers: {
             'Content-Type': 'application/octet-stream',
         }

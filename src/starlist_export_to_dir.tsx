@@ -60,8 +60,7 @@ function ExportTargetsNameDialog(props: ETProps) {
 const exportBlob = (blob: Blob, filename: string, snackbarContext: SnackbarContextProps) => {
     const formData = new FormData();
     formData.append('file', blob, filename);
-    fetch('/api/upload', { method: 'POST', body: formData, })
-    submit_target_to_starlist_dir(blob)
+    submit_target_to_starlist_dir(formData)
         .then(response => {
             const severity = typeof response === 'string' ? 'success' : 'error';
             snackbarContext.setSnackbarMessage({ severity, message: `${response}` });
