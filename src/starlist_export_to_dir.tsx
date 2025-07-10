@@ -3,8 +3,9 @@ import { GridExportMenuItemProps, useGridApiContext } from "@mui/x-data-grid-pro
 import { getStarlist } from "./table_toolbar";
 import { SnackbarContextProps, useSnackbarContext } from "./App";
 import { DialogComponent } from './dialog_component';
-import { Button, Input, TextField } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import React from "react";
+import { submit_target_to_starlist_dir } from "./api/api_root";
 
 interface ETProps {
     open: boolean;
@@ -59,17 +60,11 @@ function ExportTargetsNameDialog(props: ETProps) {
 const exportBlob = (blob: Blob, filename: string, snackbarContext: SnackbarContextProps) => {
     const formData = new FormData();
     formData.append('file', blob, filename);
-    fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-    })
+    fetch('/api/upload', { method: 'POST', body: formData, })
+    submit_target_to_starlist_dir(blob, filename)
         .then(response => {
-            if (!response.ok) {
-                console.error('error saving targets to dir', response);
-                snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error saving to starlist directory' })
-            }
-            snackbarContext.setSnackbarMessage({ severity: 'success', message: 'File saved to starlist directory' })
-            return response.json();
+            const severity = typeof response === 'string' ? 'success' : 'error';
+            snackbarContext.setSnackbarMessage({ severity, message: `${response}` });
         }
         )
 }

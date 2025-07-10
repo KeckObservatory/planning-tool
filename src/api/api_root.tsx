@@ -76,6 +76,15 @@ export const get_userinfo = (): Promise<UserInfo> => {
         .catch(handleError)
 }
 
+export const submit_target_to_starlist_dir = (blob: Blob, filename: string): Promise<string> => {
+    return axiosInstance.post(BASE_URL + '/uploadStarlistToDir', blob, {
+        headers: {
+            'Content-Type': 'application/octet-stream',
+        }
+    }).then(handleResponse)
+    .catch(handleError)
+}
+
 export interface DeleteResponse {
     status: string
 }
@@ -83,7 +92,7 @@ export interface DeleteResponse {
 export const delete_target = (target_ids: string[]): Promise<DeleteResponse> => {
     const url = BASE_URL + "/deletePlanningToolTarget"
     const obsid_cookie = Cookies.get('observer')
-    return axiosInstance.put(url, {obsid_cookie, target_ids})
+    return axiosInstance.put(url, { obsid_cookie, target_ids })
         .then(handleResponse)
         .catch(handleError)
 }
@@ -97,8 +106,8 @@ export const observer_logout = (): Promise<string> => {
 
 export const get_targets = (obsid?: number, target_id?: string): Promise<Target[]> => {
     let url = BASE_URL + "/getPlanningToolTarget?"
-    url += obsid ? "obsid=" + obsid: ""
-    url += target_id ? "&target_id=" + target_id: ""
+    url += obsid ? "obsid=" + obsid : ""
+    url += target_id ? "&target_id=" + target_id : ""
     const obsid_cookie = Cookies.get('observer')
     return axiosInstance.put(url, { obsid_cookie })
         .then(handleResponse)
@@ -106,14 +115,14 @@ export const get_targets = (obsid?: number, target_id?: string): Promise<Target[
 }
 
 export interface SubmitTargetResponse {
-    targets: Target[] 
-    errors: string[] 
+    targets: Target[]
+    errors: string[]
 }
 
 export const submit_target = (targets: Target[]): Promise<SubmitTargetResponse> => {
     const url = BASE_URL + "/submitPlanningToolTarget"
     const obsid_cookie = Cookies.get('observer')
-    return axiosInstance.post(url, { targets, obsid_cookie } )
+    return axiosInstance.post(url, { targets, obsid_cookie })
         .then(handleResponse)
         .catch(handleError)
 }
