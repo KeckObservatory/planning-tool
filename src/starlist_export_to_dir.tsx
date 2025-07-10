@@ -61,7 +61,7 @@ const exportBlob = (blob: Blob, filename: string, snackbarContext: SnackbarConte
     const formData = new FormData();
     formData.append('file', blob, filename);
     fetch('/api/upload', { method: 'POST', body: formData, })
-    submit_target_to_starlist_dir(blob, filename)
+    submit_target_to_starlist_dir(blob)
         .then(response => {
             const severity = typeof response === 'string' ? 'success' : 'error';
             snackbarContext.setSnackbarMessage({ severity, message: `${response}` });
