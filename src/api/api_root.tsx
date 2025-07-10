@@ -1,5 +1,4 @@
 import axios from 'axios';
-import Cookies from 'js-cookie'
 
 import { handleResponse, handleError, intResponse, intError } from './response.tsx';
 import { Target } from '../App.tsx';
@@ -70,8 +69,7 @@ export const get_gaia = (gaia_id: string): Promise<GaiaResp> => {
 
 export const get_userinfo = (): Promise<UserInfo> => {
     let url = BASE_URL + '/userinfo'
-    const obsid_cookie = Cookies.get('observer')
-    return axiosInstance.post(url, { obsid_cookie })
+    return axiosInstance.post(url)
         .then(handleResponse)
         .catch(handleError)
 }
@@ -91,8 +89,7 @@ export interface DeleteResponse {
 
 export const delete_target = (target_ids: string[]): Promise<DeleteResponse> => {
     const url = BASE_URL + "/deletePlanningToolTarget"
-    const obsid_cookie = Cookies.get('observer')
-    return axiosInstance.put(url, { obsid_cookie, target_ids })
+    return axiosInstance.put(url, { target_ids })
         .then(handleResponse)
         .catch(handleError)
 }
@@ -108,8 +105,7 @@ export const get_targets = (obsid?: number, target_id?: string): Promise<Target[
     let url = BASE_URL + "/getPlanningToolTarget?"
     url += obsid ? "obsid=" + obsid : ""
     url += target_id ? "&target_id=" + target_id : ""
-    const obsid_cookie = Cookies.get('observer')
-    return axiosInstance.put(url, { obsid_cookie })
+    return axiosInstance.put(url)
         .then(handleResponse)
         .catch(handleError)
 }
@@ -121,8 +117,7 @@ export interface SubmitTargetResponse {
 
 export const submit_target = (targets: Target[]): Promise<SubmitTargetResponse> => {
     const url = BASE_URL + "/submitPlanningToolTarget"
-    const obsid_cookie = Cookies.get('observer')
-    return axiosInstance.post(url, { targets, obsid_cookie })
+    return axiosInstance.post(url, { targets })
         .then(handleResponse)
         .catch(handleError)
 }

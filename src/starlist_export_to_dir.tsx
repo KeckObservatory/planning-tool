@@ -95,7 +95,7 @@ export const StarListExportDirMenu = (props: GridExportMenuItemProps<{}>) => {
                     setOpen(true);
                 }}
             >
-                Export Starlist Text File
+                Write to Starlist Directory
             </MenuItem >
             <ExportTargetsNameDialog
                 open={open}
