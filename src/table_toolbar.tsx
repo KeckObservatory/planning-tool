@@ -24,6 +24,7 @@ import { Target, useSnackbarContext } from './App.tsx';
 import { Stack } from '@mui/material';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import DeleteDialogButton from './delete_rows_dialog.tsx';
+import { StarListExportDirMenu } from './starlist_export_to_dir.tsx';
 
 export const TARGET_LENGTH = 15 // 15 characters for target name
 export const TARGET_NAME_LENGTH_PADDED = TARGET_LENGTH + 1 // 15 characters for target name, one space at the end
@@ -72,7 +73,7 @@ const convert_target_to_targetlist_row = (target: Target) => {
   return row
 }
 
-const getStarlist = (apiRef: React.MutableRefObject<GridApi>) => {
+export const getStarlist = (apiRef: React.MutableRefObject<GridApi>) => {
   // Select rows and columns
   let rows = ""
   apiRef.current.getRowModels().forEach((target) => {
@@ -151,6 +152,7 @@ function CustomExportButton(props: ExportButtonProps) {
     <GridToolbarExportContainer {...props}>
       <JsonExportMenuItem />
       <StarListExportMenu />
+      <StarListExportDirMenu />
     </GridToolbarExportContainer>
   );
 }
