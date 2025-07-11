@@ -1,7 +1,6 @@
 import MenuItem from "@mui/material/MenuItem";
-import { useGridApiContext } from "@mui/x-data-grid-pro";
 import { ExportProps, getStarlist } from "./table_toolbar";
-import { SnackbarContextProps, useSnackbarContext, Target } from "./App";
+import { SnackbarContextProps, useSnackbarContext } from "./App";
 import { DialogComponent } from './dialog_component';
 import { Button, Stack, TextField } from "@mui/material";
 import React from "react";
