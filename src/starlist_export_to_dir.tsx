@@ -78,7 +78,6 @@ const exportBlob = (blob: Blob, filename: string, snackbarContext: SnackbarConte
 }
 
 export const StarListExportDirMenu = (props: ExportProps) => {
-    const apiRef = useGridApiContext();
     const [open, setOpen] = React.useState(false);
     const [fileName, setFileName] = React.useState('starlist.txt');
 
@@ -90,7 +89,7 @@ export const StarListExportDirMenu = (props: ExportProps) => {
     };
 
     const handleExport = () => {
-        const targets = props.selectedTargets ?? apiRef.current.getRowModels() as unknown as Target[];
+        const targets = props.exportTargets
         const txt = getStarlist(targets);
         const blob = new Blob([txt], {
             type: 'text/json',
