@@ -130,7 +130,7 @@ const TargetStepper = (props: Props) => {
         })
 
         const resp = await submit_target(tgts)
-        if (resp.errors) {
+        if (resp.errors && resp.errors.length > 0) {
             console.error('errors', resp.errors)
             snackbarContext.setSnackbarMessage({ severity: 'error', message: `Error saving targets ${resp.errors}` })
             snackbarContext.setSnackbarOpen(true);
