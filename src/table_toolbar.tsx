@@ -29,27 +29,6 @@ import { StarListExportDirMenu } from './starlist_export_to_dir.tsx';
 export const TARGET_LENGTH = 15 // 15 characters for target name
 export const TARGET_NAME_LENGTH_PADDED = TARGET_LENGTH + 1 // 15 characters for target name, one space at the end
 
-const getJson = (apiRef: React.MutableRefObject<GridApi>) => {
-  // Select rows and columns
-  const filteredSortedRowIds = gridFilteredSortedRowIdsSelector(apiRef);
-  const visibleColumnsField = gridVisibleColumnFieldsSelector(apiRef);
-
-  // Format the data. Here we only keep the value
-  let data: Record<string, any> = []
-  filteredSortedRowIds.forEach((id) => {
-    const row: Record<string, any> = {};
-    visibleColumnsField.forEach((field) => {
-      row[field] = apiRef.current.getCellParams(id, field).value;
-    });
-    //TODO: format types
-    delete row.__check__
-    if (Object.keys(row).length > 0) {
-      data.push(row)
-    }
-  });
-  return data
-};
-
 const convert_target_to_targetlist_row = (target: Target) => {
   //required params
   const name = target.target_name?.slice(0, TARGET_LENGTH).padEnd(TARGET_NAME_LENGTH_PADDED, " ") //columns 1-16 are text last column is a space
@@ -98,16 +77,13 @@ const exportBlob = (blob: Blob, filename: string) => {
 };
 
 function StarListExportMenu(props: ExportProps) {
-  const apiRef = useGridApiContext();
 
-  const { hideMenu } = props;
-
-  const targets = props.selectedTargets ?? apiRef.current.getRowModels() as unknown as Target[];
+  const { hideMenu, exportTargets } = props;
 
   return (
     <MenuItem
       onClick={() => {
-        const txt = getStarlist(targets);
+        const txt = getStarlist(exportTargets);
         const blob = new Blob([txt], {
           type: 'text/json',
         });
@@ -122,18 +98,16 @@ function StarListExportMenu(props: ExportProps) {
 }
 
 export interface ExportProps extends GridExportMenuItemProps<{}> {
-  selectedTargets?: Target[];
+  exportTargets: Target[];
 }
 
 function JsonExportMenuItem(props: ExportProps) {
-  const apiRef = useGridApiContext();
-
   const { hideMenu } = props;
 
   return (
     <MenuItem
       onClick={() => {
-        const targets = props.selectedTargets ?? getJson(apiRef);
+        const targets = props.exportTargets;
         const blob = new Blob([JSON.stringify(targets, null, 2)], {
           type: 'text/json',
         });
@@ -150,15 +124,16 @@ function JsonExportMenuItem(props: ExportProps) {
 
 
 interface ExportButtonProps extends ButtonProps {
-  selectedTargets?: Target[];
+  exportTargets: Target[];
 }
 
 function CustomExportButton(props: ExportButtonProps) {
+
   return (
     <GridToolbarExportContainer {...props}>
-      <JsonExportMenuItem selectedTargets={props.selectedTargets} />
-      <StarListExportMenu selectedTargets={props.selectedTargets} />
-      <StarListExportDirMenu selectedTargets={props.selectedTargets} />
+      <JsonExportMenuItem exportTargets={props.exportTargets} />
+      <StarListExportMenu exportTargets={props.exportTargets} />
+      <StarListExportDirMenu exportTargets={props.exportTargets} />
     </GridToolbarExportContainer>
   );
 }
@@ -220,6 +195,10 @@ export function EditToolbar(props: EditToolbarProps) {
     :
     rows.filter((target) => target.ra && target.dec)
 
+  const exportTargets = props.selectedTargets.length > 0 ? 
+    get_targets_from_selected_targets(selectedTargets, rows)
+    : rows
+
   return (
     // <GridToolbarContainer sx={{ justifyContent: 'center' }}>
     <GridToolbarContainer sx={{ justifyContent: 'space-between' }}>
@@ -233,7 +212,7 @@ export function EditToolbar(props: EditToolbarProps) {
         <TargetWizardButton />
       </Stack>
       <Stack justifyContent={'right'} direction="row" spacing={1}>
-        <CustomExportButton selectedTargets={selectedTargets ?? undefined}/>
+        <CustomExportButton exportTargets={exportTargets}/>
         <GridToolbar
           printOptions={{ disableToolbarButton: true }}
           csvOptions={{ disableToolbarButton: true }}
