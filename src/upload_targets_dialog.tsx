@@ -68,10 +68,14 @@ export const format_targets = (tgts: UploadedTarget[], targetProps: TargetProps)
     const fmtTgts = tgts.map((tgt) => {
         Object.entries(tgt).forEach(([key, value]) => {
             const props = targetProps[key]
-            if (!props) console.log('tgt', tgt) 
-            const fmtValue = format_target_property(key as keyof Target, value, props)
-            //@ts-ignore
-            tgt[key] = fmtValue
+            if (!props) {
+                console.log('tgt', tgt)
+            }
+            else {
+                const fmtValue = format_target_property(key as keyof Target, value, props)
+                //@ts-ignore
+                tgt[key] = fmtValue
+            }
         })
         return tgt
     })
