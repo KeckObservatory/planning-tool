@@ -57,7 +57,7 @@ const convert_target_to_targetlist_row = (target: Target) => {
   const dec = target.dec?.replaceAll(':', ' ')
   const equinox = target.equinox ?? '2000'
   let row = `${name} ${ra} ${dec} ${equinox}`
-  const valid = target.target_name && target.ra && target.dec && target.equinox
+  const valid = target.target_name && target.ra && target.dec && equinox
   row = valid ? row : '# INVALID row: ' + row
   //optional params
   row = target.g_mag ? row + ` gmag=${target.g_mag}` : row
