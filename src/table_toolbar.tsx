@@ -125,13 +125,13 @@ interface ExportButtonProps extends ButtonProps {
 function CustomExportButton(props: ExportButtonProps) {
 
   return (
-    <Tooltip title="Export selected targets (or all if none selected)">
-    <GridToolbarExportContainer {...props}>
+    <GridToolbarExportContainer {...props} slotProps={{ tooltip: {
+      title: 'Export selected targets (or all if none selected)',
+    }}}>
       <JsonExportMenuItem exportTargets={props.exportTargets} />
       <StarListExportMenu exportTargets={props.exportTargets} />
       <StarListExportDirMenu exportTargets={props.exportTargets} />
     </GridToolbarExportContainer>
-    </Tooltip>
   );
 }
 
