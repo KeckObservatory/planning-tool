@@ -3,7 +3,7 @@ import { GridExportMenuItemProps, useGridApiContext } from "@mui/x-data-grid-pro
 import { getStarlist } from "./table_toolbar";
 import { SnackbarContextProps, useSnackbarContext } from "./App";
 import { DialogComponent } from './dialog_component';
-import { Button, TextField } from "@mui/material";
+import { Button, Stack, TextField } from "@mui/material";
 import React from "react";
 import { submit_target_to_starlist_dir } from "./api/api_root";
 
@@ -23,7 +23,14 @@ function ExportTargetsNameDialog(props: ETProps) {
     );
 
     const dialogContent = (
-        <>
+        <Stack sx={{
+            paddingTop: '16px',
+            display: 'flex',
+            flexWrap: 'wrap',
+        }}
+            justifyContent='center'
+            maxWidth='100%'
+        >
             <TextField
                 required
                 id="filename-required"
@@ -42,7 +49,7 @@ function ExportTargetsNameDialog(props: ETProps) {
                 }}>
                 Submit
             </Button>
-        </>
+        </ Stack>
     )
 
     return (
