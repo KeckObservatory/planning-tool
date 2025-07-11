@@ -70,7 +70,9 @@ const exportBlob = (blob: Blob, filename: string, snackbarContext: SnackbarConte
     submit_target_to_starlist_dir(formData)
         .then(response => {
             const severity = typeof response === 'string' ? 'success' : 'error';
+            console.log('export response', response);
             snackbarContext.setSnackbarMessage({ severity, message: `${response}` });
+            snackbarContext.setSnackbarOpen(true);
         }
         )
 }

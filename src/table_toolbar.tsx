@@ -133,8 +133,8 @@ function JsonExportMenuItem(props: ExportProps) {
   return (
     <MenuItem
       onClick={() => {
-        const json = getJson(apiRef);
-        const blob = new Blob([JSON.stringify(json, null, 2)], {
+        const targets = props.selectedTargets ?? getJson(apiRef);
+        const blob = new Blob([JSON.stringify(targets, null, 2)], {
           type: 'text/json',
         });
         exportBlob(blob, 'targets.json');
