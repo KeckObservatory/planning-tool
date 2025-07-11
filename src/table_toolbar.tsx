@@ -16,7 +16,7 @@ import { v4 as randomId } from 'uuid';
 import MenuItem from '@mui/material/MenuItem';
 import Button, { ButtonProps } from '@mui/material/Button';
 import { Target, useSnackbarContext } from './App.tsx';
-import { Stack } from '@mui/material';
+import { Stack, Tooltip } from '@mui/material';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import DeleteDialogButton from './delete_rows_dialog.tsx';
 import { StarListExportDirMenu } from './starlist_export_to_dir.tsx';
@@ -125,11 +125,13 @@ interface ExportButtonProps extends ButtonProps {
 function CustomExportButton(props: ExportButtonProps) {
 
   return (
+    <Tooltip title="Export selected targets (or all if none selected)">
     <GridToolbarExportContainer {...props}>
       <JsonExportMenuItem exportTargets={props.exportTargets} />
       <StarListExportMenu exportTargets={props.exportTargets} />
       <StarListExportDirMenu exportTargets={props.exportTargets} />
     </GridToolbarExportContainer>
+    </Tooltip>
   );
 }
 
