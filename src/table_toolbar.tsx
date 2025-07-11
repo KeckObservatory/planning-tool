@@ -205,6 +205,7 @@ export function EditToolbar(props: EditToolbarProps) {
     if (!submittedTarget) {
       console.error('error submitting target')
       snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error adding target' })
+      snackbarContext.setSnackbarOpen(true);
       return
     }
     processRowUpdate(submittedTarget)

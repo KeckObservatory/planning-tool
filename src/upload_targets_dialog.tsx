@@ -322,6 +322,7 @@ export function UploadComponent(props: UploadProps) {
                     break;
                 default:
                     snackbarContext.setSnackbarMessage({severity: 'warning', message: 'File type may not supported. Attempting to parse as .txt'}) 
+                    snackbarContext.setSnackbarOpen(true);
                     try {
                         uploadedTargets = parse_txt(contents, context.obsid)
                     }

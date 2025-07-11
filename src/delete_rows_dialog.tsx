@@ -34,6 +34,7 @@ function DeleteTargets(props: { targets: Target[], setRows: Function }) {
     if (resp.status !== 'SUCCESS') {
       console.error('error deleting targets', resp)
       snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error deleting targets' })
+      snackbarContext.setSnackbarOpen(true)
       return
     }
     setDeletedTargets(targets)
@@ -50,9 +51,11 @@ function DeleteTargets(props: { targets: Target[], setRows: Function }) {
       console.error('error while undoing target delete', resp)
       const msg = 'error when undoing deleted targets: ' + resp.errors.join(', ')
       snackbarContext.setSnackbarMessage({ severity: 'error', message: msg })
+      snackbarContext.setSnackbarOpen(true)
       return
     }
     snackbarContext.setSnackbarMessage({ severity: 'info', message: 'Resubmitted deleted targets' })
+    snackbarContext.setSnackbarOpen(true)
     setRows((oldRows: any) => {
       return [...targets, ...oldRows]
     });

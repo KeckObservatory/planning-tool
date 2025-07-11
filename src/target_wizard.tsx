@@ -133,6 +133,7 @@ const TargetStepper = (props: Props) => {
         if (resp.errors) {
             console.error('errors', resp.errors)
             snackbarContext.setSnackbarMessage({ severity: 'error', message: `Error saving targets ${resp.errors}` })
+            snackbarContext.setSnackbarOpen(true);
         }
 
         RowsContext.setRows((curTgts) => [...tgts, ...curTgts])
