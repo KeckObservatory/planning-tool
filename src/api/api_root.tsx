@@ -69,7 +69,7 @@ export const get_gaia = (gaia_id: string): Promise<GaiaResp> => {
 
 export const get_userinfo = (): Promise<UserInfo> => {
     let url = BASE_URL + '/userinfo'
-    return axiosInstance.post(url)
+    return axiosInstance.post(url, { })
         .then(handleResponse)
         .catch(handleError)
 }
@@ -105,7 +105,7 @@ export const get_targets = (obsid?: number, target_id?: string): Promise<Target[
     let url = BASE_URL + "/getPlanningToolTarget?"
     url += obsid ? "obsid=" + obsid : ""
     url += target_id ? "&target_id=" + target_id : ""
-    return axiosInstance.put(url)
+    return axiosInstance.put(url, { })
         .then(handleResponse)
         .catch(handleError)
 }
