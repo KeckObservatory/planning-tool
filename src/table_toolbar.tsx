@@ -1,4 +1,3 @@
-import * as React from 'react';
 import target_schema from './target_schema.json';
 import AddIcon from '@mui/icons-material/Add';
 import { TargetWizardButton } from './target_wizard';
@@ -7,10 +6,6 @@ import {
   GridToolbarContainer,
   GridToolbarExportContainer,
   GridExportMenuItemProps,
-  useGridApiContext,
-  gridFilteredSortedRowIdsSelector,
-  gridVisibleColumnFieldsSelector,
-  GridApi,
   GridRowsProp,
   GridRowModel,
   GridToolbar,
