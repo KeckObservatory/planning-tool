@@ -1,7 +1,7 @@
 import MenuItem from "@mui/material/MenuItem";
-import { GridExportMenuItemProps, useGridApiContext } from "@mui/x-data-grid-pro";
-import { getStarlist } from "./table_toolbar";
-import { SnackbarContextProps, useSnackbarContext } from "./App";
+import { useGridApiContext } from "@mui/x-data-grid-pro";
+import { ExportProps, getStarlist } from "./table_toolbar";
+import { SnackbarContextProps, useSnackbarContext, Target } from "./App";
 import { DialogComponent } from './dialog_component';
 import { Button, Stack, TextField } from "@mui/material";
 import React from "react";
@@ -75,7 +75,7 @@ const exportBlob = (blob: Blob, filename: string, snackbarContext: SnackbarConte
         )
 }
 
-export const StarListExportDirMenu = (props: GridExportMenuItemProps<{}>) => {
+export const StarListExportDirMenu = (props: ExportProps) => {
     const apiRef = useGridApiContext();
     const [open, setOpen] = React.useState(false);
     const [fileName, setFileName] = React.useState('starlist.txt');
@@ -88,7 +88,8 @@ export const StarListExportDirMenu = (props: GridExportMenuItemProps<{}>) => {
     };
 
     const handleExport = () => {
-        const txt = getStarlist(apiRef);
+        const targets = props.selectedTargets ?? apiRef.current.getRowModels() as unknown as Target[];
+        const txt = getStarlist(targets);
         const blob = new Blob([txt], {
             type: 'text/json',
         });

@@ -73,10 +73,10 @@ const convert_target_to_targetlist_row = (target: Target) => {
   return row
 }
 
-export const getStarlist = (apiRef: React.MutableRefObject<GridApi>) => {
+export const getStarlist = (targets: Target[]) => {
   // Select rows and columns
   let rows = ""
-  apiRef.current.getRowModels().forEach((target) => {
+  targets.forEach((target) => {
     const row = convert_target_to_targetlist_row(target as Target)
     rows += row + '\n'
   })
@@ -97,15 +97,17 @@ const exportBlob = (blob: Blob, filename: string) => {
   });
 };
 
-function StarListExportMenu(props: GridExportMenuItemProps<{}>) {
+function StarListExportMenu(props: ExportProps) {
   const apiRef = useGridApiContext();
 
   const { hideMenu } = props;
 
+  const targets = props.selectedTargets ?? apiRef.current.getRowModels() as unknown as Target[];
+
   return (
     <MenuItem
       onClick={() => {
-        const txt = getStarlist(apiRef);
+        const txt = getStarlist(targets);
         const blob = new Blob([txt], {
           type: 'text/json',
         });
@@ -119,8 +121,11 @@ function StarListExportMenu(props: GridExportMenuItemProps<{}>) {
   );
 }
 
+export interface ExportProps extends GridExportMenuItemProps<{}> {
+  selectedTargets?: Target[];
+}
 
-function JsonExportMenuItem(props: GridExportMenuItemProps<{}>) {
+function JsonExportMenuItem(props: ExportProps) {
   const apiRef = useGridApiContext();
 
   const { hideMenu } = props;
@@ -145,14 +150,15 @@ function JsonExportMenuItem(props: GridExportMenuItemProps<{}>) {
 
 
 interface ExportButtonProps extends ButtonProps {
+  selectedTargets?: Target[];
 }
 
 function CustomExportButton(props: ExportButtonProps) {
   return (
     <GridToolbarExportContainer {...props}>
-      <JsonExportMenuItem />
-      <StarListExportMenu />
-      <StarListExportDirMenu />
+      <JsonExportMenuItem selectedTargets={props.selectedTargets} />
+      <StarListExportMenu selectedTargets={props.selectedTargets} />
+      <StarListExportDirMenu selectedTargets={props.selectedTargets} />
     </GridToolbarExportContainer>
   );
 }
@@ -226,7 +232,7 @@ export function EditToolbar(props: EditToolbarProps) {
         <TargetWizardButton />
       </Stack>
       <Stack justifyContent={'right'} direction="row" spacing={1}>
-        <CustomExportButton/>
+        <CustomExportButton selectedTargets={selectedTargets ?? undefined}/>
         <GridToolbar
           printOptions={{ disableToolbarButton: true }}
           csvOptions={{ disableToolbarButton: true }}
