@@ -307,7 +307,7 @@ export function UploadComponent(props: UploadProps) {
 
     React.useEffect(() => {
         const fetchStarlistNames = async () => {
-            const resp = await fetch('/api/getStarlistDirectory')
+            const resp = await fetch('/api/planning_tool/getStarlistDirectory')
             if (!resp.ok) {
                 console.error('error fetching starlist directory', resp)
                 return
@@ -325,7 +325,7 @@ export function UploadComponent(props: UploadProps) {
     };
     const handleClose = async (filename?: string) => {
         if (filename) {
-            const fileresp = await fetch(`/api/importFileFromStarlistDirectory?filename=${filename}`)
+            const fileresp = await fetch(`/api/planning_tool/importFileFromStarlistDirectory?filename=${filename}`)
             !fileresp.ok && console.error('error importing file', filename, fileresp)
             const contents = await fileresp.text()
             handle_contents(filename, contents, 'txt')
