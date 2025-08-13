@@ -368,7 +368,7 @@ export function UploadComponent(props: UploadProps) {
         console.log('uploaded tgts', uploadedTargets)
         props.setOpen && props.setOpen(false)
         const fmtTgts = format_targets(uploadedTargets, targetProps)
-        props.setLabel && props.setLabel(`${filename} Uploaded. (${fmtTgts.length} targets)`)
+        props.setLabel && props.setLabel(`${ext === 'starlisttxt' ? 'Starlist ' : ''}${filename} Uploaded. (${fmtTgts.length} targets)`)
         props.setTargets(fmtTgts)
     };
 
@@ -386,53 +386,54 @@ export function UploadComponent(props: UploadProps) {
     };
 
     return (
-        <Stack direction="row" spacing={2} alignItems="center">
-            <input
-                // accept="*.json,*.txt" // prefer .json but .txt is ok too
-                style={{ display: 'none' }}
-                id="target-file-input"
-                type="file"
-                onChange={localFileLoad}
-            />
-            <label htmlFor="target-file-input">
-                <Button id={'load-target-file'} variant="outlined" component="span" color="primary"
-                >
+        <>
+            <Stack direction="row" spacing={2} alignItems="center">
+                <input
+                    // accept="*.json,*.txt" // prefer .json but .txt is ok too
+                    style={{ display: 'none' }}
+                    id="target-file-input"
+                    type="file"
+                    onChange={localFileLoad}
+                />
+                <label htmlFor="target-file-input">
+                    <Button id={'load-target-file'} variant="outlined" component="span" color="primary" >
                     Load from Local File
+                    </Button>
+                </label>
+                <Button
+                    id="starlist-button"
+                    aria-controls={open ? 'starlist-menu' : undefined}
+                    aria-haspopup="true"
+                    variant='outlined'
+                    aria-expanded={open ? 'true' : undefined}
+                    onClick={handleClick}
+                >
+                    From Starlist Directory
                 </Button>
-            </label>
-            <Button
-                id="starlist-button"
-                aria-controls={open ? 'starlist-menu' : undefined}
-                aria-haspopup="true"
-                variant='outlined'
-                aria-expanded={open ? 'true' : undefined}
-                onClick={handleClick}
-            >
-                Load from Starlist Directory
-            </Button>
+                <Menu
+                    id="starlist-menu"
+                    aria-labelledby="starlist-button"
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={() => handleClose()}
+                    anchorOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left',
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left',
+                    }}
+                >
+                    {starlistNames.map(name => (
+                        <MenuItem key={name} onClick={() => handleClose(name)}>{name}</MenuItem>
+                    ))}
+                </Menu>
+            </Stack>
             <Typography variant="body2" color="text.secondary">
                 {props.label}
             </Typography>
-            <Menu
-                id="starlist-menu"
-                aria-labelledby="starlist-button"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={() => handleClose()}
-                anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                }}
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                }}
-            >
-                {starlistNames.map(name => (
-                    <MenuItem key={name} onClick={() => handleClose(name)}>{name}</MenuItem>
-                ))}
-            </Menu>
-        </Stack>
+        </>
     )
 }
 
