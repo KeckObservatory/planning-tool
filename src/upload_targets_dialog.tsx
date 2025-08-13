@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from '@mui/material/Button';
 import DialogContentText from '@mui/material/DialogContentText';
-import { Tooltip } from '@mui/material';
+import { MenuItem, Menu, Stack, Tooltip } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
 import { RotatorMode, Target, TelescopeWrap, useStateContext, useSnackbarContext } from './App';
 import target_schema from './target_schema.json'
@@ -216,7 +216,7 @@ const split_at = (index: number, str: string) => {
     }
     if (tabidx > 0) { // tab(s) in target name
         console.log('tabs in target name: targetName', str.slice(0, tabidx))
-        const targetName = str.slice(0, tabidx-1).replaceAll('\t', ' ').padEnd(TARGET_NAME_LENGTH_PADDED, ' ')
+        const targetName = str.slice(0, tabidx - 1).replaceAll('\t', ' ').padEnd(TARGET_NAME_LENGTH_PADDED, ' ')
         const targetBody = str.slice(tabidx + 1).replaceAll('\t', ' ').trimStart()
         console.log('targetName', targetName, 'targetBody', targetBody)
         return [targetName, targetBody]
@@ -225,7 +225,7 @@ const split_at = (index: number, str: string) => {
 
     // older files may have names longer than be longer than the 15 char limit. This relaxes this constraint
     let sliceIdx = index
-    let substr = str.slice(index-1)
+    let substr = str.slice(index - 1)
     while (substr[0].trim() !== '' && substr.length > 0) {
         substr = substr.slice(1)
         sliceIdx += 1
@@ -260,7 +260,7 @@ const parse_txt = (contents: string, obsid: number) => {
         //inline comments are added to comments field
         const inlineComment = opts.findIndex((opt) => opt.startsWith('#'))
         let comment: string = ''
-        if (inlineComment > 0 && opts.length>0) {
+        if (inlineComment > 0 && opts.length > 0) {
             opts = opts.slice(0, inlineComment)
             comment = opts.slice(inlineComment).join(' ')
         }
@@ -275,7 +275,7 @@ const parse_txt = (contents: string, obsid: number) => {
             dec,
             equinox,
         };
-        if (comment.length>0) {
+        if (comment.length > 0) {
             tgt.comment = comment
         }
         opts.forEach((opt) => {
@@ -303,7 +303,68 @@ export function UploadComponent(props: UploadProps) {
     const context = useStateContext()
     const snackbarContext = useSnackbarContext()
 
-    const fileLoad = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    const [starlistNames, setStarlistNames] = React.useState<string[]>([])
+
+    React.useEffect(() => {
+        const fetchStarlistNames = async () => {
+            const resp = await fetch('/api/getStarlistDirectory')
+            if (!resp.ok) {
+                console.error('error fetching starlist directory', resp)
+                return
+            }
+            const names: string[] = await resp.json()
+            setStarlistNames(names)
+        }
+        fetchStarlistNames()
+    }, [])
+
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = async (filename?: string) => {
+        if (filename) {
+            const fileresp = await fetch(`/api/importFileFromStarlistDirectory?filename=${filename}`)
+            !fileresp.ok && console.error('error importing file', filename, fileresp)
+            const contents = await fileresp.text()
+            handle_contents(filename, contents, 'txt')
+        }
+        setAnchorEl(null);
+    };
+
+    const handle_contents = (filename: string, contents: string, ext: string) => {
+        let uploadedTargets: UploadedTarget[] = []
+        switch (ext) {
+            case 'json':
+                uploadedTargets = parse_json(contents)
+                break;
+            case 'csv':
+                uploadedTargets = parse_csv(contents)
+                break;
+            case 'txt':
+                console.log('txt', contents, context.obsid)
+                uploadedTargets = parse_txt(contents, context.obsid)
+                break;
+            default:
+                snackbarContext.setSnackbarMessage({ severity: 'warning', message: 'File type may not supported. Attempting to parse as .txt' })
+                snackbarContext.setSnackbarOpen(true);
+                try {
+                    uploadedTargets = parse_txt(contents, context.obsid)
+                }
+                catch (e) {
+                    console.error('file type not supported', e)
+                    return
+                }
+        }
+        console.log('uploaded tgts', uploadedTargets)
+        props.setOpen && props.setOpen(false)
+        const fmtTgts = format_targets(uploadedTargets, targetProps)
+        props.setLabel && props.setLabel(`${filename} Uploaded (${fmtTgts.length} targets)`)
+        props.setTargets(fmtTgts)
+    };
+
+    const localFileLoad = (evt: React.ChangeEvent<HTMLInputElement>) => {
         let file: File = new File([], 'empty')
         evt.target?.files && (file = evt.target?.files[0])
         props.setLabel && props.setLabel(`${file.name} Uploaded`)
@@ -312,44 +373,18 @@ export function UploadComponent(props: UploadProps) {
         fileReader.readAsText(file, "UTF-8");
         fileReader.onload = e => {
             const contents = e.target?.result as string
-            let uploadedTargets: UploadedTarget[] = []
-            switch (ext) {
-                case 'json':
-                    uploadedTargets = parse_json(contents)
-                    break;
-                case 'csv':
-                    uploadedTargets = parse_csv(contents)
-                    break;
-                case 'txt':
-                    console.log('txt', contents, context.obsid)
-                    uploadedTargets = parse_txt(contents, context.obsid)
-                    break;
-                default:
-                    snackbarContext.setSnackbarMessage({severity: 'warning', message: 'File type may not supported. Attempting to parse as .txt'}) 
-                    snackbarContext.setSnackbarOpen(true);
-                    try {
-                        uploadedTargets = parse_txt(contents, context.obsid)
-                    }
-                    catch (e) {
-                        console.error('file type not supported', e)
-                        return
-                    }
-            }
-            console.log('uploaded tgts', uploadedTargets)
-            props.setOpen && props.setOpen(false)
-            const fmtTgts = format_targets(uploadedTargets, targetProps)
-            props.setLabel && props.setLabel(`${file.name} Uploaded (${fmtTgts.length} targets)`)
-            props.setTargets(fmtTgts)
+            handle_contents(file.name, contents, ext ?? 'txt')
         };
     };
+
     return (
-        <>
+        <Stack direction="row" spacing={2} alignItems="center">
             <input
                 // accept="*.json,*.txt" // prefer .json but .txt is ok too
                 style={{ display: 'none' }}
                 id="target-file-input"
                 type="file"
-                onChange={fileLoad}
+                onChange={localFileLoad}
             />
             <label htmlFor="target-file-input">
                 <Button id={'load-target-file'} variant="outlined" component="span" color="primary"
@@ -357,9 +392,36 @@ export function UploadComponent(props: UploadProps) {
                     {props.label}
                 </Button>
             </label>
-        </>
+            <Button
+                id="starlist-button"
+                aria-controls={open ? 'starlist-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                onClick={handleClick}
+            >
+                Load from Starlist Directory
+            </Button>
+            <Menu
+                id="starlist-menu"
+                aria-labelledby="starlist-button"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={() => handleClose()}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+            >
+                {starlistNames.map(name => (
+                    <MenuItem key={name} onClick={() => handleClose(name)}>{name}</MenuItem>
+                ))}
+            </Menu>
+        </Stack>
     )
-
 }
 
 export default function UploadDialog(props: Props) {
@@ -408,7 +470,7 @@ export default function UploadDialog(props: Props) {
                 titleContent={titleContent}
                 children={dialogContent}
                 actions={dialogActions}
-                />
+            />
         </>
     );
 }
