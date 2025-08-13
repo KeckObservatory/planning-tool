@@ -368,7 +368,8 @@ export function UploadComponent(props: UploadProps) {
         console.log('uploaded tgts', uploadedTargets)
         props.setOpen && props.setOpen(false)
         const fmtTgts = format_targets(uploadedTargets, targetProps)
-        props.setLabel && props.setLabel(`${ext === 'starlisttxt' ? 'Starlist ' : ''}${filename} Uploaded. (${fmtTgts.length} targets)`)
+        const txt = `${ext === 'starlisttxt' ? 'Starlist: ' : 'Local File: '}${filename} Uploaded. (${fmtTgts.length} targets)`
+        props.setLabel && props.setLabel(txt)
         props.setTargets(fmtTgts)
     };
 
