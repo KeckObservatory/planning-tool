@@ -327,6 +327,10 @@ export function UploadComponent(props: UploadProps) {
         if (filename) {
             const fileresp = await fetch(`/api/planning_tool/importFileFromStarlistDirectory`, {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({ filename: filename }),
             })
             !fileresp.ok && console.error('error importing file', filename, fileresp)
