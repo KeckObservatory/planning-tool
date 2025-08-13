@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from '@mui/material/Button';
 import DialogContentText from '@mui/material/DialogContentText';
-import { MenuItem, Menu, Stack, Tooltip } from '@mui/material';
+import { MenuItem, Menu, Stack, Tooltip, Typography } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
 import { RotatorMode, Target, TelescopeWrap, useStateContext, useSnackbarContext } from './App';
 import target_schema from './target_schema.json'
@@ -335,12 +335,12 @@ export function UploadComponent(props: UploadProps) {
             })
             !fileresp.ok && console.error('error importing file', filename, fileresp)
             const contents = await fileresp.text()
-            handle_contents(filename, contents, 'txt')
+            handle_contents(filename, contents, 'starlisttxt')
         }
         setAnchorEl(null);
     };
 
-    const handle_contents = (filename: string, contents: string, ext: string) => {
+    const handle_contents = (filename: string, contents: string, ext?: string) => {
         let uploadedTargets: UploadedTarget[] = []
         switch (ext) {
             case 'json':
@@ -349,6 +349,7 @@ export function UploadComponent(props: UploadProps) {
             case 'csv':
                 uploadedTargets = parse_csv(contents)
                 break;
+            case 'starlisttxt':
             case 'txt':
                 console.log('txt', contents, context.obsid)
                 uploadedTargets = parse_txt(contents, context.obsid)
@@ -367,7 +368,7 @@ export function UploadComponent(props: UploadProps) {
         console.log('uploaded tgts', uploadedTargets)
         props.setOpen && props.setOpen(false)
         const fmtTgts = format_targets(uploadedTargets, targetProps)
-        props.setLabel && props.setLabel(`${filename} Uploaded (${fmtTgts.length} targets)`)
+        props.setLabel && props.setLabel(`${filename} Uploaded. (${fmtTgts.length} targets)`)
         props.setTargets(fmtTgts)
     };
 
@@ -380,7 +381,7 @@ export function UploadComponent(props: UploadProps) {
         fileReader.readAsText(file, "UTF-8");
         fileReader.onload = e => {
             const contents = e.target?.result as string
-            handle_contents(file.name, contents, ext ?? 'txt')
+            handle_contents(file.name, contents, ext)
         };
     };
 
@@ -396,18 +397,22 @@ export function UploadComponent(props: UploadProps) {
             <label htmlFor="target-file-input">
                 <Button id={'load-target-file'} variant="outlined" component="span" color="primary"
                 >
-                    {props.label}
+                    Load from Local File
                 </Button>
             </label>
             <Button
                 id="starlist-button"
                 aria-controls={open ? 'starlist-menu' : undefined}
                 aria-haspopup="true"
+                variant='outlined'
                 aria-expanded={open ? 'true' : undefined}
                 onClick={handleClick}
             >
                 Load from Starlist Directory
             </Button>
+            <Typography variant="body2" color="text.secondary">
+                {props.label}
+            </Typography>
             <Menu
                 id="starlist-menu"
                 aria-labelledby="starlist-button"
