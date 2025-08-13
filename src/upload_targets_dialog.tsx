@@ -386,7 +386,7 @@ export function UploadComponent(props: UploadProps) {
     };
 
     return (
-        <>
+        <Stack direction="column" spacing={2} alignItems="flex-start">
             <Stack direction="row" spacing={2} alignItems="center">
                 <input
                     // accept="*.json,*.txt" // prefer .json but .txt is ok too
@@ -397,7 +397,7 @@ export function UploadComponent(props: UploadProps) {
                 />
                 <label htmlFor="target-file-input">
                     <Button id={'load-target-file'} variant="outlined" component="span" color="primary" >
-                    Load from Local File
+                        Load from Local File
                     </Button>
                 </label>
                 <Button
@@ -433,7 +433,7 @@ export function UploadComponent(props: UploadProps) {
             <Typography variant="body2" color="text.secondary">
                 {props.label}
             </Typography>
-        </>
+        </Stack>
     )
 }
 
