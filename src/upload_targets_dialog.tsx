@@ -325,7 +325,9 @@ export function UploadComponent(props: UploadProps) {
     };
     const handleClose = async (filename?: string) => {
         if (filename) {
-            const fileresp = await fetch(`/api/planning_tool/importFileFromStarlistDirectory?filename=${filename}`)
+            const fileresp = await fetch(`/api/planning_tool/importFileFromStarlistDirectory?filename=${filename}`, {
+                method: 'POST'
+            })
             !fileresp.ok && console.error('error importing file', filename, fileresp)
             const contents = await fileresp.text()
             handle_contents(filename, contents, 'txt')
