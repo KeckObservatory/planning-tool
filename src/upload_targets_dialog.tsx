@@ -307,7 +307,7 @@ export function UploadComponent(props: UploadProps) {
 
     React.useEffect(() => {
         const fetchStarlistNames = async () => {
-            const resp = await fetch('/api/planning_tool/getStarlistDirectory')
+            const resp = await fetch('/api/planning_tool/getFileNamesFromStarlistDirectory')
             if (!resp.ok) {
                 console.error('error fetching starlist directory', resp)
                 return
