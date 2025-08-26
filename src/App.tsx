@@ -14,33 +14,9 @@ import { LicenseInfo } from '@mui/x-license';
 import licenseKey from './license.json'
 import Skeleton from '@mui/material/Skeleton';
 import { get_targets, get_userinfo } from './api/api_root.tsx';
-import { AxiosError } from 'axios';
 import { SimbadTargetData } from './catalog_button.tsx';
 
 const CONFIG_PATH = './config.json'
-
-const DEFAULT_TARGETS = [
-  {
-    "_id": "3272fa23-b4eb-4781-8f60-7b9dc706190d",
-    "comment": "",
-    "target_name": "High Boi",
-    "dec": "20:00:00.00",
-    "dec_deg": 20.0,
-    "ra": "10:40:07",
-    "ra_deg": 15.029,
-    "equinox": "2000",
-    "g_mag": 12.84409,
-    "gaia_id": "3.70038690560506E+018",
-    "j_mag": 11.692,
-    "obsid": 4866,
-    "pm_dec": 0.098,
-    "pm_ra": 3,
-    "tags": [
-      "asdf quer",
-      "asdf"
-    ],
-    "tic_id": ""
-  }]
 
 LicenseInfo.setLicenseKey(
   licenseKey.license_key
