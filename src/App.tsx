@@ -193,21 +193,20 @@ function App() {
     const fetch_data = async () => {
       const config = await get_config()
       const userinfo = await get_userinfo();
+
       const username = `${userinfo.FirstName} ${userinfo.LastName}`;
       const init_state = {
         config,
         username,
-        obsid: userinfo.Id ?? 1234,
+        obsid: userinfo.Id,
         is_admin: userinfo.is_admin ?? false
       }
       setState(init_state)
       // const userinfo = await get_userinfo_mock();
-      let tgts = await get_targets(init_state.obsid)
-      if ((tgts as unknown as AxiosError).message) {
-        console.warn('error fetching targets', tgts)
-        tgts = DEFAULT_TARGETS
+      if (init_state.obsid) {
+        let tgts = await get_targets(init_state.obsid)
+        setTargets(tgts)
       }
-      setTargets(tgts)
     }
     fetch_data()
   }, [])
