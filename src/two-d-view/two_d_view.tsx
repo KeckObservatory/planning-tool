@@ -331,8 +331,9 @@ const TwoDView = ({ targets }: Props) => {
                     </Tooltip>
                     <Tooltip title={'Rotator angle for Field of View'}>
                         <Button
-                            sx={{ margin: '6px' }}
+                            sx={{ width: '200px', margin: '6px' }}
                             onClick={save_img}
+                            variant='contained'
                         >
                             Save Image as .png
                         </Button>
