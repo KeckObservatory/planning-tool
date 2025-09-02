@@ -251,12 +251,12 @@ const TwoDView = ({ targets }: Props) => {
             'aladin-tooltip-container aladin-fullScreen-control left'
         ]
         
-        const doc = document.getElementById('aladin-lite-div');
+        const doc = document.getElementById('aladin-lite-div')?.cloneNode(true);
 
         classNames.forEach((className) => {
-            const element = doc?.getElementsByClassName(className)[0] as HTMLElement;
+            const element = (doc as HTMLElement)?.getElementsByClassName(className)[0] as HTMLElement;
             if (element) {
-                doc?.removeChild(element)
+                (doc as HTMLElement)?.removeChild(element)
             }
         });
 
