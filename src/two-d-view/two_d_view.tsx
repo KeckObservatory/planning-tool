@@ -243,29 +243,32 @@ const TwoDView = ({ targets }: Props) => {
             'aladin-logo-container',
             'aladin-tooltip-container aladin-cooFrame bottom',
             'aladin-horizontal-list aladin-location',
-            'aladin-tooltip-container top aladin-zoom-out',
-            'aladin-tooltip-container top aladin-zoom-in',
+            // 'aladin-tooltip-container top aladin-zoom-out',
+            // 'aladin-tooltip-container top aladin-zoom-in',
             'aladin-tooltip-container aladin-stack-control top right',
             'aladin-tooltip-container aladin-grid-control top right',
             'aladin-tooltip-container aladin-projection-control bottom left',
             'aladin-tooltip-container aladin-fullScreen-control left'
         ]
         
-        const doc = document.getElementById('aladin-lite-div')?.cloneNode(true);
+        const doc = document.getElementById('aladin-lite-div')?.cloneNode(true) as HTMLElement
 
         classNames.forEach((className) => {
-            const element = (doc as HTMLElement)?.getElementsByClassName(className)[0] as HTMLElement;
+            const element = doc?.getElementsByClassName(className)[0];
             if (element) {
                 try {
-                    (doc as HTMLElement)?.removeChild(element)
+                    doc?.removeChild(element)
                 } catch (error) {
                     console.error('Error removing element:', className, error)
                 }
             }
         });
 
+        doc.setAttribute('id', 'cloned-aladin-lite-div')
+        document.body.appendChild(doc)
+        
         console.log('doc', doc)
-        html2canvas(doc as HTMLElement).then((canvas) => {
+        html2canvas(doc).then((canvas) => {
             console.log('Canvas created')
             if (canvas) {
                 console.log('saving canvas')
@@ -275,6 +278,7 @@ const TwoDView = ({ targets }: Props) => {
                 link.click();
             }
         })
+        doc.remove()
     }
 
     const moonInfo = SunCalc.getMoonIllumination(time)
