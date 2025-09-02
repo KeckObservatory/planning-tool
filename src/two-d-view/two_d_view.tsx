@@ -256,7 +256,11 @@ const TwoDView = ({ targets }: Props) => {
         classNames.forEach((className) => {
             const element = (doc as HTMLElement)?.getElementsByClassName(className)[0] as HTMLElement;
             if (element) {
-                (doc as HTMLElement)?.removeChild(element)
+                try {
+                    (doc as HTMLElement)?.removeChild(element)
+                } catch (error) {
+                    console.error('Error removing element:', className, error)
+                }
             }
         });
 
