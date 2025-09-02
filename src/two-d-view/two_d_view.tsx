@@ -260,8 +260,11 @@ const TwoDView = ({ targets }: Props) => {
             }
         });
 
+        console.log('doc', doc)
         html2canvas(doc as HTMLElement).then((canvas) => {
+            console.log('Canvas created')
             if (canvas) {
+                console.log('saving canvas')
                 const link = document.createElement('a');
                 link.download = 'sky-chart.png';
                 link.href = canvas.toDataURL();
