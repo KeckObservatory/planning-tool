@@ -238,8 +238,27 @@ const TwoDView = ({ targets }: Props) => {
     }
 
     const save_img = () => {
+
+        const classNames = [
+            'aladin-logo-container',
+            'aladin-tooltip-container aladin-cooFrame bottom',
+            'aladin-horizontal-list aladin-location',
+            'aladin-tooltip-container top aladin-zoom-out',
+            'aladin-tooltip-container top aladin-zoom-in',
+            'aladin-tooltip-container aladin-stack-control top right',
+            'aladin-tooltip-container aladin-grid-control top right',
+            'aladin-tooltip-container aladin-projection-control bottom left',
+            'aladin-tooltip-container aladin-fullScreen-control left'
+        ]
         
         const doc = document.getElementById('aladin-lite-div');
+
+        classNames.forEach((className) => {
+            const element = doc?.getElementsByClassName(className)[0] as HTMLElement;
+            if (element) {
+                doc?.removeChild(element)
+            }
+        });
 
         html2canvas(doc as HTMLElement).then((canvas) => {
             if (canvas) {

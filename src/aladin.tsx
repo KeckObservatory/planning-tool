@@ -217,7 +217,6 @@ export default function AladinViewer(props: Props) {
             fov: 15 / 60,
             showCooGrid: false,
             showCooGridControl: true,
-            showShareControl: true,
             showReticle: false,
             target: startPos
         }
