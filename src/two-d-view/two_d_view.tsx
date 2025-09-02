@@ -277,8 +277,10 @@ const TwoDView = ({ targets }: Props) => {
                 link.href = canvas.toDataURL();
                 link.click();
             }
-        })
-        doc.remove()
+        }).finally(() => {
+            console.log('Canvas saving process completed');
+            doc.remove()
+        });
     }
 
     const moonInfo = SunCalc.getMoonIllumination(time)
