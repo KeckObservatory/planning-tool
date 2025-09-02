@@ -2,7 +2,7 @@ import React from 'react';
 import * as util from './sky_view_util.tsx'
 import NightPicker from '../two-d-view/night_picker'
 import dayjs, { Dayjs } from 'dayjs';
-import { Autocomplete, FormControl, FormControlLabel, FormLabel, Grid2, Radio, RadioGroup, Stack, Switch, TextField, Tooltip, Typography } from '@mui/material';
+import { Autocomplete, Button, FormControl, FormControlLabel, FormLabel, Grid2, Radio, RadioGroup, Stack, Switch, TextField, Tooltip, Typography } from '@mui/material';
 import TimeSlider from './time_slider';
 import { Target, useStateContext } from '../App.tsx';
 import { DomeChart } from './dome_chart.tsx';
@@ -17,6 +17,7 @@ import { MoonMarker } from './moon_marker.tsx';
 import * as SunCalc from "suncalc";
 import { FOVlink, STEP_SIZE } from './constants.tsx';
 import { createEnumParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
+import html2canvas from 'html2canvas';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -145,7 +146,7 @@ const TwoDView = ({ targets }: Props) => {
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
     const [fovs, setFOVs] = React.useState<string[]>([])
     //const [instrumentFOV, setInstrumentFOV] = React.useState('MOSFIRE')
-    const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam,'MOSFIRE'))
+    const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
 
     React.useEffect(() => {
         const fun = async () => {
@@ -177,14 +178,15 @@ const TwoDView = ({ targets }: Props) => {
                     const moon_illumination = SunCalc.getMoonIllumination(datetime)
                     const moon_position = util.get_moon_position(datetime, lngLatEl)
                     // const air_mass_val = util.air_mass(alt)
-                    const vis: VizRow = {az, 
-                        alt, 
-                        ...alt_az_observable(alt, az, KG), 
-                        datetime, 
+                    const vis: VizRow = {
+                        az,
+                        alt,
+                        ...alt_az_observable(alt, az, KG),
+                        datetime,
                         air_mass: air_mass_val,
                         moon_illumination,
                         moon_position
-                     }
+                    }
                     azEl.push([az, alt])
                     visibility.push(vis)
                 })
@@ -233,6 +235,20 @@ const TwoDView = ({ targets }: Props) => {
         if (value) {
             setInstrumentFOV(value)
         }
+    }
+
+    const save_img = () => {
+        
+        const doc = document.getElementById('aladin-lite-div');
+
+        html2canvas(doc as HTMLElement).then((canvas) => {
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = 'sky-chart.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            }
+        })
     }
 
     const moonInfo = SunCalc.getMoonIllumination(time)
@@ -312,6 +328,15 @@ const TwoDView = ({ targets }: Props) => {
                             value={rotatorAngle}
                             onChange={(event) => setRotatorAngle(Number(event.target.value))}
                         />
+                    </Tooltip>
+                    <Tooltip title={'Rotator angle for Field of View'}>
+                        <Button
+                            sx={{ margin: '6px' }}
+                            onClick={save_img}
+                        >
+                            Save Image as .png
+                        </Button>
+
                     </Tooltip>
                     {/* <Tooltip title={'Position angle for the sky'}>
                         <TextField

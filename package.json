@@ -24,6 +24,7 @@
     "aladin-lite": "^3.3.2",
     "axios": "^1.6.5",
     "dayjs": "^1.11.10",
+    "html2canvas": "^1.4.1",
     "js-cookie": "^3.0.5",
     "ls": "^0.2.1",
     "mui-chips-input": "^4.0.1",
