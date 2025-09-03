@@ -239,34 +239,8 @@ const TwoDView = ({ targets }: Props) => {
 
     const save_img = () => {
 
-        const classNames = [
-            'aladin-logo-container',
-            'aladin-tooltip-container aladin-cooFrame bottom',
-            'aladin-horizontal-list aladin-location',
-            // 'aladin-tooltip-container top aladin-zoom-out',
-            // 'aladin-tooltip-container top aladin-zoom-in',
-            'aladin-tooltip-container aladin-stack-control top right',
-            'aladin-tooltip-container aladin-grid-control top right',
-            'aladin-tooltip-container aladin-projection-control bottom left',
-            'aladin-tooltip-container aladin-fullScreen-control left'
-        ]
-        
-        const doc = document.getElementById('aladin-lite-div')?.cloneNode(true) as HTMLElement
+        const doc = document.getElementById('aladin-lite-div') as HTMLElement
 
-        classNames.forEach((className) => {
-            const element = doc?.getElementsByClassName(className)[0];
-            if (element) {
-                try {
-                    doc?.removeChild(element)
-                } catch (error) {
-                    console.error('Error removing element:', className, error)
-                }
-            }
-        });
-
-        doc.setAttribute('id', 'cloned-aladin-lite-div')
-        document.body.appendChild(doc)
-        
         console.log('doc', doc)
         html2canvas(doc).then((canvas) => {
             console.log('Canvas created')
@@ -279,7 +253,6 @@ const TwoDView = ({ targets }: Props) => {
             }
         }).finally(() => {
             console.log('Canvas saving process completed');
-            doc.remove()
         });
     }
 
