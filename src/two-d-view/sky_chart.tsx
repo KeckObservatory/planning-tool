@@ -217,14 +217,9 @@ export const SkyChart = (props: Props) => {
         false,
         showLimits,)
 
-    // const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, 5, suncalcTimes, context.config.timezone);
-    const [state, setState] = useState<State>({ layout: {}, y2Axis: {}} as State);
+    const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, 5, suncalcTimes, context.config.timezone);
+    const [state, setState] = useState({ layout: scLayout, y2Axis: y2Axis } as State);
 
-    useEffect(() => {
-        console.log('initial render')
-        const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, 5, suncalcTimes, context.config.timezone);
-        setState({ layout: scLayout, y2Axis: y2Axis } as State);
-    }, [])
 
     useEffect(() => {
         const shapes = util.get_shapes(suncalcTimes,
@@ -233,7 +228,7 @@ export const SkyChart = (props: Props) => {
             deckBlocking,
             showLimits,)
 
-        console.log('chartType, dome, time, showLimits, suncalcTimes', chartType, dome, time, showLimits, suncalcTimes)
+        console.log('chartType', chartType, dome )
 
         const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, maxAirmass, suncalcTimes, context.config.timezone);
         setState({
