@@ -341,7 +341,8 @@ export const SkyChart = (props: Props) => {
             ref={plotRef}
             layout={state.layout}
             // onUpdate={draw_elevation_axis}
-            onAfterPlot={draw_elevation_axis}
+            onRelayout={draw_elevation_axis}
+            //onAfterPlot={draw_elevation_axis}
             // onRedraw={draw_elevation_axis}
             onInitialized={draw_elevation_axis}
         />
