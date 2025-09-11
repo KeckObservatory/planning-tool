@@ -12,6 +12,7 @@ import timezone from 'dayjs/plugin/timezone'
 import { AIRMASS_LIMIT, DEFAULT_OPACITY, NON_OBSERVABLE_OPACITY } from "./constants.tsx";
 import { useRef } from "react";
 import { useDebounceCallback } from "../use_debounce_callback.tsx";
+import { useTimeout } from "usehooks-ts";
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -285,51 +286,48 @@ export const SkyChart = (props: Props) => {
         }
     }
 
-    const debounced_draw = useDebounceCallback(
-        () => {
-            if (plotRef.current && isAirmass) {
-                // Get the tickvals and ticktext from yaxis
-                const plotlyFigure = plotRef.current;
-                const leftTicks = plotlyFigure.props.layout.yaxis.tickvals as number[];
-
-                // If not set, try to get from the actual plotly instance
-                // (Plotly stores the latest tickvals in the fullLayout)
-                const gd = plotlyFigure?.el;
-                let otickvals = leftTicks;
-                if (gd && gd._fullLayout?.yaxis._vals) {
-                    otickvals = gd._fullLayout.yaxis._vals.map((val: any) => {
-                        return val.x
-                    });
-                }
-
-                const tickvals = otickvals.map(val => util.alt_from_air_mass(val));
-                const ticktext = tickvals.map(val => val.toFixed(1));
-                // 3. Update yaxis2 to match yaxis
-                const newY2Axis = {
-                    ...state.y2Axis,
-                    tickvals: otickvals,
-                    ticktext: ticktext,
-                    position: 0.95, // Adjust position to the right side
-                };
-
-                if (tickvals) {
-                    setState(
-                        {
-                            layout: {
-                                ...(state.layout),
-                                yaxis2: newY2Axis
-                            },
-                            y2Axis: newY2Axis
-                        }
-                    );
-                }
-            }
-        }
-        , 100)
-
 
     const draw_elevation_axis = () => {
-        debounced_draw()
+        setTimeout(
+            () => {
+                if (plotRef.current && isAirmass) {
+                    // Get the tickvals and ticktext from yaxis
+                    const plotlyFigure = plotRef.current;
+                    const leftTicks = plotlyFigure.props.layout.yaxis.tickvals as number[];
+
+                    // If not set, try to get from the actual plotly instance
+                    // (Plotly stores the latest tickvals in the fullLayout)
+                    const gd = plotlyFigure?.el;
+                    let otickvals = leftTicks;
+                    if (gd && gd._fullLayout?.yaxis._vals) {
+                        otickvals = gd._fullLayout.yaxis._vals.map((val: any) => {
+                            return val.x
+                        });
+                    }
+
+                    const tickvals = otickvals.map(val => util.alt_from_air_mass(val));
+                    const ticktext = tickvals.map(val => val.toFixed(1));
+                    // 3. Update yaxis2 to match yaxis
+                    const newY2Axis = {
+                        ...state.y2Axis,
+                        tickvals: otickvals,
+                        ticktext: ticktext,
+                        position: 0.95, // Adjust position to the right side
+                    };
+
+                    if (tickvals) {
+                        setState(
+                            {
+                                layout: {
+                                    ...(state.layout),
+                                    yaxis2: newY2Axis
+                                },
+                                y2Axis: newY2Axis
+                            }
+                        );
+                    }
+                }
+            }, 100)
     }
 
 
@@ -339,8 +337,8 @@ export const SkyChart = (props: Props) => {
             data={traces}
             ref={plotRef}
             layout={state.layout}
-            // onUpdate={draw_elevation_axis}
-            onRelayout={draw_elevation_axis}
+            onUpdate={draw_elevation_axis}
+            //onRelayout={draw_elevation_axis}
             //onAfterPlot={draw_elevation_axis}
             // onRedraw={draw_elevation_axis}
             onInitialized={draw_elevation_axis}
