@@ -217,8 +217,14 @@ export const SkyChart = (props: Props) => {
         false,
         showLimits,)
 
-    const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, 5, suncalcTimes, context.config.timezone);
-    const [state, setState] = useState<State>({ layout: scLayout, y2Axis: y2Axis } as State);
+    // const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, 5, suncalcTimes, context.config.timezone);
+    const [state, setState] = useState<State>({ layout: {}, y2Axis: {}} as State);
+
+    useEffect(() => {
+        console.log('initial render')
+        const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, 5, suncalcTimes, context.config.timezone);
+        setState({ layout: scLayout, y2Axis: y2Axis } as State);
+    }, [])
 
     useEffect(() => {
         const shapes = util.get_shapes(suncalcTimes,
@@ -234,7 +240,7 @@ export const SkyChart = (props: Props) => {
             layout: scLayout,
             y2Axis,
         });
-    }, [dome, targetView, time, showLimits, suncalcTimes])
+    }, [chartType, dome, targetView, time, showLimits, suncalcTimes])
 
     let traces: Plotly.Data[] = []
     const lngLatEl = context.config.tel_lat_lng_el.keck
