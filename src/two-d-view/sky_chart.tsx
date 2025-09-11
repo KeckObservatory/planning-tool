@@ -311,15 +311,17 @@ export const SkyChart = (props: Props) => {
                 };
 
                 if (tickvals) {
-                    setState(
-                        {
-                            layout: {
-                                ...(state.layout),
-                                yaxis2: newY2Axis
-                            },
-                            y2Axis: newY2Axis
-                        }
-                    );
+
+                    plotlyFigure.props.layout.yaxis2 = newY2Axis;
+                    // setState(
+                    //     {
+                    //         layout: {
+                    //             ...(state.layout),
+                    //             yaxis2: newY2Axis
+                    //         },
+                    //         y2Axis: newY2Axis
+                    //     }
+                    // );
                 }
             }
         }
@@ -341,7 +343,7 @@ export const SkyChart = (props: Props) => {
             onUpdate={draw_elevation_axis} //updates too often
             // onRelayout={draw_elevation_axis}
             // onAfterPlot={() => { console.log('onAfterPlot invoked'); debounced_draw(); }} // calls after any plot updates
-            onRedraw={() => { console.log('onRedraw invoked'); debounced_draw(); }} //not called at all
+            // onRedraw={() => { console.log('onRedraw invoked'); debounced_draw(); }} //not called at all
             onInitialized={() => { console.log('onInitialized invoked'); draw_elevation_axis(); }}
         />
     )
