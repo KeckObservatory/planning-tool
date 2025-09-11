@@ -128,7 +128,7 @@ const make_layout = (chartType: SkyChart,
 
     //set yRange for airmass charts. order to reverse axis
     const yLower = Math.min(AIRMASS_LIMIT, maxAirmass)
-    const yRange = isAirmass ? [yLower, 1] : undefined
+    const yRange = isAirmass ? [yLower, .9] : undefined
     const y2Axis: Partial<Plotly.LayoutAxis> = {
         title: { text: 'Altitude [deg]' },
         gridwidth: 0,
@@ -281,63 +281,59 @@ export const SkyChart = (props: Props) => {
         }
     }
 
+    const draw_elevation_axis = () => {
+        if (!plotRef.current || chartType !== 'Airmass') {
+            return
+        }
+        // Get the left y-axis ticks from the plotly instance
+        const plotlyFigure = plotRef.current;
+        // Wait for the plot to be fully rendered
+        setTimeout(() => {
+            // Get the tickvals and ticktext from yaxis
+            const leftTicks = plotlyFigure.props.layout.yaxis.tickvals as number[];
+
+            // If not set, try to get from the actual plotly instance
+            // (Plotly stores the latest tickvals in the fullLayout)
+            const gd = plotlyFigure?.el;
+            let otickvals = leftTicks;
+            if (gd && gd._fullLayout?.yaxis._vals) {
+                otickvals = gd._fullLayout.yaxis._vals.map((val: any) => {
+                    return val.x
+                });
+            }
+
+            const tickvals = otickvals.map(val => util.alt_from_air_mass(val));
+            const ticktext = tickvals.map(val => val.toFixed(1));
+            // 3. Update yaxis2 to match yaxis
+            const newY2Axis = {
+                ...state.y2Axis,
+                tickvals: otickvals,
+                ticktext: ticktext,
+                position: 0.95, // Adjust position to the right side
+            };
+
+            if (tickvals) {
+                setState(
+                    {
+                        layout: {
+                            ...(state.layout),
+                            yaxis2: newY2Axis
+                        },
+                        y2Axis: newY2Axis
+                    }
+                );
+            }
+        }, 100); // Delay to ensure plot is rendered
+    }
+
+
 
     return (
         <Plot
             data={traces}
             ref={plotRef}
             layout={state.layout}
-            onAfterPlot={() => { console.log("After plot event"); }}
-            onRedraw={() => { console.log("Redraw event"); }}
-            onRestyle={() => { console.log("Restyle event"); }}
-            onUpdate={() => { console.log("Update event"); }}
-            onInitialized={() => {
-                console.log("Initialized event");
-                if (plotRef.current && chartType === 'Airmass') {
-                    // Get the left y-axis ticks from the plotly instance
-                    const plotlyFigure = plotRef.current;
-
-                    console.log("Plotly figure initialized:", plotlyFigure);
-                    // Wait for the plot to be fully rendered
-                    setTimeout(() => {
-                        // Get the tickvals and ticktext from yaxis
-                        const leftTicks = plotlyFigure.props.layout.yaxis.tickvals as number[];
-
-                        // If not set, try to get from the actual plotly instance
-                        // (Plotly stores the latest tickvals in the fullLayout)
-                        const gd = plotlyFigure?.el;
-                        let otickvals = leftTicks;
-                        if (gd && gd._fullLayout?.yaxis._vals) {
-                            otickvals = gd._fullLayout.yaxis._vals.map((val: any) => {
-                                return val.x
-                            });
-                        }
-
-                        const tickvals = otickvals.map(val => util.alt_from_air_mass(val));
-                        const ticktext = tickvals.map(val => val.toFixed(1));
-                        // 3. Update yaxis2 to match yaxis
-                        const newY2Axis = {
-                            ...state.y2Axis,
-                            tickvals: otickvals,
-                            ticktext: ticktext,
-                            position: 0.95, // Adjust position to the right side
-                        };
-
-                        if (tickvals) {
-                            setState(
-                                {
-                                    layout: {
-                                        ...(state.layout),
-                                        yaxis2: newY2Axis
-                                    },
-                                    y2Axis: newY2Axis
-                                }
-                            );
-                        }
-                    }, 100); // Delay to ensure plot is rendered
-                }
-            }
-            }
+            onUpdate={draw_elevation_axis}
         />
     )
 }
