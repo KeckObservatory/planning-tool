@@ -328,13 +328,9 @@ export const SkyChart = (props: Props) => {
         , 100)
 
 
-    const draw_elevation_axis = (figure: Readonly<Figure>) => {
-        console.log('draw_elevation_axis', figure)
-        //@ts-ignore
-        if (figure.layout.yaxis?.title?.text === 'Airmass') {
-            console.log('drawing elevation axis')
-            debounced_draw()
-        }
+    const draw_elevation_axis = () => {
+        console.log('drawing elevation axis')
+        debounced_draw()
     }
 
 
@@ -344,11 +340,11 @@ export const SkyChart = (props: Props) => {
             data={traces}
             ref={plotRef}
             layout={state.layout}
-            // onUpdate={draw_elevation_axis}
+            // onUpdate={draw_elevation_axis} //updates too often
             // onRelayout={draw_elevation_axis}
-            onAfterPlot={() => { console.log('onAfterPlot invoked'); debounced_draw(); }}
-            onRedraw={() => { console.log('onRedraw invoked'); debounced_draw(); }}
-            onInitialized={draw_elevation_axis}
+            // onAfterPlot={() => { console.log('onAfterPlot invoked'); debounced_draw(); }} // calls after any plot updates
+            onRedraw={() => { console.log('onRedraw invoked'); debounced_draw(); }} //not called at all
+            onInitialized={() => { console.log('onInitialized invoked'); draw_elevation_axis(); }}
         />
     )
 }
