@@ -128,7 +128,7 @@ const make_layout = (chartType: SkyChart,
 
     //set yRange for airmass charts. order to reverse axis
     const yLower = Math.min(AIRMASS_LIMIT, maxAirmass)
-    const yRange = chartType.includes('Airmass')? [yLower, .9] : undefined
+    const yRange = chartType.includes('Airmass') ? [yLower, .9] : undefined
     const y2Axis: Partial<Plotly.LayoutAxis> = {
         title: { text: 'Altitude [deg]' },
         gridwidth: 0,
@@ -313,19 +313,15 @@ export const SkyChart = (props: Props) => {
                 if (tickvals) {
 
                     plotlyFigure.props.layout.yaxis2 = newY2Axis;
-                    // setState(
-                    //     {
-                    //         layout: {
-                    //             ...(state.layout),
-                    //             yaxis2: newY2Axis
-                    //         },
-                    //         y2Axis: newY2Axis
-                    //     }
-                    // );
+                    setState(
+                        (oldState) => {
+                            return { ...oldState, y2Axis: newY2Axis }
+                        }
+                    );
                 }
             }
         }
-        , 0)
+        , 100)
 
 
     const draw_elevation_axis = () => {
