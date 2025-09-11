@@ -57,6 +57,7 @@ function convert_schema_to_columns() {
     let type = valueProps.type === 'array' ? 'string' : valueProps.type
     type = type.includes('string') ? 'string' : type //multiple typed fields are cast as string and formatted later on
     const editable = valueProps.type === 'array' ? false : valueProps.editable ?? true
+    const width = key === 'ra' || key === 'dec' ? 150 : undefined 
     let col = {
       field: key,
       valueParser,
@@ -65,6 +66,7 @@ function convert_schema_to_columns() {
       type: valueProps.type === 'array' ? 'string' : valueProps.type, //array cells are cast as string
       headerName: valueProps.short_description ?? valueProps.description,
       editable,
+      width
     } as GridColDef
 
     columns.push(col)
