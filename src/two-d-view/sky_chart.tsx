@@ -344,10 +344,10 @@ export const SkyChart = (props: Props) => {
             data={traces}
             ref={plotRef}
             layout={state.layout}
-            onUpdate={draw_elevation_axis}
+            // onUpdate={draw_elevation_axis}
             // onRelayout={draw_elevation_axis}
-            // onAfterPlot={draw_elevation_axis}
-            // onRedraw={draw_elevation_axis}
+            onAfterPlot={() => { console.log('onAfterPlot invoked'); debounced_draw(); }}
+            onRedraw={() => { console.log('onRedraw invoked'); debounced_draw(); }}
             onInitialized={draw_elevation_axis}
         />
     )
