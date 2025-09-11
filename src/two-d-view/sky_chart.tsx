@@ -125,11 +125,10 @@ const make_layout = (chartType: SkyChart,
     timezone: string
 ): [Plotly.Layout, Plotly.LayoutAxis] => {
 
-    const isAirmass = chartType.includes('Airmass')
 
     //set yRange for airmass charts. order to reverse axis
     const yLower = Math.min(AIRMASS_LIMIT, maxAirmass)
-    const yRange = isAirmass ? [yLower, .9] : undefined
+    const yRange = chartType.includes('Airmass')? [yLower, .9] : undefined
     const y2Axis: Partial<Plotly.LayoutAxis> = {
         title: { text: 'Altitude [deg]' },
         gridwidth: 0,
@@ -156,7 +155,7 @@ const make_layout = (chartType: SkyChart,
     })
 
     const scyaxis: Partial<Plotly.LayoutAxis> = {
-        title: { text: isAirmass ? 'Airmass' : 'Degrees' },
+        title: { text: chartType.includes('Airmass') ? 'Airmass' : 'Degrees' },
         range: yRange,
     }
 
@@ -193,7 +192,7 @@ const make_layout = (chartType: SkyChart,
         },
     }
 
-    if (isAirmass) {
+    if (chartType.includes('Airmass')) {
         sclayout.yaxis2 = y2Axis
     }
     return [sclayout as Plotly.Layout, y2Axis as Plotly.LayoutAxis];
@@ -208,7 +207,6 @@ export const SkyChart = (props: Props) => {
     const { targetView, chartType, time, showCurrLoc, showLimits, width, height, dome, suncalcTimes } = props
 
     const context = useStateContext()
-    const isAirmass = chartType.includes('Airmass')
     const plotRef = useRef<any>(null);
     //set layout for plotly. need to render after initialization for y2 axis
     const shapes = util.get_shapes(suncalcTimes,
@@ -262,7 +260,7 @@ export const SkyChart = (props: Props) => {
     })
 
     // add elevation axis for airmass charts only
-    if (isAirmass && targetView.length > 0) {
+    if (chartType.includes('Airmass') && targetView.length > 0) {
         const data = generateData(targetView[0], 'Elevation', context.config.date_time_format, lngLatEl, 0)
         const newTrace = make_trace(data, 'Elevation axis for airmass', '#00000000')
         //@ts-ignore
