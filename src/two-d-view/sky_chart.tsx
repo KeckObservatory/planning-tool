@@ -287,7 +287,7 @@ export const SkyChart = (props: Props) => {
 
     const debounced_draw = useDebounceCallback(
         () => {
-            if (plotRef.current && isAirmass) {
+            if (plotRef.current && chartType.includes('Airmass')) {
                 // Get the tickvals and ticktext from yaxis
                 const plotlyFigure = plotRef.current;
                 const leftTicks = plotlyFigure.props.layout.yaxis.tickvals as number[];
