@@ -325,7 +325,7 @@ export const SkyChart = (props: Props) => {
                 }
             }
         }
-        , 100)
+        , 0)
 
 
     const draw_elevation_axis = () => {
