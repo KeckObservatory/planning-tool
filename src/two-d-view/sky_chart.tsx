@@ -11,7 +11,6 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { AIRMASS_LIMIT, DEFAULT_OPACITY, NON_OBSERVABLE_OPACITY } from "./constants.tsx";
 import { useRef } from "react";
-import { useDebounce } from "usehooks-ts";
 import { useDebounceCallback } from "../use_debounce_callback.tsx";
 dayjs.extend(utc)
 dayjs.extend(timezone)
