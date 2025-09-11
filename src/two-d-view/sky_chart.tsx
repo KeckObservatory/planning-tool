@@ -1,4 +1,4 @@
-import Plot, { Figure } from "react-plotly.js";
+import Plot from "react-plotly.js";
 import { useEffect, useState } from "react";
 import * as util from './sky_view_util.tsx'
 import { Dome, TargetView } from "./two_d_view";
