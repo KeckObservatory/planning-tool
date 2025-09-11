@@ -287,7 +287,12 @@ export const SkyChart = (props: Props) => {
             data={traces}
             ref={plotRef}
             layout={state.layout}
+            onAfterPlot={() => { console.log("After plot event"); }}
+            onRedraw={() => { console.log("Redraw event"); }}
+            onRestyle={() => { console.log("Restyle event"); }}
+            onUpdate={() => { console.log("Update event"); }}
             onInitialized={() => {
+                console.log("Initialized event");
                 if (plotRef.current && chartType === 'Airmass') {
                     // Get the left y-axis ticks from the plotly instance
                     const plotlyFigure = plotRef.current;
