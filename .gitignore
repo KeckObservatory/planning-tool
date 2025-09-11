@@ -1,3 +1,6 @@
+doc/
+starlists_to_test/
+
 # Logs
 logs
 *.log

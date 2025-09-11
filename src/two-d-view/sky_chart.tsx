@@ -283,7 +283,7 @@ export const SkyChart = (props: Props) => {
         }
     }
 
-    const debounced_draw = useDebounceCallback(
+    const debounced_elevation_axis_draw = useDebounceCallback(
         () => {
             if (plotRef.current && chartType.includes('Airmass')) {
                 // Get the tickvals and ticktext from yaxis
@@ -311,8 +311,9 @@ export const SkyChart = (props: Props) => {
                 };
 
                 if (tickvals) {
-
-                    plotlyFigure.props.layout.yaxis2 = newY2Axis;
+                    // Update the layout directly, otherwise it affects the other chart types for some unknown reason
+                    plotlyFigure.props.layout.yaxis2 = newY2Axis; 
+                    // Also update state so that it is not lost on next re-render
                     setState(
                         (oldState) => {
                             return { ...oldState, y2Axis: newY2Axis }
@@ -323,24 +324,13 @@ export const SkyChart = (props: Props) => {
         }
         , 100)
 
-
-    const draw_elevation_axis = () => {
-        console.log('drawing elevation axis')
-        debounced_draw()
-    }
-
-
-
     return (
         <Plot
             data={traces}
             ref={plotRef}
             layout={state.layout}
-            onUpdate={draw_elevation_axis} //updates too often
-            // onRelayout={draw_elevation_axis}
-            // onAfterPlot={() => { console.log('onAfterPlot invoked'); debounced_draw(); }} // calls after any plot updates
-            // onRedraw={() => { console.log('onRedraw invoked'); debounced_draw(); }} //not called at all
-            onInitialized={() => { console.log('onInitialized invoked'); draw_elevation_axis(); }}
+            onUpdate={debounced_elevation_axis_draw}
+            onInitialized={debounced_elevation_axis_draw}
         />
     )
 }
