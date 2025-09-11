@@ -340,7 +340,7 @@ export const SkyChart = (props: Props) => {
             data={traces}
             ref={plotRef}
             layout={state.layout}
-            // onUpdate={draw_elevation_axis} //updates too often
+            onUpdate={draw_elevation_axis} //updates too often
             // onRelayout={draw_elevation_axis}
             // onAfterPlot={() => { console.log('onAfterPlot invoked'); debounced_draw(); }} // calls after any plot updates
             onRedraw={() => { console.log('onRedraw invoked'); debounced_draw(); }} //not called at all
