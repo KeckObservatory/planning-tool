@@ -11,6 +11,8 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { AIRMASS_LIMIT, DEFAULT_OPACITY, NON_OBSERVABLE_OPACITY } from "./constants.tsx";
 import { useRef } from "react";
+import { useDebounce } from "usehooks-ts";
+import { useDebounceCallback } from "../use_debounce_callback.tsx";
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -281,15 +283,10 @@ export const SkyChart = (props: Props) => {
         }
     }
 
-    const draw_elevation_axis = () => {
-        if (!plotRef.current || chartType !== 'Airmass') {
-            return
-        }
-        // Get the left y-axis ticks from the plotly instance
-        const plotlyFigure = plotRef.current;
-        // Wait for the plot to be fully rendered
-        setTimeout(() => {
+    const debounced_draw = useDebounceCallback(
+        () => {
             // Get the tickvals and ticktext from yaxis
+            const plotlyFigure = plotRef.current;
             const leftTicks = plotlyFigure.props.layout.yaxis.tickvals as number[];
 
             // If not set, try to get from the actual plotly instance
@@ -323,7 +320,15 @@ export const SkyChart = (props: Props) => {
                     }
                 );
             }
-        }, 100); // Delay to ensure plot is rendered
+        }
+        , 100)
+
+
+    const draw_elevation_axis = () => {
+        if (plotRef.current && isAirmass) {
+            // Wait for the plot to be fully rendered
+            debounced_draw()
+        }
     }
 
 
