@@ -34,6 +34,7 @@ const convert_target_to_targetlist_row = (target: Target) => {
   const valid = target.target_name && target.ra && target.dec && equinox
   row = valid ? row : '# INVALID row: ' + row
   //optional params
+  row = target.v_mag ? row + ` vmag=${target.v_mag}` : row
   row = target.g_mag ? row + ` gmag=${target.g_mag}` : row
   row = target.j_mag ? row + ` jmag=${target.j_mag}` : row
   row = target.ra_offset ? row + ` raoffset=${target.ra_offset}` : row
