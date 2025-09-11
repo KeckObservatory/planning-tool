@@ -330,7 +330,9 @@ export const SkyChart = (props: Props) => {
 
     const draw_elevation_axis = (figure: Readonly<Figure>) => {
         console.log('draw_elevation_axis', figure)
-        if (figure.layout.yaxis?.title === 'Airmass') {
+        //@ts-ignore
+        if (figure.layout.yaxis?.title?.text === 'Airmass') {
+            console.log('drawing elevation axis')
             debounced_draw()
         }
     }
