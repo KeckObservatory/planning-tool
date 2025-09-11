@@ -227,12 +227,14 @@ export const SkyChart = (props: Props) => {
             deckBlocking,
             showLimits,)
 
+        console.log('chartType, dome, time, showLimits, suncalcTimes', chartType, dome, time, showLimits, suncalcTimes)
+
         const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, maxAirmass, suncalcTimes, context.config.timezone);
         setState({
             layout: scLayout,
             y2Axis,
         });
-    }, [chartType, dome, targetView, time, showLimits, suncalcTimes])
+    }, [dome, targetView, time, showLimits, suncalcTimes])
 
     let traces: Plotly.Data[] = []
     const lngLatEl = context.config.tel_lat_lng_el.keck
