@@ -105,7 +105,7 @@ export const get_targets = (obsid?: number, target_id?: string): Promise<Target[
     let url = BASE_URL + "/getPlanningToolTarget?"
     url += obsid ? "obsid=" + obsid : ""
     url += target_id ? "&target_id=" + target_id : ""
-    return axiosInstance.put(url, { })
+    return axiosInstance.get(url, { })
         .then(handleResponse)
         .catch(handleError)
 }
