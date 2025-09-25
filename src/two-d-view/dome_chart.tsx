@@ -59,7 +59,7 @@ const make_disk_polar = (r1: number, r2: number, th1: number, th2: number) => {
 }
 
 const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc: boolean, times: Date[], time: Date,
-    time_format: string, KG: GeoModel, lngLatEl: LngLatEl
+    time_format: string, geoModel: GeoModel, lngLatEl: LngLatEl
 ) => {
 
     //target trajectory traces
@@ -161,7 +161,7 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
             const moonMarkerTrace = {
                 r: [r],
                 theta: [moon_position.azimuth],
-                text: r <= KG.trackLimit ? [txt] : [],
+                text: r <= geoModel.trackLimit ? [txt] : [],
                 hovorinfo: 'text',
                 showlegend: false,
                 hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
@@ -237,14 +237,14 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
     }
 
     //add dome shapes
-    const r0 = 90 - KG.r0
-    const r1 = 90 - KG.r1
-    const t0 = KG.t0
-    const t1 = KG.t1
-    const r2 = 90 - KG.r2
-    const r3 = 90 - KG.r3
-    const t2 = KG.t2
-    const t3 = KG.t3
+    const r0 = 90 - geoModel.r0
+    const r1 = 90 - geoModel.r1
+    const t0 = geoModel.t0
+    const t1 = geoModel.t1
+    const r2 = 90 - geoModel.r2
+    const r3 = 90 - geoModel.r3
+    const t2 = geoModel.t2
+    const t3 = geoModel.t3
     const d1 = make_disk_polar(r0, r1, t0, t1)
     const d2 = make_disk_polar(r2, r3, t2, t3)
     const shape = {
@@ -273,7 +273,7 @@ const make_2d_traces = (targetView: TargetView[], showMoon: boolean, showCurrLoc
 export const DomeChart = (props: DomeChartProps) => {
     const { targetView, showMoon, showCurrLoc, times, time, dome, width, height } = props
     const context = useStateContext()
-    const KG = context.config.tel_geometry.keck[dome]
+    const geoModel = context.config.tel_geometry[dome]
     const lngLatEl = context.config.tel_lat_lng_el.keck
 
     const traces = make_2d_traces(targetView,
@@ -282,7 +282,7 @@ export const DomeChart = (props: DomeChartProps) => {
         times,
         time,
         context.config.time_format,
-        KG, lngLatEl)
+        geoModel, lngLatEl)
     const layout: Partial<Plotly.Layout> = {
         width,
         height,

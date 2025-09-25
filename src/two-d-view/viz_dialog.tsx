@@ -158,7 +158,7 @@ export const SemesterSelect = (props: SemesterSelectProps) => {
 
 
 export const VizDialog = (props: VizDialogProps) => {
-    const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'K2' as Dome))
+    const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'Keck 2' as Dome))
     const default_semester = get_curr_semester(new Date())
     const [semester, setSemester] = useQueryParam('semester', withDefault(StringParam, default_semester))
     const [vizType, setVizType] = useState<VizChart>("Target Visibility")
@@ -167,7 +167,7 @@ export const VizDialog = (props: VizDialogProps) => {
     const lngLatEl = context.config.tel_lat_lng_el.keck
     // target must have ra dec and be defined
     const { target, setTarget, targets, open } = props
-    const KG = context.config.tel_geometry.keck[dome as Dome]
+    const geoModel = context.config.tel_geometry[dome]
     const regexp = new RegExp("^[12][0-9]{3}[AB]$")
 
     const targetViz = React.useMemo(() => {
@@ -202,7 +202,7 @@ export const VizDialog = (props: VizDialogProps) => {
                 const vis: VizRow = {
                     az,
                     alt,
-                    ...alt_az_observable(alt, az, KG),
+                    ...alt_az_observable(alt, az, geoModel),
                     datetime: time,
                     air_mass: air_mass_val,
                     moon_illumination,

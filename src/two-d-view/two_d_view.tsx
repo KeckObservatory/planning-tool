@@ -27,7 +27,7 @@ interface Props {
     targets: Target[]
 }
 
-export type Dome = "K1" | "K2"
+export type Dome = "Keck 1" | "Keck 2"
 
 const height = 500
 const width = 500
@@ -115,8 +115,8 @@ export const DomeSelect = (props: DomeSelectProps) => {
                 value={dome}
                 onChange={handleDomeChange}
             >
-                <FormControlLabel value="K1" control={<Radio />} label="K1" />
-                <FormControlLabel value="K2" control={<Radio />} label="K2" />
+                <FormControlLabel value="Keck 1" control={<Radio />} label="Keck 1" />
+                <FormControlLabel value="Keck 2" control={<Radio />} label="Keck 2" />
             </RadioGroup>
         </FormControl>
     )
@@ -126,13 +126,13 @@ export const hidate = (date: Date, timezone: string) => {
     return dayjs(date).tz(timezone)
 }
 
-export const DomeParam = createEnumParam<Dome>(['K1', 'K2'])
+export const DomeParam = createEnumParam<Dome>(['Keck 1', 'Keck 2'])
 
 const TwoDView = ({ targets }: Props) => {
     const context = useStateContext()
     const today = hidate(new Date(), context.config.timezone).toDate()
     const [obsdate, setObsdate] = React.useState<Date>(today)
-    const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'K2' as Dome))
+    const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'Keck 2' as Dome))
     const [skyChart, setSkyChart] = React.useState<SkyChart>("Airmass")
     const [showMoon, setShowMoon] = React.useState(true)
     const [showCurrLoc, setShowCurrLoc] = React.useState(true)
@@ -164,7 +164,7 @@ const TwoDView = ({ targets }: Props) => {
         const newSuncalcTimes = util.get_suncalc_times(lngLatEl, obsdate)
         const newTimes = util.get_times_using_nadir(newSuncalcTimes.nadir)
         const tviz: TargetView[] = []
-        const KG = context.config.tel_geometry.keck[dome]
+        const geoModel = context.config.tel_geometry[dome]
         targets.forEach((tgt: Target) => {
             if (tgt.ra && tgt.dec) {
                 const ra_deg = tgt.ra_deg ?? util.ra_dec_to_deg(tgt.ra as string, false)
@@ -181,7 +181,7 @@ const TwoDView = ({ targets }: Props) => {
                     const vis: VizRow = {
                         az,
                         alt,
-                        ...alt_az_observable(alt, az, KG),
+                        ...alt_az_observable(alt, az, geoModel),
                         datetime,
                         air_mass: air_mass_val,
                         moon_illumination,

@@ -368,7 +368,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "OSIRISImager",
-          "dome": "K1",
+          "dome": "Keck 1",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"
@@ -427,7 +427,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "OSIRISSpec",
-          "dome": "K1",
+          "dome": "Keck 1",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"
@@ -486,7 +486,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "OSIRISImagerTrick",
-          "dome": "K1",
+          "dome": "Keck 1",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"
@@ -545,7 +545,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "OSIRISSpecTrick",
-          "dome": "K1",
+          "dome": "Keck 1",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"
@@ -604,7 +604,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "NIRC2Narrow",
-          "dome": "K2",
+          "dome": "Keck 2",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"
@@ -641,7 +641,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "NIRC2Medium",
-          "dome": "K2",
+          "dome": "Keck 2",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"
@@ -678,7 +678,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "NIRC2Wide",
-          "dome": "K2",
+          "dome": "Keck 2",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"
@@ -715,7 +715,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "HIRES",
-          "dome": "K1",
+          "dome": "Keck 1",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"
@@ -752,7 +752,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "LRISADC",
-          "dome": "K1",
+          "dome": "Keck 1",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"
@@ -789,7 +789,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "MOSFIRE",
-          "dome": "K1",
+          "dome": "Keck 1",
           "type": "FOV",
           "zoom": 0.5,
           "units": "arcsec"
@@ -1006,7 +1006,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "ESI",
-          "dome": "K2",
+          "dome": "Keck 2",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"
@@ -1043,7 +1043,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "KCWI",
-          "dome": "K2",
+          "dome": "Keck 2",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"
@@ -2720,7 +2720,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "DEIMOS",
-          "dome": "K2",
+          "dome": "Keck 2",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"
@@ -2757,7 +2757,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "NIRSPEC",
-          "dome": "K2",
+          "dome": "Keck 2",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"
@@ -2794,7 +2794,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "NIRSPAO",
-          "dome": "K2",
+          "dome": "Keck 2",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"
@@ -2831,7 +2831,7 @@
         "type": "Feature",
         "properties": {
           "instrument": "NIRES",
-          "dome": "K2",
+          "dome": "Keck 2",
           "type": "FOV",
           "zoom": 0.15,
           "units": "arcsec"

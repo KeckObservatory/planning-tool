@@ -486,7 +486,7 @@ export const get_curr_loc_trace = (targetView: TargetView[],
     time: Date, 
     lngLatEl: LngLatEl, 
     chartType: SkyChart, 
-    KG: GeoModel, 
+    geoModel: GeoModel, 
     timezone: string, 
     date_time_format: string) => {
     //get curr marker
@@ -496,7 +496,7 @@ export const get_curr_loc_trace = (targetView: TargetView[],
             const azEl = ra_dec_to_az_alt(ra, dec, time, lngLatEl)
             const moon_illumination = SunCalc.getMoonIllumination(time)
             let moon_position = get_moon_position(time, lngLatEl)
-            const { observable, reasons } = alt_az_observable(azEl[1], azEl[0], KG)
+            const { observable, reasons } = alt_az_observable(azEl[1], azEl[0], geoModel)
             const viz: VizRow = {
                 az: azEl[0],
                 alt: azEl[1],

@@ -20,12 +20,12 @@ interface Props {
 }
 
 
-export const alt_az_observable = (alt: number, az: number, KG: GeoModel) => {
-    const minDeckAz = KG.t2
-    const maxDeckAz = KG.t3
-    const minAlt = KG.r1
-    const deckAlt = KG.r3
-    const trackLimit = KG.trackLimit
+export const alt_az_observable = (alt: number, az: number, geoModel: GeoModel) => {
+    const minDeckAz = geoModel.t2
+    const maxDeckAz = geoModel.t3
+    const minAlt = geoModel.r1
+    const deckAlt = geoModel.r3
+    const trackLimit = geoModel.trackLimit
 
     const reasons: Array<BlockReason> = []
     //nasdeck is blocking the target?

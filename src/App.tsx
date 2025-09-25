@@ -80,11 +80,6 @@ const init_snackbar_context: SnackbarContextProps = {
 const SnackbarContext = React.createContext<SnackbarContextProps>(init_snackbar_context);
 export const useSnackbarContext = () => React.useContext(SnackbarContext);
 
-export interface KeckGeoModel {
-  K1: GeoModel
-  K2: GeoModel
-}
-
 export interface GeoModel {
   r0: number,
   r1: number,
@@ -114,7 +109,7 @@ interface ConfigFile {
   timezone: string,
   time_format: string,
   date_time_format: string,
-  tel_geometry: { [key: string]: KeckGeoModel }
+  tel_geometry: { [key: string]: GeoModel }
   tel_lat_lng_el: { [key: string]: LngLatEl }
 }
 
