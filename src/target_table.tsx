@@ -57,7 +57,9 @@ function convert_schema_to_columns() {
     let type = valueProps.type === 'array' ? 'string' : valueProps.type
     type = type.includes('string') ? 'string' : type //multiple typed fields are cast as string and formatted later on
     const editable = valueProps.type === 'array' ? false : valueProps.editable ?? true
-    const width = key === 'ra' || key === 'dec' ? 150 : undefined 
+    let width = key === 'ra' || key === 'dec' ? 150 : undefined 
+    if (key === 'target_name') width = 200
+    if (key === 'tags') width = 200
     let col = {
       field: key,
       valueParser,
