@@ -3,6 +3,9 @@
 This is a tool used to create and store telescope targets. A full tutorial video is found [here](https://vimeo.com/1103283521/3adcf122b6?ts=98447&share=copy)
 
 ### FAQ
+#### Where is the save button?
+Changing a target automatically triggers a save. No need to remember to hit the save button.
+
 #### Question: Can I import starlists?
 Yes! You can also import JSON objects. Select the "UPLOAD TARGETS" button to load targets. You can also upload starlists from your starlist directory.
 
