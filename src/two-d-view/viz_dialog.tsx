@@ -27,6 +27,7 @@ interface ButtonProps {
 export interface TargetViz extends Target {
     semester: string
     semester_visibility: DayViz[]
+    dome: Dome
 }
 
 export interface DayViz extends GetTimesResult {
@@ -164,7 +165,7 @@ export const VizDialog = (props: VizDialogProps) => {
     const [vizType, setVizType] = useState<VizChart>("Target Visibility")
     const context = useStateContext()
 
-    const lngLatEl = context.config.tel_lat_lng_el.keck
+    const lngLatEl = context.config.tel_lat_lng_el[dome]
     // target must have ra dec and be defined
     const { target, setTarget, targets, open } = props
     const geoModel = context.config.tel_geometry[dome]

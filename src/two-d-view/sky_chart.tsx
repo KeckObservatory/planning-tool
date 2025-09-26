@@ -222,7 +222,7 @@ export const SkyChart = (props: Props) => {
     useEffect(() => {
         const shapes = util.get_shapes(suncalcTimes,
             chartType,
-            context.config.tel_geometry.keck[dome],
+            context.config.tel_geometry[dome],
             deckBlocking,
             showLimits,)
 
@@ -236,7 +236,7 @@ export const SkyChart = (props: Props) => {
     }, [chartType, dome, targetView, time, showLimits, suncalcTimes])
 
     let traces: Plotly.Data[] = []
-    const lngLatEl = context.config.tel_lat_lng_el.keck
+    const lngLatEl = context.config.tel_lat_lng_el[dome]
     let deckBlocking = false
 
     targetView.forEach((tgtv: TargetView, idx: number) => {

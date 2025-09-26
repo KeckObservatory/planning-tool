@@ -274,7 +274,7 @@ export const DomeChart = (props: DomeChartProps) => {
     const { targetView, showMoon, showCurrLoc, times, time, dome, width, height } = props
     const context = useStateContext()
     const geoModel = context.config.tel_geometry[dome]
-    const lngLatEl = context.config.tel_lat_lng_el.keck
+    const lngLatEl = context.config.tel_lat_lng_el[dome]
 
     const traces = make_2d_traces(targetView,
         showMoon,

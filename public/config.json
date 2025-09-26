@@ -47,7 +47,12 @@
     "time_format": "MM:DD HH:mm",
     "date_time_format": "YYYY/MM/DD HH:mm",
     "tel_lat_lng_el": {
-        "keck": {
+        "Keck 1": {
+            "lat": 19.8283,
+            "lng": 204.5253,
+            "el": 4.160
+        },
+        "Keck 2": {
             "lat": 19.8283,
             "lng": 204.5253,
             "el": 4.160

@@ -245,7 +245,7 @@ export const TargetVizChart = (props: Props) => {
             let text = `<b>${targetViz.target_name} Visibility</b><br>` 
             text += `Az: ${viz.az.toFixed(2)}<br>`
             text += `El: ${viz.alt.toFixed(2)}<br>`
-            text += `Airmass: ${air_mass(viz.alt, context.config.tel_lat_lng_el.keck.el).toFixed(2)}<br>`
+            text += `Airmass: ${air_mass(viz.alt, context.config.tel_lat_lng_el[targetViz.dome].el).toFixed(2)}<br>`
             // text += `Airmass: ${air_mass(viz.alt).toFixed(2)}<br>`
             text += `HT: ${dayjs(viz.datetime).format(context.config.date_time_format)}<br>`
             text += `UT: ${dayjs(viz.datetime).utc(false).format(context.config.date_time_format)}<br>`
