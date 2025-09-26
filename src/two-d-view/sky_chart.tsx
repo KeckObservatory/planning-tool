@@ -211,7 +211,7 @@ export const SkyChart = (props: Props) => {
     //set layout for plotly. need to render after initialization for y2 axis
     const shapes = util.get_shapes(suncalcTimes,
         chartType,
-        context.config.tel_geometry.keck[dome],
+        context.config.tel_geometry[dome],
         false,
         showLimits,)
 
@@ -277,7 +277,7 @@ export const SkyChart = (props: Props) => {
         const currLocTraces = util.get_curr_loc_trace(targetView,
             minAirmass, maxAirmass,
             time,
-            lngLatEl, chartType, context.config.tel_geometry.keck[dome], context.config.timezone, context.config.date_time_format)
+            lngLatEl, chartType, context.config.tel_geometry[dome], context.config.timezone, context.config.date_time_format)
         if (currLocTraces) {
             traces = [...traces, ...currLocTraces]
         }
