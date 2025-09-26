@@ -370,7 +370,7 @@
           "instrument": "OSIRISImager",
           "dome": "Keck 1",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -429,7 +429,7 @@
           "instrument": "OSIRISSpec",
           "dome": "Keck 1",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -488,7 +488,7 @@
           "instrument": "OSIRISImagerTrick",
           "dome": "Keck 1",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -547,7 +547,7 @@
           "instrument": "OSIRISSpecTrick",
           "dome": "Keck 1",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -606,7 +606,7 @@
           "instrument": "NIRC2Narrow",
           "dome": "Keck 2",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -643,7 +643,7 @@
           "instrument": "NIRC2Medium",
           "dome": "Keck 2",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -680,7 +680,7 @@
           "instrument": "NIRC2Wide",
           "dome": "Keck 2",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -717,7 +717,7 @@
           "instrument": "HIRES",
           "dome": "Keck 1",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -754,7 +754,7 @@
           "instrument": "LRISADC",
           "dome": "Keck 1",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -791,7 +791,7 @@
           "instrument": "MOSFIRE",
           "dome": "Keck 1",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -1008,7 +1008,7 @@
           "instrument": "ESI",
           "dome": "Keck 2",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -1045,7 +1045,7 @@
           "instrument": "KCWI",
           "dome": "Keck 2",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -2722,7 +2722,7 @@
           "instrument": "DEIMOS",
           "dome": "Keck 2",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -2759,7 +2759,7 @@
           "instrument": "NIRSPEC",
           "dome": "Keck 2",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -2796,7 +2796,7 @@
           "instrument": "NIRSPAO",
           "dome": "Keck 2",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -2833,7 +2833,7 @@
           "instrument": "NIRES",
           "dome": "Keck 2",
           "type": "FOV",
-          "zoom": 0.015,
+          "zoom": 0.075,
           "units": "arcsec"
         },
         "geometry": {
@@ -2841,24 +2841,24 @@
           "coordinates": [
             [
               [
-                112.64,
-                112.64
+                56.32,
+                56.32
               ],
               [
-                -112.64,
-                112.64
+                -56.32,
+                56.32
               ],
               [
-                -112.64,
-                -112.64
+                -56.32,
+                -56.32
               ],
               [
-                112.64,
-                -112.64
+                56.32,
+                -56.32
               ],
               [
-                112.64,
-                112.64
+                56.32,
+                56.32
               ]
             ]
           ]
