@@ -111,6 +111,7 @@ export default function TagDialogButton(props: Props) {
             <TagDialog
                 open={open}
                 handleClose={handleClose}
+                targets={props.targets}
             />
         </>
     );
