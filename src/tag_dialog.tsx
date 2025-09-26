@@ -55,7 +55,13 @@ function TagDialog(props: TagDialogProps) {
         else {
             snackbarContext.setSnackbarMessage({ severity: 'success', message: `Successfully saved ${resp.targets.length} targets` })
             snackbarContext.setSnackbarOpen(true);
-            RowsContext.setRows(resp.targets)
+            RowsContext.setRows((tgts) => {
+                return ( //update targets 
+                    tgts.map(tgt => {
+                        const updatedTgt = resp.targets.find(rt => rt._id === tgt._id);
+                        return updatedTgt ? { ...tgt, ...updatedTgt } : tgt;
+                    }))
+            });
         }
     }
 
@@ -84,11 +90,8 @@ function TagDialog(props: TagDialogProps) {
 
 
 export default function TagDialogButton(props: Props) {
+    console.log('TagDialogButton props', props)
     const [open, setOpen] = React.useState(false);
-
-    React.useEffect(() => {
-    }, [props.targets])
-
 
     const handleClickOpen = () => {
         setOpen(true);
