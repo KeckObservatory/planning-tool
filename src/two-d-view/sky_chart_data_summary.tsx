@@ -75,7 +75,7 @@ export const SkyChartDataSummary = (props: { targetView: TargetView[], time: Dat
     return (
         <Tooltip title={'Save chart data as .png file'}>
             <Button
-                sx={{ height: '36px', width: '200px', margin: '6px' }}
+                sx={{ height: '36px', width: '200px', margin: '6px', marginTom: 'auto' }}
                 onClick={handleDownload}
                 variant='contained'
             >
