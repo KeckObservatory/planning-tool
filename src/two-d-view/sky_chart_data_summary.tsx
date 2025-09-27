@@ -52,9 +52,8 @@ export const SkyChartDataSummary = (props: { targetView: TargetView[], time: Dat
             const target_name = tv.target_name
             tv.visibility.forEach(sv => {
                 let row = { 
-                    time: time.toISOString(),
                     target_name, 
-                    datetime: sv.datetime, 
+                    datetime: sv.datetime.toISOString(), 
                     airmass: sv.air_mass, 
                     altitude: sv.alt, 
                     azimuth: sv.az,
@@ -69,7 +68,7 @@ export const SkyChartDataSummary = (props: { targetView: TargetView[], time: Dat
 
     const handleDownload = () => {
         const rows = generateRows()
-        const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-')
+        const timestamp = time.toISOString().split('T')[0].replace(/:/g, '-')
         saveRowsAsCSV(rows, `target_data_${timestamp}.csv`)
     }
 
