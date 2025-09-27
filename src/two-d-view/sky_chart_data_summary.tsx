@@ -1,4 +1,4 @@
-import { Button } from "@mui/material"
+import { Button, Tooltip } from "@mui/material"
 import { TargetView } from "./two_d_view"
 
 // Function to convert array of objects to CSV and save
@@ -10,13 +10,13 @@ const saveRowsAsCSV = (rows: any[], filename: string = 'sky_chart_data.csv') => 
 
     // Get headers from the first object's keys
     const headers = Object.keys(rows[0])
-    
+
     // Create CSV content
     const csvContent = [
         // Header row
         headers.join(','),
         // Data rows
-        ...rows.map(row => 
+        ...rows.map(row =>
             headers.map(header => {
                 const value = row[header]
                 // Handle values that might contain commas or quotes
@@ -31,7 +31,7 @@ const saveRowsAsCSV = (rows: any[], filename: string = 'sky_chart_data.csv') => 
     // Create blob and download
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
-    
+
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob)
         link.setAttribute('href', url)
@@ -51,11 +51,11 @@ export const SkyChartDataSummary = (props: { targetView: TargetView[], time: Dat
         targetView.map(tv => {
             const target_name = tv.target_name
             tv.visibility.forEach(sv => {
-                let row = { 
-                    target_name, 
-                    datetime: sv.datetime.toISOString(), 
-                    airmass: sv.air_mass, 
-                    altitude: sv.alt, 
+                let row = {
+                    target_name,
+                    datetime: sv.datetime.toISOString(),
+                    airmass: sv.air_mass,
+                    altitude: sv.alt,
                     azimuth: sv.az,
                     observable: sv.observable,
                     reasons: sv.reasons.join(', ')
@@ -73,8 +73,14 @@ export const SkyChartDataSummary = (props: { targetView: TargetView[], time: Dat
     }
 
     return (
-        <Button onClick={handleDownload}>
-            Download Table
-        </Button>
+        <Tooltip title={'Save chart data as .png file'}>
+            <Button
+                sx={{ width: '200px', margin: '6px' }}
+                onClick={handleDownload}
+                variant='contained'
+            >
+                Download Table
+            </Button>
+        </Tooltip>
     )
 }
