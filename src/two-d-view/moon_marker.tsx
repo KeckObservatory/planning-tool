@@ -1,6 +1,10 @@
 import React from "react";
 import * as SunCalc from "suncalc";
 import { useTheme } from "@emotion/react";
+import Stack from "@mui/material/Stack";
+import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
+import Typography from "@mui/material/Typography";
 
 interface Props {
     datetime: Date,
@@ -69,14 +73,24 @@ export const MoonMarker = (props: Props) => {
     }
 
     return (
-        <div style={sphereStyle}>
-            <div id={deg > 180 ? 'light-hemisphere' : 'dark-hemisphere'}
-                style={deg > 180 ? lightStyle : darkStyle}></div>
-            <div id={deg > 180 ? 'dark-hemisphere' : 'light-hemisphere'}
-                style={deg > 180 ? darkStyle : lightStyle}></div>
-            <div style={dividerStyle}>
-                <div style={dividerAfterStyle}></div>
-            </div>
-        </div>
+
+        <Stack direction='column'>
+            <FormControl sx={{ display: 'inlineBlock' }}>
+                <FormLabel sx={{ marginRight: '6px', paddingTop: '9px' }}
+                    id="moon-phase-group-label">Moon Fraction: </FormLabel>
+            </FormControl>
+            <Stack direction='row' spacing={1}>
+                <div style={sphereStyle}>
+                    <div id={deg > 180 ? 'light-hemisphere' : 'dark-hemisphere'}
+                        style={deg > 180 ? lightStyle : darkStyle}></div>
+                    <div id={deg > 180 ? 'dark-hemisphere' : 'light-hemisphere'}
+                        style={deg > 180 ? darkStyle : lightStyle}></div>
+                    <div style={dividerStyle}>
+                        <div style={dividerAfterStyle}></div>
+                    </div>
+                </div>
+                <Typography>{Math.floor(props.moonInfo.fraction * 100)}%</Typography>
+            </Stack>
+        </Stack>
     )
 }

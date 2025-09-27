@@ -18,6 +18,7 @@ import * as SunCalc from "suncalc";
 import { FOVlink, STEP_SIZE } from './constants.tsx';
 import { createEnumParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
 import html2canvas from 'html2canvas';
+import { SkyChartDataSummary } from './sky_chart_data_summary.tsx';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -296,18 +297,12 @@ const TwoDView = ({ targets }: Props) => {
                     />
                     <Stack width="100%" direction="row" justifyContent='space-between' spacing={0}>
                         <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
+                        <SkyChartDataSummary targetView={targetView} time={time} />
                         <Stack direction='column'>
-                            <FormControl sx={{ display: 'inlineBlock' }}>
-                                <FormLabel sx={{ marginRight: '6px', paddingTop: '9px' }}
-                                    id="moon-phase-group-label">Moon Fraction: </FormLabel>
-                            </FormControl>
-                            <Stack direction='row' spacing={1}>
-                                <MoonMarker
-                                    moonInfo={moonInfo}
-                                    datetime={time} width={width} height={height}
-                                />
-                                <Typography>{Math.floor(moonInfo.fraction * 100)}%</Typography>
-                            </Stack>
+                            <MoonMarker
+                                moonInfo={moonInfo}
+                                datetime={time} width={width} height={height}
+                            />
                         </Stack>
                     </Stack>
                 </>
