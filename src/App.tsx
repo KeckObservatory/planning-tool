@@ -117,6 +117,7 @@ export interface State {
   username: string;
   obsid: number;
   is_admin: boolean;
+  semids: string[];
   config: ConfigFile;
 }
 
@@ -147,6 +148,7 @@ export interface UserInfo {
   BadEmail: string;
   Category: string;
   is_admin: boolean; //added by backend
+  semids: string[]; //added by backend
 }
 
 const StateContext = React.createContext<State>({} as State)
@@ -170,6 +172,7 @@ function App() {
         config,
         username,
         obsid: userinfo.Id,
+        semids: userinfo.semids ?? [],
         is_admin: userinfo.is_admin ?? false
       }
       setState(init_state)

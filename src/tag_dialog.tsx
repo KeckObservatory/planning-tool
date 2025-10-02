@@ -5,10 +5,11 @@ import DialogContent from '@mui/material/DialogContent';
 import Tooltip from '@mui/material/Tooltip';
 import TagIcon from '@mui/icons-material/Tag';
 import { Target, useSnackbarContext } from './App';
-import { Button, IconButton } from '@mui/material';
+import { Button, IconButton, Stack } from '@mui/material';
 import { MuiChipsInput } from 'mui-chips-input';
 import { submit_target } from './api/api_root';
 import { useRowsContext } from './target_table';
+import { ProgramChipsInput } from './program_select';
 
 
 export interface TagDialogProps {
@@ -24,12 +25,17 @@ export interface Props {
 function TagDialog(props: TagDialogProps) {
     const { open, handleClose, targets } = props;
     const [tags, setTags] = React.useState<string[]>([]);
+    const [semids, setSemids] = React.useState<string[]>([]);
 
     const RowsContext = useRowsContext()
     const snackbarContext = useSnackbarContext()
 
-    const handleArrayChange = (value: any) => {
-        setTags(value)
+    const handleArrayChange = (value: any, type: 'tags' | 'semids') => {
+        if (type === 'tags') {
+            setTags(value)
+        } else if (type === 'semids') {
+            setSemids(value)
+        }
     }
 
     const handleSubmit = async () => {
@@ -70,11 +76,15 @@ function TagDialog(props: TagDialogProps) {
         <Dialog maxWidth="lg" onClose={() => handleClose()} open={open}>
             <DialogTitle>Target Validation Errors</DialogTitle>
             <DialogContent dividers>
+                <Stack direction="column" spacing={2} sx={{ width: 500, maxWidth: '100%' }}>
                 <MuiChipsInput
                     value={tags}
-                    onChange={(value) => handleArrayChange(value)}
+                    onChange={(value) => handleArrayChange(value, 'tags')}
                     label={tags.length === 0 ? "Add Tags" : "Edit Tags"}
                     id="tags"
+                />
+                <ProgramChipsInput
+                    onChange={(value) => handleArrayChange(value, 'semids')}
                 />
                 <Button onClick={() => {
                     console.log("Tags submitted:", tags);
@@ -83,6 +93,7 @@ function TagDialog(props: TagDialogProps) {
                 }}>
                     Submit
                 </Button>
+                </Stack>
             </DialogContent>
         </Dialog>
     );

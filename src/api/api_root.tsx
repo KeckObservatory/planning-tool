@@ -7,6 +7,7 @@ const BASE_URL = "/api/planning_tool"
 
 
 export interface UserInfo {
+    semids: any;
     Id: number;
     FirstName: string;
     LastName: string;

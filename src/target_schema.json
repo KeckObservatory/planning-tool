@@ -11,6 +11,16 @@
             "short_description": "Target Name",
             "description": "Target Name. Alpha-numeric, hyphen, underscore, and space characters only"
         },
+        "program_ids": {
+            "type": "array",
+            "short_description": "Program IDs",
+            "description": "Program IDs, comma separated",
+            "items": {
+                "description": "comprised of semids that other coobservers can view/edit",
+                "type": "string",
+                "pattern": "^[^,]+$"
+            }
+        },
         "tags": {
             "type": "array",
             "short_description": "Tags",

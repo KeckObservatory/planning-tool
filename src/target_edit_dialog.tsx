@@ -15,6 +15,7 @@ import CatalogButton from './catalog_button';
 import target_schema from './target_schema.json'
 import { Status, Target } from './App';
 import { MuiChipsInput } from 'mui-chips-input';
+import { ProgramChipsInput } from './program_select';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util';
 import { TARGET_LENGTH } from './table_toolbar';
 
@@ -544,6 +545,9 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 id="tags"
                             />
                         </Tooltip>
+                        < ProgramChipsInput
+                            onChange={(value) => handleArrayChange('semids', value)}
+                        />
                     </Stack>
                     <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
                         <Tooltip title={input_label('comment', true)}>
