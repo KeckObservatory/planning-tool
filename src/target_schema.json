@@ -11,7 +11,7 @@
             "short_description": "Target Name",
             "description": "Target Name. Alpha-numeric, hyphen, underscore, and space characters only"
         },
-        "program_ids": {
+        "semids": {
             "type": "array",
             "short_description": "Program IDs",
             "description": "Program IDs, comma separated",
