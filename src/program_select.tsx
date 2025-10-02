@@ -10,6 +10,7 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 interface props {
+    semids: string[]
     onChange: (value: string[]) => void;
 }
 
