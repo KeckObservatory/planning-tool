@@ -178,12 +178,12 @@ export const format_edit_entry = (key: string, value?: string | number, isNumber
     return value
 }
 
-export const format_tags = (tags: string[]) => {
+export const format_string_array = (array: string[]) => {
     const pattern = /[,]/g
-    tags = tags ?? [] //if tags is undefined, set to empty array
-    tags = tags.map((tag) => tag.trim().replace(pattern, '')).filter((tag) => tag.length > 0) //no empty strings or whitespace
-    tags = [...new Set(tags)]
-    return tags
+    array = array ?? [] //if tags is undefined, set to empty array
+    array = array.map((tag) => tag.trim().replace(pattern, '')).filter((str) => str.length > 0) //no empty strings or whitespace
+    array = [...new Set(array)]
+    return array
 }
 
 export const TargetEditDialog = (props: TargetEditProps) => {
@@ -203,7 +203,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
     }
 
     const handleArrayChange = (key: string, value: string[]) => {
-        value = format_tags(value)
+        value = format_string_array(value)
         setTarget((prev: Target) => {
             return rowSetter(prev, key, value)
         })

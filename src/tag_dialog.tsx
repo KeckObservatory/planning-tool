@@ -39,7 +39,7 @@ function TagDialog(props: TagDialogProps) {
     }
 
     const handleSubmit = async () => {
-        console.log("Submitting tags:", tags);
+        console.log("Submitting tags/semids:", tags, semids);
         // Here you would typically handle the submission, e.g., send to an API or update state
         const tgts = targets?.map(tgt => {
             let newTags = tgt.tags ? [...tgt.tags] : []

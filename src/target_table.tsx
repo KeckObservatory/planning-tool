@@ -26,7 +26,7 @@ import ValidationDialogButton, { validate } from './validation_check_dialog';
 import CatalogButton from './catalog_button.tsx';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
 import { Target, useSnackbarContext, useStateContext } from './App.tsx';
-import TargetEditDialogButton, { format_tags, format_edit_entry, PropertyProps, rowSetter, TargetProps } from './target_edit_dialog.tsx';
+import TargetEditDialogButton, { format_string_array, format_edit_entry, PropertyProps, rowSetter, TargetProps } from './target_edit_dialog.tsx';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 import { format_target_property } from './upload_targets_dialog.tsx';
@@ -267,7 +267,7 @@ export default function TargetTable(props: TargetTableProps) {
         if (changeDetected) {
           const isNumber = type.includes('number') || type.includes('integer')
           if (type === 'array') {
-            value = format_tags(Array.isArray(value) ? value.flat(Infinity) : value.split(','))
+            value = format_string_array(Array.isArray(value) ? value.flat(Infinity) : value.split(','))
           }
           else {
             value = format_edit_entry(params.field, value, isNumber)

@@ -6,7 +6,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import { RotatorMode, Target, TelescopeWrap, useStateContext, useSnackbarContext } from './App';
 import target_schema from './target_schema.json'
 import { v4 as randomId } from 'uuid';
-import { format_tags, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog';
+import { format_string_array, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog';
 import { DialogComponent } from './dialog_component';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util';
 import { TARGET_NAME_LENGTH_PADDED } from './table_toolbar';
@@ -57,9 +57,9 @@ export const format_target_property = (key: keyof Target, value: unknown, props:
         //@ts-ignore
         fmtValue = raDecFormat(fmtValue as string)
     }
-    else if (key === 'tags') {
+    else if (['tags', 'semids'].includes(key)) {
         //@ts-ignore
-        fmtValue = format_tags(fmtValue as Array<string>)
+        fmtValue = format_string_array(fmtValue as Array<string>)
     }
     return fmtValue
 }
