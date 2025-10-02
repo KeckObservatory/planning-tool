@@ -13,8 +13,8 @@
         },
         "semids": {
             "type": "array",
-            "short_description": "Program IDs",
-            "description": "Program IDs, comma separated",
+            "short_description": "Semids",
+            "description": "Semester Ids, comma separated",
             "items": {
                 "description": "comprised of semids that other coobservers can view/edit",
                 "type": "string",

@@ -46,6 +46,8 @@ const convert_target_to_targetlist_row = (target: Target) => {
   row = target.comment ? `# ${name} comment: ${target.comment}\n` + row : row
   const tags = target.tags ?? []
   row = tags.length > 0 ? `# ${name} tags: ${tags.join(', ')}\n` + row : row
+  const semids = target.semids ?? []
+  row = semids.length > 0 ? `# ${name} semids: ${semids.join(', ')}\n` + row : row
   return row
 }
 
