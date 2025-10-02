@@ -157,6 +157,7 @@ export const useStateContext = () => React.useContext(StateContext)
 
 function App() {
   const [darkState, setDarkState] = useQueryParam('darkState', withDefault(BooleanParam, true));
+  const [ semid ] = useQueryParam<string>('semid');
   const [openSnackbar, setOpenSnackbar] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState<SnackbarMessage>({ message: 'default message' })
   const [state, setState] = useState<State>({} as State);
@@ -179,7 +180,7 @@ function App() {
       setState(init_state)
       // const userinfo = await get_userinfo_mock();
       if (init_state.obsid) {
-        let tgts = await get_targets(init_state.obsid)
+        let tgts = await get_targets(init_state.obsid, undefined, semid)
         setTargets(tgts)
       }
     }

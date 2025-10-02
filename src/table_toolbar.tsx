@@ -15,12 +15,14 @@ import {
 import { v4 as randomId } from 'uuid';
 import MenuItem from '@mui/material/MenuItem';
 import Button, { ButtonProps } from '@mui/material/Button';
-import { Target, useSnackbarContext } from './App.tsx';
+import { Target, useSnackbarContext, useStateContext } from './App.tsx';
 import { Stack } from '@mui/material';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import DeleteDialogButton from './delete_rows_dialog.tsx';
 import { StarListExportDirMenu } from './starlist_export_to_dir.tsx';
 import TagDialogButton from './tag_dialog.tsx';
+import { useQueryParam } from 'use-query-params';
+import { SemidSelect } from './select_semid.tsx';
 
 export const TARGET_LENGTH = 15 // 15 characters for target name
 export const TARGET_NAME_LENGTH_PADDED = TARGET_LENGTH + 1 // 15 characters for target name, one space at the end
@@ -214,6 +216,7 @@ export function EditToolbar(props: EditToolbarProps) {
         <TagDialogButton targets={props.selectedTargets} />
       </Stack>
       <Stack justifyContent={'right'} direction="row" spacing={1}>
+        <SemidSelect />
         <CustomExportButton exportTargets={exportTargets}/>
         <GridToolbar
           printOptions={{ disableToolbarButton: true }}

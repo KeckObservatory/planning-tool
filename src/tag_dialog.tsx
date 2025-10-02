@@ -121,7 +121,7 @@ export default function TagDialogButton(props: Props) {
 
     return (
         <>
-            <Tooltip title="Select to add tags to selected targets">
+            <Tooltip title="Add tags and assign semid(s) to selected targets">
                 <IconButton color="primary" disabled={props.targets.length === 0} onClick={handleClickOpen}>
                     <TagIcon />
                 </IconButton>
