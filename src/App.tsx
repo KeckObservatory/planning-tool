@@ -55,6 +55,7 @@ export interface Target extends SimbadTargetData {
   t_eff?: number,
   comment?: string,
   tags?: string[],
+  semids?: string[];
   status?: Status //used to track row/form edits and updates them accordingly.
 }
 

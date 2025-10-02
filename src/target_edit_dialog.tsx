@@ -546,6 +546,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             />
                         </Tooltip>
                         < ProgramChipsInput
+                            semids = {target.semids ?? []} 
                             onChange={(value) => handleArrayChange('semids', value)}
                         />
                     </Stack>

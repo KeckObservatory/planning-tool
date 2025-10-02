@@ -41,14 +41,20 @@ function TagDialog(props: TagDialogProps) {
     const handleSubmit = async () => {
         console.log("Submitting tags:", tags);
         // Here you would typically handle the submission, e.g., send to an API or update state
-        const tgts = targets?.map(t => {
-            let newTags = t.tags ? [...t.tags] : []
+        const tgts = targets?.map(tgt => {
+            let newTags = tgt.tags ? [...tgt.tags] : []
             tags.forEach(tag => {
                 if (!newTags.includes(tag)) {
                     newTags.push(tag)
                 }
             })
-            return { ...t, tags: newTags }
+            let newSemids = tgt.semids ? [...tgt.semids] : []
+            semids.forEach(semid => {
+                if (!newSemids.includes(semid)) {
+                    newSemids.push(semid)
+                }
+            })
+            return { ...tgt, tags: newTags, semids: newSemids}
         }) ?? []
         console.log('tgts with new tags', tgts)
 
@@ -84,6 +90,7 @@ function TagDialog(props: TagDialogProps) {
                     id="tags"
                 />
                 <ProgramChipsInput
+                    semids={semids}
                     onChange={(value) => handleArrayChange(value, 'semids')}
                 />
                 <Button onClick={() => {
