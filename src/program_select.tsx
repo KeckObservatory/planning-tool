@@ -41,7 +41,7 @@ export const ProgramChipsInput = (props: props) => {
             }}
             style={{ width: 500 }}
             renderInput={(params) => (
-                <TextField {...params} label="Checkboxes" placeholder="Semids" />
+                <TextField {...params} label="Semids" placeholder="Semids" />
             )}
         />
     </Tooltip>
