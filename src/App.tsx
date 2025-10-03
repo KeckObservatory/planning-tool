@@ -15,21 +15,12 @@ import licenseKey from './license.json'
 import Skeleton from '@mui/material/Skeleton';
 import { get_targets, get_userinfo } from './api/api_root.tsx';
 import { SimbadTargetData } from './catalog_button.tsx';
-
-const CONFIG_PATH = './config.json'
+import { config } from './config.tsx';
 
 LicenseInfo.setLicenseKey(
   licenseKey.license_key
 )
 
-
-export const get_config = async () => {
-  const resp = await fetch(
-    CONFIG_PATH
-  )
-  const json = await resp.json()
-  return json
-}
 
 export type Status = "EDITED" | "CREATED"
 
@@ -160,7 +151,7 @@ function App() {
   const [ semid ] = useQueryParam<string>('semid');
   const [openSnackbar, setOpenSnackbar] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState<SnackbarMessage>({ message: 'default message' })
-  const [state, setState] = useState<State>({} as State);
+  const [state, setState] = useState<State>({config} as unknown as State);
   const theme = handleTheme(darkState)
   const [targets, setTargets] = useState<Target[] | undefined>(undefined)
 
@@ -184,9 +175,7 @@ function App() {
 
   useEffect(() => {
     const fetch_data = async () => {
-      const config = await get_config()
       const userinfo = await get_userinfo();
-
       const username = `${userinfo.FirstName} ${userinfo.LastName}`;
       const init_state = {
         config,

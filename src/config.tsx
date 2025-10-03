@@ -1,4 +1,4 @@
-{
+export const config = {
     "default_table_columns": [
         "actions",
         "target_name",
