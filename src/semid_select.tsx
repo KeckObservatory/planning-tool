@@ -22,7 +22,6 @@ export const SemidSelect = () => {
                 <Select
                     labelId="semid-select-label"
                     id="semid-simple-select"
-                    sx = {{ height: 35 }}
                     value={semid}
                     displayEmpty
                     label="Semid"
