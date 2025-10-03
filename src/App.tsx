@@ -167,8 +167,14 @@ function App() {
   useEffect(() => {
     console.log('semid changed', semid)
     const fetch_targets = async () => {
-      if (state.obsid) {
+      if (semid) {
+        console.log("Fetching targets for semid", semid);
         let tgts = await get_targets(undefined, undefined, semid)
+        setTargets(tgts)
+      }
+      else if (state.obsid && (semid === undefined || semid === "")) {
+        console.log("Fetching targets for all semids");
+        let tgts = await get_targets(state.obsid)
         setTargets(tgts)
       }
     }
