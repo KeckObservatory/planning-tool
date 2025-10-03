@@ -156,16 +156,12 @@ function App() {
   const [targets, setTargets] = useState<Target[] | undefined>(undefined)
 
   useEffect(() => {
-    console.log('semid changed', semid)
     const fetch_targets = async () => {
       if (semid) {
-        console.log("Fetching targets for semid", semid);
         let tgts = await get_targets(undefined, undefined, semid)
-        console.log("Fetched targets:", tgts, 'now setting...');
         setTargets([...tgts])
       }
       else if (state.obsid && (semid === undefined || semid === "")) {
-        console.log("Fetching targets for all semids");
         let tgts = await get_targets(state.obsid)
         setTargets(tgts)
       }

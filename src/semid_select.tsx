@@ -22,14 +22,15 @@ export const SemidSelect = () => {
                 <Select
                     labelId="semid-select-label"
                     id="semid-simple-select"
+                    sx = {{ height: 35 }}
                     value={semid}
                     label="Semid"
                     onChange={handleChange}
                 >
-                    <MenuItem key={"undefined"} value={""}>{"All"}</MenuItem>
+                    <MenuItem key={"undefined"} value={undefined}>All Semids</MenuItem>
                     {
-                        context.semids.map((semid) => (
-                            <MenuItem key={semid} value={semid}>{semid}</MenuItem>
+                        context.semids.map((sid) => (
+                            <MenuItem key={sid} value={sid}>{sid}</MenuItem>
                         ))
                     }
                 </Select>
