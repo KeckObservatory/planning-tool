@@ -165,6 +165,17 @@ function App() {
   const [targets, setTargets] = useState<Target[] | undefined>(undefined)
 
   useEffect(() => {
+    console.log('semid changed', semid)
+    const fetch_targets = async () => {
+      if (state.obsid) {
+        let tgts = await get_targets(undefined, undefined, semid)
+        setTargets(tgts)
+      }
+    }
+    fetch_targets()
+  }, [semid])
+
+  useEffect(() => {
     const fetch_data = async () => {
       const config = await get_config()
       const userinfo = await get_userinfo();

@@ -11,6 +11,7 @@ export const SemidSelect = () => {
     const context = useStateContext()
 
     const handleChange = (event: SelectChangeEvent) => {
+        console.log("Setting semid to", event.target.value);
         setSemid(event.target.value as string);
     };
 
