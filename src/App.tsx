@@ -151,7 +151,7 @@ function App() {
   const [ semid ] = useQueryParam<string>('semid');
   const [openSnackbar, setOpenSnackbar] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState<SnackbarMessage>({ message: 'default message' })
-  const [state, setState] = useState<State>({config} as unknown as State);
+  const [state, setState] = useState<State>({config, semids: [], is_admin: false, username:""} as unknown as State);
   const theme = handleTheme(darkState)
   const [targets, setTargets] = useState<Target[] | undefined>(undefined)
 
