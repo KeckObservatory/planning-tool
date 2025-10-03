@@ -17,13 +17,14 @@ export const SemidSelect = () => {
 
     return (
         <Box sx={{ minWidth: 120 }}>
-            <FormControl fullWidth>
+            <FormControl fullWidth size="small">
                 <InputLabel id="semid-select-label">Semid</InputLabel>
                 <Select
                     labelId="semid-select-label"
                     id="semid-simple-select"
                     sx = {{ height: 35 }}
                     value={semid}
+                    displayEmpty
                     label="Semid"
                     onChange={handleChange}
                 >
