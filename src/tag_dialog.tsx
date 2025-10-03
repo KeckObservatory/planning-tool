@@ -9,7 +9,6 @@ import { Button, IconButton, Stack } from '@mui/material';
 import { MuiChipsInput } from 'mui-chips-input';
 import { submit_target } from './api/api_root';
 import { useRowsContext } from './target_table';
-import { ProgramChipsInput } from './program_select';
 
 
 export interface TagDialogProps {
@@ -25,7 +24,6 @@ export interface Props {
 function TagDialog(props: TagDialogProps) {
     const { open, handleClose, targets } = props;
     const [tags, setTags] = React.useState<string[]>([]);
-    const [semids, setSemids] = React.useState<string[]>([]);
 
     const RowsContext = useRowsContext()
     const snackbarContext = useSnackbarContext()
@@ -35,7 +33,7 @@ function TagDialog(props: TagDialogProps) {
     }
 
     const handleSubmit = async () => {
-        console.log("Submitting tags:", tags, semids);
+        console.log("Submitting tags:", tags);
         // Here you would typically handle the submission, e.g., send to an API or update state
         const tgts = targets?.map(tgt => {
             let newTags = tgt.tags ? [...tgt.tags] : []
