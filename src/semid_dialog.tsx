@@ -3,16 +3,14 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import Tooltip from '@mui/material/Tooltip';
-import TagIcon from '@mui/icons-material/Tag';
 import { Target, useSnackbarContext } from './App';
-import { Button, IconButton, Stack } from '@mui/material';
-import { MuiChipsInput } from 'mui-chips-input';
+import { Button, Stack } from '@mui/material';
 import { submit_target } from './api/api_root';
 import { useRowsContext } from './target_table';
 import { ProgramChipsInput } from './program_select';
 
 
-export interface TagDialogProps {
+export interface SemidDialogProps {
     open: boolean;
     handleClose: Function;
     targets?: Target[]
@@ -22,29 +20,21 @@ export interface Props {
     targets: Target[]
 }
 
-function TagDialog(props: TagDialogProps) {
+function SemidDialog(props: SemidDialogProps) {
     const { open, handleClose, targets } = props;
-    const [tags, setTags] = React.useState<string[]>([]);
     const [semids, setSemids] = React.useState<string[]>([]);
 
     const RowsContext = useRowsContext()
     const snackbarContext = useSnackbarContext()
 
     const handleArrayChange = (value: any) => {
-        setTags(value)
+        setSemids(value)
     }
 
     const handleSubmit = async () => {
-        console.log("Submitting tags:", tags, semids);
         // Here you would typically handle the submission, e.g., send to an API or update state
         const tgts = targets?.map(tgt => {
-            let newTags = tgt.tags ? [...tgt.tags] : []
-            tags.forEach(tag => {
-                if (!newTags.includes(tag)) {
-                    newTags.push(tag)
-                }
-            })
-            let newTarget = { ...tgt, tags: newTags}
+            let newTarget = { ...tgt, semids: semids }
             return newTarget
         }) ?? []
 
@@ -70,14 +60,12 @@ function TagDialog(props: TagDialogProps) {
 
     return (
         <Dialog maxWidth="lg" onClose={() => handleClose()} open={open}>
-            <DialogTitle>Target Validation Errors</DialogTitle>
+            <DialogTitle>Semid Assignment</DialogTitle>
             <DialogContent dividers>
                 <Stack direction="column" spacing={2} sx={{ width: 500, maxWidth: '100%' }}>
-                <MuiChipsInput
-                    value={tags}
+                <ProgramChipsInput
+                    semids={semids}
                     onChange={(value) => handleArrayChange(value)}
-                    label={tags.length === 0 ? "Add Tags" : "Edit Tags"}
-                    id="tags"
                 />
                 <Button onClick={() => {
                     handleSubmit();
@@ -92,8 +80,7 @@ function TagDialog(props: TagDialogProps) {
 }
 
 
-export default function TagDialogButton(props: Props) {
-    console.log('TagDialogButton props', props)
+export default function SemidDialogButton(props: Props) {
     const [open, setOpen] = React.useState(false);
 
     const handleClickOpen = () => {
@@ -106,12 +93,12 @@ export default function TagDialogButton(props: Props) {
 
     return (
         <>
-            <Tooltip title="Add tags to selected targets">
-                <IconButton color="primary" disabled={props.targets.length === 0} onClick={handleClickOpen}>
-                    <TagIcon />
-                </IconButton>
+            <Tooltip title="Assign semid(s) to selected targets. Targets with these semids will be visible to other users who share these semids.">
+                <Button color="primary" disabled={props.targets.length === 0} onClick={handleClickOpen}>
+                    Assign Semid(s) 
+                </Button>
             </Tooltip>
-            <TagDialog
+            <SemidDialog
                 open={open}
                 handleClose={handleClose}
                 targets={props.targets}
