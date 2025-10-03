@@ -26,7 +26,7 @@ export const SemidSelect = () => {
                     label="Semid"
                     onChange={handleChange}
                 >
-                    <MenuItem key={"undefined"} value={undefined}>{"All"}</MenuItem>
+                    <MenuItem key={"undefined"} value={""}>{"All"}</MenuItem>
                     {
                         context.semids.map((semid) => (
                             <MenuItem key={semid} value={semid}>{semid}</MenuItem>

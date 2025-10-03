@@ -170,7 +170,8 @@ function App() {
       if (semid) {
         console.log("Fetching targets for semid", semid);
         let tgts = await get_targets(undefined, undefined, semid)
-        setTargets(tgts)
+        console.log("Fetched targets:", tgts, 'now setting...');
+        setTargets([...tgts])
       }
       else if (state.obsid && (semid === undefined || semid === "")) {
         console.log("Fetching targets for all semids");

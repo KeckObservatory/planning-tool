@@ -179,6 +179,10 @@ export default function TargetTable(props: TargetTableProps) {
     }
   }, [rows])
 
+  React.useEffect(() => { // when semid is changed
+    setRows(targets)
+  }, [targets])
+
   const debounced_save = useDebounceCallback(edit_target, 2000)
 
   const handleEditClick = (id: GridRowId) => () => {
