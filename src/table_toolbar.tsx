@@ -205,7 +205,7 @@ export function EditToolbar(props: EditToolbarProps) {
 
   return (
     // <GridToolbarContainer sx={{ justifyContent: 'center' }}>
-    <GridToolbarContainer sx={{ justifyContent: 'space-between' }}>
+    <GridToolbarContainer sx={{ justifyContent: 'space-between', p: 2 }}>
       <Stack justifyContent={'left'} direction="row" spacing={1}>
         <Button color="primary" startIcon={<AddIcon />} onClick={handleAddTarget}>
           Add Target
