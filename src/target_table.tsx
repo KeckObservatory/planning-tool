@@ -336,7 +336,7 @@ export default function TargetTable(props: TargetTableProps) {
     <RowsContext.Provider value={{ rows: rows, setRows: setRows }}>
       <Box
         sx={{
-          height: 500,
+          height: 1000,
           width: '100%',
           '& .actions': {
             color: 'text.secondary',
