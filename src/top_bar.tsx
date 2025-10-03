@@ -9,7 +9,7 @@ import DoorFrontIcon from '@mui/icons-material/DoorFront';
 import IconButton from '@mui/material/IconButton';
 import MarkdownDialogButton from './markdown_dialog.tsx';
 import React from 'react';
-import { get_config } from './App.tsx';
+import { config } from './config.tsx';
 
 interface Props {
   username?: string,
@@ -24,8 +24,6 @@ export function TopBar(props: Props) {
 
   React.useEffect(() => {
     const init_msgs = async () => {
-
-      const config = await get_config()
       const welcomeResp = await fetch(config.help_msg_filename)
       const wtxt = await welcomeResp.text()
       setHelpMsg(wtxt)
