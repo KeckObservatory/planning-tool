@@ -11,7 +11,7 @@ import {
   GridToolbar,
   GridToolbarProps,
   ToolbarPropsOverrides
-} from '@mui/x-data-grid-pro';
+} from '@mui/x-data-grid';
 import { v4 as randomId } from 'uuid';
 import MenuItem from '@mui/material/MenuItem';
 import Button, { ButtonProps } from '@mui/material/Button';
@@ -100,6 +100,7 @@ function StarListExportMenu(props: ExportProps) {
 
 export interface ExportProps extends GridExportMenuItemProps<{}> {
   exportTargets: Target[];
+  hideMenu?: () => void;
 }
 
 function JsonExportMenuItem(props: ExportProps) {

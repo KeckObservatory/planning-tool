@@ -15,6 +15,8 @@ export const SemidSelect = () => {
         setSemid(event.target.value as string);
     };
 
+    console.log("Rendering semid select with semid", semid);
+
     return (
         <Box sx={{ minWidth: 120 }}>
             <FormControl fullWidth size="small">
@@ -23,7 +25,6 @@ export const SemidSelect = () => {
                     labelId="semid-select-label"
                     id="semid-simple-select"
                     value={semid}
-                    displayEmpty
                     label="Semid"
                     onChange={handleChange}
                 >

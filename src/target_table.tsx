@@ -6,7 +6,7 @@ import { EditToolbarProps, EditToolbar } from './table_toolbar.tsx';
 import {
   GridRowModesModel,
   GridRowModes,
-  DataGridPro,
+  DataGrid,
   GridColDef,
   GridActionsCellItem,
   GridEventListener,
@@ -20,7 +20,7 @@ import {
   GridValueSetter,
   GridCellEditStopParams,
   GridRowModel,
-} from '@mui/x-data-grid-pro';
+} from '@mui/x-data-grid';
 import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
 import CatalogButton from './catalog_button.tsx';
@@ -347,8 +347,8 @@ export default function TargetTable(props: TargetTableProps) {
         }}
       >
         {Object.keys(visibleColumns).length > 0 && (
-          <DataGridPro
-            getRowId={(row) => row._id}
+          <DataGrid
+            getRowId={(row: Target) => row._id}
             //disableRowSelectionOnClick // turned off for now to allow row edit
             processRowUpdate={processRowUpdate}
             autosizeOptions={autosizeOptions}
@@ -361,6 +361,7 @@ export default function TargetTable(props: TargetTableProps) {
               //@ts-ignore
               toolbar: EditToolbar,
             }}
+            //@ts-ignore
             onRowSelectionModelChange={(newRowSelectionModel) => {
               setRowSelectionModel(newRowSelectionModel);
             }}
@@ -378,7 +379,7 @@ export default function TargetTable(props: TargetTableProps) {
               } as EditToolbarProps,
             }}
             initialState={{
-              pinnedColumns: pinnedColumns,
+              // pinnedColumns: pinnedColumns, // pro version only
               columns: {
                 columnVisibilityModel:
                   visibleColumns

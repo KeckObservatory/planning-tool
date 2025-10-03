@@ -10,16 +10,16 @@ import { BooleanParam, useQueryParam, withDefault } from 'use-query-params';
 import TargetTable from './target_table.tsx';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
-import { LicenseInfo } from '@mui/x-license';
-import licenseKey from './license.json'
+// import { LicenseInfo } from '@mui/x-license';
+// import licenseKey from './license.json'
 import Skeleton from '@mui/material/Skeleton';
 import { get_targets, get_userinfo } from './api/api_root.tsx';
 import { SimbadTargetData } from './catalog_button.tsx';
 import { config } from './config.tsx';
 
-LicenseInfo.setLicenseKey(
-  licenseKey.license_key
-)
+// LicenseInfo.setLicenseKey(
+//   licenseKey.license_key
+// )
 
 
 export type Status = "EDITED" | "CREATED"
@@ -229,6 +229,7 @@ function App() {
                 flexDirection: 'column',
               }}
             >
+                <TargetTable targets={targets ?? []} />
               {targets === undefined ? (<Skeleton variant="rectangular" width="100%" height={500} />) :
                 <TargetTable targets={targets} />}
             </Paper>
