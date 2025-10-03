@@ -330,7 +330,6 @@ export const SkyChart = (props: Props) => {
             ref={plotRef}
             layout={{
                 ...state.layout,
-                dragmode: chartType.includes('Airmass') ? false : 'zoom'
             }}
             config={{
                 scrollZoom: !chartType.includes('Airmass'),
