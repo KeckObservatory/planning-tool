@@ -81,13 +81,17 @@ const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoMo
 }
 
 const find_fine_transition_time = (tv: TargetView, vIdx: number, lngLatEl: LngLatEl, geoModel: GeoModel) => {
-    const visibleTime = tv.visibility[vIdx].datetime
-    const nonVisibleTime = !tv.visibility[vIdx + 1].observable ? tv.visibility[vIdx + 1].datetime : tv.visibility[vIdx - 1].datetime
-    const startTime = visibleTime < nonVisibleTime ? visibleTime : nonVisibleTime
-    const endTime = visibleTime > nonVisibleTime ? visibleTime : nonVisibleTime
+    // const visibleTime = tv.visibility[vIdx].datetime
+    // const nonVisibleTime = !tv.visibility[vIdx].observable ? tv.visibility[vIdx + 1].datetime : tv.visibility[vIdx - 1].datetime
+    // const startTime = visibleTime < nonVisibleTime ? visibleTime : nonVisibleTime
+    // const endTime = visibleTime > nonVisibleTime ? visibleTime : nonVisibleTime
+
+    const [start, end] = tv.visibility[vIdx].observable ? 
+    [tv.visibility[vIdx].datetime, tv.visibility[vIdx - 1].datetime] : 
+    [tv.visibility[vIdx - 1].datetime, tv.visibility[vIdx].datetime]
+    console.log('finding fine transition time between ', start, ' and ', end)
     //find transition time
-    const transitionTime = find_transition_time(tv.ra_deg, tv.dec_deg, lngLatEl, geoModel,
-        startTime, endTime)
+    const transitionTime = find_transition_time(tv.ra_deg, tv.dec_deg, lngLatEl, geoModel, start, end)
     return transitionTime
 }
 
@@ -111,13 +115,9 @@ export const SkyChartDataSummary = (props: Props) => {
                 const sv = tv.visibility[idx]
                 const lastSV = tv.visibility[idx - 1]
                 //check if transitioning
-                if (!sv.observable && lastSV.observable) {
+                if (sv.observable !== lastSV.observable) {
                     // transitioning from not visible to visible
                     transitionTimesIdx.push(idx)
-                }
-                if (sv.observable && !lastSV.observable) {
-                    // transitioning from visible to not visible
-                    transitionTimesIdx.push(idx - 1)
                 }
             }
 
