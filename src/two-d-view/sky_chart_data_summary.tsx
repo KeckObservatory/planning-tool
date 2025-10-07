@@ -65,6 +65,7 @@ const generate_times = (startTime: Date, endTime: Date, stepSize: number) => {
 const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoModel: GeoModel,
     startTime: Date, endTime: Date, observable: boolean, minStep = 1) => {
     const times = generate_times(startTime, endTime, minStep)
+    console.log('finding transition time between ', startTime, ' and ', endTime, times)
     for (let t of times) {
         const altAz = util.ra_dec_to_az_alt(ra, dec, t, lngLatEl)
         const obs = alt_az_observable(altAz[1], altAz[0], geoModel)
@@ -150,7 +151,7 @@ export const SkyChartDataSummary = (props: Props) => {
                 let row = {
                     target_name,
                     datetime: t,
-                    airmass: util.air_mass(90 - azAlt[1]),
+                    airmass: util.air_mass(azAlt[1], lngLatEl.el),
                     altitude: azAlt[1],
                     azimuth: azAlt[0],
                     observable: observable.observable,
