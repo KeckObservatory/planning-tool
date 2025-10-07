@@ -56,9 +56,10 @@ interface Props {
 const generate_times = (startTime: Date, endTime: Date, stepSize: number) => {
     const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60)
     const nLen = Math.floor(totalMinutes / stepSize) + 1
-    const deltaTimes = Array.from({ length: nLen }, (_, idx) => startTime.getTime() + stepSize * idx)
-    return deltaTimes.map((hour: number) => {
-        return util.add_hours(startTime, hour)
+    const deltaTimes = Array.from({ length: nLen }, (_, idx) => stepSize * idx)
+    console.log('generated delta times: ', deltaTimes)
+    return deltaTimes.map((minutes: number) => {
+        return util.add_hours(startTime, minutes / 60)
     })
 }
 
