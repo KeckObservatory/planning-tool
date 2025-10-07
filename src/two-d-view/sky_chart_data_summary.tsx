@@ -74,7 +74,7 @@ const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoMo
         const altAz = util.ra_dec_to_az_alt(ra, dec, t, lngLatEl)
         const obs = alt_az_observable(altAz[1], altAz[0], geoModel)
         if (obs.observable !== startObs) {
-            return t
+            return observable ? t : times[idx-1]
         }
     }
     return (observable ? endTime : startTime)
