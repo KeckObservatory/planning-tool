@@ -132,7 +132,7 @@ export const get_suncalc_times = (lngLatEl: LngLatEl, date?: Date) => {
     return times
 }
 
-const round_date = (minutes: number, date: Date) => {
+export const round_date = (minutes: number, date: Date) => {
     const coeff = 1000 * 60 * minutes;
     return new Date(Math.round(date.getTime() / coeff) * coeff)
 }

@@ -1,5 +1,8 @@
 import { Button, Tooltip } from "@mui/material"
-import { TargetView } from "./two_d_view"
+import { Dome, TargetView } from "./two_d_view"
+import { GeoModel, LngLatEl, useStateContext } from "../App"
+import * as util from './sky_view_util.tsx'
+import { alt_az_observable } from "./target_viz_chart.tsx"
 
 // Function to convert array of objects to CSV and save
 const saveRowsAsCSV = (rows: any[], filename: string = 'sky_chart_data.csv') => {
@@ -43,25 +46,128 @@ const saveRowsAsCSV = (rows: any[], filename: string = 'sky_chart_data.csv') => 
     }
 }
 
-export const SkyChartDataSummary = (props: { targetView: TargetView[], time: Date }) => {
-    const { targetView, time } = props
+interface Props {
+    targetView: TargetView[],
+    time: Date,
+    dome: Dome
+}
+
+
+const generate_times = (startTime: Date, endTime: Date, stepSize = 60000) => {
+    const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60)
+    const nLen = Math.floor(totalMinutes / stepSize) + 1
+    const deltaTimes = Array.from({ length: nLen }, (_, idx) => startTime.getTime() + stepSize * idx)
+    return deltaTimes.map((hour: number) => {
+        return util.add_hours(startTime, hour)
+    })
+}
+
+const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoModel: GeoModel,
+    startTime: Date, endTime: Date, observable: boolean, minStep = 60000) => {
+    const times = generate_times(startTime, endTime, minStep)
+    for (let t of times) {
+        const altAz = util.ra_dec_to_az_alt(ra, dec, t, lngLatEl)
+        const obs = alt_az_observable(altAz[1], altAz[0], geoModel)
+        if (obs.observable !== observable) {
+            return t
+        }
+    }
+    return (observable ? endTime : startTime)
+}
+
+const find_fine_transition_time = (tv: TargetView, vIdx: number, observable: boolean, lngLatEl: LngLatEl, geoModel: GeoModel) => {
+    const visibleTime = tv.visibility[vIdx].datetime
+    const nonVisibleTime = !tv.visibility[vIdx + 1].observable ? tv.visibility[vIdx + 1].datetime : tv.visibility[vIdx - 1].datetime
+    const startTime = visibleTime < nonVisibleTime ? visibleTime : nonVisibleTime
+    const endTime = visibleTime > nonVisibleTime ? visibleTime : nonVisibleTime
+    //find transition time
+    const transitionTime = find_transition_time(tv.ra_deg, tv.dec_deg, lngLatEl, geoModel,
+        startTime, endTime, observable)
+    return transitionTime
+}
+
+export const SkyChartDataSummary = (props: Props) => {
+    const { targetView, time, dome } = props
+    const context = useStateContext()
+
+    const lngLatEl = context.config.tel_lat_lng_el[dome]
+    const geoModel = context.config.tel_geometry[dome]
 
     const generateRows = () => {
         let rows: any[] = []
         targetView.map(tv => {
             const target_name = tv.target_name
-            tv.visibility.forEach(sv => {
+
+            //get transition times 
+            let visibleTransitionIdx: number[] = []
+            let notVisibleTransitionIdx: number[] = []
+            //loop through visibility array and find transitions
+
+            for (let idx = 1; idx < tv.visibility.length; idx++) {
+                const sv = tv.visibility[idx]
+                const lastSV = tv.visibility[idx - 1]
+                //check if transitioning
+                if (sv.observable && !lastSV.observable) {
+                    // transitioning from not visible to visible
+                    visibleTransitionIdx.push(idx)
+                } else if (!sv.observable && lastSV.observable) {
+                    // transitioning from visible to not visible
+                    notVisibleTransitionIdx.push(idx)
+                }
+            }
+
+            //loop through transition times and find more precise times
+            const fineVisibleTransitionTimes: Date[] = visibleTransitionIdx.map((vIdx) => {
+                return find_fine_transition_time(tv, vIdx, true, lngLatEl, geoModel)
+            })
+
+            const fineNotVisibleTransitionTimes: Date[] = notVisibleTransitionIdx.map((vIdx) => {
+                return find_fine_transition_time(tv, vIdx, false, lngLatEl, geoModel)
+            })
+
+            fineVisibleTransitionTimes.forEach(t => {
+                const azAlt = util.ra_dec_to_az_alt(tv.ra_deg, tv.dec_deg, t, lngLatEl)
+                const observable = alt_az_observable(azAlt[1], azAlt[0], geoModel)
                 let row = {
                     target_name,
-                    datetime: sv.datetime.toISOString(),
-                    airmass: sv.air_mass,
-                    altitude: sv.alt,
-                    azimuth: sv.az,
-                    observable: sv.observable,
-                    reasons: sv.reasons.join(', ')
+                    datetime: t.toISOString(),
+                    airmass: util.air_mass(90 - azAlt[1]),
+                    altitude: azAlt[1],
+                    azimuth: azAlt[0],
+                    observable: observable.observable,
+                    reasons: observable.reasons.join(', ')
                 }
                 rows.push(row)
             })
+
+            fineNotVisibleTransitionTimes.forEach(t => {
+                const azAlt = util.ra_dec_to_az_alt(tv.ra_deg, tv.dec_deg, t, lngLatEl)
+                const observable = alt_az_observable(azAlt[1], azAlt[0], geoModel)
+                let row = {
+                    target_name,
+                    datetime: t.toISOString(),
+                    airmass: util.air_mass(90 - azAlt[1]),
+                    altitude: azAlt[1],
+                    azimuth: azAlt[0],
+                    observable: observable.observable,
+                    reasons: observable.reasons.join(', ')
+                }
+                rows.push(row)
+            })
+
+            // display table of values at each time step
+            // tv.visibility.forEach(sv => {
+            //     let row = {
+            //         target_name,
+            //         datetime: sv.datetime.toISOString(),
+            //         airmass: sv.air_mass,
+            //         altitude: sv.alt,
+            //         azimuth: sv.az,
+            //         observable: sv.observable,
+            //         reasons: sv.reasons.join(', ')
+            //     }
+            //     rows.push(row)
+            // })
         })
         return rows
     }

@@ -297,7 +297,7 @@ const TwoDView = ({ targets }: Props) => {
                     />
                     <Stack width="100%" direction="row" justifyContent='space-between' spacing={0}>
                         <SkyChartSelect skyChart={skyChart} setSkyChart={setSkyChart} />
-                        <SkyChartDataSummary targetView={targetView} time={time} />
+                        <SkyChartDataSummary targetView={targetView} time={obsdate} dome={dome} />
                         <Stack direction='column'>
                             <MoonMarker
                                 moonInfo={moonInfo}
