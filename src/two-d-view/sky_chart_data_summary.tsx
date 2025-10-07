@@ -106,11 +106,13 @@ export const SkyChartDataSummary = (props: Props) => {
             for (let idx = 1; idx < tv.visibility.length-1; idx++) {
                 const sv = tv.visibility[idx]
                 const lastSV = tv.visibility[idx - 1]
+                const nextSV = tv.visibility[idx + 1]
                 //check if transitioning
-                if (sv.observable && !lastSV.observable) {
+                if (!sv.observable && nextSV.observable) {
                     // transitioning from not visible to visible
                     visibleTransitionIdx.push(idx)
-                } else if (!sv.observable && lastSV.observable) {
+                } 
+                if (lastSV.observable && !sv.observable) {
                     // transitioning from visible to not visible
                     notVisibleTransitionIdx.push(idx)
                 }
