@@ -67,10 +67,13 @@ const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoMo
     startTime: Date, endTime: Date, observable: boolean, minStep = 1) => {
     const times = generate_times(startTime, endTime, minStep)
     console.log('finding transition time between ', startTime, ' and ', endTime, times)
-    for (let t of times) {
+    const altAz = util.ra_dec_to_az_alt(ra, dec, startTime, lngLatEl)
+    const startObs = alt_az_observable( altAz[1], altAz[0], geoModel).observable
+    for (let idx=1; idx < times.length; idx++) {
+        const t = times[idx]
         const altAz = util.ra_dec_to_az_alt(ra, dec, t, lngLatEl)
         const obs = alt_az_observable(altAz[1], altAz[0], geoModel)
-        if (obs.observable !== observable) {
+        if (obs.observable !== startObs) {
             return t
         }
     }
