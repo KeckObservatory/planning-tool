@@ -110,11 +110,11 @@ export const SkyChartDataSummary = (props: Props) => {
                 //check if transitioning
                 if (!sv.observable && nextSV.observable) {
                     // transitioning from not visible to visible
-                    visibleTransitionIdx.push(idx)
+                    visibleTransitionIdx.push(idx+1)
                 } 
                 if (lastSV.observable && !sv.observable) {
                     // transitioning from visible to not visible
-                    notVisibleTransitionIdx.push(idx)
+                    notVisibleTransitionIdx.push(idx-1)
                 }
             }
 
