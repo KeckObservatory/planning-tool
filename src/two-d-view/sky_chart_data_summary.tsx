@@ -79,7 +79,7 @@ const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoMo
     throw new Error('transition not found. should not reach here!')
 }
 
-const find_fine_transition_time = (tv: TargetView, vIdx: number, observable: boolean, lngLatEl: LngLatEl, geoModel: GeoModel) => {
+const find_fine_transition_time = (tv: TargetView, vIdx: number, lngLatEl: LngLatEl, geoModel: GeoModel) => {
     const visibleTime = tv.visibility[vIdx].datetime
     const nonVisibleTime = !tv.visibility[vIdx + 1].observable ? tv.visibility[vIdx + 1].datetime : tv.visibility[vIdx - 1].datetime
     const startTime = visibleTime < nonVisibleTime ? visibleTime : nonVisibleTime
@@ -124,11 +124,11 @@ export const SkyChartDataSummary = (props: Props) => {
 
             //loop through transition times and find more precise times
             const fineVisibleTransitionTimes: Date[] = visibleTransitionIdx.map((vIdx) => {
-                return find_fine_transition_time(tv, vIdx, true, lngLatEl, geoModel)
+                return find_fine_transition_time(tv, vIdx, lngLatEl, geoModel)
             })
 
             const fineNotVisibleTransitionTimes: Date[] = notVisibleTransitionIdx.map((vIdx) => {
-                return find_fine_transition_time(tv, vIdx, true, lngLatEl, geoModel)
+                return find_fine_transition_time(tv, vIdx, lngLatEl, geoModel)
             })
 
             fineVisibleTransitionTimes.forEach(t => {
