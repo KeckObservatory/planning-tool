@@ -64,7 +64,7 @@ const generate_times = (startTime: Date, endTime: Date, stepSize: number) => {
 }
 
 const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoModel: GeoModel,
-    startTime: Date, endTime: Date, minStep = 1) => {
+    startTime: Date, endTime: Date, minStep = .5) => {
     const times = generate_times(startTime, endTime, minStep)
     console.log('finding transition time between ', startTime, ' and ', endTime, times)
     const altAz = util.ra_dec_to_az_alt(ra, dec, startTime, lngLatEl)
