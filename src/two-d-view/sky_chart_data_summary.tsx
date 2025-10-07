@@ -66,7 +66,7 @@ const generate_times = (startTime: Date, endTime: Date, stepSize: number) => {
 const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoModel: GeoModel,
     startTime: Date, endTime: Date, minStep = 1) => {
     const times = generate_times(startTime, endTime, minStep)
-    console.log('finding transition time between ', startTime, ' and ', endTime, times)
+    console.log('finding transition in times', times)
     const altAz = util.ra_dec_to_az_alt(ra, dec, startTime, lngLatEl)
     const startObservable = alt_az_observable(altAz[1], altAz[0], geoModel).observable
     for (let idx = 1; idx < times.length - 1; idx++) {
@@ -86,7 +86,7 @@ const find_fine_transition_time = (tv: TargetView, vIdx: number, lngLatEl: LngLa
     // const startTime = visibleTime < nonVisibleTime ? visibleTime : nonVisibleTime
     // const endTime = visibleTime > nonVisibleTime ? visibleTime : nonVisibleTime
 
-    const [start, end] = tv.visibility[vIdx].observable ? 
+    const [start, end] = !tv.visibility[vIdx].observable ? 
     [tv.visibility[vIdx].datetime, tv.visibility[vIdx - 1].datetime] : 
     [tv.visibility[vIdx - 1].datetime, tv.visibility[vIdx].datetime]
     console.log('finding fine transition time between ', start, ' and ', end)
