@@ -131,7 +131,7 @@ export const SkyChartDataSummary = (props: Props) => {
                     airmass: util.air_mass(azAlt[1], lngLatEl.el),
                     altitude: azAlt[1],
                     azimuth: azAlt[0],
-                    status: prevPoint.observable ? 'setting': 'rising',
+                    status: prevPoint.observable ? 'occluding': 'emerging',
                     reasons: observable.reasons.join(', ')
                 }
                 rows.push(row)
