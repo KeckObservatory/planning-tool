@@ -124,7 +124,6 @@ export const SkyChartDataSummary = (props: Props) => {
                 const vidx = transitionTimesIdx[idx]
                 const prevPoint = tv.visibility[vidx - 1]
                 const azAlt = util.ra_dec_to_az_alt(tv.ra_deg, tv.dec_deg, t, lngLatEl)
-                const observable = alt_az_observable(azAlt[1], azAlt[0], geoModel)
                 let row = {
                     target_name,
                     datetime: t,
@@ -132,7 +131,6 @@ export const SkyChartDataSummary = (props: Props) => {
                     altitude: azAlt[1],
                     azimuth: azAlt[0],
                     status: prevPoint.observable ? 'occluding': 'emerging',
-                    reasons: observable.reasons.join(', ')
                 }
                 rows.push(row)
             })
@@ -147,13 +145,13 @@ export const SkyChartDataSummary = (props: Props) => {
     }
 
     return (
-        <Tooltip title={'Save chart data as .png file'}>
+        <Tooltip title={'Retrieve a CSV summary of target(s) visibility transitions'}>
             <Button
                 sx={{ height: '36px', width: '200px', margin: '6px', marginTop: 'auto' }}
                 onClick={handleDownload}
                 variant='contained'
             >
-                Download Table
+                Get Transition Chart 
             </Button>
         </Tooltip>
     )
