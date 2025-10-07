@@ -103,7 +103,7 @@ export const SkyChartDataSummary = (props: Props) => {
             let notVisibleTransitionIdx: number[] = []
             //loop through visibility array and find transitions
 
-            for (let idx = 1; idx < tv.visibility.length; idx++) {
+            for (let idx = 1; idx < tv.visibility.length-1; idx++) {
                 const sv = tv.visibility[idx]
                 const lastSV = tv.visibility[idx - 1]
                 //check if transitioning
@@ -126,11 +126,12 @@ export const SkyChartDataSummary = (props: Props) => {
             })
 
             fineVisibleTransitionTimes.forEach(t => {
+                console.log('visible transition time: ', t)
                 const azAlt = util.ra_dec_to_az_alt(tv.ra_deg, tv.dec_deg, t, lngLatEl)
                 const observable = alt_az_observable(azAlt[1], azAlt[0], geoModel)
                 let row = {
                     target_name,
-                    datetime: t.toISOString(),
+                    datetime: t,
                     airmass: util.air_mass(90 - azAlt[1]),
                     altitude: azAlt[1],
                     azimuth: azAlt[0],
@@ -141,11 +142,12 @@ export const SkyChartDataSummary = (props: Props) => {
             })
 
             fineNotVisibleTransitionTimes.forEach(t => {
+                console.log('not visible transition time: ', t)
                 const azAlt = util.ra_dec_to_az_alt(tv.ra_deg, tv.dec_deg, t, lngLatEl)
                 const observable = alt_az_observable(azAlt[1], azAlt[0], geoModel)
                 let row = {
                     target_name,
-                    datetime: t.toISOString(),
+                    datetime: t,
                     airmass: util.air_mass(90 - azAlt[1]),
                     altitude: azAlt[1],
                     azimuth: azAlt[0],
@@ -155,21 +157,8 @@ export const SkyChartDataSummary = (props: Props) => {
                 rows.push(row)
             })
 
-            // display table of values at each time step
-            // tv.visibility.forEach(sv => {
-            //     let row = {
-            //         target_name,
-            //         datetime: sv.datetime.toISOString(),
-            //         airmass: sv.air_mass,
-            //         altitude: sv.alt,
-            //         azimuth: sv.az,
-            //         observable: sv.observable,
-            //         reasons: sv.reasons.join(', ')
-            //     }
-            //     rows.push(row)
-            // })
         })
-        return rows
+        return rows.sort((a, b) => (a.datetime > b.datetime) ? 1 : ((b.datetime > a.datetime) ? -1 : 0))
     }
 
     const handleDownload = () => {
