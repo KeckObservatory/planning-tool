@@ -64,21 +64,19 @@ const generate_times = (startTime: Date, endTime: Date, stepSize: number) => {
 }
 
 const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoModel: GeoModel,
-    startTime: Date, endTime: Date, observable: boolean, minStep = 1) => {
+    startTime: Date, endTime: Date, minStep = 1) => {
     const times = generate_times(startTime, endTime, minStep)
     console.log('finding transition time between ', startTime, ' and ', endTime, times)
     const altAz = util.ra_dec_to_az_alt(ra, dec, startTime, lngLatEl)
     const startObs = alt_az_observable( altAz[1], altAz[0], geoModel).observable
-    for (let idx=1; idx < times.length; idx++) {
-        const t = times[idx]
-        const altAz = util.ra_dec_to_az_alt(ra, dec, t, lngLatEl)
+    for (let idx=1; idx < times.length-1; idx++) {
+        const altAz = util.ra_dec_to_az_alt(ra, dec, times[idx], lngLatEl)
         const obs = alt_az_observable(altAz[1], altAz[0], geoModel)
-        if (obs.observable !== startObs) {
-            return observable ? times[idx-1] : t
+        if (obs.observable !== startObs) { //transitioned
+            return startObs ? times[idx-1] : times[idx]
         }
     }
-    console.error('should not reach here!')
-    return (observable ? endTime : startTime)
+    throw new Error('transition not found. should not reach here!')
 }
 
 const find_fine_transition_time = (tv: TargetView, vIdx: number, observable: boolean, lngLatEl: LngLatEl, geoModel: GeoModel) => {
@@ -88,7 +86,7 @@ const find_fine_transition_time = (tv: TargetView, vIdx: number, observable: boo
     const endTime = visibleTime > nonVisibleTime ? visibleTime : nonVisibleTime
     //find transition time
     const transitionTime = find_transition_time(tv.ra_deg, tv.dec_deg, lngLatEl, geoModel,
-        startTime, endTime, observable)
+        startTime, endTime)
     return transitionTime
 }
 
