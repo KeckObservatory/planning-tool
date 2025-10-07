@@ -68,14 +68,15 @@ const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoMo
     const times = generate_times(startTime, endTime, minStep)
     console.log('finding transition time between ', startTime, ' and ', endTime, times)
     const altAz = util.ra_dec_to_az_alt(ra, dec, startTime, lngLatEl)
-    const startObs = alt_az_observable( altAz[1], altAz[0], geoModel).observable
+    const startObservable = alt_az_observable( altAz[1], altAz[0], geoModel).observable
     for (let idx=1; idx < times.length-1; idx++) {
         const altAz = util.ra_dec_to_az_alt(ra, dec, times[idx], lngLatEl)
         const obs = alt_az_observable(altAz[1], altAz[0], geoModel)
-        if (obs.observable !== startObs) { //transitioned
-            return startObs ? times[idx-1] : times[idx]
+        if (obs.observable !== startObservable) { //transitioned
+            return startObservable ? times[idx-1] : times[idx]
         }
     }
+    console.log('no transition found between ', startTime, ' and ', endTime, 'startObservable: ', startObservable)
     throw new Error('transition not found. should not reach here!')
 }
 
@@ -103,8 +104,7 @@ export const SkyChartDataSummary = (props: Props) => {
             const target_name = tv.target_name
 
             //get transition times 
-            let visibleTransitionIdx: number[] = []
-            let notVisibleTransitionIdx: number[] = []
+            let transitionTimesIdx: number[] = []
             //loop through visibility array and find transitions
 
             for (let idx = 1; idx < tv.visibility.length-1; idx++) {
@@ -114,25 +114,30 @@ export const SkyChartDataSummary = (props: Props) => {
                 //check if transitioning
                 if (!sv.observable && nextSV.observable) {
                     // transitioning from not visible to visible
-                    visibleTransitionIdx.push(idx+1)
+                    transitionTimesIdx.push(idx+1)
                 } 
                 if (sv.observable && !lastSV.observable) {
                     // transitioning from visible to not visible
-                    notVisibleTransitionIdx.push(idx-1)
+                    transitionTimesIdx.push(idx-1)
                 }
             }
 
             //loop through transition times and find more precise times
-            const fineVisibleTransitionTimes: Date[] = visibleTransitionIdx.map((vIdx) => {
-                return find_fine_transition_time(tv, vIdx, lngLatEl, geoModel)
+            const fineTransitionTimes: Date[] = []
+            transitionTimesIdx.forEach((vIdx) => {
+                try {
+                    console.log('finding fine transition time for ', tv.target_name, ' at idx ', vIdx)
+                    const ftt = find_fine_transition_time(tv, vIdx, lngLatEl, geoModel)
+                    fineTransitionTimes.push(ftt)
+                }
+                catch (e) {
+                    console.error('error finding fine transition time for ', tv.target_name, ' at idx ', vIdx, e)
+                }
             })
 
-            const fineNotVisibleTransitionTimes: Date[] = notVisibleTransitionIdx.map((vIdx) => {
-                return find_fine_transition_time(tv, vIdx, lngLatEl, geoModel)
-            })
 
-            fineVisibleTransitionTimes.forEach(t => {
-                console.log('visible transition time: ', t)
+            fineTransitionTimes.forEach(t => {
+                console.log('transition time: ', t)
                 const azAlt = util.ra_dec_to_az_alt(tv.ra_deg, tv.dec_deg, t, lngLatEl)
                 const observable = alt_az_observable(azAlt[1], azAlt[0], geoModel)
                 let row = {
@@ -146,23 +151,6 @@ export const SkyChartDataSummary = (props: Props) => {
                 }
                 rows.push(row)
             })
-
-            fineNotVisibleTransitionTimes.forEach(t => {
-                console.log('not visible transition time: ', t)
-                const azAlt = util.ra_dec_to_az_alt(tv.ra_deg, tv.dec_deg, t, lngLatEl)
-                const observable = alt_az_observable(azAlt[1], azAlt[0], geoModel)
-                let row = {
-                    target_name,
-                    datetime: t,
-                    airmass: util.air_mass(azAlt[1], lngLatEl.el),
-                    altitude: azAlt[1],
-                    azimuth: azAlt[0],
-                    observable: observable.observable,
-                    reasons: observable.reasons.join(', ')
-                }
-                rows.push(row)
-            })
-
         })
         return rows.sort((a, b) => (a.datetime > b.datetime) ? 1 : ((b.datetime > a.datetime) ? -1 : 0))
     }
