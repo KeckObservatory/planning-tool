@@ -129,8 +129,10 @@ export const SkyChartDataSummary = (props: Props) => {
             })
 
 
-            fineTransitionTimes.forEach(t => {
+            fineTransitionTimes.forEach((t, idx) => {
                 console.log('transition time: ', t)
+                const vidx = transitionTimesIdx[idx]
+                const prevPoint = tv.visibility[vidx - 1]
                 const azAlt = util.ra_dec_to_az_alt(tv.ra_deg, tv.dec_deg, t, lngLatEl)
                 const observable = alt_az_observable(azAlt[1], azAlt[0], geoModel)
                 let row = {
@@ -140,7 +142,7 @@ export const SkyChartDataSummary = (props: Props) => {
                     altitude: azAlt[1],
                     azimuth: azAlt[0],
                     observable: observable.observable,
-                    status: observable ? 'rising': 'setting',
+                    status: prevPoint.observable ? 'setting': 'rising',
                     reasons: observable.reasons.join(', ')
                 }
                 rows.push(row)
