@@ -64,7 +64,7 @@ const generate_times = (startTime: Date, endTime: Date, stepSize: number) => {
 }
 
 const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoModel: GeoModel,
-    startTime: Date, endTime: Date, minStep = .5) => {
+    startTime: Date, endTime: Date, minStep = 1) => {
     const times = generate_times(startTime, endTime, minStep)
     console.log('finding transition time between ', startTime, ' and ', endTime, times)
     const altAz = util.ra_dec_to_az_alt(ra, dec, startTime, lngLatEl)
@@ -107,14 +107,13 @@ export const SkyChartDataSummary = (props: Props) => {
             let transitionTimesIdx: number[] = []
             //loop through visibility array and find transitions
 
-            for (let idx = 1; idx < tv.visibility.length - 1; idx++) {
+            for (let idx = 1; idx < tv.visibility.length; idx++) {
                 const sv = tv.visibility[idx]
                 const lastSV = tv.visibility[idx - 1]
-                const nextSV = tv.visibility[idx + 1]
                 //check if transitioning
-                if (!sv.observable && nextSV.observable) {
+                if (!sv.observable && lastSV.observable) {
                     // transitioning from not visible to visible
-                    transitionTimesIdx.push(idx + 1)
+                    transitionTimesIdx.push(idx)
                 }
                 if (sv.observable && !lastSV.observable) {
                     // transitioning from visible to not visible
@@ -141,6 +140,7 @@ export const SkyChartDataSummary = (props: Props) => {
                     altitude: azAlt[1],
                     azimuth: azAlt[0],
                     observable: observable.observable,
+                    status: observable ? 'rising': 'setting',
                     reasons: observable.reasons.join(', ')
                 }
                 rows.push(row)
