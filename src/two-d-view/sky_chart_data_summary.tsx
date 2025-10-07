@@ -53,7 +53,7 @@ interface Props {
 }
 
 
-const generate_times = (startTime: Date, endTime: Date, stepSize = 60000) => {
+const generate_times = (startTime: Date, endTime: Date, stepSize: number) => {
     const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60)
     const nLen = Math.floor(totalMinutes / stepSize) + 1
     const deltaTimes = Array.from({ length: nLen }, (_, idx) => startTime.getTime() + stepSize * idx)
@@ -63,7 +63,7 @@ const generate_times = (startTime: Date, endTime: Date, stepSize = 60000) => {
 }
 
 const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoModel: GeoModel,
-    startTime: Date, endTime: Date, observable: boolean, minStep = 60000) => {
+    startTime: Date, endTime: Date, observable: boolean, minStep = 1) => {
     const times = generate_times(startTime, endTime, minStep)
     for (let t of times) {
         const altAz = util.ra_dec_to_az_alt(ra, dec, t, lngLatEl)
@@ -134,7 +134,7 @@ export const SkyChartDataSummary = (props: Props) => {
                 let row = {
                     target_name,
                     datetime: t,
-                    airmass: util.air_mass(90 - azAlt[1]),
+                    airmass: util.air_mass(azAlt[1], lngLatEl.el),
                     altitude: azAlt[1],
                     azimuth: azAlt[0],
                     observable: observable.observable,
