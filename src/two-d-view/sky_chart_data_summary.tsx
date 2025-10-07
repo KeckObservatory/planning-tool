@@ -57,7 +57,6 @@ const generate_times = (startTime: Date, endTime: Date, stepSize: number) => {
     const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60)
     const nLen = Math.floor(totalMinutes / stepSize) + 1
     const deltaTimes = Array.from({ length: nLen }, (_, idx) => stepSize * idx)
-    console.log('generated delta times: ', deltaTimes)
     return deltaTimes.map((minutes: number) => {
         return util.add_hours(startTime, minutes / 60)
     })
@@ -66,7 +65,6 @@ const generate_times = (startTime: Date, endTime: Date, stepSize: number) => {
 const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoModel: GeoModel,
     startTime: Date, endTime: Date, minStep = 1) => {
     const times = generate_times(startTime, endTime, minStep)
-    console.log('finding transition in times', times)
     const altAz = util.ra_dec_to_az_alt(ra, dec, startTime, lngLatEl)
     const startObservable = alt_az_observable(altAz[1], altAz[0], geoModel).observable
     for (let idx = 1; idx < times.length - 1; idx++) {
@@ -76,20 +74,13 @@ const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoMo
             return startObservable ? times[idx - 1] : times[idx]
         }
     }
-    console.log('no transition found between ', startTime, ' and ', endTime, 'using: ', startObservable ? startTime : endTime)
     return startObservable ? startTime : endTime
 }
 
 const find_fine_transition_time = (tv: TargetView, vIdx: number, lngLatEl: LngLatEl, geoModel: GeoModel) => {
-    // const visibleTime = tv.visibility[vIdx].datetime
-    // const nonVisibleTime = !tv.visibility[vIdx].observable ? tv.visibility[vIdx + 1].datetime : tv.visibility[vIdx - 1].datetime
-    // const startTime = visibleTime < nonVisibleTime ? visibleTime : nonVisibleTime
-    // const endTime = visibleTime > nonVisibleTime ? visibleTime : nonVisibleTime
-
     const [start, end] = !tv.visibility[vIdx].observable ? 
     [tv.visibility[vIdx].datetime, tv.visibility[vIdx - 1].datetime] : 
     [tv.visibility[vIdx - 1].datetime, tv.visibility[vIdx].datetime]
-    console.log('finding fine transition time between ', start, ' and ', end)
     //find transition time
     const transitionTime = find_transition_time(tv.ra_deg, tv.dec_deg, lngLatEl, geoModel, start, end)
     return transitionTime
@@ -130,7 +121,6 @@ export const SkyChartDataSummary = (props: Props) => {
 
 
             fineTransitionTimes.forEach((t, idx) => {
-                console.log('transition time: ', t)
                 const vidx = transitionTimesIdx[idx]
                 const prevPoint = tv.visibility[vidx - 1]
                 const azAlt = util.ra_dec_to_az_alt(tv.ra_deg, tv.dec_deg, t, lngLatEl)
@@ -141,7 +131,6 @@ export const SkyChartDataSummary = (props: Props) => {
                     airmass: util.air_mass(azAlt[1], lngLatEl.el),
                     altitude: azAlt[1],
                     azimuth: azAlt[0],
-                    observable: observable.observable,
                     status: prevPoint.observable ? 'setting': 'rising',
                     reasons: observable.reasons.join(', ')
                 }
