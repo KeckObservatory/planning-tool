@@ -151,7 +151,7 @@ export const SkyChartDataSummary = (props: Props) => {
                 onClick={handleDownload}
                 variant='contained'
             >
-                Get Transition Chart 
+                Transition CSV
             </Button>
         </Tooltip>
     )
