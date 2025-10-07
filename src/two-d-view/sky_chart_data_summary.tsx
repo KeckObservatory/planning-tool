@@ -112,7 +112,7 @@ export const SkyChartDataSummary = (props: Props) => {
                     // transitioning from not visible to visible
                     visibleTransitionIdx.push(idx+1)
                 } 
-                if (lastSV.observable && !sv.observable) {
+                if (sv.observable && !lastSV.observable) {
                     // transitioning from visible to not visible
                     notVisibleTransitionIdx.push(idx-1)
                 }
@@ -124,7 +124,7 @@ export const SkyChartDataSummary = (props: Props) => {
             })
 
             const fineNotVisibleTransitionTimes: Date[] = notVisibleTransitionIdx.map((vIdx) => {
-                return find_fine_transition_time(tv, vIdx, false, lngLatEl, geoModel)
+                return find_fine_transition_time(tv, vIdx, true, lngLatEl, geoModel)
             })
 
             fineVisibleTransitionTimes.forEach(t => {
