@@ -336,7 +336,7 @@ export const SkyChart = (props: Props) => {
                 doubleClick: chartType.includes('Airmass') ? false : 'reset+autosize',
                 showTips: true,
                 displayModeBar: true,
-                modeBarButtonsToRemove: chartType.includes('Airmass') ? ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'] : []
+                modeBarButtonsToRemove: chartType.includes('Airmass') ? ['zoom2d', 'zoomIn2d', 'zoomOut2d' ] : []
             }}
             onUpdate={debounced_elevation_axis_draw}
             onInitialized={debounced_elevation_axis_draw}
