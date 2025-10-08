@@ -235,9 +235,9 @@ export const SkyChart = (props: Props) => {
         });
     }, [chartType, dome, targetView, time, showLimits, suncalcTimes])
 
-    useEffect(() => {
-        debounced_elevation_axis_draw();
-    }, [plotRef.current])
+    // useEffect(() => {
+    //     debounced_elevation_axis_draw();
+    // }, [plotRef.current ])
 
     let traces: Plotly.Data[] = []
     const lngLatEl = context.config.tel_lat_lng_el[dome]
@@ -264,15 +264,15 @@ export const SkyChart = (props: Props) => {
     })
 
     // add elevation axis for airmass charts only
-    if (chartType.includes('Airmass') && targetView.length > 0) {
-        const data = generateData(targetView[0], 'Elevation', context.config.date_time_format, lngLatEl, 0)
-        const newTrace = make_trace(data, 'Elevation axis for airmass', '#00000000')
-        //@ts-ignore
-        newTrace.yaxis = 'y2'
-        //@ts-ignore
-        newTrace.showlegend = false
-        traces.push(newTrace)
-    }
+    // if (chartType.includes('Airmass') && targetView.length > 0) {
+    //     const data = generateData(targetView[0], 'Elevation', context.config.date_time_format, lngLatEl, 0)
+    //     const newTrace = make_trace(data, 'Elevation axis for airmass', '#00000000')
+    //     //@ts-ignore
+    //     newTrace.yaxis = 'y2'
+    //     //@ts-ignore
+    //     newTrace.showlegend = false
+    //     traces.push(newTrace)
+    // }
 
     //get curr marker
     let maxAirmass = 10;
@@ -287,48 +287,49 @@ export const SkyChart = (props: Props) => {
         }
     }
 
-    const debounced_elevation_axis_draw = useDebounceCallback(
-        () => {
-            console.log('debounced_elevation_axis_draw called')
-            if (plotRef.current && chartType.includes('Airmass')) {
-                // Get the tickvals and ticktext from yaxis
-                const plotlyFigure = plotRef.current;
-                const leftTicks = plotlyFigure.props.layout.yaxis.tickvals as number[];
+    // TODO: until y2 axis is working properly, disable for now
+    // const debounced_elevation_axis_draw = useDebounceCallback(
+    //     () => {
+    //         console.log('debounced_elevation_axis_draw called')
+    //         if (plotRef.current && chartType.includes('Airmass')) {
+    //             // Get the tickvals and ticktext from yaxis
+    //             const plotlyFigure = plotRef.current;
+    //             const leftTicks = plotlyFigure.props.layout.yaxis.tickvals as number[];
 
-                // If not set, try to get from the actual plotly instance
-                // (Plotly stores the latest tickvals in the fullLayout)
-                const gd = plotlyFigure?.el;
-                let otickvals = leftTicks;
-                if (gd && gd._fullLayout?.yaxis._vals) {
-                    otickvals = gd._fullLayout.yaxis._vals.map((val: any) => {
-                        return val.x
-                    });
-                }
+    //             // If not set, try to get from the actual plotly instance
+    //             // (Plotly stores the latest tickvals in the fullLayout)
+    //             const gd = plotlyFigure?.el;
+    //             let otickvals = leftTicks;
+    //             if (gd && gd._fullLayout?.yaxis._vals) {
+    //                 otickvals = gd._fullLayout.yaxis._vals.map((val: any) => {
+    //                     return val.x
+    //                 });
+    //             }
 
-                const tickvals = otickvals.map(val => util.alt_from_air_mass(val));
-                const ticktext = tickvals.map(val => val.toFixed(1));
-                // 3. Update yaxis2 to match yaxis
-                const newY2Axis = {
-                    ...state.y2Axis,
-                    tickvals: otickvals,
-                    ticktext: ticktext,
-                    position: 0.95, // Adjust position to the right side
-                };
+    //             const tickvals = otickvals.map(val => util.alt_from_air_mass(val));
+    //             const ticktext = tickvals.map(val => val.toFixed(1));
+    //             // 3. Update yaxis2 to match yaxis
+    //             const newY2Axis = {
+    //                 ...state.y2Axis,
+    //                 tickvals: otickvals,
+    //                 ticktext: ticktext,
+    //                 position: 0.95, // Adjust position to the right side
+    //             };
 
-                if (tickvals) {
-                    // Update the layout directly, otherwise it affects the other chart types for some unknown reason
-                    console.log('updating y2 axis to', newY2Axis)
-                    plotlyFigure.props.layout.yaxis2 = newY2Axis; 
-                    // Also update state so that it is not lost on next re-render
-                    // setState(
-                    //     (oldState) => {
-                    //         return { ...oldState, y2Axis: newY2Axis }
-                    //     }
-                    // );
-                }
-            }
-        }
-        , 100)
+    //             if (tickvals) {
+    //                 // Update the layout directly, otherwise it affects the other chart types for some unknown reason
+    //                 console.log('updating y2 axis to', newY2Axis)
+    //                 plotlyFigure.props.layout.yaxis2 = newY2Axis; 
+    //                 // Also update state so that it is not lost on next re-render
+    //                 // setState(
+    //                 //     (oldState) => {
+    //                 //         return { ...oldState, y2Axis: newY2Axis }
+    //                 //     }
+    //                 // );
+    //             }
+    //         }
+    //     }
+    //     , 100)
 
     return (
         <Plot
@@ -337,13 +338,13 @@ export const SkyChart = (props: Props) => {
             layout={{
                 ...state.layout,
             }}
-            config={{
-                scrollZoom: !chartType.includes('Airmass'),
-                doubleClick: chartType.includes('Airmass') ? false : 'reset+autosize',
-                showTips: true,
-                displayModeBar: true,
-                modeBarButtonsToRemove: chartType.includes('Airmass') ? ['zoom2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d' ] : []
-            }}
+            // config={{
+            //     scrollZoom: !chartType.includes('Airmass'),
+            //     doubleClick: chartType.includes('Airmass') ? false : 'reset+autosize',
+            //     showTips: true,
+            //     displayModeBar: true,
+            //     modeBarButtonsToRemove: chartType.includes('Airmass') ? ['zoom2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d' ] : []
+            // }}
             // onUpdate={debounced_elevation_axis_draw}
             // onInitialized={debounced_elevation_axis_draw}
         />
