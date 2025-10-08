@@ -332,8 +332,8 @@ export const SkyChart = (props: Props) => {
                 ...state.layout,
             }}
             config={{
-                scrollZoom: !chartType.includes('Airmass'),
-                doubleClick: chartType.includes('Airmass') ? false : 'reset+autosize',
+                // scrollZoom: !chartType.includes('Airmass'),
+                // doubleClick: chartType.includes('Airmass') ? false : 'reset+autosize',
                 showTips: true,
                 displayModeBar: true,
                 modeBarButtonsToRemove: chartType.includes('Airmass') ? ['zoom2d', 'zoomIn2d', 'zoomOut2d' ] : []
