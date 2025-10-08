@@ -63,16 +63,16 @@ function SemidDialog(props: SemidDialogProps) {
             <DialogTitle>Semid Assignment</DialogTitle>
             <DialogContent dividers>
                 <Stack direction="column" spacing={2} sx={{ width: 500, maxWidth: '100%' }}>
-                <ProgramChipsInput
-                    semids={semids}
-                    onChange={(value) => handleArrayChange(value)}
-                />
-                <Button onClick={() => {
-                    handleSubmit();
-                    handleClose();
-                }}>
-                    Submit
-                </Button>
+                    <ProgramChipsInput
+                        semids={semids}
+                        onChange={(value) => handleArrayChange(value)}
+                    />
+                    <Button onClick={() => {
+                        handleSubmit();
+                        handleClose();
+                    }}>
+                        Submit
+                    </Button>
                 </Stack>
             </DialogContent>
         </Dialog>
@@ -93,9 +93,12 @@ export default function SemidDialogButton(props: Props) {
 
     return (
         <>
-            <Tooltip title="Assign semid(s) to selected targets. Targets with these semids will be visible to other users who share these semids.">
+            <Tooltip
+                placement='top'
+                title="Assign semid(s) to selected targets. Targets with these semids will be visible to other users who share these semids."
+            >
                 <Button color="primary" disabled={props.targets.length === 0} onClick={handleClickOpen}>
-                    Assign Semid(s) 
+                    Assign Semid(s)
                 </Button>
             </Tooltip>
             <SemidDialog
