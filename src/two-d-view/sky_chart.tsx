@@ -235,6 +235,10 @@ export const SkyChart = (props: Props) => {
         });
     }, [chartType, dome, targetView, time, showLimits, suncalcTimes])
 
+    useEffect(() => {
+        debounced_elevation_axis_draw();
+    }, [plotRef.current])
+
     let traces: Plotly.Data[] = []
     const lngLatEl = context.config.tel_lat_lng_el[dome]
     let deckBlocking = false
@@ -313,14 +317,14 @@ export const SkyChart = (props: Props) => {
 
                 if (tickvals) {
                     // Update the layout directly, otherwise it affects the other chart types for some unknown reason
+                    console.log('updating y2 axis to', newY2Axis)
                     plotlyFigure.props.layout.yaxis2 = newY2Axis; 
                     // Also update state so that it is not lost on next re-render
-                    console.log('updating y2 axis to', newY2Axis)
-                    setState(
-                        (oldState) => {
-                            return { ...oldState, y2Axis: newY2Axis }
-                        }
-                    );
+                    // setState(
+                    //     (oldState) => {
+                    //         return { ...oldState, y2Axis: newY2Axis }
+                    //     }
+                    // );
                 }
             }
         }
@@ -340,8 +344,8 @@ export const SkyChart = (props: Props) => {
                 displayModeBar: true,
                 modeBarButtonsToRemove: chartType.includes('Airmass') ? ['zoom2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d' ] : []
             }}
-            onUpdate={debounced_elevation_axis_draw}
-            onInitialized={debounced_elevation_axis_draw}
+            // onUpdate={debounced_elevation_axis_draw}
+            // onInitialized={debounced_elevation_axis_draw}
         />
     )
 }
