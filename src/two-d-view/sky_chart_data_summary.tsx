@@ -136,7 +136,7 @@ export const SkyChartDataSummary = (props: Props) => {
         })
         rows.sort((a, b) => (a["Target Name"] === b["Target Name"]) ? 1 : ((b["Target Name"] === a["Target Name"]) ? -1 : 0))
         rows.sort((a, b) => (a["Datetime (UTC)"] > b["Datetime (UTC)"]) ? 1 : ((b["Datetime (UTC)"] > a["Datetime (UTC)"]) ? -1 : 0))
-        rows = rows.map(r => ({ ...r, "Datetime (UTC)": r["Datetime (UTC)"].toUTCString().replace('T', ' ').split('.')[0] })) //remove ms
+        rows = rows.map(r => ({ ...r, "Datetime (UTC)": r["Datetime (UTC)"].toISOString().replace('T', ' ').split('.')[0] })) //remove ms
         return rows
     }
 
