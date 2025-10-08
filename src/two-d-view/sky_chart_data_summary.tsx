@@ -125,16 +125,18 @@ export const SkyChartDataSummary = (props: Props) => {
                 const prevPoint = tv.visibility[vidx - 1]
                 let status = prevPoint.observable ? 'occluding' : 'emerging'
                 status += prevPoint.reasons ? ` (${prevPoint.reasons.join(', ')})` : ''
-                const datetime = t.toUTCString().replace('T', ' ').split('.')[0] //remove ms
                 let row = {
-                    target_name,
-                    datetime,
-                    status,
+                    "Target Name": target_name,
+                    "Datetime (UTC)": t,
+                    "Status": status,
                 }
                 rows.push(row)
             })
         })
-        return rows.sort((a, b) => (a.datetime > b.datetime) ? 1 : ((b.datetime > a.datetime) ? -1 : 0))
+        rows.sort((a, b) => (a["Target Name"] === b["Target Name"]) ? 1 : ((b["Target Name"] === a["Target Name"]) ? -1 : 0))
+        rows.sort((a, b) => (a["Datetime (UTC)"] > b["Datetime (UTC)"]) ? 1 : ((b["Datetime (UTC)"] > a["Datetime (UTC)"]) ? -1 : 0))
+        rows = rows.map(r => ({ ...r, "Datetime (UTC)": r["Datetime (UTC)"].toUTCString().replace('T', ' ').split('.')[0] })) //remove ms
+        return rows
     }
 
     const handleDownload = () => {
