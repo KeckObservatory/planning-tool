@@ -123,14 +123,13 @@ export const SkyChartDataSummary = (props: Props) => {
             fineTransitionTimes.forEach((t, idx) => {
                 const vidx = transitionTimesIdx[idx]
                 const prevPoint = tv.visibility[vidx - 1]
-                const azAlt = util.ra_dec_to_az_alt(tv.ra_deg, tv.dec_deg, t, lngLatEl)
+                let status = prevPoint.observable ? 'occluding' : 'emerging'
+                status += prevPoint.reasons ? ` (${prevPoint.reasons.join(', ')})` : ''
+                const datetime = t.toUTCString().replace('T', ' ').split('.')[0] //remove ms
                 let row = {
                     target_name,
-                    datetime: t,
-                    airmass: util.air_mass(azAlt[1], lngLatEl.el),
-                    altitude: azAlt[1],
-                    azimuth: azAlt[0],
-                    status: prevPoint.observable ? 'occluding': 'emerging',
+                    datetime,
+                    status,
                 }
                 rows.push(row)
             })
