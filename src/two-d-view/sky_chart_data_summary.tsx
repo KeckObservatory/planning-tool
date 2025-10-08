@@ -81,9 +81,7 @@ const find_transition_time = (ra: number, dec: number, lngLatEl: LngLatEl, geoMo
 }
 
 const find_fine_transition_time = (tv: TargetView, vIdx: number, lngLatEl: LngLatEl, geoModel: GeoModel) => {
-    const [start, end] = !tv.visibility[vIdx].observable ? 
-    [tv.visibility[vIdx].datetime, tv.visibility[vIdx - 1].datetime] : 
-    [tv.visibility[vIdx].datetime, tv.visibility[vIdx - 1].datetime]
+    const [end, start] = [tv.visibility[vIdx].datetime, tv.visibility[vIdx - 1].datetime] 
     //find transition time
     console.log('finding fine transition time between', start, end, 'for ', tv.target_name)
     const transitionTime = find_transition_time(tv.ra_deg, tv.dec_deg, lngLatEl, geoModel, start, end)
