@@ -235,6 +235,10 @@ export const SkyChart = (props: Props) => {
         });
     }, [chartType, dome, targetView, time, showLimits, suncalcTimes])
 
+    useEffect(() => {
+        debounced_elevation_axis_draw();
+    }, [])
+
     let traces: Plotly.Data[] = []
     const lngLatEl = context.config.tel_lat_lng_el[dome]
     let deckBlocking = false
@@ -332,11 +336,11 @@ export const SkyChart = (props: Props) => {
                 ...state.layout,
             }}
             config={{
-                // scrollZoom: !chartType.includes('Airmass'),
-                // doubleClick: chartType.includes('Airmass') ? false : 'reset+autosize',
+                scrollZoom: !chartType.includes('Airmass'),
+                doubleClick: chartType.includes('Airmass') ? false : 'reset+autosize',
                 showTips: true,
                 displayModeBar: true,
-                modeBarButtonsToRemove: chartType.includes('Airmass') ? ['zoom2d', 'zoomIn2d', 'zoomOut2d' ] : []
+                modeBarButtonsToRemove: chartType.includes('Airmass') ? ['zoom2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'] : []
             }}
             onUpdate={debounced_elevation_axis_draw}
             onInitialized={debounced_elevation_axis_draw}
