@@ -124,7 +124,8 @@ export const SkyChartDataSummary = (props: Props) => {
                 const vidx = transitionTimesIdx[idx]
                 const prevPoint = tv.visibility[vidx - 1]
                 let status = prevPoint.observable ? 'occluding' : 'emerging'
-                status += prevPoint.reasons ? ` (${prevPoint.reasons.join(', ')})` : ''
+                let reason = status === 'occluding' ? tv.visibility[vidx].reasons.join(', ') : prevPoint.reasons.join(', ')
+                status += reason ? ` (${reason})` : ''
                 let row = {
                     "Target Name": target_name,
                     "Datetime (UTC)": t,
