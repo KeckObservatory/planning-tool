@@ -4,7 +4,7 @@ import Slider from "@mui/material/Slider";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { TIMEZONE } from "./constants";
+import { config } from "../config";
 
 
 dayjs.extend(timezone);
@@ -14,7 +14,7 @@ interface Props {
     times: Date[]
     time: Date
     setTime: Function
-} 
+}
 
 const TimeSlider = (props: Props) => {
 
@@ -38,7 +38,7 @@ const TimeSlider = (props: Props) => {
         <Box sx={{
             height: "40px",
         }} padding={0}>
-            <FormLabel id="hour-offset-from-now-label">{`HT: ${dayjs(props.time).tz(TIMEZONE, false).format('HH:mm')}, UTC: ${dayjs(props.time).utc().format('HH:mm')}`}</FormLabel>
+            <FormLabel id="hour-offset-from-now-label">{`HT: ${dayjs(props.time).tz(config.TIMEZONE, false).format('HH:mm')}, UTC: ${dayjs(props.time).utc().format('HH:mm')}`}</FormLabel>
             <Slider
                 aria-label="Hours from now"
                 onChange={handleHourOffsetChange}
