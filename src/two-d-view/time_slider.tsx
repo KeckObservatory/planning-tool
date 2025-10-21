@@ -38,7 +38,7 @@ const TimeSlider = (props: Props) => {
         <Box sx={{
             height: "40px",
         }} padding={0}>
-            <FormLabel id="hour-offset-from-now-label">{`HT: ${dayjs(props.time).tz(config.TIMEZONE, false).format('HH:mm')}, UTC: ${dayjs(props.time).utc().format('HH:mm')}`}</FormLabel>
+            <FormLabel id="hour-offset-from-now-label">{`HT: ${dayjs(props.time).tz(config.timezone, false).format('HH:mm')}, UTC: ${dayjs(props.time).utc().format('HH:mm')}`}</FormLabel>
             <Slider
                 aria-label="Hours from now"
                 onChange={handleHourOffsetChange}
