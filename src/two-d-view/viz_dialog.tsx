@@ -34,6 +34,8 @@ export interface DayViz extends GetTimesResult {
     date: Date,
     visibility: VizRow[]
     visible_hours: number
+    civilDawn: Date, // Sun in 6 degrees below the horizon
+    civilDusk: Date, // Sun in 6 degrees below the horizon
     amateurDawn: Date, // Sun in 12 degrees below the horizon
     amateurDusk: Date, // Sun in 12 degrees below the horizon
     astronomicalDawn: Date, // Sun is 18 degrees below the horizon

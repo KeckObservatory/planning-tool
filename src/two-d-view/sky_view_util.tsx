@@ -110,6 +110,7 @@ export const get_suncalc_times = (lngLatEl: LngLatEl, date?: Date) => {
     if (!date) {
         date = new Date()
     }
+    SunCalc.addTime(-6, 'civilDawn', 'civilDusk')
     SunCalc.addTime(-12, 'amateurDawn', 'amateurDusk')
     SunCalc.addTime(-18, 'astronomicalDawn', 'astronomicalDusk')
     let times = SunCalc.getTimes(date, lngLatEl.lat, lngLatEl.lng) as DayViz
@@ -122,12 +123,13 @@ export const get_suncalc_times = (lngLatEl: LngLatEl, date?: Date) => {
     times.sunrise = nextdaytimes.sunrise
     times.sunriseEnd = nextdaytimes.sunriseEnd
 
+    times.civilDawn = nextdaytimes.civilDawn
     times.amateurDawn = nextdaytimes.amateurDawn
-    times.nadir = nextdaytimes.nadir
     times.astronomicalDawn = nextdaytimes.astronomicalDawn
+    times.nauticalDawn = nextdaytimes.nauticalDawn
+    times.nadir = nextdaytimes.nadir
     times.nightEnd = nextdaytimes.nightEnd
     times.dawn = nextdaytimes.dawn
-    times.nauticalDawn = nextdaytimes.nauticalDawn
     times.goldenHourEnd = nextdaytimes.goldenHourEnd
     return times
 }
@@ -281,7 +283,7 @@ export const get_shapes = (suncalcTimes: DayViz,
             type: 'rect',
             xref: 'x',
             yref: 'paper',
-            x0: suncalcTimes.dusk.getTime(),
+            x0: suncalcTimes.civilDusk.getTime(),
             y0: 0,
             x1: suncalcTimes.amateurDusk.getTime(),
             y1: 1,
@@ -343,7 +345,7 @@ export const get_shapes = (suncalcTimes: DayViz,
             yref: 'paper',
             x0: suncalcTimes.amateurDawn.getTime(),
             y0: 0,
-            x1: suncalcTimes.dawn.getTime(),
+            x1: suncalcTimes.civilDawn.getTime(),
             y1: 1,
             fillcolor: TWILIGHT_SHADE,
             layer: 'below',
