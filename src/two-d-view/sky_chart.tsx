@@ -56,6 +56,8 @@ export const generateData = (tgtv: TargetView,
         chartType.includes('Lunar Angle') && (txt += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`)
         txt += `Visible for: ${tgtv.visibilitySum.toFixed(2)} hours<br>`
         txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
+        txt += tgtv.tags ? `<br>Tags: ${tgtv.tags.join(', ')}` : ''
+        txt += tgtv.comment ? `<br>Notes: ${tgtv.comment}` : ''
         const datum = viz.moon_position ? util.get_chart_datum(tgtv.ra_deg, tgtv.dec_deg, viz, chartType, lngLatEl) : null
         data.push({
             x: viz.datetime,
