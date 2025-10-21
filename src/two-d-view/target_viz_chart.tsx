@@ -216,7 +216,7 @@ export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: 
         dawn_dusk_traces.astronomical_dusk.x.push(xdate)
 
         dawn_dusk_traces.nautical_dawn.y.push(date_normalize(dayViz.nauticalDawn, true))
-        dawn_dusk_traces.dusk.y.push(date_normalize(dayViz.dusk, true))
+        dawn_dusk_traces.nautical_dusk.y.push(date_normalize(dayViz.nauticalDusk, true))
         dawn_dusk_traces.dawn.y.push(date_normalize(dayViz.dawn, true))
         dawn_dusk_traces.dusk.y.push(date_normalize(dayViz.dusk, true))
         dawn_dusk_traces.astronomical_dawn.y.push(date_normalize(dayViz.astronomicalDawn, true))
