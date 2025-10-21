@@ -27,6 +27,7 @@ export const config = {
         "ra_deg",
         "dec_deg",
         "observer_id",
+        "semids",
         "tags"
     ],
     "pinned_table_columns": {
