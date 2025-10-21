@@ -119,7 +119,7 @@ export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: 
             x: [],
             y: [],
             text: [],
-            name: 'Nautical Dusk (6 deg)',
+            name: 'Dusk (0-6 deg)',
             marker: {
                 ...trace.marker,
                 color: '#eeeeee',
@@ -129,12 +129,12 @@ export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: 
                 color: '#eeeeee',
             }
         },
-        amateur_dusk: {
+        nautical_dusk: {
             ...trace,
             x: [],
             y: [],
             text: [],
-            name: 'Amateur Dusk (12 deg)',
+            name: 'Nautical Dusk (6-12 deg)',
             marker: {
                 ...trace.marker,
                 color: '#dddddd',
@@ -149,7 +149,7 @@ export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: 
             x: [],
             y: [],
             text: [],
-            name: 'Astronomical Dusk (18 deg)',
+            name: 'Astronomical Dusk (12-18 deg)',
             marker: {
                 ...trace.marker,
                 color: '#cccccc',
@@ -164,7 +164,7 @@ export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: 
             x: [],
             y: [],
             text: [],
-            name: 'Astronomical Dawn (18 deg)',
+            name: 'Astronomical Dawn (12-18 deg)',
             marker: {
                 ...trace.marker,
                 color: '#cccccc',
@@ -174,12 +174,12 @@ export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: 
                 color: '#cccccc',
             }
         },
-        amateur_dawn: {
+        nautical_dawn: {
             ...trace,
             x: [],
             y: [],
             text: [],
-            name: 'Amateur Dawn (12 deg)',
+            name: 'Nautical Dawn (6-12 deg)',
             marker: {
                 ...trace.marker,
                 color: '#dddddd',
@@ -194,7 +194,7 @@ export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: 
             x: [],
             y: [],
             text: [],
-            name: 'Nautical Dawn (6 deg)',
+            name: 'Dawn (0-6 deg)',
             marker: {
                 ...trace.marker,
                 color: '#eeeeee',
@@ -208,26 +208,26 @@ export const create_dawn_dusk_traces = (targetViz: TargetViz, date_time_format: 
 
     targetViz.semester_visibility.forEach((dayViz: DayViz) => {
         const xdate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
-        dawn_dusk_traces.amateur_dawn.x.push(xdate)
-        dawn_dusk_traces.amateur_dusk.x.push(xdate)
+        dawn_dusk_traces.nautical_dawn.x.push(xdate)
+        dawn_dusk_traces.nautical_dusk.x.push(xdate)
         dawn_dusk_traces.dawn.x.push(xdate)
         dawn_dusk_traces.dusk.x.push(xdate)
         dawn_dusk_traces.astronomical_dawn.x.push(xdate)
         dawn_dusk_traces.astronomical_dusk.x.push(xdate)
 
-        dawn_dusk_traces.amateur_dawn.y.push(date_normalize(dayViz.amateurDawn, true))
-        dawn_dusk_traces.amateur_dusk.y.push(date_normalize(dayViz.amateurDusk, true))
+        dawn_dusk_traces.nautical_dawn.y.push(date_normalize(dayViz.nauticalDawn, true))
+        dawn_dusk_traces.dusk.y.push(date_normalize(dayViz.dusk, true))
         dawn_dusk_traces.dawn.y.push(date_normalize(dayViz.dawn, true))
         dawn_dusk_traces.dusk.y.push(date_normalize(dayViz.dusk, true))
         dawn_dusk_traces.astronomical_dawn.y.push(date_normalize(dayViz.astronomicalDawn, true))
         dawn_dusk_traces.astronomical_dusk.y.push(date_normalize(dayViz.astronomicalDusk, true))
 
-        dawn_dusk_traces.amateur_dawn.text.push(create_dawn_dusk_text(dayViz.amateurDawn, date_time_format))
-        dawn_dusk_traces.amateur_dusk.text.push(create_dawn_dusk_text(dayViz.amateurDusk, date_time_format))
-        dawn_dusk_traces.dawn.text.push(create_dawn_dusk_text(dayViz.amateurDusk, date_time_format))
-        dawn_dusk_traces.dusk.text.push(create_dawn_dusk_text(dayViz.amateurDusk, date_time_format))
-        dawn_dusk_traces.astronomical_dawn.text.push(create_dawn_dusk_text(dayViz.amateurDusk, date_time_format))
-        dawn_dusk_traces.astronomical_dusk.text.push(create_dawn_dusk_text(dayViz.amateurDusk, date_time_format))
+        dawn_dusk_traces.nautical_dawn.text.push(create_dawn_dusk_text(dayViz.nauticalDawn, date_time_format))
+        dawn_dusk_traces.nautical_dusk.text.push(create_dawn_dusk_text(dayViz.nauticalDusk, date_time_format))
+        dawn_dusk_traces.dawn.text.push(create_dawn_dusk_text(dayViz.dawn, date_time_format))
+        dawn_dusk_traces.dusk.text.push(create_dawn_dusk_text(dayViz.dusk, date_time_format))
+        dawn_dusk_traces.astronomical_dawn.text.push(create_dawn_dusk_text(dayViz.astronomicalDawn, date_time_format))
+        dawn_dusk_traces.astronomical_dusk.text.push(create_dawn_dusk_text(dayViz.astronomicalDusk, date_time_format))
     })
     return dawn_dusk_traces
 }
