@@ -3,8 +3,12 @@ import FormLabel from "@mui/material/FormLabel";
 import Slider from "@mui/material/Slider";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import { TIMEZONE } from "./constants";
 
 
+dayjs.extend(timezone);
+dayjs.tz.setDefault(TIMEZONE);
 dayjs.extend(utc);
 
 interface Props {
