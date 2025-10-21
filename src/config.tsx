@@ -9,6 +9,7 @@ export const config = {
         "g_mag",
         "pm_ra",
         "pm_dec",
+        "semids",
         "tags"
     ],
     "csv_order": [
