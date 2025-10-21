@@ -18,7 +18,8 @@ export const ProgramChipsInput = (props: props) => {
     const state = useStateContext()
 
     return (
-    <Tooltip title="Add your programs here. Other users who share these programs will be able to see and edit these targets.">
+    <Tooltip placement="left"
+    title="Add your programs here. Other users who share these programs will be able to see and edit these targets.">
         <Autocomplete
             multiple
             id="checkboxes-semids"
