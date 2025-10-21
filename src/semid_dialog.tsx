@@ -62,7 +62,7 @@ function SemidDialog(props: SemidDialogProps) {
         <Dialog maxWidth="lg" onClose={() => handleClose()} open={open}>
             <DialogTitle>Semid Assignment</DialogTitle>
             <DialogContent dividers>
-                <Stack direction="column" spacing={2} sx={{ width: 500, maxWidth: '100%' }}>
+                <Stack direction="row" spacing={2} sx={{ width: 500, maxWidth: '100%' }}>
                     <ProgramChipsInput
                         semids={semids}
                         onChange={(value) => handleArrayChange(value)}
