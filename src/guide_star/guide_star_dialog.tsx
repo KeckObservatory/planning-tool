@@ -210,7 +210,11 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     selectCallback={onGuideStarNameSelect}
                     selectedGuideStarName={guideStarName}
                 />
-                <GuideStarTable selectedGuideStarName={guideStarName} targets={guidestartargets} />
+                <GuideStarTable 
+                    selectedGuideStarName={guideStarName} 
+                    setSelectedGuideStarName={setGuideStarName} 
+                    targets={guidestartargets} 
+                />
             </Stack>
         </Stack>
     )

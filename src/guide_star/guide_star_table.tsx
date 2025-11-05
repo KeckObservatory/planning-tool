@@ -52,10 +52,11 @@ const AddGuideStarButton = (props: { target: GuideStarTarget }) => {
 interface Props {
     targets?: GuideStarTarget[];
     selectedGuideStarName?: string;
+    setSelectedGuideStarName?: (name: string) => void;
 }
 
 export default function GuideStarTable(props: Props) {
-    const { targets, selectedGuideStarName } = props;
+    const { targets, selectedGuideStarName, setSelectedGuideStarName } = props;
     const context = useStateContext()
     const cfg = context.config
     let columns = convert_schema_to_columns();
@@ -124,6 +125,7 @@ export default function GuideStarTable(props: Props) {
                     onRowSelectionModelChange={(newRowSelectionModel) => {
                         console.log("Row selection model changed:", newRowSelectionModel)
                         setRowSelectModel(newRowSelectionModel);
+                        setSelectedGuideStarName && setSelectedGuideStarName(newRowSelectionModel[0] as string);
                     }}
                     initialState={{
                         columns: {
