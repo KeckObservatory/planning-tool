@@ -4,7 +4,6 @@ import {
     DataGrid,
     GridColDef,
     GridRowParams,
-    GRID_CHECKBOX_SELECTION_COL_DEF,
 } from '@mui/x-data-grid';
 import { useStateContext } from '../App.tsx';
 import { convert_schema_to_columns } from '../target_table.tsx';
