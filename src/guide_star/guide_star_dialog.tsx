@@ -3,8 +3,7 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 
-import { StringParam, useQueryParam, withDefault } from 'use-query-params';
-import { Target, useStateContext } from '../App';
+import { Target } from '../App';
 import { Autocomplete, Stack, TextField, Typography } from '@mui/material';
 import { DialogComponent } from '../dialog_component';
 
