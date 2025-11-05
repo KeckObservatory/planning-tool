@@ -9,7 +9,7 @@ import {
 import { useStateContext } from '../App.tsx';
 import { convert_schema_to_columns } from '../target_table.tsx';
 import { IconButton } from '@mui/material';
-import { SimbadTargetData } from '../catalog_button.tsx';
+import { GuideStarTarget } from './guide_star_dialog.tsx';
 
 // interface CatalogStarData {
 //     name: string;
@@ -33,65 +33,6 @@ import { SimbadTargetData } from '../catalog_button.tsx';
 //     b_rmag: number;
 // }
 
-interface GuideStarTarget extends SimbadTargetData {
-    target_name: string;
-}
-
-const targets: GuideStarTarget[] = [
-    {
-        "dec": "+30:39:36.630403128",
-        "dec_deg": 30.960175112,
-        "epoch": "J2000",
-        "equinox": "2000",
-        "g_mag": 15.113876,
-        "j_mag": 5.039,
-        "pm_dec": 0.827,
-        "pm_ra": 0.707,
-        "ra": "01:33:50.8965749232",
-        "ra_deg": 23.3620690622,
-        "systemic_velocity": -179.2,
-        "target_name": "M33 buddy"
-    },
-    {
-        "dec": "+30:39:36.630403128",
-        "dec_deg": 30.660175112,
-        "epoch": "J2000",
-        "equinox": "2000",
-        "g_mag": 15.113876,
-        "j_mag": 5.039,
-        "pm_dec": 0.827,
-        "pm_ra": 0.707,
-        "ra": "01:33:50.8965749232",
-        "ra_deg": 23.1620690622,
-        "target_name": "M33 buddy"
-    },
-    {
-        "dec": "+30:39:36.630403128",
-        "dec_deg": 30.560175112,
-        "epoch": "J2000",
-        "equinox": "2000",
-        "g_mag": 15.113876,
-        "j_mag": 5.039,
-        "pm_dec": 0.827,
-        "pm_ra": 0.707,
-        "ra": "01:33:50.8965749232",
-        "ra_deg": 23.4620690622,
-        "target_name": "M33 buddy 2"
-    },
-    {
-        "dec": "+30:39:36.630403128",
-        "dec_deg": 30.560175112,
-        "epoch": "J2000",
-        "equinox": "2000",
-        "g_mag": 15.113876,
-        "j_mag": 5.039,
-        "pm_dec": 0.827,
-        "pm_ra": 0.707,
-        "ra": "01:33:50.8965749232",
-        "ra_deg": 23.5620690622,
-        "target_name": "M33 buddy 3"
-    }
-]
 
 const AddGuideStarButton = (props: { target: GuideStarTarget }) => {
     const { target } = props
@@ -108,7 +49,12 @@ const AddGuideStarButton = (props: { target: GuideStarTarget }) => {
 }
 
 
-export default function GuideStarTable() {
+interface Props {
+    targets?: GuideStarTarget[];
+}
+
+export default function GuideStarTable(props: Props) {
+    const { targets } = props;
     const context = useStateContext()
 
     const cfg = context.config
@@ -142,7 +88,7 @@ export default function GuideStarTable() {
             type: 'actions',
             editable: false,
             headerName: 'Actions',
-            width: 250,
+            width: 50,
             disableExport: true,
             cellClassName: 'actions',
             getActions: ActionsCell,

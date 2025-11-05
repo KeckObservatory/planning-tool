@@ -8,6 +8,68 @@ import { Target } from '../App';
 import { Autocomplete, Stack, TextField } from '@mui/material';
 import { DialogComponent } from '../dialog_component';
 import GuideStarTable from './guide_star_table';
+import { SimbadTargetData } from '../catalog_button';
+
+export interface GuideStarTarget extends SimbadTargetData {
+    target_name: string;
+}
+
+export const guidestartargets: GuideStarTarget[] = [
+    {
+        "dec": "+30:39:36.630403128",
+        "dec_deg": 30.960175112,
+        "epoch": "J2000",
+        "equinox": "2000",
+        "g_mag": 15.113876,
+        "j_mag": 5.039,
+        "pm_dec": 0.827,
+        "pm_ra": 0.707,
+        "ra": "01:33:50.8965749232",
+        "ra_deg": 23.3620690622,
+        "systemic_velocity": -179.2,
+        "target_name": "M33 buddy"
+    },
+    {
+        "dec": "+30:39:36.630403128",
+        "dec_deg": 30.660175112,
+        "epoch": "J2000",
+        "equinox": "2000",
+        "g_mag": 15.113876,
+        "j_mag": 5.039,
+        "pm_dec": 0.827,
+        "pm_ra": 0.707,
+        "ra": "01:33:50.8965749232",
+        "ra_deg": 23.1620690622,
+        "target_name": "M33 buddy"
+    },
+    {
+        "dec": "+30:39:36.630403128",
+        "dec_deg": 30.560175112,
+        "epoch": "J2000",
+        "equinox": "2000",
+        "g_mag": 15.113876,
+        "j_mag": 5.039,
+        "pm_dec": 0.827,
+        "pm_ra": 0.707,
+        "ra": "01:33:50.8965749232",
+        "ra_deg": 23.4620690622,
+        "target_name": "M33 buddy 2"
+    },
+    {
+        "dec": "+30:39:36.630403128",
+        "dec_deg": 30.560175112,
+        "epoch": "J2000",
+        "equinox": "2000",
+        "g_mag": 15.113876,
+        "j_mag": 5.039,
+        "pm_dec": 0.827,
+        "pm_ra": 0.707,
+        "ra": "01:33:50.8965749232",
+        "ra_deg": 23.5620690622,
+        "target_name": "M33 buddy 3"
+    }
+]
+
 
 interface ButtonProps {
     targets: Target[]
@@ -130,16 +192,17 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     />
                 </Tooltip>
             </Stack>
-            <Stack direction='column' spacing={2} sx={{ marginTop: '16px' }}>
+            <Stack direction='row' spacing={2} sx={{ marginTop: '16px' }}>
                 <AladinViewer
                     targets={[target]}
+                    guideStars={guidestartargets as Target[]}
                     positionAngle={target.rotator_pa ?? 0}
                     fovAngle={0}
                     instrumentFOV={''}
                     height={height}
                     width={width}
                 />
-                <GuideStarTable />
+                <GuideStarTable targets={guidestartargets} />
             </Stack>
         </Stack>
     )
