@@ -55,7 +55,6 @@ interface Props {
 export default function GuideStarTable(props: Props) {
     const { targets } = props;
     const context = useStateContext()
-
     const cfg = context.config
     let columns = convert_schema_to_columns();
     const sortOrder = cfg.default_guide_star_table_columns;
