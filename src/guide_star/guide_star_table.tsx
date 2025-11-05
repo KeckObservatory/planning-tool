@@ -64,12 +64,9 @@ export default function GuideStarTable(props: Props) {
         return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);
     });
     const visibleColumns = Object.fromEntries(columns.map((col) => {
-        const visible = cfg.default_table_columns.includes(col.field)
+        const visible = cfg.default_guide_star_table_columns.includes(col.field)
         return [col.field, visible]
     }));
-    let pinnedColumns = cfg.pinned_table_columns
-    const leftPin = [...new Set([GRID_CHECKBOX_SELECTION_COL_DEF.field, ...cfg.pinned_table_columns.left])]
-    pinnedColumns.left = leftPin
 
     const ActionsCell = (params: GridRowParams<GuideStarTarget>) => {
         const { row } = params;
@@ -124,7 +121,6 @@ export default function GuideStarTable(props: Props) {
                         toolbar: {},
                     }}
                     initialState={{
-                        // pinnedColumns: pinnedColumns, // pro version only
                         columns: {
                             columnVisibilityModel:
                                 visibleColumns
