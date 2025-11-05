@@ -237,7 +237,7 @@ export default function AladinViewer(props: Props) {
             alad.on('objectClicked', function (obj: any) {
                 console.log('clicked object:', obj)
                 if (props.selectCallback && obj && obj.length > 0) {
-                    const targetName = obj[0].popupTitle.split(':')[0]
+                    const targetName = obj.popupTitle.split(':')[0]
                     props.selectCallback(targetName)
                 }
             })
