@@ -157,6 +157,11 @@ export const SemesterSelect = (props: SemesterSelectProps) => {
 export const GuideStarDialog = (props: VizDialogProps) => {
     // target must have ra dec and be defined
     const { target, setTarget, targets, open } = props
+    const [guideStarName, setGuideStarName] = useState<string>('')
+
+    const onGuideStarNameSelect = (name: string) => {
+        setGuideStarName(name)
+    }
 
     const onTargetNameSelect = (name: string) => {
         const targetName = target.target_name ?? target._id
@@ -201,8 +206,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     instrumentFOV={''}
                     height={height}
                     width={width}
+                    selectCallback={onGuideStarNameSelect}
                 />
-                <GuideStarTable targets={guidestartargets} />
+                <GuideStarTable selectedGuideStarName={guideStarName} targets={guidestartargets} />
             </Stack>
         </Stack>
     )
