@@ -236,11 +236,10 @@ export default function AladinViewer(props: Props) {
             })
             alad.on('objectClicked', function (obj: any) {
                 console.log('clicked object:', obj)
-                if (props.selectCallback && obj && obj.length > 0) {
-                    const targetName = obj.popupTitle.split(':')[0]
-                    console.log('selected target name:', targetName)
-                    props.selectCallback(targetName)
-                }
+                const targetName = obj.popupTitle.split(':')[0]
+                console.log('selected target name:', targetName)
+                 
+                props.selectCallback && (props.selectCallback(targetName))
             })
             const fovz = await get_fovz(alad, props.instrumentFOV, props.fovAngle)
             const newCompass = await get_compass(alad, props.height, props.width, props.positionAngle)
