@@ -61,6 +61,7 @@ export default function GuideStarTable(props: Props) {
     columns = columns.sort((a, b) => {
         return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);
     });
+
     const visibleColumns = Object.fromEntries(columns.map((col) => {
         const visible = cfg.default_guide_star_table_columns.includes(col.field)
         return [col.field, visible]
@@ -80,7 +81,7 @@ export default function GuideStarTable(props: Props) {
             field: 'actions',
             type: 'actions',
             editable: false,
-            headerName: 'Actions',
+            headerName: 'Add',
             width: 50,
             disableExport: true,
             cellClassName: 'actions',
@@ -95,7 +96,7 @@ export default function GuideStarTable(props: Props) {
         <Box
             sx={{
                 height: 1000,
-                width: '75%',
+                width: 1200,
                 '& .actions': {
                     color: 'text.secondary',
                 },

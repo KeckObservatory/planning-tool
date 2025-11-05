@@ -13,6 +13,7 @@ interface Props {
     titleContent: JSX.Element
     children: JSX.Element
     actions?: JSX.Element
+    fullScreen?: boolean
 }
 
 export const DialogComponent = (props: Props) => {
@@ -22,6 +23,7 @@ export const DialogComponent = (props: Props) => {
             maxWidth={props.maxWidth ?? 'md'}
             onClose={() => props.handleClose()}
             open={props.open}
+            fullScreen={props.fullScreen}
             sx={{ padding: '0px' }}
         >
             <DialogTitle>

@@ -40,7 +40,7 @@ export const guidestartargets: GuideStarTarget[] = [
         "pm_ra": 0.707,
         "ra": "01:33:50.8965749232",
         "ra_deg": 23.1620690622,
-        "target_name": "M33 buddy"
+        "target_name": "M33 buddy 4"
     },
     {
         "dec": "+30:39:36.630403128",
@@ -210,6 +210,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     return (
         <DialogComponent
             open={open}
+            fullScreen={true}
             handleClose={props.handleClose}
             titleContent={dialogTitle}
             children={dialogContent}
