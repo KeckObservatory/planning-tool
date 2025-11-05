@@ -64,8 +64,8 @@ export default function GuideStarTable(props: Props) {
     const apiRef = useGridApiRef();
 
     React.useEffect(() => {
-        if (selectedGuideStarName) {
-            console.log("Selected guide star name:", selectedGuideStarName)
+        if (apiRef.current && selectedGuideStarName) {
+            console.log("Selected guide star name:", selectedGuideStarName, apiRef.current)
             apiRef.current.selectRow(selectedGuideStarName);
         }
     }, [selectedGuideStarName]);
