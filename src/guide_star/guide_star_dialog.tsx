@@ -160,6 +160,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [guideStarName, setGuideStarName] = useState<string>('')
 
     const onGuideStarNameSelect = (name: string) => {
+        console.log("setting guidestar name to:", name)
         setGuideStarName(name)
     }
 
