@@ -69,8 +69,6 @@ export default function GuideStarTable(props: Props) {
 
     const ActionsCell = (params: GridRowParams<GuideStarTarget>) => {
         const { row } = params;
-
-
         return [
             <AddGuideStarButton
                 target={row}
@@ -110,15 +108,8 @@ export default function GuideStarTable(props: Props) {
             {Object.keys(visibleColumns).length > 0 && (
                 <DataGrid
                     getRowId={(row: GuideStarTarget) => row.target_name}
-                    checkboxSelection
                     rows={targets ?? []}
                     columns={columns}
-                    disableMultipleRowSelection={true}
-                    slots={{
-                    }}
-                    slotProps={{
-                        toolbar: {},
-                    }}
                     initialState={{
                         columns: {
                             columnVisibilityModel:
