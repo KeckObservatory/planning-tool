@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
+import AladinViewer from '../aladin';
 
 import { Target } from '../App';
 import { Autocomplete, Stack, TextField, Typography } from '@mui/material';
@@ -13,6 +14,9 @@ interface ButtonProps {
 
 export interface TargetViz extends Target {
 }
+
+const height = 500
+const width = 500
 
 interface VizDialogProps {
     open: boolean,
@@ -125,7 +129,17 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     />
                 </Tooltip>
             </Stack>
-            <Stack direction='column' spacing={2} sx={{ marginTop: '16px' }}>
+            <Stack direction='row' spacing={2} sx={{ marginTop: '16px' }}>
+                <AladinViewer
+                    targets={[target]}
+                    positionAngle={target.rotator_pa ?? 0}
+                    fovAngle={0}
+                    instrumentFOV={''}
+                    height={height}
+                    width={width}
+                />
+            </Stack>
+            <Stack sx={{ marginTop: '16px' }}>
                 <Typography variant="h6">Guide Star Selection chart goes here</Typography>
                 <Typography variant="h6">Guide Star Table goes here</Typography>
             </Stack>

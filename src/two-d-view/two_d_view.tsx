@@ -380,10 +380,10 @@ const TwoDView = ({ targets }: Props) => {
             <Grid2 size={{ xs: 4 }}>
                 <AladinViewer
                     height={height}
+                    width={width}
                     fovAngle={rotatorAngle}
                     positionAngle={positionAngle}
                     instrumentFOV={instrumentFOV}
-                    width={width}
                     targets={targets} />
             </Grid2>
         </Grid2 >

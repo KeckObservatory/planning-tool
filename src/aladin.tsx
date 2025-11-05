@@ -11,6 +11,7 @@ interface Props {
     height: number,
     instrumentFOV: string,
     targets: Target[],
+    guideStars?: Target[],
     fovAngle: number
     positionAngle: number
 }
@@ -237,6 +238,7 @@ export default function AladinViewer(props: Props) {
             setAladin(alad)
             setCompass(newCompass)
             props.targets && add_catalog(alad, props.targets)
+            props.guideStars && add_catalog(alad, props.guideStars, 'Guide Stars')
             alad.setViewCenter2NorthPoleAngle(props.positionAngle)
         })
     }
