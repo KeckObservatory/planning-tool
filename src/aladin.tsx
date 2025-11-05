@@ -146,13 +146,12 @@ export default function AladinViewer(props: Props) {
     const [fov, setFOV] = React.useState<Position[][][]>([])
     const [compass, setCompass] = React.useState<FeatureCollection<Polygon>>({ type: 'FeatureCollection', features: [] })
     const [aladin, setAladin] = React.useState<null | any>(null)
-    // const [aladin, setAladin] = React.useMemo<null | any>(null, [])
     const [zoom, setZoom] = React.useState(5)
 
     // define custom draw function
     const drawFunction = function (source: any, canvasCtx: any) {
         canvasCtx.beginPath();
-        canvasCtx.arc(source.x, source.y, 2, 0, 2 * Math.PI, false);
+        canvasCtx.arc(source.x, source.y, 4, 0, 2 * Math.PI, false);
         canvasCtx.closePath();
         //canvasCtx.strokeStyle = '#c38';
         canvasCtx.fillStyle = source.catalog.color;
@@ -229,6 +228,9 @@ export default function AladinViewer(props: Props) {
             })
             alad.on('positionChanged', function () {
                 debounced_update_shapes(alad, false, true)
+            })
+            alad.on('objectsSelected', function (obj: any) {
+                console.log('selected objects:', obj)
             })
             const fovz = await get_fovz(alad, props.instrumentFOV, props.fovAngle)
             const newCompass = await get_compass(alad, props.height, props.width, props.positionAngle)
