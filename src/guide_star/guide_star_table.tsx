@@ -96,7 +96,7 @@ export default function GuideStarTable(props: Props) {
         <Box
             sx={{
                 height: 1000,
-                width: '100%',
+                width: '75%',
                 '& .actions': {
                     color: 'text.secondary',
                 },
