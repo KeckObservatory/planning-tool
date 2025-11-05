@@ -23,6 +23,7 @@ import { StarListExportDirMenu } from './starlist_export_to_dir.tsx';
 import TagDialogButton from './tag_dialog.tsx';
 import SemidDialogButton from './semid_dialog.tsx';
 import { SemidSelect } from './semid_select.tsx';
+import { GuideStarButton } from './guide_star/guide_star_dialog.tsx';
 
 export const TARGET_LENGTH = 15 // 15 characters for target name
 export const TARGET_NAME_LENGTH_PADDED = TARGET_LENGTH + 1 // 15 characters for target name, one space at the end
@@ -213,6 +214,7 @@ export function EditToolbar(props: EditToolbarProps) {
         <DeleteDialogButton setRows={setRows} targets={props.selectedTargets} color='primary' />
         <ViewTargetsDialogButton targets={props.selectedTargets} color='primary' />
         <TargetVizButton targets={vizTargets} />
+        <GuideStarButton targets={vizTargets} />
         <TargetWizardButton />
         <TagDialogButton targets={props.selectedTargets} />
         <SemidDialogButton targets={props.selectedTargets} />
