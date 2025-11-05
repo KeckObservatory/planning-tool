@@ -4,11 +4,13 @@ import {
     DataGrid,
     GridColDef,
     GridRowParams,
+    useGridApiRef
 } from '@mui/x-data-grid';
 import { useStateContext } from '../App.tsx';
 import { convert_schema_to_columns } from '../target_table.tsx';
 import { IconButton } from '@mui/material';
 import { GuideStarTarget } from './guide_star_dialog.tsx';
+import React from 'react';
 
 // interface CatalogStarData {
 //     name: string;
@@ -50,14 +52,24 @@ const AddGuideStarButton = (props: { target: GuideStarTarget }) => {
 
 interface Props {
     targets?: GuideStarTarget[];
+    selectedGuideStarName?: string;
 }
 
 export default function GuideStarTable(props: Props) {
-    const { targets } = props;
+    const { targets, selectedGuideStarName } = props;
     const context = useStateContext()
     const cfg = context.config
     let columns = convert_schema_to_columns();
     const sortOrder = cfg.default_guide_star_table_columns;
+    const apiRef = useGridApiRef();
+
+    React.useEffect(() => {
+        if (selectedGuideStarName) {
+            console.log("Selected guide star name:", selectedGuideStarName)
+            apiRef.current.selectRow(selectedGuideStarName);
+        }
+    }, [selectedGuideStarName]);
+
     columns = columns.sort((a, b) => {
         return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);
     });
