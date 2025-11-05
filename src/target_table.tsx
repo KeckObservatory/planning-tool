@@ -33,7 +33,7 @@ import { format_target_property } from './upload_targets_dialog.tsx';
 import { Tooltip } from '@mui/material';
 
 
-function convert_schema_to_columns() {
+export const convert_schema_to_columns = () => {
   const columns: GridColDef[] = []
   Object.entries(target_schema.properties).forEach(([key, valueProps]: [string, any]) => {
     // format value for display

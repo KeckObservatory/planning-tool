@@ -87,6 +87,7 @@ export interface LngLatEl {
 
 
 interface ConfigFile {
+  default_guide_star_table_columns: string[];
   default_table_columns: string[];
   csv_order: string[];
   pinned_table_columns: { 'left': string[], 'right': string[] };

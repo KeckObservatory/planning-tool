@@ -1,4 +1,15 @@
 export const config = {
+    "default_guide_star_table_columns": [
+        "actions",
+        "target_name",
+        "ra",
+        "dec",
+        "equinox",
+        "b_mag",
+        "r_mag",
+        "j_mag",
+        "g_mag",
+    ],
     "default_table_columns": [
         "actions",
         "target_name",

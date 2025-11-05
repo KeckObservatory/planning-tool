@@ -5,8 +5,9 @@ import Tooltip from '@mui/material/Tooltip'
 import AladinViewer from '../aladin';
 
 import { Target } from '../App';
-import { Autocomplete, Stack, TextField, Typography } from '@mui/material';
+import { Autocomplete, Stack, TextField } from '@mui/material';
 import { DialogComponent } from '../dialog_component';
+import GuideStarTable from './guide_star_table';
 
 interface ButtonProps {
     targets: Target[]
@@ -129,7 +130,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     />
                 </Tooltip>
             </Stack>
-            <Stack direction='row' spacing={2} sx={{ marginTop: '16px' }}>
+            <Stack direction='column' spacing={2} sx={{ marginTop: '16px' }}>
                 <AladinViewer
                     targets={[target]}
                     positionAngle={target.rotator_pa ?? 0}
@@ -138,10 +139,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     height={height}
                     width={width}
                 />
-            </Stack>
-            <Stack sx={{ marginTop: '16px' }}>
-                <Typography variant="h6">Guide Star Selection chart goes here</Typography>
-                <Typography variant="h6">Guide Star Table goes here</Typography>
+                <GuideStarTable />
             </Stack>
         </Stack>
     )
