@@ -14,6 +14,7 @@ interface Props {
     guideStars?: Target[],
     fovAngle: number
     positionAngle: number
+    selectCallback?: (targetName: string) => void
 }
 
 interface PolylineProps {
@@ -173,7 +174,8 @@ export default function AladinViewer(props: Props) {
             const tgt = targets[idx]
             const options = {
                 idx: idx,
-                popupTitle: tgt.target_name + JSON.stringify(idx),
+                name: tgt.target_name ?? tgt._id,
+                popupTitle: tgt.target_name + ':' + JSON.stringify(idx),
                 size: 4,
                 popupDesc: `<t> RA: ${tgt.ra} <br /> Dec: ${tgt.dec}</t>`
             }
@@ -234,6 +236,10 @@ export default function AladinViewer(props: Props) {
             })
             alad.on('objectClicked', function (obj: any) {
                 console.log('clicked object:', obj)
+                if (props.selectCallback && obj && obj.length > 0) {
+                    const targetName = obj[0].popupTitle
+                    props.selectCallback(targetName)
+                }
             })
             const fovz = await get_fovz(alad, props.instrumentFOV, props.fovAngle)
             const newCompass = await get_compass(alad, props.height, props.width, props.positionAngle)
