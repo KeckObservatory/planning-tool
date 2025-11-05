@@ -232,6 +232,9 @@ export default function AladinViewer(props: Props) {
             alad.on('objectsSelected', function (obj: any) {
                 console.log('selected objects:', obj)
             })
+            alad.on('objectClicked', function (obj: any) {
+                console.log('clicked object:', obj)
+            })
             const fovz = await get_fovz(alad, props.instrumentFOV, props.fovAngle)
             const newCompass = await get_compass(alad, props.height, props.width, props.positionAngle)
             setZoom(fovz.zoom)
