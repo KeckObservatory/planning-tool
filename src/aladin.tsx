@@ -15,6 +15,7 @@ interface Props {
     fovAngle: number
     positionAngle: number
     selectCallback?: (targetName: string) => void
+    selectedGuideStarName?: string
 }
 
 interface PolylineProps {
@@ -148,6 +149,25 @@ export default function AladinViewer(props: Props) {
     const [compass, setCompass] = React.useState<FeatureCollection<Polygon>>({ type: 'FeatureCollection', features: [] })
     const [aladin, setAladin] = React.useState<null | any>(null)
     const [zoom, setZoom] = React.useState(5)
+
+    React.useEffect(() => {
+        if (props.selectedGuideStarName && aladin) {
+            console.log("Selecting guide star in Aladin:", props.selectedGuideStarName)
+            const catalogs = aladin.getCatalogs()
+            catalogs.forEach((cat: any) => {
+                if (cat.name === 'Guide Stars') {
+                    console.log("Found guide star catalog:", cat)
+                    const sources = cat.getSources()
+                    sources.forEach((source: any) => {
+                        if (source.popupTitle.startsWith(props.selectedGuideStarName + ':')) {
+                            console.log("Found source to select:", source)
+                            aladin.select(source)
+                        }
+                    })
+                }
+            })
+        }
+    }, [props.selectedGuideStarName])
 
     // define custom draw function
     const drawFunction = function (source: any, canvasCtx: any) {
