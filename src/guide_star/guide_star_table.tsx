@@ -122,6 +122,7 @@ export default function GuideStarTable(props: Props) {
                     getRowId={(row: GuideStarTarget) => row.target_name}
                     rows={targets ?? []}
                     columns={columns}
+                    apiRef={apiRef}
                     initialState={{
                         columns: {
                             columnVisibilityModel:
