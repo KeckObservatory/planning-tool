@@ -62,12 +62,12 @@ export default function GuideStarTable(props: Props) {
     let columns = convert_schema_to_columns();
     const sortOrder = cfg.default_guide_star_table_columns;
     const apiRef = useGridApiRef();
+    const [rowSelectModel, setRowSelectModel] = React.useState<any>([]);
 
     React.useEffect(() => {
-        if (apiRef.current && selectedGuideStarName) {
-            console.log("Selected guide star name:", selectedGuideStarName, apiRef.current)
-            apiRef.current.selectRow(selectedGuideStarName);
-        }
+        // console.log("Selected guide star name:", selectedGuideStarName, apiRef.current)
+        // apiRef.current.selectRow(selectedGuideStarName);
+        setRowSelectModel([selectedGuideStarName])
     }, [selectedGuideStarName]);
 
     columns = columns.sort((a, b) => {
@@ -122,6 +122,11 @@ export default function GuideStarTable(props: Props) {
                     getRowId={(row: GuideStarTarget) => row.target_name}
                     rows={targets ?? []}
                     columns={columns}
+                    rowSelectionModel={rowSelectModel}
+                    onRowSelectionModelChange={(newRowSelectionModel) => {
+                        console.log("Row selection model changed:", newRowSelectionModel)
+                        setRowSelectModel(newRowSelectionModel);
+                    }}
                     apiRef={apiRef}
                     initialState={{
                         columns: {
