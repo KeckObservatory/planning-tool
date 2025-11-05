@@ -4,7 +4,6 @@ import {
     DataGrid,
     GridColDef,
     GridRowParams,
-    useGridApiRef
 } from '@mui/x-data-grid';
 import { useStateContext } from '../App.tsx';
 import { convert_schema_to_columns } from '../target_table.tsx';
@@ -61,7 +60,6 @@ export default function GuideStarTable(props: Props) {
     const cfg = context.config
     let columns = convert_schema_to_columns();
     const sortOrder = cfg.default_guide_star_table_columns;
-    const apiRef = useGridApiRef();
     const [rowSelectModel, setRowSelectModel] = React.useState<any>([]);
 
     React.useEffect(() => {
@@ -127,7 +125,6 @@ export default function GuideStarTable(props: Props) {
                         console.log("Row selection model changed:", newRowSelectionModel)
                         setRowSelectModel(newRowSelectionModel);
                     }}
-                    apiRef={apiRef}
                     initialState={{
                         columns: {
                             columnVisibilityModel:
