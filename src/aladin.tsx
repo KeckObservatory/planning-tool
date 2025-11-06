@@ -191,14 +191,16 @@ export default function AladinViewer(props: Props) {
 
     const add_catalog = (alad: any, targets: Target[], name = 'Targets') => {
         //var cat = A.catalog({ name: name, sourceSize: 4, shape: drawFunction});
-        var cat = A.catalog({ name: name, shape: drawFunction });
-        cat.setSelectionColor('#FF0000');
-        alad.addCatalog(cat);
 
         if (name === 'Guide Stars') {
+            var cat = A.catalog({ name: name});
             cat.setColor('#00FF00');
-            alad.setSelectMode(true)
+            cat.setSelectionColor('#FF0000');
         }
+        else {
+            var cat = A.catalog({ name: name, shape: drawFunction });
+        }
+        alad.addCatalog(cat);
 
         alad.on('zoomChanged', function (zoom: number) {
             setZoom(zoom)
