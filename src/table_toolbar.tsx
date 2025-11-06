@@ -6,7 +6,6 @@ import {
   GridToolbarContainer,
   GridToolbarExportContainer,
   GridExportMenuItemProps,
-  GridRowsProp,
   GridRowModel,
   GridToolbar,
   GridToolbarProps,
@@ -166,7 +165,7 @@ export const create_new_target = (id?: string, obsid?: number, target_name?: str
 
 export interface EditToolbarProps extends Partial<GridToolbarProps & ToolbarPropsOverrides> {
   rows: Target[];
-  setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
+  setRows: React.Dispatch<React.SetStateAction<Target[]>>;
   obsid: number;
   processRowUpdate: (newRow: GridRowModel<Target>) => Promise<GridRowModel<Target>>;
   submit_one_target: Function
@@ -214,7 +213,7 @@ export function EditToolbar(props: EditToolbarProps) {
         <DeleteDialogButton setRows={setRows} targets={props.selectedTargets} color='primary' />
         <ViewTargetsDialogButton targets={props.selectedTargets} color='primary' />
         <TargetVizButton targets={vizTargets} />
-        <GuideStarButton targets={vizTargets} />
+        <GuideStarButton targets={vizTargets} setRows={setRows} />
         <TargetWizardButton />
         <TagDialogButton targets={props.selectedTargets} />
         <SemidDialogButton targets={props.selectedTargets} />

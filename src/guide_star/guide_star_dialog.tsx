@@ -73,7 +73,7 @@ export const guidestartargets: GuideStarTarget[] = [
 
 interface ButtonProps {
     targets: Target[]
-    setRows?: React.Dispatch<React.SetStateAction<Target[]>>
+    setRows: React.Dispatch<React.SetStateAction<Target[]>>
 }
 
 export interface TargetViz extends Target {
@@ -159,7 +159,7 @@ export const SemesterSelect = (props: SemesterSelectProps) => {
 
 export const GuideStarDialog = (props: VizDialogProps) => {
     // target must have ra dec and be defined
-    const { target, setTarget, targets, open } = props
+    const { target, setTarget, targets, open, setRows } = props
     const [guideStarName, setGuideStarName] = useState<string>('')
 
     const onGuideStarNameSelect = (name: string) => {
