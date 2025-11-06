@@ -168,7 +168,7 @@ export default function AladinViewer(props: Props) {
                     sources.forEach((source: any) => {
                         if (source.popupTitle.startsWith(props.selectedGuideStarName + ':')) {
                             console.log("Found source to select:", source, aladin)
-                            aladin.view.selectObjects([source])
+                            aladin.selectObjects([source])
                             // aladin.select(source)
                         }
                     })
