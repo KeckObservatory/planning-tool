@@ -164,14 +164,6 @@ export default function AladinViewer(props: Props) {
                         }
                         return source.popupTitle.startsWith(props.selectedGuideStarName + ':')
                     })
-                    // const sources = cat.getSources()
-                    // sources.forEach((source: any) => {
-                    //     if (source.popupTitle.startsWith(props.selectedGuideStarName + ':')) {
-                    //         console.log("Found source to select:", source, aladin)
-                    //         // aladin.selectObjects([source])
-                    //         cat.select(source)
-                    //     }
-                    // })
                 }
             })
         }

@@ -5,11 +5,14 @@ import {
     GridColDef,
     GridRowParams,
 } from '@mui/x-data-grid';
-import { useStateContext } from '../App.tsx';
+import { useSnackbarContext, useStateContext } from '../App.tsx';
+import { v4 as randomId } from 'uuid';
 import { convert_schema_to_columns } from '../target_table.tsx';
 import { IconButton } from '@mui/material';
 import { GuideStarTarget } from './guide_star_dialog.tsx';
 import React from 'react';
+import { create_new_target } from '../table_toolbar.tsx';
+import { submit_target } from '../api/api_root.tsx';
 
 // interface CatalogStarData {
 //     name: string;
@@ -37,8 +40,24 @@ import React from 'react';
 const AddGuideStarButton = (props: { target: GuideStarTarget }) => {
     const { target } = props
 
-    const handleClick = () => {
-        console.log("Add guide star for target:", target)
+    const context = useStateContext()
+    const snackbarContext = useSnackbarContext() 
+
+    const handleClick = async () => {
+        const id = randomId();
+        let newTarget = create_new_target(id, context.obsid, target.target_name)
+        newTarget = {
+            ...newTarget,
+            ...target
+        }
+        const resp = await submit_target([newTarget])
+        if (resp.errors.length > 0) {
+            console.error('error submitting target')
+            snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error adding target' })
+            snackbarContext.setSnackbarOpen(true);
+            return
+        }
+        console.log("Added guide star for target:", resp.targets[0])
     }
 
     return (
