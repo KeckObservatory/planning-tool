@@ -105,6 +105,8 @@ export interface State {
   is_admin: boolean;
   semids: string[];
   config: ConfigFile;
+  targets?: Target[]
+  setTargets?: React.Dispatch<React.SetStateAction<Target[] | undefined>>;
 }
 
 export interface UserInfo {
@@ -145,19 +147,25 @@ function App() {
   const [ semid ] = useQueryParam<string>('semid');
   const [openSnackbar, setOpenSnackbar] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState<SnackbarMessage>({ message: 'default message' })
-  const [state, setState] = useState<State>({config, semids: [], is_admin: false, username:""} as unknown as State);
+  const [state, setState] = useState<State>({config, 
+    semids: [], 
+    is_admin: false, 
+    username:"",
+    targets: undefined,
+    setTargets: undefined
+  } as unknown as State);
   const theme = handleTheme(darkState)
-  const [targets, setTargets] = useState<Target[] | undefined>(undefined)
+  // const [targets, setTargets] = useState<Target[] | undefined>(undefined)
 
   useEffect(() => {
     const fetch_targets = async () => {
       if (semid) {
         let tgts = await get_targets(undefined, undefined, semid)
-        setTargets([...tgts])
+        setState((prevState) => ({ ...prevState, targets: [...tgts] }))
       }
       else if (state.obsid && (semid === undefined || semid === "")) {
         let tgts = await get_targets(state.obsid)
-        setTargets(tgts)
+        setState((prevState) => ({ ...prevState, targets: [...tgts] }))
       }
     }
     fetch_targets()
@@ -178,7 +186,7 @@ function App() {
       // const userinfo = await get_userinfo_mock();
       if (init_state.obsid) {
         let tgts = await get_targets(init_state.obsid, undefined, semid)
-        setTargets(tgts)
+        setState((prevState) => ({ ...prevState, targets: [...tgts] }))
       }
     }
     fetch_data()
@@ -223,8 +231,8 @@ function App() {
                 flexDirection: 'column',
               }}
             >
-              {targets === undefined ? (<Skeleton variant="rectangular" width="100%" height={500} />) :
-                <TargetTable targets={targets} />}
+              {state.targets === undefined ? (<Skeleton variant="rectangular" width="100%" height={500} />) :
+                <TargetTable targets={state.targets} />}
             </Paper>
           </Stack>
         </SnackbarContext.Provider>

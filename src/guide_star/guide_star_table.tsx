@@ -60,6 +60,13 @@ const AddGuideStarButton = (props: { target: GuideStarTarget }) => {
         }
         snackbarContext.setSnackbarMessage({ severity: 'success', message: 'Guide star added successfully' })
         console.log("Added guide star for target:", resp.targets[0])
+        context.setTargets && context.setTargets((prevTargets) => {
+            if (prevTargets) {
+                return [...prevTargets, resp.targets[0]];
+            } else {
+                return [resp.targets[0]];
+            }
+        });
     }
 
     return (

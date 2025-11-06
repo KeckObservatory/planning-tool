@@ -222,7 +222,6 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     return (
         <DialogComponent
             open={open}
-            fullScreen={true}
             handleClose={props.handleClose}
             titleContent={dialogTitle}
             children={dialogContent}
