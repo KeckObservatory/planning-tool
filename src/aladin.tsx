@@ -158,20 +158,20 @@ export default function AladinViewer(props: Props) {
             overlays.forEach((cat: any) => {
                 if (cat.name === 'Guide Stars') {
                     console.log("Found guide star catalog:", cat)
-                    cat.selectAll()
                     // cat.select( (source: any) => {
                     //     if (source.popupTitle.startsWith(props.selectedGuideStarName + ':')) {
                     //         console.log("Found source to select:", source)
                     //     }
                     //     return source.popupTitle.startsWith(props.selectedGuideStarName + ':')
                     // })
-                    // const sources = cat.getSources()
-                    // sources.forEach((source: any) => {
-                    //     if (source.popupTitle.startsWith(props.selectedGuideStarName + ':')) {
-                    //         console.log("Found source to select:", source)
-                    //         aladin.selectObjects([source])
-                    //     }
-                    // })
+                    const sources = cat.getSources()
+                    sources.forEach((source: any) => {
+                        if (source.popupTitle.startsWith(props.selectedGuideStarName + ':')) {
+                            console.log("Found source to select:", source, aladin)
+                            aladin.selectObjects([source])
+                            aladin.select(source)
+                        }
+                    })
                 }
             })
         }
@@ -194,6 +194,11 @@ export default function AladinViewer(props: Props) {
         var cat = A.catalog({ name: name, shape: drawFunction });
         cat.setSelectionColor('#FF0000');
         alad.addCatalog(cat);
+
+        if (name === 'Guide Stars') {
+            cat.setColor('#00FF00');
+            alad.setSelectMode(true)
+        }
 
         alad.on('zoomChanged', function (zoom: number) {
             setZoom(zoom)
