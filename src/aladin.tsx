@@ -158,12 +158,13 @@ export default function AladinViewer(props: Props) {
             overlays.forEach((cat: any) => {
                 if (cat.name === 'Guide Stars') {
                     console.log("Found guide star catalog:", cat)
-                    cat.select( (source: any) => {
-                        if (source.popupTitle.startsWith(props.selectedGuideStarName + ':')) {
-                            console.log("Found source to select:", source)
-                        }
-                        return source.popupTitle.startsWith(props.selectedGuideStarName + ':')
-                    })
+                    cat.selectAll()
+                    // cat.select( (source: any) => {
+                    //     if (source.popupTitle.startsWith(props.selectedGuideStarName + ':')) {
+                    //         console.log("Found source to select:", source)
+                    //     }
+                    //     return source.popupTitle.startsWith(props.selectedGuideStarName + ':')
+                    // })
                     // const sources = cat.getSources()
                     // sources.forEach((source: any) => {
                     //     if (source.popupTitle.startsWith(props.selectedGuideStarName + ':')) {
