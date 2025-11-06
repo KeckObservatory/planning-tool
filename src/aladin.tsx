@@ -198,6 +198,7 @@ export default function AladinViewer(props: Props) {
                 name: tgt.target_name ?? tgt._id,
                 popupTitle: tgt.target_name + ':' + JSON.stringify(idx),
                 size: 4,
+                selectionColor: '#89CFF0',
                 popupDesc: `<t> RA: ${tgt.ra} <br /> Dec: ${tgt.dec}</t>`
             }
             const ra = tgt.ra_deg ? tgt.ra_deg : ra_dec_to_deg(tgt.ra as string)
