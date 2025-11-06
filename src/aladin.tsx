@@ -185,7 +185,7 @@ export default function AladinViewer(props: Props) {
     const add_catalog = (alad: any, targets: Target[], name = 'Targets') => {
         //var cat = A.catalog({ name: name, sourceSize: 4, shape: drawFunction});
         var cat = A.catalog({ name: name, shape: drawFunction });
-        cat.setSelectedColor('#FF0000');
+        cat.setSelectionColor('#FF0000');
         alad.addCatalog(cat);
 
         alad.on('zoomChanged', function (zoom: number) {
