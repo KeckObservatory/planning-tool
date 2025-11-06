@@ -36,9 +36,13 @@ import { submit_target } from '../api/api_root.tsx';
 //     b_rmag: number;
 // }
 
+interface AddGuideStarButtonProps {
+    target: GuideStarTarget;
+    science_target_name?: string;
+}
 
-const AddGuideStarButton = (props: { target: GuideStarTarget }) => {
-    const { target } = props
+const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
+    const { target, science_target_name } = props
 
     const context = useStateContext()
     const snackbarContext = useSnackbarContext() 
@@ -49,7 +53,7 @@ const AddGuideStarButton = (props: { target: GuideStarTarget }) => {
         newTarget = {
             ...newTarget,
             ...target, 
-            tags: [...(newTarget.tags ?? []), 'guide_star for ' + target.target_name],
+            tags: [...(newTarget.tags ?? []), 'guide_star for ' + (science_target_name ?? '')],
         }
         const resp = await submit_target([newTarget])
         if (resp.errors.length > 0) {
@@ -79,12 +83,13 @@ const AddGuideStarButton = (props: { target: GuideStarTarget }) => {
 
 interface Props {
     targets?: GuideStarTarget[];
+    science_target_name?: string;
     selectedGuideStarName?: string;
     setSelectedGuideStarName?: (name: string) => void;
 }
 
 export default function GuideStarTable(props: Props) {
-    const { targets, selectedGuideStarName, setSelectedGuideStarName } = props;
+    const { targets, selectedGuideStarName, setSelectedGuideStarName, science_target_name } = props;
     const context = useStateContext()
     const cfg = context.config
     let columns = convert_schema_to_columns();
@@ -111,6 +116,7 @@ export default function GuideStarTable(props: Props) {
         return [
             <AddGuideStarButton
                 target={row}
+                science_target_name={science_target_name}
             />
         ];
     }

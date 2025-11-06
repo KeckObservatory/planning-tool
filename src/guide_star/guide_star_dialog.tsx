@@ -214,6 +214,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     selectedGuideStarName={guideStarName} 
                     setSelectedGuideStarName={setGuideStarName} 
                     targets={guidestartargets} 
+                    science_target_name={target.target_name ?? target._id}
                 />
             </Stack>
         </Stack>
