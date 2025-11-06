@@ -169,7 +169,7 @@ export default function AladinViewer(props: Props) {
                         if (source.popupTitle.startsWith(props.selectedGuideStarName + ':')) {
                             console.log("Found source to select:", source, aladin)
                             aladin.selectObjects([source])
-                            aladin.select(source)
+                            // aladin.select(source)
                         }
                     })
                 }
