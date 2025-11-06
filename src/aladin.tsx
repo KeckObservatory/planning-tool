@@ -194,8 +194,6 @@ export default function AladinViewer(props: Props) {
 
         if (name === 'Guide Stars') {
             var cat = A.catalog({ name: name});
-            cat.setColor('#00FF00');
-            cat.setSelectionColor('#FF0000');
         }
         else {
             var cat = A.catalog({ name: name, shape: drawFunction });
