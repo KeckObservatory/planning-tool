@@ -9,6 +9,9 @@ import { Autocomplete, Stack, TextField } from '@mui/material';
 import { DialogComponent } from '../dialog_component';
 import GuideStarTable from './guide_star_table';
 import { SimbadTargetData } from '../catalog_button';
+import { FOVSelect } from '../two-d-view/fov_select';
+import { get_shapes } from '../two-d-view/two_d_view';
+import { StringParam, useQueryParam, withDefault } from 'use-query-params';
 
 export interface GuideStarTarget extends SimbadTargetData {
     target_name: string;
@@ -161,6 +164,20 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     // target must have ra dec and be defined
     const { target, setTarget, targets, open, setRows } = props
     const [guideStarName, setGuideStarName] = useState<string>('')
+    const [instrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
+    const [fovs, setFOVs] = React.useState<string[]>([])
+
+    React.useEffect(() => {
+        const fun = async () => {
+            const featureCollection = await get_shapes('fov')
+            const features = featureCollection['features'].filter((feature: any) => {
+                return feature['properties'].type === 'FOV'
+            })
+            const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
+            setFOVs(newFovs)
+        }
+        fun()
+    }, [])
 
     const onGuideStarNameSelect = (name: string) => {
         console.log("setting guidestar name to:", name)
@@ -200,6 +217,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         renderInput={(params) => <TextField {...params} label={'Selected Target'} />}
                     />
                 </Tooltip>
+                <FOVSelect 
+                    fovs={fovs}
+                />
             </Stack>
             <Stack direction='row' spacing={2} sx={{ marginTop: '16px' }}>
                 <AladinViewer
@@ -207,7 +227,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     guideStars={guidestartargets as Target[]}
                     positionAngle={target.rotator_pa ?? 0}
                     fovAngle={0}
-                    instrumentFOV={''}
+                    instrumentFOV={instrumentFOV}
                     height={height}
                     width={width}
                     selectCallback={onGuideStarNameSelect}

@@ -19,6 +19,7 @@ import { FOVlink, STEP_SIZE } from './constants.tsx';
 import { createEnumParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
 import html2canvas from 'html2canvas';
 import { SkyChartDataSummary } from './sky_chart_data_summary.tsx';
+import { FOVSelect } from './fov_select.tsx';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -146,7 +147,6 @@ const TwoDView = ({ targets }: Props) => {
     const [time, setTime] = React.useState(suncalcTimes.nadir)
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
     const [fovs, setFOVs] = React.useState<string[]>([])
-    //const [instrumentFOV, setInstrumentFOV] = React.useState('MOSFIRE')
     const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
 
     React.useEffect(() => {
@@ -214,7 +214,7 @@ const TwoDView = ({ targets }: Props) => {
                 return feature['properties'].type === 'FOV' && feature['properties'].dome === dome
             })
             const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
-            console.log('dome', dome, 'obsdate', obsdate, 'instrumentFOV', 'skychart', skyChart)
+            console.log('dome', dome, 'obsdate', obsdate, 'skychart', skyChart)
             !newFovs.includes(instrumentFOV) && setInstrumentFOV(newFovs[0])
             setFOVs(newFovs)
         }
@@ -230,12 +230,6 @@ const TwoDView = ({ targets }: Props) => {
         if (!newDate) return
         const newObsDate = hidate(newDate?.toDate(), context.config.timezone).toDate()
         newDate && setObsdate(newObsDate)
-    }
-
-    const onInstrumentFOVChange = (value: string | undefined | null) => {
-        if (value) {
-            setInstrumentFOV(value)
-        }
     }
 
     const save_img = () => {
@@ -309,17 +303,9 @@ const TwoDView = ({ targets }: Props) => {
             </Grid2>
             <Grid2 size={{ xs: 4 }}>
                 <Stack width="100%" direction="column" justifyContent='center' spacing={1}>
-                    <Tooltip placement="top" title="Select instrument field of view">
-                        <Autocomplete
-                            disablePortal
-                            id="semid-selection"
-                            value={{ label: instrumentFOV }}
-                            onChange={(_, value) => onInstrumentFOVChange(value?.label)}
-                            options={fovs.map((instr) => { return { label: instr } })}
-                            sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
-                            renderInput={(params) => <TextField {...params} label="Instrument FOV" />}
-                        />
-                    </Tooltip>
+                    <FOVSelect 
+                        fovs={fovs}
+                    />
                     <Tooltip title={'Rotator angle for Field of View'}>
                         <TextField
                             sx={{ width: '200px', margin: '6px' }}
