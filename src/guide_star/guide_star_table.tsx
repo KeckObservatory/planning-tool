@@ -48,7 +48,8 @@ const AddGuideStarButton = (props: { target: GuideStarTarget }) => {
         let newTarget = create_new_target(id, context.obsid, target.target_name)
         newTarget = {
             ...newTarget,
-            ...target
+            ...target, 
+            tags: [...(newTarget.tags ?? []), 'guide_star for ' + target.target_name],
         }
         const resp = await submit_target([newTarget])
         if (resp.errors.length > 0) {
@@ -57,6 +58,7 @@ const AddGuideStarButton = (props: { target: GuideStarTarget }) => {
             snackbarContext.setSnackbarOpen(true);
             return
         }
+        snackbarContext.setSnackbarMessage({ severity: 'success', message: 'Guide star added successfully' })
         console.log("Added guide star for target:", resp.targets[0])
     }
 
