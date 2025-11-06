@@ -62,7 +62,7 @@ const AddGuideStarButton = (props: { target: GuideStarTarget }) => {
         console.log("Added guide star for target:", resp.targets[0])
         context.setTargets && context.setTargets((prevTargets) => {
             if (prevTargets) {
-                return [...prevTargets, resp.targets[0]];
+                return [resp.targets[0], ...prevTargets ];
             } else {
                 return [resp.targets[0]];
             }
