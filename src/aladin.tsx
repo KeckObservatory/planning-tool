@@ -153,8 +153,9 @@ export default function AladinViewer(props: Props) {
     React.useEffect(() => {
         if (props.selectedGuideStarName && aladin) {
             console.log("Selecting guide star in Aladin:", props.selectedGuideStarName)
-            const catalogs = aladin.getCatalogs()
-            catalogs.forEach((cat: any) => {
+            const overlays = aladin.getOverlays()
+            console.log("Aladin overlays:", overlays)
+            overlays.forEach((cat: any) => {
                 if (cat.name === 'Guide Stars') {
                     console.log("Found guide star catalog:", cat)
                     const sources = cat.getSources()
