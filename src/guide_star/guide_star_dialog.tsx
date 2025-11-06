@@ -73,6 +73,7 @@ export const guidestartargets: GuideStarTarget[] = [
 
 interface ButtonProps {
     targets: Target[]
+    setRows?: React.Dispatch<React.SetStateAction<Target[]>>
 }
 
 export interface TargetViz extends Target {
@@ -84,6 +85,7 @@ const width = 500
 interface VizDialogProps {
     open: boolean,
     target: Target,
+    setRows: React.Dispatch<React.SetStateAction<Target[]>>
     setTarget: (t: Target) => void
     targets: Target[]
     handleClose: () => void
@@ -95,7 +97,7 @@ interface SemesterSelectProps {
 }
 
 export const GuideStarButton = (props: ButtonProps) => {
-    const { targets } = props
+    const { targets, setRows } = props
     let initTarget = targets.at(0) ?? {} as Target
     const [target, setTarget] = useState<Target>(initTarget)
     const [open, setOpen] = React.useState(false);
@@ -129,6 +131,7 @@ export const GuideStarButton = (props: ButtonProps) => {
                     setTarget={setTarget}
                     targets={targets}
                     handleClose={handleClose}
+                    setRows={setRows}
                 />
             }
         </>
@@ -214,6 +217,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     selectedGuideStarName={guideStarName} 
                     setSelectedGuideStarName={setGuideStarName} 
                     targets={guidestartargets} 
+                    setRows={setRows}
                     science_target_name={target.target_name ?? target._id}
                 />
             </Stack>

@@ -5,7 +5,7 @@ import {
     GridColDef,
     GridRowParams,
 } from '@mui/x-data-grid';
-import { useSnackbarContext, useStateContext } from '../App.tsx';
+import { Target, useSnackbarContext, useStateContext } from '../App.tsx';
 import { v4 as randomId } from 'uuid';
 import { convert_schema_to_columns } from '../target_table.tsx';
 import { IconButton } from '@mui/material';
@@ -38,11 +38,12 @@ import { submit_target } from '../api/api_root.tsx';
 
 interface AddGuideStarButtonProps {
     target: GuideStarTarget;
+    setRows?: React.Dispatch<React.SetStateAction<Target[]>>;
     science_target_name?: string;
 }
 
 const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
-    const { target, science_target_name } = props
+    const { target, science_target_name, setRows } = props
 
     const context = useStateContext()
     const snackbarContext = useSnackbarContext() 
@@ -64,12 +65,9 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
         }
         snackbarContext.setSnackbarMessage({ severity: 'success', message: 'Guide star added successfully' })
         console.log("Added guide star for target:", resp.targets[0])
-        context.setTargets && context.setTargets((prevTargets) => {
-            if (prevTargets) {
-                return [resp.targets[0], ...prevTargets ];
-            } else {
-                return [resp.targets[0]];
-            }
+        snackbarContext.setSnackbarOpen(true);
+        setRows && setRows((oldRows) => {
+            return [resp.targets[0], ...oldRows]
         });
     }
 
@@ -83,6 +81,7 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
 
 interface Props {
     targets?: GuideStarTarget[];
+    setRows?: React.Dispatch<React.SetStateAction<Target[]>>;
     science_target_name?: string;
     selectedGuideStarName?: string;
     setSelectedGuideStarName?: (name: string) => void;
@@ -117,6 +116,7 @@ export default function GuideStarTable(props: Props) {
             <AddGuideStarButton
                 target={row}
                 science_target_name={science_target_name}
+                setRows={props.setRows}
             />
         ];
     }
