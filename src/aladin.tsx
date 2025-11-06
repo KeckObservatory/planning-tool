@@ -168,7 +168,7 @@ export default function AladinViewer(props: Props) {
                     sources.forEach((source: any) => {
                         if (source.popupTitle.startsWith(props.selectedGuideStarName + ':')) {
                             console.log("Found source to select:", source, aladin)
-                            aladin.selectObjects([source])
+                            aladin.view.selectObjects([source])
                             // aladin.select(source)
                         }
                     })
@@ -192,11 +192,11 @@ export default function AladinViewer(props: Props) {
     const add_catalog = (alad: any, targets: Target[], name = 'Targets') => {
         //var cat = A.catalog({ name: name, sourceSize: 4, shape: drawFunction});
 
-        if (name === 'Guide Stars') {
-            var cat = A.catalog({ name: name});
+        if (name === 'Targets') {
+            var cat = A.catalog({ name: name, shape: drawFunction });
         }
         else {
-            var cat = A.catalog({ name: name, shape: drawFunction });
+            var cat = A.catalog({ name: name, shape: 'square' });
         }
         alad.addCatalog(cat);
 
