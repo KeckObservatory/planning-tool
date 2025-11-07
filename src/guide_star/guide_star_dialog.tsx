@@ -144,8 +144,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const ra = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
             const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
             if (catalog) {
-                const tgts = await get_catalog_targets(catalog, ra, dec, 0.5)
-                setGuideStars(tgts)
+                const gs = await get_catalog_targets(catalog, ra, dec, 0.5)
+                console.log('setting guide stars:', gs)
+                setGuideStars(gs)
             }
         }
         fun()
