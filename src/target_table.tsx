@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import { ErrorObject } from 'ajv/dist/2019'
+import { ErrorObject, JSONSchemaType } from 'ajv/dist/2019'
 import { EditToolbarProps, EditToolbar } from './table_toolbar.tsx';
 import {
   GridRowModesModel,
@@ -31,11 +31,12 @@ import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 import { format_target_property } from './upload_targets_dialog.tsx';
 import { Tooltip } from '@mui/material';
+import { CatalogTarget } from './guide_star/guide_star_dialog.tsx';
 
 
-export const convert_schema_to_columns = () => {
+export const convert_schema_to_columns = (schema: JSONSchemaType<Target | CatalogTarget>) => {
   const columns: GridColDef[] = []
-  Object.entries(target_schema.properties).forEach(([key, valueProps]: [string, any]) => {
+  Object.entries(schema.properties).forEach(([key, valueProps]: [string, any]) => {
     // format value for display
     const valueParser: GridValueParser = (value: unknown) => {
       value = format_target_property(key as keyof Target, value, valueProps)
@@ -134,7 +135,7 @@ export default function TargetTable(props: TargetTableProps) {
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
   const cfg = context.config
-  let columns = convert_schema_to_columns();
+  let columns = convert_schema_to_columns(target_schema as any); //TODO: fix type issue
   const sortOrder = cfg.default_table_columns
   columns = columns.sort((a, b) => {
     return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);

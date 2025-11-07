@@ -14,6 +14,7 @@ import React from 'react';
 import { create_new_target } from '../table_toolbar.tsx';
 import { submit_target } from '../api/api_root.tsx';
 import { ra_dec_to_deg } from '../catalog_button.tsx';
+import guide_star_schema from './guide_star_schema.json';
 
 interface AddGuideStarButtonProps {
     guidestar: CatalogTarget;
@@ -75,7 +76,7 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
 
 
 interface Props {
-    targets?: CatalogTarget[];
+    guidestars?: CatalogTarget[];
     setRows?: React.Dispatch<React.SetStateAction<Target[]>>;
     science_target_name?: string;
     selectedGuideStarName?: string;
@@ -83,10 +84,10 @@ interface Props {
 }
 
 export default function GuideStarTable(props: Props) {
-    const { targets, selectedGuideStarName, setSelectedGuideStarName, science_target_name } = props;
+    const { guidestars, selectedGuideStarName, setSelectedGuideStarName, science_target_name } = props;
     const context = useStateContext()
     const cfg = context.config
-    let columns = convert_schema_to_columns();
+    let columns = convert_schema_to_columns(guide_star_schema as any); //TODO: convert guide star schema to columns
     const sortOrder = cfg.default_guide_star_table_columns;
     const [rowSelectModel, setRowSelectModel] = React.useState<any>([]);
 
@@ -148,7 +149,7 @@ export default function GuideStarTable(props: Props) {
             {Object.keys(visibleColumns).length > 0 && (
                 <DataGrid
                     getRowId={(row: CatalogTarget) => row.name}
-                    rows={targets ?? []}
+                    rows={guidestars ?? []}
                     columns={columns}
                     rowSelectionModel={rowSelectModel}
                     onRowSelectionModelChange={(newRowSelectionModel) => {
