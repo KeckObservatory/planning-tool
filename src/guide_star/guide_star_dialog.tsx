@@ -142,8 +142,12 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     }, [])
 
     const onGuideStarNameSelect = (name: string) => {
-        console.log("setting guidestar name to:", name)
-        setGuideStarName(name)
+        if (name !== guideStarName) { //ignore setting guide star if the target is selected
+            let newGuideStar = guidestars.find((gs: CatalogTarget) => gs.name === name)
+            if (newGuideStar) {
+                setGuideStarName(name)
+            }
+        }
     }
 
     const onTargetNameSelect = (name: string) => {
