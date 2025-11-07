@@ -8,7 +8,7 @@ import { Target } from '../App';
 import { Autocomplete, Stack, TextField } from '@mui/material';
 import { DialogComponent } from '../dialog_component';
 import GuideStarTable from './guide_star_table';
-import { ra_dec_to_deg, SimbadTargetData } from '../catalog_button';
+import { ra_dec_to_deg } from '../catalog_button';
 import { FOVSelect } from '../two-d-view/fov_select';
 import { get_shapes } from '../two-d-view/two_d_view';
 import { StringParam, useQueryParam, withDefault } from 'use-query-params';
