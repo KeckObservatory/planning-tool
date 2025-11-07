@@ -153,14 +153,10 @@ export default function AladinViewer(props: Props) {
 
     React.useEffect(() => {
         if (props.selectedGuideStarName && aladin) {
-            console.log("Selecting guide star in Aladin:", props.selectedGuideStarName)
             const overlays = aladin.getOverlays()
-            console.log("Aladin overlays:", overlays)
             overlays.forEach((cat: any) => {
                 if (cat.name === 'Guide Stars') {
-                    console.log("Found guide star catalog:", cat)
                     cat.select( (source: any) => {
-                        console.log("source to maybe select:", source)
                         return source.popupTitle.startsWith(props.selectedGuideStarName + ':')
                     })
                 }
@@ -196,7 +192,6 @@ export default function AladinViewer(props: Props) {
         })
 
 
-        console.log('adding catalog:', name, targets)
         for (let idx = 0; idx < targets.length; idx++) {
             const tgt = targets[idx]
             const popupTitle = tgt.name ?? (tgt.target_name ?? tgt._id)
@@ -232,7 +227,6 @@ export default function AladinViewer(props: Props) {
     const debounced_update_shapes = useDebounceCallback(update_shapes, 250)
 
     const scriptloaded = async () => {
-        console.log('aladin script loaded', props)
         const firstRow = props.targets.at(0) ?? { ra: '0', dec: '0', ra_deg: 0, dec_deg: 0 }
         const ra = firstRow.ra_deg ?? ra_dec_to_deg(firstRow.ra ?? '0')
         const dec = firstRow.dec_deg ?? ra_dec_to_deg(firstRow.dec ?? '0', true)
@@ -255,13 +249,8 @@ export default function AladinViewer(props: Props) {
             alad.on('positionChanged', function () {
                 debounced_update_shapes(alad, false, true)
             })
-            alad.on('objectsSelected', function (obj: any) {
-                console.log('selected objects:', obj)
-            })
             alad.on('objectClicked', function (obj: any) {
-                console.log('clicked object:', obj)
                 const targetName = obj.popupTitle.split(':').at(0) // guide star names are in the format "name:idx"
-                console.log('selected target name:', targetName)
                 if (targetName && props.selectCallback) {
                     props.selectCallback(targetName)
                 }
@@ -287,9 +276,7 @@ export default function AladinViewer(props: Props) {
     React.useEffect(() => {
         //remove old catalog and add new one
         if (!aladin || !props.guideStars) return
-        console.log('removing overlay')
         aladin.removeOverlay('Guide Stars')
-        console.log('adding new guide star catalog')
         add_catalog(aladin, props.guideStars as (Target & CatalogTarget)[], 'Guide Stars')
     }, [props.guideStars])
 
