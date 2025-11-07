@@ -73,7 +73,7 @@ export const GuideStarButton = (props: ButtonProps) => {
 
     return (
         <>
-            <Tooltip title={`Click to find and add guide stars for selected target`}>
+            <Tooltip title={`Click to find and add guide stars for selected target(s)`}>
                 <IconButton color="primary" onClick={handleClickOpen}>
                     <AutoAwesomeIcon />
                 </IconButton>

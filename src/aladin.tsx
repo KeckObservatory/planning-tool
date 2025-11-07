@@ -198,6 +198,7 @@ export default function AladinViewer(props: Props) {
         })
 
 
+        console.log('adding catalog:', name, targets)
         for (let idx = 0; idx < targets.length; idx++) {
             const tgt = targets[idx]
             const popupTitle = tgt.name ?? (tgt.target_name ?? tgt._id)
@@ -206,11 +207,10 @@ export default function AladinViewer(props: Props) {
                 name: tgt.name ?? (tgt.target_name ?? tgt._id),
                 popupTitle: popupTitle + ':' + JSON.stringify(idx),
                 size: 4,
-                selectionColor: '#89CFF0',
                 popupDesc: `<t> RA: ${tgt.ra} <br /> Dec: ${tgt.dec}</t>`
             }
-            const ra = tgt.ra_deg ? tgt.ra_deg : ra_dec_to_deg(tgt.ra as string)
-            const dec = tgt.dec_deg ? tgt.dec_deg : ra_dec_to_deg(tgt.dec as string, true)
+            const ra = tgt.ra_deg ?? ra_dec_to_deg(tgt.ra as string)
+            const dec = tgt.dec_deg ?? ra_dec_to_deg(tgt.dec as string, true)
             if (ra && dec) {
                 cat.addSources(A.marker(ra, dec, options));
             }
