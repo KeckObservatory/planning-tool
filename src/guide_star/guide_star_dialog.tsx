@@ -126,6 +126,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     useEffect(() => {
         const fun = async () => {
             const cats = await get_catalogs()
+            setCatalog(cats.at(0))
             setCatalogs(cats)
         }
         fun()
@@ -148,7 +149,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             }
         }
         fun()
-    }, [target])
+    }, [catalog, target])
 
     React.useEffect(() => {
         const fun = async () => {
