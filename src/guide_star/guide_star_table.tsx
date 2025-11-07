@@ -9,51 +9,40 @@ import { Target, useSnackbarContext, useStateContext } from '../App.tsx';
 import { v4 as randomId } from 'uuid';
 import { convert_schema_to_columns } from '../target_table.tsx';
 import { IconButton } from '@mui/material';
-import { GuideStarTarget } from './guide_star_dialog.tsx';
+import { CatalogTarget } from './guide_star_dialog.tsx';
 import React from 'react';
 import { create_new_target } from '../table_toolbar.tsx';
 import { submit_target } from '../api/api_root.tsx';
 
-// interface CatalogStarData {
-//     name: string;
-//     ra: string;
-//     dec: string;
-//     equinox: number;
-//     pm_ra: number;
-//     pm_dec: number;
-//     dra: number;
-//     ddec: number;
-//     spec_type: string;
-//     galaxy: number;
-//     mag: number;
-//     vmag: number;
-//     rmag: number;
-//     jmag: number;
-//     hmag: number;
-//     kmag: number;
-//     dist: number;
-//     b_vmag: number;
-//     b_rmag: number;
-// }
-
 interface AddGuideStarButtonProps {
-    target: GuideStarTarget;
+    guidestar: CatalogTarget;
     setRows?: React.Dispatch<React.SetStateAction<Target[]>>;
     science_target_name?: string;
 }
 
+const guidestar_to_target = (gs: CatalogTarget, mapping: object): Partial<Target> => {
+    let tgt = Object.fromEntries(Object.entries(gs).map(([key, value]) => {
+        if (key in mapping) {
+            return [mapping[key as keyof object], value];
+        } else {
+            return [key, value];
+        }
+    }));
+    return tgt ;
+}
+
 const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
-    const { target, science_target_name, setRows } = props
+    const { guidestar, science_target_name, setRows } = props
 
     const context = useStateContext()
     const snackbarContext = useSnackbarContext() 
 
     const handleClick = async () => {
         const id = randomId();
-        let newTarget = create_new_target(id, context.obsid, target.target_name)
+        let newTarget = create_new_target(id, context.obsid, guidestar.name)
         newTarget = {
             ...newTarget,
-            ...target, 
+            ...guidestar_to_target(guidestar, context.config.catalog_to_target_map), 
             tags: [...(newTarget.tags ?? []), 'guide_star for ' + (science_target_name ?? '')],
         }
         const resp = await submit_target([newTarget])
@@ -80,7 +69,7 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
 
 
 interface Props {
-    targets?: GuideStarTarget[];
+    targets?: CatalogTarget[];
     setRows?: React.Dispatch<React.SetStateAction<Target[]>>;
     science_target_name?: string;
     selectedGuideStarName?: string;
@@ -110,11 +99,11 @@ export default function GuideStarTable(props: Props) {
         return [col.field, visible]
     }));
 
-    const ActionsCell = (params: GridRowParams<GuideStarTarget>) => {
+    const ActionsCell = (params: GridRowParams<CatalogTarget>) => {
         const { row } = params;
         return [
             <AddGuideStarButton
-                target={row}
+                guidestar={row}
                 science_target_name={science_target_name}
                 setRows={props.setRows}
             />
@@ -152,7 +141,7 @@ export default function GuideStarTable(props: Props) {
         >
             {Object.keys(visibleColumns).length > 0 && (
                 <DataGrid
-                    getRowId={(row: GuideStarTarget) => row.target_name}
+                    getRowId={(row: CatalogTarget) => row.name}
                     rows={targets ?? []}
                     columns={columns}
                     rowSelectionModel={rowSelectModel}

@@ -5,13 +5,14 @@ import A from 'aladin-lite'
 import { useDebounceCallback } from "./use_debounce_callback.tsx"
 import { Feature, FeatureCollection, MultiPolygon, Polygon, Position } from 'geojson'
 import { get_shapes } from "./two-d-view/two_d_view.tsx"
+import { CatalogTarget } from "./guide_star/guide_star_dialog.tsx"
 
 interface Props {
     width: number,
     height: number,
     instrumentFOV: string,
     targets: Target[],
-    guideStars?: Target[],
+    guideStars?: CatalogTarget[],
     fovAngle: number
     positionAngle: number
     selectCallback?: (targetName: string) => void
@@ -181,7 +182,7 @@ export default function AladinViewer(props: Props) {
         canvasCtx.fill();
     };
 
-    const add_catalog = (alad: any, targets: Target[], name = 'Targets') => {
+    const add_catalog = (alad: any, targets: (Target & CatalogTarget)[], name = 'Targets') => {
         //var cat = A.catalog({ name: name, sourceSize: 4, shape: drawFunction});
 
         if (name === 'Targets') {
@@ -196,12 +197,14 @@ export default function AladinViewer(props: Props) {
             setZoom(zoom)
         })
 
+
         for (let idx = 0; idx < targets.length; idx++) {
             const tgt = targets[idx]
+            const popupTitle = tgt.name ?? (tgt.target_name ?? tgt._id)
             const options = {
                 idx: idx,
-                name: tgt.target_name ?? tgt._id,
-                popupTitle: tgt.target_name + ':' + JSON.stringify(idx),
+                name: tgt.name ?? (tgt.target_name ?? tgt._id),
+                popupTitle: popupTitle + ':' + JSON.stringify(idx),
                 size: 4,
                 selectionColor: '#89CFF0',
                 popupDesc: `<t> RA: ${tgt.ra} <br /> Dec: ${tgt.dec}</t>`
@@ -211,10 +214,6 @@ export default function AladinViewer(props: Props) {
             if (ra && dec) {
                 cat.addSources(A.marker(ra, dec, options));
             }
-            // tgt.ra &&
-            //     cat.addSources(
-            //         A.marker(ra_dec_to_deg(tgt.ra as string),
-            //             ra_dec_to_deg(tgt.dec as string, true), options));
         }
     }
 
@@ -275,8 +274,8 @@ export default function AladinViewer(props: Props) {
             setFOV(() => [...fovz.fov])
             setAladin(alad)
             setCompass(newCompass)
-            props.targets && add_catalog(alad, props.targets)
-            props.guideStars && add_catalog(alad, props.guideStars, 'Guide Stars')
+            props.targets && add_catalog(alad, props.targets as (Target & CatalogTarget)[], 'Targets')
+            props.guideStars && add_catalog(alad, props.guideStars as (Target & CatalogTarget)[], 'Guide Stars')
             alad.setViewCenter2NorthPoleAngle(props.positionAngle)
         })
     }

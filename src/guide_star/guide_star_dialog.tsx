@@ -8,71 +8,32 @@ import { Target } from '../App';
 import { Autocomplete, Stack, TextField } from '@mui/material';
 import { DialogComponent } from '../dialog_component';
 import GuideStarTable from './guide_star_table';
-import { SimbadTargetData } from '../catalog_button';
+import { ra_dec_to_deg, SimbadTargetData } from '../catalog_button';
 import { FOVSelect } from '../two-d-view/fov_select';
 import { get_shapes } from '../two-d-view/two_d_view';
 import { StringParam, useQueryParam, withDefault } from 'use-query-params';
+import { get_catalog_targets, get_catalogs } from '../api/api_root';
 
-export interface GuideStarTarget extends SimbadTargetData {
-    target_name: string;
+export interface CatalogTarget {
+    name: string;
+    ra: string;
+    dec: string;
+    equinox: number;
+    pm_ra: number;
+    pm_dec: number;
+    dra: number;
+    ddec: number;
+    jmag: number;
+    rmag: number;
+    vmag: number;
+    hmag: number;
+    kmag: number;
+    spec_type: string | null
+    galaxy: number
+    dist: number
+    "B-V": number
+    "B-R": number
 }
-
-export const guidestartargets: GuideStarTarget[] = [
-    {
-        "dec": "+30:39:36.630403128",
-        "dec_deg": 30.960175112,
-        "epoch": "J2000",
-        "equinox": "2000",
-        "g_mag": 15.113876,
-        "j_mag": 5.039,
-        "pm_dec": 0.827,
-        "pm_ra": 0.707,
-        "ra": "01:33:50.8965749232",
-        "ra_deg": 23.3620690622,
-        "systemic_velocity": -179.2,
-        "target_name": "M33 buddy"
-    },
-    {
-        "dec": "+30:39:36.630403128",
-        "dec_deg": 30.660175112,
-        "epoch": "J2000",
-        "equinox": "2000",
-        "g_mag": 15.113876,
-        "j_mag": 5.039,
-        "pm_dec": 0.827,
-        "pm_ra": 0.707,
-        "ra": "01:33:50.8965749232",
-        "ra_deg": 23.1620690622,
-        "target_name": "M33 buddy 4"
-    },
-    {
-        "dec": "+30:39:36.630403128",
-        "dec_deg": 30.560175112,
-        "epoch": "J2000",
-        "equinox": "2000",
-        "g_mag": 15.113876,
-        "j_mag": 5.039,
-        "pm_dec": 0.827,
-        "pm_ra": 0.707,
-        "ra": "01:33:50.8965749232",
-        "ra_deg": 23.4620690622,
-        "target_name": "M33 buddy 2"
-    },
-    {
-        "dec": "+30:39:36.630403128",
-        "dec_deg": 30.560175112,
-        "epoch": "J2000",
-        "equinox": "2000",
-        "g_mag": 15.113876,
-        "j_mag": 5.039,
-        "pm_dec": 0.827,
-        "pm_ra": 0.707,
-        "ra": "01:33:50.8965749232",
-        "ra_deg": 23.5620690622,
-        "target_name": "M33 buddy 3"
-    }
-]
-
 
 interface ButtonProps {
     targets: Target[]
@@ -87,9 +48,7 @@ const width = 500
 
 interface VizDialogProps {
     open: boolean,
-    target: Target,
     setRows: React.Dispatch<React.SetStateAction<Target[]>>
-    setTarget: (t: Target) => void
     targets: Target[]
     handleClose: () => void
 }
@@ -100,17 +59,9 @@ interface SemesterSelectProps {
 }
 
 export const GuideStarButton = (props: ButtonProps) => {
-    const { targets, setRows } = props
-    let initTarget = targets.at(0) ?? {} as Target
-    const [target, setTarget] = useState<Target>(initTarget)
-    const [open, setOpen] = React.useState(false);
 
-    useEffect(() => {
-        if (targets.length > 0) {
-            const target = targets.at(0) ?? {} as Target
-            setTarget(target)
-        }
-    }, [targets])
+    const { targets, setRows } = props
+    const [open, setOpen] = React.useState(false);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -122,7 +73,7 @@ export const GuideStarButton = (props: ButtonProps) => {
 
     return (
         <>
-            <Tooltip title={`Click to find and add guide stars for ${target.target_name ?? target._id}`}>
+            <Tooltip title={`Click to find and add guide stars for selected target`}>
                 <IconButton color="primary" onClick={handleClickOpen}>
                     <AutoAwesomeIcon />
                 </IconButton>
@@ -130,8 +81,6 @@ export const GuideStarButton = (props: ButtonProps) => {
             {open &&
                 <GuideStarDialog
                     open={open}
-                    target={target}
-                    setTarget={setTarget}
                     targets={targets}
                     handleClose={handleClose}
                     setRows={setRows}
@@ -162,10 +111,44 @@ export const SemesterSelect = (props: SemesterSelectProps) => {
 
 export const GuideStarDialog = (props: VizDialogProps) => {
     // target must have ra dec and be defined
-    const { target, setTarget, targets, open, setRows } = props
+    const { targets, open, setRows } = props
     const [guideStarName, setGuideStarName] = useState<string>('')
     const [instrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
     const [fovs, setFOVs] = React.useState<string[]>([])
+
+    let initTarget = targets.at(0) ?? {} as Target
+    const [target, setTarget] = useState<Target>(initTarget)
+    const [guidestars, setGuideStars] = useState<CatalogTarget[]>([])
+
+    const [catalog, setCatalog] = useState<string | undefined>(undefined)
+    const [catalogs, setCatalogs] = useState<string[]>([])
+
+    useEffect(() => {
+        const fun = async () => {
+            const cats = await get_catalogs()
+            setCatalogs(cats)
+        }
+        fun()
+    }, [])
+
+    useEffect(() => {
+        if (targets.length > 0) {
+            const target = targets.at(0) ?? {} as Target
+            setTarget(target)
+        }
+    }, [targets])
+
+    useEffect(() => {
+        const fun = async () => {
+            const ra = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
+            const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
+            if (catalog) {
+                const tgts = await get_catalog_targets(catalog, ra, dec, 0.5)
+                setGuideStars(tgts)
+            }
+        }
+        fun()
+    }, [target])
 
     React.useEffect(() => {
         const fun = async () => {
@@ -206,6 +189,17 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             }}
             direction='column'>
             <Stack direction='row' spacing={1}>
+                <Tooltip title={'Select Guide Star from Catalog'}>
+                    <Autocomplete
+                        disablePortal
+                        id="selected-catalog"
+                        value={catalog}
+                        onChange={(_, value) => value && (setCatalog(value))}
+                        options={catalogs}
+                        sx={{ width: 250 }}
+                        renderInput={(params) => <TextField {...params} label={'Selected Catalog'} />}
+                    />
+                </Tooltip>
                 <Tooltip title={'Target'}>
                     <Autocomplete
                         disablePortal
@@ -224,7 +218,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             <Stack direction='row' spacing={2} sx={{ marginTop: '16px' }}>
                 <AladinViewer
                     targets={[target]}
-                    guideStars={guidestartargets as Target[]}
+                    guideStars={guidestars}
                     positionAngle={target.rotator_pa ?? 0}
                     fovAngle={0}
                     instrumentFOV={instrumentFOV}
@@ -236,7 +230,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 <GuideStarTable 
                     selectedGuideStarName={guideStarName} 
                     setSelectedGuideStarName={setGuideStarName} 
-                    targets={guidestartargets} 
+                    targets={guidestars} 
                     setRows={setRows}
                     science_target_name={target.target_name ?? target._id}
                 />
