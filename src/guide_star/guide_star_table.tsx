@@ -13,6 +13,7 @@ import { CatalogTarget } from './guide_star_dialog.tsx';
 import React from 'react';
 import { create_new_target } from '../table_toolbar.tsx';
 import { submit_target } from '../api/api_root.tsx';
+import { ra_dec_to_deg } from '../catalog_button.tsx';
 
 interface AddGuideStarButtonProps {
     guidestar: CatalogTarget;
@@ -20,14 +21,19 @@ interface AddGuideStarButtonProps {
     science_target_name?: string;
 }
 
-const guidestar_to_target = (gs: CatalogTarget, mapping: object): Partial<Target> => {
-    let tgt = Object.fromEntries(Object.entries(gs).map(([key, value]) => {
+const guidestar_to_target = (guidestar: CatalogTarget, mapping: object): Partial<Target> => {
+    let tgt = Object.fromEntries(Object.entries(guidestar).map(([key, value]) => {
         if (key in mapping) {
             return [mapping[key as keyof object], value];
         } else {
             return [key, value];
         }
+
     }));
+    tgt.ra = tgt.ra.replace(/\s+/g, '');
+    tgt.dec = tgt.dec.replace(/\s+/g, '');
+    tgt.ra_deg = tgt.ra_deg ?? ra_dec_to_deg(tgt.ra as string);
+    tgt.dec_deg = tgt.dec_deg ?? ra_dec_to_deg(tgt.dec as string, true);
     return tgt ;
 }
 
