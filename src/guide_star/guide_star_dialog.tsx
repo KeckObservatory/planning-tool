@@ -99,7 +99,7 @@ export const guidestar_to_target = (guidestar: CatalogTarget, mapping: object): 
     tgt.dec = tgt.dec.replace(/\s+/g, '');
     tgt.ra_deg = tgt.ra_deg ?? ra_dec_to_deg(tgt.ra as string);
     tgt.dec_deg = tgt.dec_deg ?? ra_dec_to_deg(tgt.dec as string, true);
-    return tgt ;
+    return tgt;
 }
 
 
@@ -124,8 +124,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const cats = await get_catalogs()
 
             console.log('available catalogs:', cats, 'setting catalog to:', cats.at(0))
-            setCatalog(cats.at(0))
             setCatalogs(cats)
+            setCatalog(cats.at(0))
         }
         fun()
     }, [])
@@ -199,17 +199,21 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             }}
             direction='column'>
             <Stack direction='row' spacing={1}>
-                <Tooltip title={'Select Guide Star from Catalog'}>
-                    <Autocomplete
-                        disablePortal
-                        id="selected-catalog"
-                        value={catalog}
-                        onChange={(_, value) => value && (setCatalog(value))}
-                        options={catalogs}
-                        sx={{ width: 250 }}
-                        renderInput={(params) => <TextField {...params} label={'Selected Catalog'} />}
-                    />
-                </Tooltip>
+                {
+                    catalog && (
+                        <Tooltip title={'Select Guide Star from Catalog'}>
+                            <Autocomplete
+                                disablePortal
+                                id="selected-catalog"
+                                value={catalog}
+                                onChange={(_, value) => value && (setCatalog(value))}
+                                options={catalogs}
+                                sx={{ width: 200 }}
+                                renderInput={(params) => <TextField {...params} label={'Selected Catalog'} />}
+                            />
+                        </Tooltip>
+                    )
+                }
                 <Tooltip title={'Target'}>
                     <Autocomplete
                         disablePortal
@@ -217,7 +221,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         value={target.target_name ?? target._id}
                         onChange={(_, value) => value && onTargetNameSelect(value)}
                         options={targets.map(target => target.target_name ?? target._id)}
-                        sx={{ width: 250 }}
+                        sx={{ width: 200 }}
                         renderInput={(params) => <TextField {...params} label={'Selected Target'} />}
                     />
                 </Tooltip>
