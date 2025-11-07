@@ -53,11 +53,6 @@ interface VizDialogProps {
     handleClose: () => void
 }
 
-interface SemesterSelectProps {
-    semester: string
-    setSemester: (semester: string) => void
-}
-
 export const GuideStarButton = (props: ButtonProps) => {
 
     const { targets, setRows } = props
