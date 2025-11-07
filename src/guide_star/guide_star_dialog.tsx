@@ -4,7 +4,7 @@ import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import AladinViewer from '../aladin';
 
-import { Target } from '../App';
+import { Target, useStateContext } from '../App';
 import { Autocomplete, Stack, TextField } from '@mui/material';
 import { DialogComponent } from '../dialog_component';
 import GuideStarTable from './guide_star_table';
@@ -85,8 +85,27 @@ export const GuideStarButton = (props: ButtonProps) => {
     );
 }
 
+export const guidestar_to_target = (guidestar: CatalogTarget, mapping: object): Partial<Target> => {
+    let tgt = Object.fromEntries(Object.entries(guidestar).map(([key, value]) => {
+        if (key in mapping) {
+            return [mapping[key as keyof object], value];
+        } else {
+            return [key, value];
+        }
+
+    }));
+    tgt.ra = tgt.ra.replace(/\s+/g, '');
+    tgt.dec = tgt.dec.replace(/\s+/g, '');
+    tgt.ra_deg = tgt.ra_deg ?? ra_dec_to_deg(tgt.ra as string);
+    tgt.dec_deg = tgt.dec_deg ?? ra_dec_to_deg(tgt.dec as string, true);
+    return tgt ;
+}
+
+
 export const GuideStarDialog = (props: VizDialogProps) => {
     // target must have ra dec and be defined
+
+    const context = useStateContext()
     const { targets, open, setRows } = props
     const [guideStarName, setGuideStarName] = useState<string>('')
     const [instrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
@@ -94,7 +113,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     let initTarget = targets.at(0) ?? {} as Target
     const [target, setTarget] = useState<Target>(initTarget)
-    const [guidestars, setGuideStars] = useState<CatalogTarget[]>([])
+    const [guidestars, setGuideStars] = useState<Partial<Target>[]>([])
 
     const [catalog, setCatalog] = useState<string | undefined>(undefined)
     const [catalogs, setCatalogs] = useState<string[]>([])
@@ -102,6 +121,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     useEffect(() => {
         const fun = async () => {
             const cats = await get_catalogs()
+
             console.log('available catalogs:', cats, 'setting catalog to:', cats.at(0))
             setCatalog(cats.at(0))
             setCatalogs(cats)
@@ -122,8 +142,14 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
             if (catalog) {
                 const gs = await get_catalog_targets(catalog, ra, dec, 0.5)
+
+                const gsTgts = gs.map((star: CatalogTarget) => {
+                    const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
+                    return tgt
+                })
+
                 console.log('setting guide stars:', gs)
-                setGuideStars(gs)
+                setGuideStars(gsTgts)
             }
         }
         fun()
@@ -143,7 +169,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     const onGuideStarNameSelect = (name: string) => {
         if (name !== guideStarName) { //ignore setting guide star if the target is selected
-            let newGuideStar = guidestars.find((gs: CatalogTarget) => gs.name === name)
+            let newGuideStar = guidestars.find((gs: Partial<Target>) => gs.target_name === name)
             if (newGuideStar) {
                 setGuideStarName(name)
             }

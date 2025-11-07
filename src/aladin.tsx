@@ -5,14 +5,13 @@ import A from 'aladin-lite'
 import { useDebounceCallback } from "./use_debounce_callback.tsx"
 import { Feature, FeatureCollection, MultiPolygon, Polygon, Position } from 'geojson'
 import { get_shapes } from "./two-d-view/two_d_view.tsx"
-import { CatalogTarget } from "./guide_star/guide_star_dialog.tsx"
 
 interface Props {
     width: number,
     height: number,
     instrumentFOV: string,
     targets: Target[],
-    guideStars?: CatalogTarget[],
+    guideStars?: Partial<Target>[],
     fovAngle: number
     positionAngle: number
     selectCallback?: (targetName: string) => void
@@ -176,7 +175,7 @@ export default function AladinViewer(props: Props) {
         canvasCtx.fill();
     };
 
-    const add_catalog = (alad: any, targets: (Target & CatalogTarget)[], name = 'Targets') => {
+    const add_catalog = (alad: any, targets: Partial<Target>[], name = 'Targets') => {
         //var cat = A.catalog({ name: name, sourceSize: 4, shape: drawFunction});
 
         if (name === 'Targets') {
@@ -194,10 +193,10 @@ export default function AladinViewer(props: Props) {
 
         for (let idx = 0; idx < targets.length; idx++) {
             const tgt = targets[idx]
-            const popupTitle = tgt.name ?? (tgt.target_name ?? tgt._id)
+            const popupTitle = tgt.target_name ?? tgt._id ?? 'Unknown'
             const options = {
                 idx: idx,
-                name: tgt.name ?? (tgt.target_name ?? tgt._id),
+                name: tgt.target_name ?? tgt._id ?? 'Unknown',
                 popupTitle: popupTitle + ':' + JSON.stringify(idx),
                 size: 4,
                 popupDesc: `<t> RA: ${tgt.ra} <br /> Dec: ${tgt.dec}</t>`
@@ -262,8 +261,8 @@ export default function AladinViewer(props: Props) {
             setFOV(() => [...fovz.fov])
             setAladin(alad)
             setCompass(newCompass)
-            props.targets && add_catalog(alad, props.targets as (Target & CatalogTarget)[], 'Targets')
-            props.guideStars && add_catalog(alad, props.guideStars as (Target & CatalogTarget)[], 'Guide Stars')
+            props.targets && add_catalog(alad, props.targets, 'Targets')
+            props.guideStars && add_catalog(alad, props.guideStars, 'Guide Stars')
             alad.setViewCenter2NorthPoleAngle(props.positionAngle)
         })
     }
@@ -277,7 +276,7 @@ export default function AladinViewer(props: Props) {
         //remove old catalog and add new one
         if (!aladin || !props.guideStars) return
         aladin.removeOverlay('Guide Stars')
-        add_catalog(aladin, props.guideStars as (Target & CatalogTarget)[], 'Guide Stars')
+        add_catalog(aladin, props.guideStars, 'Guide Stars')
     }, [props.guideStars])
 
 
