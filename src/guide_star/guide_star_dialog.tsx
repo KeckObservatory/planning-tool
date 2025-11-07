@@ -90,25 +90,6 @@ export const GuideStarButton = (props: ButtonProps) => {
     );
 }
 
-export const SemesterSelect = (props: SemesterSelectProps) => {
-    const { semester, setSemester } = props
-    const handleSemesterChange = (semester?: string) => {
-        if (semester) setSemester(semester)
-    }
-    return (
-        <Tooltip title="Select Semester visibility Range.">
-            <TextField
-                // focused
-                label={'Semester Select'}
-                id="target-name"
-                value={semester}
-                onChange={(event) => handleSemesterChange(event.target.value)}
-            />
-        </Tooltip>
-    )
-}
-
-
 export const GuideStarDialog = (props: VizDialogProps) => {
     // target must have ra dec and be defined
     const { targets, open, setRows } = props
@@ -126,6 +107,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     useEffect(() => {
         const fun = async () => {
             const cats = await get_catalogs()
+            console.log('available catalogs:', cats, 'setting catalog to:', cats.at(0))
             setCatalog(cats.at(0))
             setCatalogs(cats)
         }
