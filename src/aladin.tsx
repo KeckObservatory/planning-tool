@@ -286,6 +286,16 @@ export default function AladinViewer(props: Props) {
 
 
     React.useEffect(() => {
+        //remove old catalog and add new one
+        if (!aladin || !props.guideStars) return
+        console.log('removing overlay')
+        aladin.removeOverlay('Guide Stars')
+        console.log('adding new guide star catalog')
+        add_catalog(aladin, props.guideStars as (Target & CatalogTarget)[], 'Guide Stars')
+    }, [props.guideStars])
+
+
+    React.useEffect(() => {
         if(!aladin) return
         debounced_update_shapes(aladin)
     }, [aladin, props.instrumentFOV, zoom, props.fovAngle, props.positionAngle])

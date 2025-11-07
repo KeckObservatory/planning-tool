@@ -213,26 +213,29 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         renderInput={(params) => <TextField {...params} label={'Selected Target'} />}
                     />
                 </Tooltip>
-                <FOVSelect 
+                <FOVSelect
                     fovs={fovs}
                 />
             </Stack>
             <Stack direction='row' spacing={2} sx={{ marginTop: '16px' }}>
-                <AladinViewer
-                    targets={[target]}
-                    guideStars={guidestars}
-                    positionAngle={target.rotator_pa ?? 0}
-                    fovAngle={0}
-                    instrumentFOV={instrumentFOV}
-                    height={height}
-                    width={width}
-                    selectCallback={onGuideStarNameSelect}
+                {
+                    guidestars.length > 0 &&
+                    (<AladinViewer
+                        targets={[target]}
+                        guideStars={guidestars}
+                        positionAngle={target.rotator_pa ?? 0}
+                        fovAngle={0}
+                        instrumentFOV={instrumentFOV}
+                        height={height}
+                        width={width}
+                        selectCallback={onGuideStarNameSelect}
+                        selectedGuideStarName={guideStarName}
+                    />)
+                }
+                <GuideStarTable
                     selectedGuideStarName={guideStarName}
-                />
-                <GuideStarTable 
-                    selectedGuideStarName={guideStarName} 
-                    setSelectedGuideStarName={setGuideStarName} 
-                    targets={guidestars} 
+                    setSelectedGuideStarName={setGuideStarName}
+                    targets={guidestars}
                     setRows={setRows}
                     science_target_name={target.target_name ?? target._id}
                 />
