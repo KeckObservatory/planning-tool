@@ -160,9 +160,7 @@ export default function AladinViewer(props: Props) {
                 if (cat.name === 'Guide Stars') {
                     console.log("Found guide star catalog:", cat)
                     cat.select( (source: any) => {
-                        if (source.popupTitle.startsWith(props.selectedGuideStarName + ':')) {
-                            console.log("Found source to select:", source)
-                        }
+                        console.log("source to maybe select:", source)
                         return source.popupTitle.startsWith(props.selectedGuideStarName + ':')
                     })
                 }
