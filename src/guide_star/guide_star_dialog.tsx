@@ -13,6 +13,7 @@ import { FOVSelect } from '../two-d-view/fov_select';
 import { get_shapes } from '../two-d-view/two_d_view';
 import { StringParam, useQueryParam, withDefault } from 'use-query-params';
 import { get_catalog_targets, get_catalogs } from '../api/api_root';
+import UploadDialog from '../upload_targets_dialog';
 
 export interface CatalogTarget {
     name: string;
@@ -222,6 +223,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 </Tooltip>
                 <FOVSelect
                     fovs={fovs}
+                />
+                <UploadDialog
+                    setTargets={setGuideStars}
                 />
             </Stack>
             <Stack direction='row' spacing={2} sx={{ marginTop: '16px' }}>
