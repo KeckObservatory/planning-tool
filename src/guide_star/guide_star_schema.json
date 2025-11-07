@@ -3,7 +3,7 @@
     "description": "This document defines the schema for the Keck Star List Targets",
     "type": "object",
     "properties": {
-        "target_name": {
+        "name": {
             "type": "string",
             "minLength": 1,
             "maxLength": 15,
@@ -11,86 +11,39 @@
             "short_description": "Target Name",
             "description": "Target Name. Alpha-numeric, hyphen, underscore, and space characters only"
         },
-        "semids": {
-            "type": "array",
-            "short_description": "Semids",
-            "description": "Semester Ids, comma separated",
-            "items": {
-                "description": "comprised of semids that other coobservers can view/edit",
-                "type": "string",
-                "pattern": "^[^,]+$"
-            }
-        },
-        "tags": {
-            "type": "array",
-            "short_description": "Tags",
-            "description": "Tags, comma separated",
-            "items": {
-                "description": "Tag comprised of characters other than comma",
-                "type": "string",
-                "pattern": "^[^,]+$"
-            }
-        },
-        "rotator_mode": {
-            "type": "string",
-            "description": "Rotator Mode",
-            "enum": [
-                "pa",
-                "vertical",
-                "stationary"
-            ]
-        },
-        "rotator_pa": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 360,
-            "short_description": "Pointing Angle",
-            "description": "Rotator Pointing Angle in degrees"
-        },
-        "obsid": {
-            "type": "number",
-            "description": "Keck Observer ID",
-            "not_editable_by_user": false
-        },
-        "lgs": {
-            "type":  ["number", "string"],
-            "description": "Is LGS target",
-            "short_description": "LGS",
-            "pattern": "^[10]$"
-        },
-        "v_mag": {
+        "vmag": {
             "type":  ["number", "string"],
             "description": "V Magnitude",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
-        "r_mag": {
+        "rmag": {
             "type":  ["number", "string"],
             "description": "R Magnitude. Relavent for AO observations with the optical WFS.",
             "short_description": "R Magnitude",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
-        "b_mag": {
-            "type":  ["number", "string"],
-            "description": "B Magnitude. Relavent for AO observations with the optical WFS.",
-            "short_description": "B Magnitude",
-            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
-        },
-        "h_mag": {
+        "hmag": {
             "type":  ["number", "string"],
             "description": "H Magnitude. Relavent fro AO observations with TRICK.",
             "short_description": "H Magnitude",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
-        "k_mag": {
+        "kmag": {
             "type":  ["number", "string"],
             "description": "K Magnitude relavent for AO observations with TRICK.",
             "short_description": "K Magnitude",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
-        "g_mag": {
+        "B-V": {
             "type":  ["number", "string"],
-            "description": "G Magnitude usually imported from SIMBAD.",
-            "short_description": "G Magnitude",
+            "description": "B-V Magnitude",
+            "short_description": "B-V Magnitude",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+        },
+        "B-R": {
+            "type":  ["number", "string"],
+            "description": "B-R Magnitude",
+            "short_description": "B-R Magnitude",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "j_mag": {
@@ -104,18 +57,13 @@
             "description": "Equinox",
             "pattern": "^\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
-        "epoch": {
-            "type":  "string",
-            "description": "Epoch specific date and time (J2000)",
-            "short_description": "Epoch",
-            "pattern": "^\\w?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"},
-        "d_dec": {
+        "ddec": {
             "type":  ["number", "string"],
             "short_description": "dDec",
             "description": "Differential tracking in arcseconds Dec/hour",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
-        "d_ra": {
+        "dra": {
             "type":  ["number", "string"],
             "short_description": "dRA",
             "description": "Differential tracking in arcseconds RA/hour divided by 15 (positive is east)",
@@ -133,18 +81,6 @@
             "description": "Proper Motion in arcseconds RA/second",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
-        "ra_offset": {
-            "type":  ["number", "string"],
-            "short_description": "RA Offset [arcseconds])",
-            "description": "Right Ascension Offset in arcseconds (positive is east)",
-            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
-        },
-        "dec_offset": {
-            "type":  ["number", "string"],
-            "short_description": "Dec Offset [arcseconds]",
-            "description": "Declination Offset in arcseconds (positive is north)",
-            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
-        },
         "ra": {
             "type": "string",
             "short_description": "RA",
@@ -156,62 +92,9 @@
             "short_description": "Dec",
             "description": "Declination [(+/-)DD:MM:SS.SSSS]",
             "pattern": "^([\\-\\+]?\\d{2}:\\d{2}:\\d{2}\\.?\\d*)$"
-        },
-        "ra_deg": {
-            "type": "number",
-            "short_description": "RA [deg]",
-            "description": "Right Ascension in degrees"
-        },
-        "dec_deg": {
-            "type": "number",
-            "short_description": "Dec [deg]",
-            "description": "Declination in degrees"
-        },
-        "telescope_wrap": {
-            "type": "string",
-            "short_description": "Telescope Wrap",
-            "description": "Telescope Azimuth Wrap. South is clockwise with az increasing, North is counter clockwise with az decreasing",
-            "enum": [
-                "shortest",
-                "south",
-                "north"
-            ]
-        },
-        "comment": {
-            "type": "string",
-            "description": "Notes/comments"
-        },
-        "_id": {
-            "type": "string",
-            "description": "target identifier for table",
-            "not_editable_by_user": true
-        },
-        "tic_id": {
-            "type": "string",
-            "short_description": "TIC ID",
-            "description": "TIC Identifier"
-        },
-        "gaia_id": {
-            "type": "string",
-            "short_description": "GAIA ID",
-            "description": "GAIA Identifier"
-        },
-        "status": {
-            "type": "string",
-            "description": "Status of the target. Used to track row edits vs form edits",
-            "not_editable_by_user": true, 
-            "enum": [
-                "EDITED",
-                "CREATED"
-            ]
         }
     },
     "required": [
-        "_id",
-        "target_name",
-        "ra",
-        "dec",
-        "equinox"
     ],
     "additionalProperties": true
 }

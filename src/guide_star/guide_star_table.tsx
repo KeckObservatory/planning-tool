@@ -87,7 +87,7 @@ export default function GuideStarTable(props: Props) {
     const { guidestars, selectedGuideStarName, setSelectedGuideStarName, science_target_name } = props;
     const context = useStateContext()
     const cfg = context.config
-    let columns = convert_schema_to_columns(guide_star_schema as any); //TODO: convert guide star schema to columns
+    let columns = convert_schema_to_columns(guide_star_schema as any);
     const sortOrder = cfg.default_guide_star_table_columns;
     const [rowSelectModel, setRowSelectModel] = React.useState<any>([]);
 
