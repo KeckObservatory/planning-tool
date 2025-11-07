@@ -212,7 +212,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 <GuideStarTable
                     selectedGuideStarName={guideStarName}
                     setSelectedGuideStarName={setGuideStarName}
-                    targets={guidestars}
+                    guidestars={guidestars}
                     setRows={setRows}
                     science_target_name={target.target_name ?? target._id}
                 />
