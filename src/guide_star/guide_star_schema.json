@@ -11,6 +11,12 @@
             "short_description": "Target Name",
             "description": "Target Name. Alpha-numeric, hyphen, underscore, and space characters only"
         },
+        "dist": {
+            "type":  ["number", "string"],
+            "description": "Distance to the target in arcseconds",
+            "short_description": "Distance (arcsec)",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+        },
         "vmag": {
             "type":  ["number", "string"],
             "description": "V Magnitude",
@@ -24,7 +30,7 @@
         },
         "hmag": {
             "type":  ["number", "string"],
-            "description": "H Magnitude. Relavent fro AO observations with TRICK.",
+            "description": "H Magnitude. Relavent for AO observations with TRICK.",
             "short_description": "H Magnitude",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
@@ -46,7 +52,7 @@
             "short_description": "B-R Magnitude",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
-        "j_mag": {
+        "jmag": {
             "type":  ["number", "string"],
             "description": "G Magnitude usually imported from SIMBAD.",
             "short_description": "J Magnitude",
