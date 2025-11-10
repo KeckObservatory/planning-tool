@@ -1,7 +1,7 @@
 export const config = {
     "default_guide_star_table_columns": [
         "actions",
-        "name",
+        "target_name",
         "ra",
         "dec",
         "equinox",
