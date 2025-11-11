@@ -26,7 +26,8 @@ export const POSelect = (props: POSelectProps) => {
             setOptions([])
             return
         }
-        const filteredOptions = pointing_origins.features.filter((feature) => feature.properties?.instrument === instrument)
+        const filteredOptions = pointing_origins.features
+        .filter((feature) => instrument.includes(feature.properties?.instrument) )
             .map((feature) => feature.properties?.name ?? '')
         setOptions(filteredOptions)
     }, [pointing_origins, instrument])
