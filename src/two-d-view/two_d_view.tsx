@@ -20,7 +20,7 @@ import { createEnumParam, StringParam, useQueryParam, withDefault } from 'use-qu
 import html2canvas from 'html2canvas';
 import { SkyChartDataSummary } from './sky_chart_data_summary.tsx';
 import { FOVSelect } from './fov_select.tsx';
-import { POSelect } from './pointing_origin_select.tsx';
+import { POPointFeature, POPointingOriginCollection, POSelect } from './pointing_origin_select.tsx';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -150,13 +150,14 @@ const TwoDView = ({ targets }: Props) => {
     const [time, setTime] = React.useState(suncalcTimes.nadir)
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
     const [fovs, setFOVs] = React.useState<string[]>([])
-    const [pointingOrigins, setPointingOrigins] = React.useState<GeoJSON.FeatureCollection<GeoJSON.Point> | undefined>(undefined)
+    const [pointingOrigins, setPointingOrigins] = React.useState<POPointingOriginCollection | undefined>(undefined)
+    const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
     const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
 
     React.useEffect(() => {
         const fun = async () => {
             const featureCollection = await get_shapes('fov')
-            const pos = await get_shapes('pointing_origins') as FeatureCollection<GeoJSON.Point>
+            const pos = await get_shapes('pointing_origins') as POPointingOriginCollection 
             const features = featureCollection['features'].filter((feature: any) => {
                 return feature['properties'].type === 'FOV'
             })
@@ -316,6 +317,8 @@ const TwoDView = ({ targets }: Props) => {
                     <POSelect
                         pointing_origins={pointingOrigins}
                         instrument={instrumentFOV}
+                        selPointingOrigins={selPointingOrigins}
+                        setSelPointingOrigins={setSelPointingOrigins}
                     />
                     <Tooltip title={'Rotator angle for Field of View'}>
                         <TextField

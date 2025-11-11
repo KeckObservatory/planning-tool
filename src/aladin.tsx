@@ -3,7 +3,7 @@ import { ra_dec_to_deg, cosd, sind, r2d } from './two-d-view/sky_view_util.tsx'
 import { Target } from "./App"
 import A from 'aladin-lite'
 import { useDebounceCallback } from "./use_debounce_callback.tsx"
-import { Feature, FeatureCollection, MultiPolygon, Polygon, Position } from 'geojson'
+import { Feature, FeatureCollection, MultiPolygon, Polygon, Position, Point } from 'geojson'
 import { get_shapes } from "./two-d-view/two_d_view.tsx"
 
 interface Props {
@@ -12,6 +12,7 @@ interface Props {
     instrumentFOV: string,
     targets: Target[],
     guideStars?: Partial<Target>[],
+    pointingOrigins?: Feature<Point, { name?: string }>[],
     fovAngle: number
     positionAngle: number
     selectCallback?: (targetName: string) => void
@@ -209,7 +210,7 @@ export default function AladinViewer(props: Props) {
         }
     }
 
-    const update_shapes = async (aladin: any, updatefov = true, updateCompass = true) => {
+    const update_shapes = async (aladin: any, updatefov = true, updateCompass = true, updatePointingOrigins = true) => {
         if (updatefov) {
             const fovz = await get_fovz(aladin, props.instrumentFOV, props.fovAngle)
             setFOV(() => [...fovz.fov])
@@ -219,6 +220,17 @@ export default function AladinViewer(props: Props) {
             setCompass(newCompass)
             const aladinAngle = aladin.getViewCenter2NorthPoleAngle()
             aladin.setViewCenter2NorthPoleAngle(props.positionAngle + aladinAngle)
+        }
+        if (updatePointingOrigins && props.pointingOrigins) {
+            const pointingOrigins = props.pointingOrigins?.map((feature) => {
+                const [ra, dec] = feature.geometry.coordinates
+                const name = feature.properties?.name ?? 'Unknown'
+                return A.marker(ra, dec, { name: name, popupTitle: name })
+            })
+            const cat = A.catalog({ name: 'Pointing Origins', shape: 'diamond' });
+            aladin.removeOverlay('Pointing Origins')
+            aladin.addCatalog(cat);
+            pointingOrigins.forEach((marker) => cat.addSources(marker))
         }
 
     }

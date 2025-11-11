@@ -7,22 +7,36 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
+export interface POPointingOriginProperties {
+        name: string;
+        instrument: string;
+        xpos:  number;
+        ypos: number;
+        units: string;
+        source_file: string;
+}
+
+export interface POPointFeature extends GeoJSON.Feature<GeoJSON.Point, POPointingOriginProperties> {}
+export interface POPointingOriginCollection extends GeoJSON.FeatureCollection<GeoJSON.Point, POPointingOriginProperties> {}
+
+
 interface POSelectProps {
-    pointing_origins?: GeoJSON.FeatureCollection<GeoJSON.Point>
+    pointing_origins?: POPointingOriginCollection
+    selPointingOrigins: POPointFeature[]
+    setSelPointingOrigins: React.Dispatch<React.SetStateAction<POPointFeature[]>>
     instrument: string
 }
 
 export const POSelect = (props: POSelectProps) => {
-    const { pointing_origins, instrument } = props
-    const [pointingOrigin, setPointingOrigin] = React.useState<GeoJSON.Feature<GeoJSON.Point>[]>([])
-    const [options, setOptions] = React.useState<(GeoJSON.Feature<GeoJSON.Point> | undefined)[]>([])
+    const { pointing_origins, instrument, selPointingOrigins, setSelPointingOrigins } = props
+    const [options, setOptions] = React.useState<(POPointFeature | undefined)[]>([])
 
-    const onPointingOriginChange = (value: (GeoJSON.Feature<GeoJSON.Point> | undefined)[]) => {
+    const onPointingOriginChange = (value: (POPointFeature | undefined)[]) => {
         if (value?.includes(undefined)) {
-            setPointingOrigin([])
+            setSelPointingOrigins([])
         }
         else {
-            setPointingOrigin(value as GeoJSON.Feature<GeoJSON.Point>[])
+            setSelPointingOrigins(value as POPointFeature[])
         }
     }
 
@@ -43,7 +57,7 @@ export const POSelect = (props: POSelectProps) => {
             <Autocomplete
                 disablePortal
                 id="pointing-origin-selection"
-                value={pointingOrigin}
+                value={selPointingOrigins}
                 onChange={(_, value) => onPointingOriginChange(value)}
                 options={options}
                 sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}

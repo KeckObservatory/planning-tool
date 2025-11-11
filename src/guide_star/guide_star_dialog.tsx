@@ -14,8 +14,7 @@ import { get_shapes } from '../two-d-view/two_d_view';
 import { StringParam, useQueryParam, withDefault } from 'use-query-params';
 import { get_catalog_targets, get_catalogs } from '../api/api_root';
 import UploadDialog from '../upload_targets_dialog';
-import { FeatureCollection } from 'geojson';
-import { POSelect } from '../two-d-view/pointing_origin_select';
+import { POPointFeature, POPointingOriginCollection, POSelect } from '../two-d-view/pointing_origin_select';
 
 export interface CatalogTarget {
     name: string;
@@ -113,7 +112,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [guideStarName, setGuideStarName] = useState<string>('')
     const [instrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
     const [fovs, setFOVs] = React.useState<string[]>([])
-    const [pointingOrigins, setPointingOrigins] = React.useState<GeoJSON.FeatureCollection<GeoJSON.Point> | undefined>(undefined)
+    const [pointingOrigins, setPointingOrigins] = React.useState<POPointingOriginCollection | undefined>(undefined)
+    const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
 
     let initTarget = targets.at(0) ?? {} as Target
     const [target, setTarget] = useState<Target>(initTarget)
@@ -162,7 +162,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     React.useEffect(() => {
         const fun = async () => {
             const featureCollection = await get_shapes('fov')
-            const pos = await get_shapes('pointing_origins') as FeatureCollection<GeoJSON.Point>
+            const pos = await get_shapes('pointing_origins') as POPointingOriginCollection
             const features = featureCollection['features'].filter((feature: any) => {
                 return feature['properties'].type === 'FOV'
             })
@@ -237,6 +237,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 <POSelect
                     pointing_origins={pointingOrigins}
                     instrument={instrumentFOV}
+                    selPointingOrigins={selPointingOrigins}
+                    setSelPointingOrigins={setSelPointingOrigins}
                 />
                 <UploadDialog
                     setTargets={setGuideStars}
