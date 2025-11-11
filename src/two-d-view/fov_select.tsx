@@ -20,7 +20,7 @@ export const FOVSelect = (props: FOVSelectProps) => {
         <Tooltip placement="top" title="Select instrument field of view">
             <Autocomplete
                 disablePortal
-                id="semid-selection"
+                id="fov-selection"
                 value={{ label: instrumentFOV }}
                 onChange={(_, value) => onInstrumentFOVChange(value?.label)}
                 options={fovs.map((instr) => { return { label: instr } })}

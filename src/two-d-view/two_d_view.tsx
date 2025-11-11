@@ -56,10 +56,12 @@ interface SkyChartSelectProps {
     setSkyChart: (skyChart: SkyChart) => void
 }
 
-export type ShapeCatagory = 'fov' | 'compass_rose'
+export type ShapeCatagory = 'fov' | 'compass_rose' | 'pointing_origins' | 'vignetting_contours'
 interface ShapeCfgFile {
     fov: FeatureCollection<MultiPolygon>
     compass_rose: FeatureCollection<Polygon>
+    pointing_origins: FeatureCollection<GeoJSON.Geometry>
+    vignetting_contours: FeatureCollection<GeoJSON.MultiLineString>
 }
 
 
