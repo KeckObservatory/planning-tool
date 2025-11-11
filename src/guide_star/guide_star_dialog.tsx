@@ -125,8 +125,6 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     useEffect(() => {
         const fun = async () => {
             const cats = await get_catalogs()
-
-            console.log('available catalogs:', cats, 'setting catalog to:', cats.at(0))
             setCatalogs(cats)
             setCatalog(cats.at(0))
         }
@@ -151,8 +149,6 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
                     return tgt
                 })
-
-                console.log('setting guide stars:', gs)
                 setGuideStars(gsTgts)
             }
         }
@@ -169,7 +165,6 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
             setFOVs(newFovs)
             setPointingOrigins(pos)
-            console.log('pointing origins', pos)
         }
         fun()
     }, [])

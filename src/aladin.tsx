@@ -233,7 +233,7 @@ export default function AladinViewer(props: Props) {
             const name = feature.properties?.name ?? 'Unknown'
             return A.marker(pora, podec, { name: name, popupTitle: name })
         })
-        const cat = A.catalog({ name: 'Pointing Origins', shape: 'diamond' });
+        const cat = A.catalog({ name: 'Pointing Origins', shape: 'diamond', color: 'yellow' });
         markers.forEach((marker) => cat.addSources(marker))
         aladin.removeOverlay('Pointing Origins')
         aladin.addCatalog(cat);

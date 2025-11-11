@@ -41,7 +41,6 @@ export const POSelect = (props: POSelectProps) => {
     }
 
     useEffect(() => {
-        console.log('pointing origins', pointing_origins)
         if (!pointing_origins) {
             setOptions([])
             return
