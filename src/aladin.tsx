@@ -223,7 +223,9 @@ export default function AladinViewer(props: Props) {
         }
         if (updatePointingOrigins && props.pointingOrigins) {
             const pointingOrigins = props.pointingOrigins?.map((feature) => {
-                const [ra, dec] = feature.geometry.coordinates
+                const [dra, ddec] = feature.geometry.coordinates //arcseconds
+                let [ra, dec] =  aladin.getRaDec() as [number, number]
+                [ra, dec] = [ra + dra / 3600, dec + ddec / 3600]
                 const name = feature.properties?.name ?? 'Unknown'
                 return A.marker(ra, dec, { name: name, popupTitle: name })
             })
