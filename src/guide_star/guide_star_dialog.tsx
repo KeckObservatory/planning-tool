@@ -169,6 +169,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
             setFOVs(newFovs)
             setPointingOrigins(pos)
+            console.log('pointing origins', pos)
         }
         fun()
     }, [])

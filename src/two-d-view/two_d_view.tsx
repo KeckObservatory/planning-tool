@@ -156,12 +156,13 @@ const TwoDView = ({ targets }: Props) => {
     React.useEffect(() => {
         const fun = async () => {
             const featureCollection = await get_shapes('fov')
+            const pos = await get_shapes('pointing_origins') as FeatureCollection<GeoJSON.Point>
             const features = featureCollection['features'].filter((feature: any) => {
                 return feature['properties'].type === 'FOV'
             })
             const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
-            const pos = await get_shapes('pointing_origins') as FeatureCollection<GeoJSON.Point>
             setFOVs(newFovs)
+            console.log('pointing origins', pos)
             setPointingOrigins(pos)
         }
         fun()
