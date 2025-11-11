@@ -228,9 +228,9 @@ export default function AladinViewer(props: Props) {
                 return A.marker(ra, dec, { name: name, popupTitle: name })
             })
             const cat = A.catalog({ name: 'Pointing Origins', shape: 'diamond' });
+            pointingOrigins.forEach((marker) => cat.addSources(marker))
             aladin.removeOverlay('Pointing Origins')
             aladin.addCatalog(cat);
-            pointingOrigins.forEach((marker) => cat.addSources(marker))
         }
 
     }
