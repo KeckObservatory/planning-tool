@@ -113,7 +113,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [guideStarName, setGuideStarName] = useState<string>('')
     const [instrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
     const [fovs, setFOVs] = React.useState<string[]>([])
-    const [pointingOrigins, setPointingOrigins] = React.useState<GeoJSON.FeatureCollection<GeoJSON.Point>>({} as GeoJSON.FeatureCollection<GeoJSON.Point>)
+    const [pointingOrigins, setPointingOrigins] = React.useState<GeoJSON.FeatureCollection<GeoJSON.Point> | undefined>(undefined)
 
     let initTarget = targets.at(0) ?? {} as Target
     const [target, setTarget] = useState<Target>(initTarget)

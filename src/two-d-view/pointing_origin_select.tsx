@@ -5,7 +5,7 @@ import { StringParam, useQueryParam, withDefault } from "use-query-params"
 
 
 interface POSelectProps {
-    pointing_origins: GeoJSON.FeatureCollection<GeoJSON.Point>
+    pointing_origins?: GeoJSON.FeatureCollection<GeoJSON.Point>
     instrument: string
 }
 
@@ -22,10 +22,14 @@ export const POSelect = (props: POSelectProps) => {
 
     useEffect(() => {
         console.log('pointing origins', pointing_origins)
+        if (!pointing_origins) {
+            setOptions([])
+            return
+        }
         const filteredOptions = pointing_origins.features.filter((feature) => feature.properties?.instrument === instrument)
             .map((feature) => feature.properties?.name ?? '')
         setOptions(filteredOptions)
-    }, [pointing_origins])
+    }, [pointing_origins, instrument])
 
 
     return (

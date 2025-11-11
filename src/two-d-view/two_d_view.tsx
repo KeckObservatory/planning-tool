@@ -150,7 +150,7 @@ const TwoDView = ({ targets }: Props) => {
     const [time, setTime] = React.useState(suncalcTimes.nadir)
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
     const [fovs, setFOVs] = React.useState<string[]>([])
-    const [pointingOrigins, setPointingOrigins] = React.useState<GeoJSON.FeatureCollection<GeoJSON.Point>>({} as GeoJSON.FeatureCollection<GeoJSON.Point>)
+    const [pointingOrigins, setPointingOrigins] = React.useState<GeoJSON.FeatureCollection<GeoJSON.Point> | undefined>(undefined)
     const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
 
     React.useEffect(() => {
