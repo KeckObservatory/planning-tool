@@ -6,7 +6,7 @@ import { useDebounceCallback } from "./use_debounce_callback.tsx"
 import { Feature, FeatureCollection, MultiPolygon, Polygon, Position, Point } from 'geojson'
 import { get_shapes } from "./two-d-view/two_d_view.tsx"
 import { POPointFeature } from "./two-d-view/pointing_origin_select.tsx"
-import { color } from "html2canvas/dist/types/css/types/color"
+// import { color } from "html2canvas/dist/types/css/types/color"
 
 interface Props {
     width: number,
