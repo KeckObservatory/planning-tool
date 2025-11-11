@@ -20,6 +20,7 @@ import { createEnumParam, StringParam, useQueryParam, withDefault } from 'use-qu
 import html2canvas from 'html2canvas';
 import { SkyChartDataSummary } from './sky_chart_data_summary.tsx';
 import { FOVSelect } from './fov_select.tsx';
+import { POSelect } from './pointing_origin_select.tsx';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -149,6 +150,7 @@ const TwoDView = ({ targets }: Props) => {
     const [time, setTime] = React.useState(suncalcTimes.nadir)
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
     const [fovs, setFOVs] = React.useState<string[]>([])
+    const [pointingOrigins, setPointingOrigins] = React.useState<GeoJSON.FeatureCollection<GeoJSON.Point>>({} as GeoJSON.FeatureCollection<GeoJSON.Point>)
     const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
 
     React.useEffect(() => {
@@ -158,7 +160,9 @@ const TwoDView = ({ targets }: Props) => {
                 return feature['properties'].type === 'FOV'
             })
             const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
+            const pos = await get_shapes('pointing_origins') as FeatureCollection<GeoJSON.Point>
             setFOVs(newFovs)
+            setPointingOrigins(pos)
         }
         fun()
     }, [])
@@ -307,6 +311,10 @@ const TwoDView = ({ targets }: Props) => {
                 <Stack width="100%" direction="column" justifyContent='center' spacing={1}>
                     <FOVSelect 
                         fovs={fovs}
+                    />
+                    <POSelect
+                        pointing_origins={pointingOrigins}
+                        instrument={instrumentFOV}
                     />
                     <Tooltip title={'Rotator angle for Field of View'}>
                         <TextField
