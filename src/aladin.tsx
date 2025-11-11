@@ -5,6 +5,7 @@ import A from 'aladin-lite'
 import { useDebounceCallback } from "./use_debounce_callback.tsx"
 import { Feature, FeatureCollection, MultiPolygon, Polygon, Position, Point } from 'geojson'
 import { get_shapes } from "./two-d-view/two_d_view.tsx"
+import { POPointFeature } from "./two-d-view/pointing_origin_select.tsx"
 
 interface Props {
     width: number,
@@ -221,23 +222,23 @@ export default function AladinViewer(props: Props) {
             const aladinAngle = aladin.getViewCenter2NorthPoleAngle()
             aladin.setViewCenter2NorthPoleAngle(props.positionAngle + aladinAngle)
         }
-        if (updatePointingOrigins && props.pointingOrigins) {
-            const pointingOrigins = props.pointingOrigins?.map((feature) => {
-                const [dra, ddec] = feature.geometry.coordinates //arcseconds
-                let [ra, dec] =  aladin.getRaDec() as [number, number]
-                [ra, dec] = [ra + dra / 3600, dec + ddec / 3600]
-                const name = feature.properties?.name ?? 'Unknown'
-                return A.marker(ra, dec, { name: name, popupTitle: name })
-            })
-            const cat = A.catalog({ name: 'Pointing Origins', shape: 'diamond' });
-            pointingOrigins.forEach((marker) => cat.addSources(marker))
-            aladin.removeOverlay('Pointing Origins')
-            aladin.addCatalog(cat);
-        }
 
     }
 
     const debounced_update_shapes = useDebounceCallback(update_shapes, 250)
+
+    const add_pointing_origins = (ra: number, dec: number, aladin: any, pointingOrigins: POPointFeature[]) => {
+        const markers = pointingOrigins?.map((feature) => {
+            const [dra, ddec] = feature.geometry.coordinates //arcseconds
+            const [pora, podec] = [ra + dra / 3600, dec + ddec / 3600]
+            const name = feature.properties?.name ?? 'Unknown'
+            return A.marker(pora, podec, { name: name, popupTitle: name })
+        })
+        const cat = A.catalog({ name: 'Pointing Origins', shape: 'diamond' });
+        markers.forEach((marker) => cat.addSources(marker))
+        aladin.removeOverlay('Pointing Origins')
+        aladin.addCatalog(cat);
+    }
 
     const scriptloaded = async () => {
         const firstRow = props.targets.at(0) ?? { ra: '0', dec: '0', ra_deg: 0, dec_deg: 0 }
@@ -277,9 +278,21 @@ export default function AladinViewer(props: Props) {
             setCompass(newCompass)
             props.targets && add_catalog(alad, props.targets, 'Targets')
             props.guideStars && add_catalog(alad, props.guideStars, 'Guide Stars')
+            if (props.pointingOrigins) { //TODO: add a catalog for pointing origins and add to aladin
+                add_pointing_origins(ra, dec, alad, props.pointingOrigins as POPointFeature[])
+            }
             alad.setViewCenter2NorthPoleAngle(props.positionAngle)
         })
     }
+
+    React.useEffect(() => {
+        if (aladin && props.pointingOrigins) {
+            const [ra, dec] = aladin.getRaDec() as [number, number]
+            add_pointing_origins(ra, dec, aladin, props.pointingOrigins as POPointFeature[])
+        }
+    }, [props.pointingOrigins])
+
+        
 
     React.useEffect(() => {
         scriptloaded()
