@@ -6,6 +6,7 @@ import { useDebounceCallback } from "./use_debounce_callback.tsx"
 import { Feature, FeatureCollection, MultiPolygon, Polygon, Position, Point } from 'geojson'
 import { get_shapes } from "./two-d-view/two_d_view.tsx"
 import { POPointFeature } from "./two-d-view/pointing_origin_select.tsx"
+import { color } from "html2canvas/dist/types/css/types/color"
 
 interface Props {
     width: number,
@@ -165,26 +166,26 @@ export default function AladinViewer(props: Props) {
         }
     }, [props.selectedGuideStarName])
 
-    // define custom draw function
-    const drawFunction = function (source: any, canvasCtx: any) {
-        canvasCtx.beginPath();
-        canvasCtx.arc(source.x, source.y, 4, 0, 2 * Math.PI, false);
-        canvasCtx.closePath();
-        //canvasCtx.strokeStyle = '#c38';
-        canvasCtx.fillStyle = source.catalog.color;
-        canvasCtx.lineWidth = 1
-        canvasCtx.stroke();
-        canvasCtx.fill();
-    };
+    // // define custom draw function
+    // const drawFunction = function (source: any, canvasCtx: any) {
+    //     canvasCtx.beginPath();
+    //     canvasCtx.arc(source.x, source.y, 4, 0, 2 * Math.PI, false);
+    //     canvasCtx.closePath();
+    //     //canvasCtx.strokeStyle = '#c38';
+    //     canvasCtx.fillStyle = source.catalog.color;
+    //     canvasCtx.lineWidth = 1
+    //     canvasCtx.stroke();
+    //     canvasCtx.fill();
+    // };
 
     const add_catalog = (alad: any, targets: Partial<Target>[], name = 'Targets') => {
         //var cat = A.catalog({ name: name, sourceSize: 4, shape: drawFunction});
 
         if (name === 'Targets') {
-            var cat = A.catalog({ name: name, shape: drawFunction });
+            var cat = A.catalog({ name: name, shape: 'circle', color: 'cyan' });
         }
         else {
-            var cat = A.catalog({ name: name, shape: 'square' });
+            var cat = A.catalog({ name: name, shape: 'square', color: 'magenta' });
         }
         alad.addCatalog(cat);
 
