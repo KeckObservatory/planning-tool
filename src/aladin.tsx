@@ -187,7 +187,6 @@ export default function AladinViewer(props: Props) {
         else {
             var cat = A.catalog({ name: name, shape: 'square', color: 'magenta' });
         }
-        alad.addCatalog(cat);
 
         alad.on('zoomChanged', function (zoom: number) {
             setZoom(zoom)
@@ -210,6 +209,7 @@ export default function AladinViewer(props: Props) {
                 cat.addSources(A.marker(ra, dec, options));
             }
         }
+        alad.addCatalog(cat);
     }
 
     const update_shapes = async (aladin: any, updatefov = true, updateCompass = true) => {
