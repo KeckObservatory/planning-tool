@@ -46,9 +46,7 @@ export const POSelect = (props: POSelectProps) => {
                 id="pointing-origin-selection"
                 value={pointingOrigin.map((feature) => feature.properties?.name ?? '')}
                 onChange={(_, value) => onPointingOriginChange(value)}
-                options={options.map( (feature) => {
-                        return { title: feature.properties?.name ?? '', label: feature.properties?.name ?? '' }
-                    })}
+                options={options}
                 sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
                 renderInput={(params) => <TextField {...params} label="PO" />}
                 multiple
@@ -64,7 +62,7 @@ export const POSelect = (props: POSelectProps) => {
                                 style={{ marginRight: 8 }}
                                 checked={selected}
                             />
-                            {option.label}
+                            {option}
                         </li>
                     );
                 }}
