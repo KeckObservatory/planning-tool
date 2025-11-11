@@ -1,4 +1,6 @@
 import { Autocomplete, TextField, Tooltip } from "@mui/material"
+import React from "react"
+import { useEffect } from "react"
 import { StringParam, useQueryParam, withDefault } from "use-query-params"
 
 
@@ -10,6 +12,7 @@ interface POSelectProps {
 export const POSelect = (props: POSelectProps) => {
     const { pointing_origins, instrument } = props
     const [ pointingOrigin, setPointingOrigin ] = useQueryParam<string>('pointing_origin', withDefault(StringParam, ''))
+    const [ options, setOptions ] = React.useState<string[]>([])
 
     const onPointingOriginChange = (value?: string ) => {
         if (value) {
@@ -17,9 +20,13 @@ export const POSelect = (props: POSelectProps) => {
         }
     }
 
-    let options = pointing_origins.features.filter((feature) => feature.properties?.instrument === instrument)
-    .map((feature) => feature.properties?.name ?? '')
-    .filter((name) => name !== '') as string[] // filter out any features without a name
+    useEffect(() => {
+        console.log('pointing origins', pointing_origins)
+        const filteredOptions = pointing_origins.features.filter((feature) => feature.properties?.instrument === instrument)
+            .map((feature) => feature.properties?.name ?? '')
+        setOptions(filteredOptions)
+    }, [pointing_origins])
+
 
     return (
         <Tooltip placement="top" title="Select pointing origin">
