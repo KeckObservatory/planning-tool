@@ -211,7 +211,7 @@ export default function AladinViewer(props: Props) {
         }
     }
 
-    const update_shapes = async (aladin: any, updatefov = true, updateCompass = true, updatePointingOrigins = true) => {
+    const update_shapes = async (aladin: any, updatefov = true, updateCompass = true) => {
         if (updatefov) {
             const fovz = await get_fovz(aladin, props.instrumentFOV, props.fovAngle)
             setFOV(() => [...fovz.fov])
@@ -222,7 +222,6 @@ export default function AladinViewer(props: Props) {
             const aladinAngle = aladin.getViewCenter2NorthPoleAngle()
             aladin.setViewCenter2NorthPoleAngle(props.positionAngle + aladinAngle)
         }
-
     }
 
     const debounced_update_shapes = useDebounceCallback(update_shapes, 250)
