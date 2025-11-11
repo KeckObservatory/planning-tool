@@ -1,6 +1,7 @@
 {
   "compass_rose": {
     "type": "",
+    "name": "compass_rose",
     "properties": {
       "name": "compassRose",
       "type": "static shape"
@@ -362,6 +363,7 @@
     ]
   },
   "fov": {
+    "name": "fov",
     "type": "FeatureCollection",
     "features": [
       {
@@ -2835,5 +2837,1307 @@
         }
       }
     ]
-  }
+  },
+  "pointing_origins": {
+  "type": "FeatureCollection",
+  "name": "pointing_origins",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.7,
+          196.0
+        ]
+      },
+      "properties": {
+        "name": "Slit 0.8",
+        "xpos": -52.7,
+        "ypos": 196.0,
+        "units": "mm",
+        "instrument": "DEIMOS",
+        "source_file": "DEIMOSpo10.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -88.6,
+          195.9
+        ]
+      },
+      "properties": {
+        "name": "Slit 1.2",
+        "xpos": -88.6,
+        "ypos": 195.9,
+        "units": "mm",
+        "instrument": "DEIMOS",
+        "source_file": "DEIMOSpo11.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.25,
+          141.25
+        ]
+      },
+      "properties": {
+        "name": "TVCENTER",
+        "xpos": -73.25,
+        "ypos": 141.25,
+        "units": "mm",
+        "instrument": "DEIMOS",
+        "source_file": "DEIMOSpo2.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -95.2,
+          202.1
+        ]
+      },
+      "properties": {
+        "name": "Image",
+        "xpos": -95.2,
+        "ypos": 202.1,
+        "units": "mm",
+        "instrument": "DEIMOS",
+        "source_file": "DEIMOSpo3.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -94.7,
+          195.8
+        ]
+      },
+      "properties": {
+        "name": "Slit",
+        "xpos": -94.7,
+        "ypos": 195.8,
+        "units": "mm",
+        "instrument": "DEIMOS",
+        "source_file": "DEIMOSpo4.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.0,
+          196.0
+        ]
+      },
+      "properties": {
+        "name": "DEIMOS",
+        "xpos": -2.0,
+        "ypos": 196.0,
+        "units": "mm",
+        "instrument": "DEIMOS",
+        "source_file": "DEIMOSpo5.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -139.2,
+          201.1
+        ]
+      },
+      "properties": {
+        "name": "Mira",
+        "xpos": -139.2,
+        "ypos": 201.1,
+        "units": "mm",
+        "instrument": "DEIMOS",
+        "source_file": "DEIMOSpo6.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -34.2,
+          196.0
+        ]
+      },
+      "properties": {
+        "name": "Slit 0.7",
+        "xpos": -34.2,
+        "ypos": 196.0,
+        "units": "mm",
+        "instrument": "DEIMOS",
+        "source_file": "DEIMOSpo7.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.9,
+          196.2
+        ]
+      },
+      "properties": {
+        "name": "Slit 1.0",
+        "xpos": -70.9,
+        "ypos": 196.2,
+        "units": "mm",
+        "instrument": "DEIMOS",
+        "source_file": "DEIMOSpo8.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -107.0,
+          196.0
+        ]
+      },
+      "properties": {
+        "name": "Slit 1.5",
+        "xpos": -107.0,
+        "ypos": 196.0,
+        "units": "mm",
+        "instrument": "DEIMOS",
+        "source_file": "DEIMOSpo9.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.53,
+          328.33
+        ]
+      },
+      "properties": {
+        "name": "REF",
+        "xpos": 1.53,
+        "ypos": 328.33,
+        "units": "mm",
+        "instrument": "ESI",
+        "source_file": "ESIpo1.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -12.32,
+          214.04
+        ]
+      },
+      "properties": {
+        "name": "ESI",
+        "xpos": -12.32,
+        "ypos": 214.04,
+        "units": "mm",
+        "instrument": "ESI",
+        "source_file": "ESIpo2.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.0,
+          -42.75
+        ]
+      },
+      "properties": {
+        "name": "dref",
+        "xpos": 0.0,
+        "ypos": -42.75,
+        "units": "mm",
+        "instrument": "ESI",
+        "source_file": "ESIpo3.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          23.96,
+          214.36
+        ]
+      },
+      "properties": {
+        "name": "Image",
+        "xpos": 23.96,
+        "ypos": 214.36,
+        "units": "mm",
+        "instrument": "ESI",
+        "source_file": "ESIpo4.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          47.35,
+          -12.21
+        ]
+      },
+      "properties": {
+        "name": "TFS",
+        "xpos": 47.35,
+        "ypos": -12.21,
+        "units": "mm",
+        "instrument": "ESI",
+        "source_file": "ESIpo5.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -4.54,
+          214.21
+        ]
+      },
+      "properties": {
+        "name": "Ellis-R",
+        "xpos": -4.54,
+        "ypos": 214.21,
+        "units": "mm",
+        "instrument": "ESI",
+        "source_file": "ESIpo6.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -11.81,
+          212.44
+        ]
+      },
+      "properties": {
+        "name": "TILT",
+        "xpos": -11.81,
+        "ypos": 212.44,
+        "units": "mm",
+        "instrument": "ESI",
+        "source_file": "ESIpo7.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.85,
+          207.38
+        ]
+      },
+      "properties": {
+        "name": "IFU",
+        "xpos": -0.85,
+        "ypos": 207.38,
+        "units": "mm",
+        "instrument": "ESI",
+        "source_file": "ESIpo8.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.53,
+          328.33
+        ]
+      },
+      "properties": {
+        "name": "REF",
+        "xpos": 1.53,
+        "ypos": 328.33,
+        "units": "mm",
+        "instrument": "ESI",
+        "source_file": "ESIpo9.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.0,
+          0.0
+        ]
+      },
+      "properties": {
+        "name": "REF",
+        "xpos": 0.0,
+        "ypos": 0.0,
+        "units": "mm",
+        "instrument": "HIRES",
+        "source_file": "HIRESpo1.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.34,
+          -0.22
+        ]
+      },
+      "properties": {
+        "name": "USER",
+        "xpos": -1.34,
+        "ypos": -0.22,
+        "units": "mm",
+        "instrument": "HIRES",
+        "source_file": "HIRESpo2.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.22,
+          1.2
+        ]
+      },
+      "properties": {
+        "name": "iodine",
+        "xpos": 0.22,
+        "ypos": 1.2,
+        "units": "mm",
+        "instrument": "HIRES",
+        "source_file": "HIRESpo3.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.11,
+          0.0
+        ]
+      },
+      "properties": {
+        "name": "Decker",
+        "xpos": 0.11,
+        "ypos": 0.0,
+        "units": "mm",
+        "instrument": "HIRES",
+        "source_file": "HIRESpo4.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.0,
+          0.0
+        ]
+      },
+      "properties": {
+        "name": "REF",
+        "xpos": 0.0,
+        "ypos": 0.0,
+        "units": "mm",
+        "instrument": "KCWI",
+        "source_file": "KCWIpo1.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.68,
+          -0.72
+        ]
+      },
+      "properties": {
+        "name": "IFU",
+        "xpos": 0.68,
+        "ypos": -0.72,
+        "units": "mm",
+        "instrument": "KCWI",
+        "source_file": "KCWIpo2.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.0,
+          20.0
+        ]
+      },
+      "properties": {
+        "name": "YPLUS",
+        "xpos": 0.0,
+        "ypos": 20.0,
+        "units": "mm",
+        "instrument": "KCWI",
+        "source_file": "KCWIpo3.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.68,
+          -0.72
+        ]
+      },
+      "properties": {
+        "name": "IFU-L",
+        "xpos": 0.68,
+        "ypos": -0.72,
+        "units": "mm",
+        "instrument": "KCWI",
+        "source_file": "KCWIpo4.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.97,
+          -0.64
+        ]
+      },
+      "properties": {
+        "name": "IFU-M",
+        "xpos": 0.97,
+        "ypos": -0.64,
+        "units": "mm",
+        "instrument": "KCWI",
+        "source_file": "KCWIpo5.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.97,
+          -1.08
+        ]
+      },
+      "properties": {
+        "name": "IFU-S",
+        "xpos": 0.97,
+        "ypos": -1.08,
+        "units": "mm",
+        "instrument": "KCWI",
+        "source_file": "KCWIpo6.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.97,
+          -309.82
+        ]
+      },
+      "properties": {
+        "name": "LRIS",
+        "xpos": 3.97,
+        "ypos": -309.82,
+        "units": "mm",
+        "instrument": "LRISADC",
+        "source_file": "LRISADCpo1.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.91,
+          -273.12
+        ]
+      },
+      "properties": {
+        "name": "POL",
+        "xpos": 3.91,
+        "ypos": -273.12,
+        "units": "mm",
+        "instrument": "LRISADC",
+        "source_file": "LRISADCpo10.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -84.45,
+          61.99
+        ]
+      },
+      "properties": {
+        "name": "REFO",
+        "xpos": -84.45,
+        "ypos": 61.99,
+        "units": "mm",
+        "instrument": "LRISADC",
+        "source_file": "LRISADCpo11.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          10.95,
+          -268.58
+        ]
+      },
+      "properties": {
+        "name": "REF",
+        "xpos": 10.95,
+        "ypos": -268.58,
+        "units": "mm",
+        "instrument": "LRISADC",
+        "source_file": "LRISADCpo2.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.25,
+          -263.38
+        ]
+      },
+      "properties": {
+        "name": "slitC",
+        "xpos": 32.25,
+        "ypos": -263.38,
+        "units": "mm",
+        "instrument": "LRISADC",
+        "source_file": "LRISADCpo3.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.67,
+          -300.34
+        ]
+      },
+      "properties": {
+        "name": "MIRA",
+        "xpos": 3.67,
+        "ypos": -300.34,
+        "units": "mm",
+        "instrument": "LRISADC",
+        "source_file": "LRISADCpo4.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -14.41,
+          -263.74
+        ]
+      },
+      "properties": {
+        "name": "slitb",
+        "xpos": -14.41,
+        "ypos": -263.74,
+        "units": "mm",
+        "instrument": "LRISADC",
+        "source_file": "LRISADCpo5.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -53.11,
+          -320.54
+        ]
+      },
+      "properties": {
+        "name": "LRISB",
+        "xpos": -53.11,
+        "ypos": -320.54,
+        "units": "mm",
+        "instrument": "LRISADC",
+        "source_file": "LRISADCpo6.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          20.25,
+          -263.68
+        ]
+      },
+      "properties": {
+        "name": "Bedge",
+        "xpos": 20.25,
+        "ypos": -263.68,
+        "units": "mm",
+        "instrument": "LRISADC",
+        "source_file": "LRISADCpo7.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.65,
+          -263.68
+        ]
+      },
+      "properties": {
+        "name": "Tedge",
+        "xpos": -0.65,
+        "ypos": -263.68,
+        "units": "mm",
+        "instrument": "LRISADC",
+        "source_file": "LRISADCpo8.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -84.45,
+          61.99
+        ]
+      },
+      "properties": {
+        "name": "REFO",
+        "xpos": -84.45,
+        "ypos": 61.99,
+        "units": "mm",
+        "instrument": "LRISADC",
+        "source_file": "LRISADCpo9.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -6.5,
+          291.2
+        ]
+      },
+      "properties": {
+        "name": "REF",
+        "xpos": -6.5,
+        "ypos": 291.2,
+        "units": "mm",
+        "instrument": "MOSFIRE",
+        "source_file": "MOSFIREpo1.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.0,
+          0.0
+        ]
+      },
+      "properties": {
+        "name": "MIRA",
+        "xpos": -2.0,
+        "ypos": 0.0,
+        "units": "mm",
+        "instrument": "MOSFIRE",
+        "source_file": "MOSFIREpo2.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.4,
+          2.0
+        ]
+      },
+      "properties": {
+        "name": "SLIT",
+        "xpos": -0.4,
+        "ypos": 2.0,
+        "units": "mm",
+        "instrument": "MOSFIRE",
+        "source_file": "MOSFIREpo3.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.0,
+          0.0
+        ]
+      },
+      "properties": {
+        "name": "MOSFIRE",
+        "xpos": -2.0,
+        "ypos": 0.0,
+        "units": "mm",
+        "instrument": "MOSFIRE",
+        "source_file": "MOSFIREpo4.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.03,
+          -0.83
+        ]
+      },
+      "properties": {
+        "name": "REF-N",
+        "xpos": -1.03,
+        "ypos": -0.83,
+        "units": "mm",
+        "instrument": "NIRC2",
+        "source_file": "NIRC2po1.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.1,
+          8.6
+        ]
+      },
+      "properties": {
+        "name": "NIRC2",
+        "xpos": 0.1,
+        "ypos": 8.6,
+        "units": "mm",
+        "instrument": "NIRC2",
+        "source_file": "NIRC2po2.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.0,
+          0.0
+        ]
+      },
+      "properties": {
+        "name": "Opt Axis",
+        "xpos": 0.0,
+        "ypos": 0.0,
+        "units": "mm",
+        "instrument": "NIRC2",
+        "source_file": "NIRC2po8.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          149.68,
+          0.0
+        ]
+      },
+      "properties": {
+        "name": "REF",
+        "xpos": 149.68,
+        "ypos": 0.0,
+        "units": "mm",
+        "instrument": "NIRES",
+        "source_file": "NIRESpo1.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.0,
+          0.0
+        ]
+      },
+      "properties": {
+        "name": "NIRES",
+        "xpos": 0.0,
+        "ypos": 0.0,
+        "units": "mm",
+        "instrument": "NIRES",
+        "source_file": "NIRESpo2.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -149.68,
+          0.0
+        ]
+      },
+      "properties": {
+        "name": "REFN",
+        "xpos": -149.68,
+        "ypos": 0.0,
+        "units": "mm",
+        "instrument": "NIRES",
+        "source_file": "NIRESpo3.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -35.7,
+          1.46
+        ]
+      },
+      "properties": {
+        "name": "IMAG",
+        "xpos": -35.7,
+        "ypos": 1.46,
+        "units": "mm",
+        "instrument": "NIRES",
+        "source_file": "NIRESpo4.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.75,
+          0.77
+        ]
+      },
+      "properties": {
+        "name": "REFS",
+        "xpos": 1.75,
+        "ypos": 0.77,
+        "units": "mm",
+        "instrument": "NIRES",
+        "source_file": "NIRESpo5.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.75,
+          0.77
+        ]
+      },
+      "properties": {
+        "name": "REFS",
+        "xpos": 1.75,
+        "ypos": 0.77,
+        "units": "mm",
+        "instrument": "NIRES",
+        "source_file": "NIRESpo6.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.0,
+          0.0
+        ]
+      },
+      "properties": {
+        "name": "Opt Axis",
+        "xpos": 0.0,
+        "ypos": 0.0,
+        "units": "mm",
+        "instrument": "NIRSPAO",
+        "source_file": "NIRSPAOpo1.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.18,
+          1.11
+        ]
+      },
+      "properties": {
+        "name": "AO scam",
+        "xpos": 0.18,
+        "ypos": 1.11,
+        "units": "mm",
+        "instrument": "NIRSPAO",
+        "source_file": "NIRSPAOpo2.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.03,
+          -1.98
+        ]
+      },
+      "properties": {
+        "name": "REF-N",
+        "xpos": -0.03,
+        "ypos": -1.98,
+        "units": "mm",
+        "instrument": "NIRSPAO",
+        "source_file": "NIRSPAOpo3.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.12,
+          -1.53
+        ]
+      },
+      "properties": {
+        "name": "REF-L",
+        "xpos": 0.12,
+        "ypos": -1.53,
+        "units": "mm",
+        "instrument": "NIRSPAO",
+        "source_file": "NIRSPAOpo4.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.64,
+          1.14
+        ]
+      },
+      "properties": {
+        "name": "USER1",
+        "xpos": -0.64,
+        "ypos": 1.14,
+        "units": "mm",
+        "instrument": "NIRSPAO",
+        "source_file": "NIRSPAOpo5.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.44,
+          -1.0
+        ]
+      },
+      "properties": {
+        "name": "USER2",
+        "xpos": 0.44,
+        "ypos": -1.0,
+        "units": "mm",
+        "instrument": "NIRSPAO",
+        "source_file": "NIRSPAOpo6.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.9612,
+          1.07132
+        ]
+      },
+      "properties": {
+        "name": "TFS",
+        "xpos": 30.9612,
+        "ypos": 1.07132,
+        "units": "mm",
+        "instrument": "NIRSPAO",
+        "source_file": "NIRSPAOpo7.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.3,
+          2.9
+        ]
+      },
+      "properties": {
+        "name": "REF",
+        "xpos": -0.3,
+        "ypos": 2.9,
+        "units": "mm",
+        "instrument": "NIRSPEC",
+        "source_file": "NIRSPECpo1.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          1.63,
+          -0.93
+        ]
+      },
+      "properties": {
+        "name": "SLIT",
+        "xpos": 1.63,
+        "ypos": -0.93,
+        "units": "mm",
+        "instrument": "NIRSPEC",
+        "source_file": "NIRSPECpo2.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.0,
+          52.0
+        ]
+      },
+      "properties": {
+        "name": "REFA",
+        "xpos": 0.0,
+        "ypos": 52.0,
+        "units": "mm",
+        "instrument": "NIRSPEC",
+        "source_file": "NIRSPECpo3.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          10.63,
+          -6.43
+        ]
+      },
+      "properties": {
+        "name": "MIRA",
+        "xpos": 10.63,
+        "ypos": -6.43,
+        "units": "mm",
+        "instrument": "NIRSPEC",
+        "source_file": "NIRSPECpo4.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.0,
+          0.0
+        ]
+      },
+      "properties": {
+        "name": "Opt Axis",
+        "xpos": 0.0,
+        "ypos": 0.0,
+        "units": "mm",
+        "instrument": "OSIRIS",
+        "source_file": "OSIRISpo1.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.49,
+          -10.16
+        ]
+      },
+      "properties": {
+        "name": "osimg",
+        "xpos": 2.49,
+        "ypos": -10.16,
+        "units": "mm",
+        "instrument": "OSIRIS",
+        "source_file": "OSIRISpo2.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.73,
+          5.3
+        ]
+      },
+      "properties": {
+        "name": "ospec",
+        "xpos": 2.73,
+        "ypos": 5.3,
+        "units": "mm",
+        "instrument": "OSIRIS",
+        "source_file": "OSIRISpo3.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -6.84,
+          -0.02
+        ]
+      },
+      "properties": {
+        "name": "REF-N",
+        "xpos": -6.84,
+        "ypos": -0.02,
+        "units": "mm",
+        "instrument": "OSIRIS",
+        "source_file": "OSIRISpo4.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -4.92,
+          1.51
+        ]
+      },
+      "properties": {
+        "name": "REF",
+        "xpos": -4.92,
+        "ypos": 1.51,
+        "units": "mm",
+        "instrument": "PCS",
+        "source_file": "PCSpo1.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.0,
+          0.0
+        ]
+      },
+      "properties": {
+        "name": "REF",
+        "xpos": 0.0,
+        "ypos": 0.0,
+        "units": "mm",
+        "instrument": "SSC",
+        "source_file": "SSCpo1.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          7.0,
+          0.0
+        ]
+      },
+      "properties": {
+        "name": "TCSU",
+        "xpos": 7.0,
+        "ypos": 0.0,
+        "units": "mm",
+        "instrument": "SSC",
+        "source_file": "SSCpo2.csave"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.0,
+          7.0
+        ]
+      },
+      "properties": {
+        "name": "X5Y7",
+        "xpos": 5.0,
+        "ypos": 7.0,
+        "units": "mm",
+        "instrument": "SSC",
+        "source_file": "SSCpo3.csave"
+      }
+    }
+  ]
+} 
 }
