@@ -15,15 +15,14 @@ interface POSelectProps {
 export const POSelect = (props: POSelectProps) => {
     const { pointing_origins, instrument } = props
     const [pointingOrigin, setPointingOrigin] = React.useState<GeoJSON.Feature<GeoJSON.Point>[]>([])
-    const [options, setOptions] = React.useState<GeoJSON.Feature<GeoJSON.Point>[]>([])
+    const [options, setOptions] = React.useState<(GeoJSON.Feature<GeoJSON.Point> | undefined)[]>([])
 
-    const onPointingOriginChange = (value?: string[]) => {
-        if (value) {
-            setPointingOrigin(value.map((name) => options.find((option) => option.properties?.name === name))
-            .filter((option): option is GeoJSON.Feature<GeoJSON.Point> => option !== undefined) as GeoJSON.Feature<GeoJSON.Point>[])
+    const onPointingOriginChange = (value: (GeoJSON.Feature<GeoJSON.Point> | undefined)[]) => {
+        if (value?.includes(undefined)) {
+            setPointingOrigin([])
         }
         else {
-            setPointingOrigin([])
+            setPointingOrigin(value as GeoJSON.Feature<GeoJSON.Point>[])
         }
     }
 
@@ -35,7 +34,7 @@ export const POSelect = (props: POSelectProps) => {
         }
         const filteredOptions = pointing_origins.features
             .filter((feature) => instrument.includes(feature.properties?.instrument))
-            .map((feature) => feature.properties?.name ?? '')
+
         setOptions([undefined, ...filteredOptions])
     }, [pointing_origins, instrument])
 
@@ -44,14 +43,14 @@ export const POSelect = (props: POSelectProps) => {
             <Autocomplete
                 disablePortal
                 id="pointing-origin-selection"
-                value={pointingOrigin.map((feature) => feature.properties?.name ?? '')}
+                value={pointingOrigin}
                 onChange={(_, value) => onPointingOriginChange(value)}
                 options={options}
                 sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
                 renderInput={(params) => <TextField {...params} label="PO" />}
                 multiple
                 disableCloseOnSelect
-                getOptionLabel={(option) => option.label}
+                getOptionLabel={(option) => option?.properties?.name || 'None'}
                 renderOption={(props, option, { selected }) => {
                     const { key, ...optionProps } = props;
                     return (
@@ -62,7 +61,7 @@ export const POSelect = (props: POSelectProps) => {
                                 style={{ marginRight: 8 }}
                                 checked={selected}
                             />
-                            {option}
+                            {option?.properties?.name || 'None'}
                         </li>
                     );
                 }}
