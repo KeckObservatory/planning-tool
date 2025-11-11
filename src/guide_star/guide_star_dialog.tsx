@@ -251,6 +251,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         targets={[target]}
                         guideStars={guidestars}
                         positionAngle={target.rotator_pa ?? 0}
+                        pointingOrigins={selPointingOrigins}
                         fovAngle={0}
                         instrumentFOV={instrumentFOV}
                         height={height}

@@ -384,6 +384,7 @@ const TwoDView = ({ targets }: Props) => {
                     fovAngle={rotatorAngle}
                     positionAngle={positionAngle}
                     instrumentFOV={instrumentFOV}
+                    pointingOrigins={selPointingOrigins}
                     targets={targets} />
             </Grid2>
         </Grid2 >
