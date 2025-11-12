@@ -78,7 +78,7 @@ export default function AladinViewer(props: Props) {
             const [dra, ddec] = feature.geometry.coordinates; // arcseconds offset
             const [pora, podec] = [ra + dra / 3600, dec + ddec / 3600]; // convert to degrees
             const [x, y] = aladin.world2pix(pora, podec);
-            const rotatedxy = rotate_point([x, y], props.positionAngle, [aladin.getWidth() / 2, aladin.getHeight() / 2]);
+            const rotatedxy = rotate_point([x, y], props.positionAngle, [props.width / 2, props.height / 2]);
             const name = feature.properties?.name ?? 'Unknown';
             
             return {
