@@ -78,8 +78,7 @@ export default function AladinViewer(props: Props) {
             const [dra, ddec] = feature.geometry.coordinates; // arcseconds offset
             const [pora, podec] = [ra + dra / 3600, dec + ddec / 3600]; // convert to degrees
             const [x, y] = aladin.world2pix(pora, podec);
-            const rotatedxy = rotate_point([x, y], props.positionAngle, [props.width / 2, props.height / 2]);
-            console.log('pointing origin', feature.properties?.name, 'dra', dra, 'ddec', ddec, 'ra', pora, 'dec', podec, 'x', x, 'y', y, 'rotatedx', rotatedxy[0], 'rotatedy', rotatedxy[1])
+            const rotatedxy = rotate_point([x, y], props.fovAngle, [props.width / 2, props.height / 2]);
             const name = feature.properties?.name ?? 'Unknown';
             
             return {
@@ -87,7 +86,7 @@ export default function AladinViewer(props: Props) {
                 position: rotatedxy as unknown as [number, number]
             };
         });
-    }, [aladin, props.pointingOrigins, zoom, props.positionAngle, props.fovAngle]); // Include zoom to trigger recalculation on zoom changes
+    }, [aladin, props.pointingOrigins, zoom, props.fovAngle]); // Include zoom to trigger recalculation on zoom changes
 
     React.useEffect(() => {
         if (props.selectedGuideStarName && aladin) {
