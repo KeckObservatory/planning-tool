@@ -85,7 +85,7 @@ export default function AladinViewer(props: Props) {
                 position: [x, y] as [number, number]
             };
         });
-    }, [aladin, props.pointingOrigins, zoom]); // Include zoom to trigger recalculation on zoom changes
+    }, [aladin, props.pointingOrigins, zoom, props.positionAngle]); // Include zoom to trigger recalculation on zoom changes
 
     React.useEffect(() => {
         if (props.selectedGuideStarName && aladin) {
