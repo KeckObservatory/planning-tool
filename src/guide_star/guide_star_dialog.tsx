@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
-import AladinViewer from '../aladin';
+import AladinViewer from '../aladin/aladin';
 
 import { Target, useStateContext } from '../App';
 import { Autocomplete, Stack, TextField } from '@mui/material';

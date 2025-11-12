@@ -1,11 +1,12 @@
 import React from "react"
-import { ra_dec_to_deg, cosd, sind, r2d } from './two-d-view/sky_view_util.tsx'
-import { Target } from "./App"
+import { ra_dec_to_deg, cosd, sind, r2d } from '../two-d-view/sky_view_util.tsx'
+import { Target } from "../App.tsx"
 import A from 'aladin-lite'
-import { useDebounceCallback } from "./use_debounce_callback.tsx"
+import { useDebounceCallback } from "../use_debounce_callback.tsx"
 import { Feature, FeatureCollection, MultiPolygon, Polygon, Position, Point } from 'geojson'
-import { get_shapes } from "./two-d-view/two_d_view.tsx"
-import { POPointFeature } from "./two-d-view/pointing_origin_select.tsx"
+import { get_shapes } from "../two-d-view/two_d_view.tsx"
+import { POPointFeature } from "../two-d-view/pointing_origin_select.tsx"
+import { PointingOriginMarkers, PointingOriginMarker } from "./pointing_origin_markers.tsx"
 // import { color } from "html2canvas/dist/types/css/types/color"
 
 interface Props {
@@ -153,6 +154,27 @@ export default function AladinViewer(props: Props) {
     const [aladin, setAladin] = React.useState<null | any>(null)
     const [zoom, setZoom] = React.useState(5)
 
+    // Convert pointing origins to pixel coordinates for SVG markers
+    const pointingOriginMarkers = React.useMemo((): PointingOriginMarker[] => {
+        if (!aladin || !props.pointingOrigins) {
+            return [];
+        }
+        
+        const [ra, dec] = aladin.getRaDec() as [number, number];
+        
+        return props.pointingOrigins.map((feature) => {
+            const [dra, ddec] = feature.geometry.coordinates; // arcseconds offset
+            const [pora, podec] = [ra + dra / 3600, dec + ddec / 3600]; // convert to degrees
+            const [x, y] = aladin.world2pix(pora, podec);
+            const name = feature.properties?.name ?? 'Unknown';
+            
+            return {
+                name,
+                position: [x, y] as [number, number]
+            };
+        });
+    }, [aladin, props.pointingOrigins, zoom]); // Include zoom to trigger recalculation on zoom changes
+
     React.useEffect(() => {
         if (props.selectedGuideStarName && aladin) {
             const overlays = aladin.getOverlays()
@@ -236,8 +258,14 @@ export default function AladinViewer(props: Props) {
         })
         const cat = A.catalog({ name: 'Pointing Origins', shape: 'diamond', color: 'yellow' });
         markers.forEach((marker) => cat.addSources(marker))
-        aladin.removeOverlay('Pointing Origins')
-        aladin.addCatalog(cat);
+        try {
+            aladin.removeOverlay('Pointing Origins')
+        } catch (error) {
+            console.error('Error removing overlay:', error)
+        }
+        finally {
+            aladin.addCatalog(cat);
+        }
     }
 
     const scriptloaded = async () => {
@@ -318,13 +346,30 @@ export default function AladinViewer(props: Props) {
 
     return (
         <div id='aladin-lite-div' style={{ margin: '0px', width: props.width, height: props.height }} >
-            {fov.map(f => <PolylineComponent points={f} width={props.width} height={props.height} />)}
-            {compass.features.map(f => <PolylineComponent points={f.geometry.coordinates}
+            {fov.map((f, idx) => <PolylineComponent key={`fov-${idx}`} points={f} width={props.width} height={props.height} />)}
+            {compass.features.map((f, idx) => <PolylineComponent 
+                key={`compass-${idx}`}
+                points={f.geometry.coordinates}
                 width={props.width}
                 height={props.height}
                 color={f.properties?.color}
                 fill={f.properties?.fill}
                 className='compass-overlay' />)}
+            
+            {/* Render pointing origin markers with labels */}
+            {aladin && pointingOriginMarkers.length > 0 && (
+                <PointingOriginMarkers
+                    markers={pointingOriginMarkers}
+                    width={props.width}
+                    height={props.height}
+                    markerSize={8}
+                    fontSize={11}
+                    textOffset={35}
+                    lineColor="#FFD700"   // Gold lines
+                    textColor="#FFFFFF"   // White text
+                    markerColor="#FFFF00" // Yellow markers
+                />
+            )}
         </div>
     )
 }

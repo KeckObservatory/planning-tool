@@ -11,7 +11,7 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { alt_az_observable } from './target_viz_chart.tsx';
 import { VizRow } from './viz_dialog.tsx';
-import AladinViewer from '../aladin';
+import AladinViewer from '../aladin/aladin.tsx';
 import { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import { MoonMarker } from './moon_marker.tsx';
 import * as SunCalc from "suncalc";
