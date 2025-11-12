@@ -1,12 +1,11 @@
 import React from "react"
-import { ra_dec_to_deg, cosd, sind, r2d } from '../two-d-view/sky_view_util.tsx'
+import { ra_dec_to_deg } from '../two-d-view/sky_view_util.tsx'
 import { Target } from "../App.tsx"
 import A from 'aladin-lite'
 import { useDebounceCallback } from "../use_debounce_callback.tsx"
-import { Feature, FeatureCollection, MultiPolygon, Polygon, Position, Point } from 'geojson'
-import { get_shapes } from "../two-d-view/two_d_view.tsx"
-import { POPointFeature } from "../two-d-view/pointing_origin_select.tsx"
+import { Feature, FeatureCollection, Polygon, Position, Point } from 'geojson'
 import { PointingOriginMarkers, PointingOriginMarker } from "./pointing_origin_markers.tsx"
+import { get_compass, get_fovz } from "./aladin-utils.tsx"
 // import { color } from "html2canvas/dist/types/css/types/color"
 
 interface Props {
@@ -59,93 +58,6 @@ const PolylineComponent = (props: PolylineProps) => {
     )
 }
 
-const rotate_multipolygon = (coords: Position[][][], angle: number, pnt=[0,0]) => {
-
-    const rotFOV = coords.map(shape => {
-        const newShape = shape.map(point => {
-            let [x, y] = point as unknown as [number, number]
-            x -= pnt[0]
-            y -= pnt[1]
-            let newPoint = [
-                x * cosd(angle) - y * sind(angle),
-                x * sind(angle) + y * cosd(angle)
-            ]
-            newPoint[0] += pnt[0]
-            newPoint[1] += pnt[1]
-            return newPoint as unknown as Position[]
-        })
-        return newShape
-    })
-    return rotFOV
-}
-
-const get_angle = (aladin: any) => {
-    //Compass rose is a euclidian object put onto a non-euclidian projection, 
-    //so we need to calculate the angle of two vectors that are small enough to be approximately euclidian
-    //usually 5 arcminutes is good enough
-    const [ra, dec] = aladin.getRaDec() as [number, number]
-    const dra = 5 / (24 * 60) //hours 5 minutes is probably good
-    const ddec = 90 //deg
-    // const dra = 5/(24*60) //hours 5 minutes is probably good
-    // const ddec = 5/60 //deg
-
-    const [x0, y0] = aladin.world2pix(ra, dec) // originate compass on center of screen
-    const [x1, y1] = aladin.world2pix(ra, dec + ddec) //point up 
-    const [x2, y2] = aladin.world2pix(ra + dra, dec) //point left 
-    const angle = r2d(Math.atan2((y2 - x0) * (x1 - x0) - (y1 - y0) * (x2 - x0), (x1 - x0) * (x2 - x0) + (y1 - y0) * (y2 - y0)))
-    return angle
-}
-
-const get_compass = async (aladin: any, height: number, width: number, positionAngle: number) => {
-    const fc = await get_shapes('compass_rose') as FeatureCollection<Polygon>
-    const angle = 90 + get_angle(aladin) // rotate to match compass
-    const aladinAngle = aladin.getViewCenter2NorthPoleAngle()
-    // const wcs = aladin.getViewWCS()
-    fc['features'].forEach((f) => {
-        let polygon = f.geometry.coordinates
-        const offsetx = f.properties?.offsetx
-        const offsety = f.properties?.offsety
-        const margin = f.properties?.margin ?? 50
-        polygon = [...polygon, polygon[0]]
-        polygon = polygon.map((point) => {
-            const [x, y] = point as unknown as [number, number]
-            return [x + width - margin + offsetx, y + height - margin + offsety] as unknown as Position[]
-        })
-        const rotPnt = [width - margin, height - margin ]
-        const compassAngle = -1 * (angle + positionAngle + aladinAngle)
-        polygon = rotate_multipolygon([polygon], compassAngle, rotPnt)[0]
-        f.geometry.coordinates = polygon
-    })
-    return fc
-}
-
-const get_fovz = async (aladin: any, instrumentFOV: string, angle: number) => {
-    const [ra, dec] = aladin.getRaDec() as [number, number]
-    const fc = await get_shapes('fov')
-    const features = fc['features'].filter((f: any) => f['properties'].type === 'FOV')
-    const feature = features.find((f: any) => f['properties'].instrument === instrumentFOV)
-    if (!feature) return { fov: [], zoom: 5 } 
-    const multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
-    const rotPolygon = rotate_multipolygon(multipolygon, angle)
-    const polygons = rotPolygon.map((polygon: Position[][]) => {
-        let absPolygon = [...polygon, polygon[0]]
-        absPolygon = absPolygon
-            .map((point) => {
-                const [x, y] = point as unknown as [number, number]
-                return [x / 3600 + ra, y / 3600 + dec]
-            })
-            .map((point) => {
-                const [x, y] = point as unknown as [number, number]
-                const pix = aladin.world2pix(x, y)
-                return pix
-            })
-        return absPolygon
-    })
-
-    const zoom = feature?.properties?.zoom ?? 1
-    const out = { fov: polygons as Position[][][], zoom: zoom as number }
-    return out 
-}
 
 export default function AladinViewer(props: Props) {
 
@@ -249,25 +161,6 @@ export default function AladinViewer(props: Props) {
 
     const debounced_update_shapes = useDebounceCallback(update_shapes, 250)
 
-    const add_pointing_origins = (ra: number, dec: number, aladin: any, pointingOrigins: POPointFeature[]) => {
-        const markers = pointingOrigins?.map((feature) => {
-            const [dra, ddec] = feature.geometry.coordinates //arcseconds
-            const [pora, podec] = [ra + dra / 3600, dec + ddec / 3600]
-            const name = feature.properties?.name ?? 'Unknown'
-            return A.marker(pora, podec, { name: name, popupTitle: name })
-        })
-        const cat = A.catalog({ name: 'Pointing Origins', shape: 'diamond', color: 'yellow' });
-        markers.forEach((marker) => cat.addSources(marker))
-        try {
-            aladin.removeOverlay('Pointing Origins')
-        } catch (error) {
-            console.error('Error removing overlay:', error)
-        }
-        finally {
-            aladin.addCatalog(cat);
-        }
-    }
-
     const scriptloaded = async () => {
         const firstRow = props.targets.at(0) ?? { ra: '0', dec: '0', ra_deg: 0, dec_deg: 0 }
         const ra = firstRow.ra_deg ?? ra_dec_to_deg(firstRow.ra ?? '0')
@@ -306,21 +199,9 @@ export default function AladinViewer(props: Props) {
             setCompass(newCompass)
             props.targets && add_catalog(alad, props.targets, 'Targets')
             props.guideStars && add_catalog(alad, props.guideStars, 'Guide Stars')
-            if (props.pointingOrigins) { //TODO: add a catalog for pointing origins and add to aladin
-                add_pointing_origins(ra, dec, alad, props.pointingOrigins as POPointFeature[])
-            }
             alad.setViewCenter2NorthPoleAngle(props.positionAngle)
         })
     }
-
-    React.useEffect(() => {
-        if (aladin && props.pointingOrigins) {
-            const [ra, dec] = aladin.getRaDec() as [number, number]
-            add_pointing_origins(ra, dec, aladin, props.pointingOrigins as POPointFeature[])
-        }
-    }, [props.pointingOrigins])
-
-        
 
     React.useEffect(() => {
         scriptloaded()
