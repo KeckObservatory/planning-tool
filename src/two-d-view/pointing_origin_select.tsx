@@ -29,10 +29,21 @@ interface POSelectProps {
 
 export const POSelect = (props: POSelectProps) => {
     const { pointing_origins, instrument, selPointingOrigins, setSelPointingOrigins } = props
-    const [options, setOptions] = React.useState<(POPointFeature | undefined)[]>([])
+    const [options, setOptions] = React.useState<(POPointFeature | undefined | 'SELECT_ALL')[]>([])
+    const [filteredFeatures, setFilteredFeatures] = React.useState<POPointFeature[]>([])
 
-    const onPointingOriginChange = (value: (POPointFeature | undefined)[]) => {
-        if (value?.includes(undefined)) {
+    const onPointingOriginChange = (value: (POPointFeature | undefined | 'SELECT_ALL')[]) => {
+        // Check if "Select All" was clicked
+        if (value?.includes('SELECT_ALL')) {
+            // If "Select All" is in the new value, select all filtered options
+            if (!selPointingOrigins || selPointingOrigins.length !== filteredFeatures.length) {
+                setSelPointingOrigins(filteredFeatures)
+            } else {
+                // If all are already selected, deselect all
+                setSelPointingOrigins([])
+            }
+        }
+        else if (value?.includes(undefined)) {
             setSelPointingOrigins([])
         }
         else {
@@ -43,12 +54,14 @@ export const POSelect = (props: POSelectProps) => {
     useEffect(() => {
         if (!pointing_origins) {
             setOptions([])
+            setFilteredFeatures([])
             return
         }
-        const filteredOptions = pointing_origins.features
+        const filtered = pointing_origins.features
             .filter((feature) => instrument.includes(feature.properties?.instrument))
 
-        setOptions([undefined, ...filteredOptions])
+        setFilteredFeatures(filtered)
+        setOptions([undefined, 'SELECT_ALL', ...filtered])
     }, [pointing_origins, instrument])
 
     return (
@@ -63,9 +76,29 @@ export const POSelect = (props: POSelectProps) => {
                 renderInput={(params) => <TextField {...params} label="PO" />}
                 multiple
                 disableCloseOnSelect
-                getOptionLabel={(option) => option?.properties?.name || 'None'}
+                getOptionLabel={(option) => {
+                    if (option === 'SELECT_ALL') return 'Select All';
+                    return option?.properties?.name || 'None';
+                }}
                 renderOption={(props, option, { selected }) => {
                     const { key, ...optionProps } = props;
+                    
+                    if (option === 'SELECT_ALL') {
+                        const allSelected = selPointingOrigins.length === filteredFeatures.length && filteredFeatures.length > 0;
+                        return (
+                            <li key={key} {...optionProps}>
+                                <Checkbox
+                                    icon={icon}
+                                    checkedIcon={checkedIcon}
+                                    style={{ marginRight: 8 }}
+                                    checked={allSelected}
+                                    indeterminate={selPointingOrigins.length > 0 && selPointingOrigins.length < filteredFeatures.length}
+                                />
+                                <strong>Select All</strong>
+                            </li>
+                        );
+                    }
+                    
                     return (
                         <li key={key} {...optionProps}>
                             <Checkbox

@@ -244,7 +244,7 @@ export default function AladinViewer(props: Props) {
                     width={props.width}
                     height={props.height}
                     markerSize={8}
-                    fontSize={11}
+                    fontSize={14}
                     textOffset={35}
                     lineColor="#FFD700"   // Gold lines
                     textColor="#FFFFFF"   // White text
