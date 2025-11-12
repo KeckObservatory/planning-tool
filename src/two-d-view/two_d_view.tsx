@@ -157,7 +157,7 @@ const TwoDView = ({ targets }: Props) => {
     React.useEffect(() => {
         const fun = async () => {
             const featureCollection = await get_shapes('fov')
-            const pos = await get_shapes('pointing_origins') as POPointingOriginCollection 
+            const pos = await get_shapes('pointing_origins') as POPointingOriginCollection
             const features = featureCollection['features'].filter((feature: any) => {
                 return feature['properties'].type === 'FOV'
             })
@@ -311,15 +311,20 @@ const TwoDView = ({ targets }: Props) => {
             </Grid2>
             <Grid2 size={{ xs: 4 }}>
                 <Stack width="100%" direction="column" justifyContent='center' spacing={1}>
-                    <FOVSelect 
+                    <FOVSelect
                         fovs={fovs}
                     />
-                    <POSelect
-                        pointing_origins={pointingOrigins}
-                        instrument={instrumentFOV}
-                        selPointingOrigins={selPointingOrigins}
-                        setSelPointingOrigins={setSelPointingOrigins}
-                    />
+                    {
+                        pointingOrigins && (
+                            <POSelect
+                                pointing_origins={pointingOrigins}
+                                instrument={instrumentFOV}
+                                selPointingOrigins={selPointingOrigins}
+                                setSelPointingOrigins={setSelPointingOrigins}
+                            />
+
+                        )
+                    }
                     <Tooltip title={'Rotator angle for Field of View'}>
                         <TextField
                             sx={{ width: '200px', margin: '6px' }}
