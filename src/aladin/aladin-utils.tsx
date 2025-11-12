@@ -2,20 +2,25 @@ import { cosd, sind, r2d } from '../two-d-view/sky_view_util.tsx'
 import { Feature, FeatureCollection, MultiPolygon, Polygon, Position } from 'geojson'
 import { get_shapes } from "../two-d-view/two_d_view.tsx"
 
+export const rotate_point = (point: Position[], angle: number, pnt=[0,0]) => {
+        let [x, y] = point as unknown as [number, number]
+        x -= pnt[0]
+        y -= pnt[1]
+        let newPoint = [
+            x * cosd(angle) - y * sind(angle),
+            x * sind(angle) + y * cosd(angle)
+        ]
+        newPoint[0] += pnt[0]
+        newPoint[1] += pnt[1]
+        return newPoint as unknown as Position[]
+}
+
 const rotate_multipolygon = (coords: Position[][][], angle: number, pnt=[0,0]) => {
 
     const rotFOV = coords.map(shape => {
         const newShape = shape.map(point => {
-            let [x, y] = point as unknown as [number, number]
-            x -= pnt[0]
-            y -= pnt[1]
-            let newPoint = [
-                x * cosd(angle) - y * sind(angle),
-                x * sind(angle) + y * cosd(angle)
-            ]
-            newPoint[0] += pnt[0]
-            newPoint[1] += pnt[1]
-            return newPoint as unknown as Position[]
+            const rotatedPoint = rotate_point(point, angle, pnt)
+            return rotatedPoint
         })
         return newShape
     })
