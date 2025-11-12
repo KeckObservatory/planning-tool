@@ -229,12 +229,14 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 <FOVSelect
                     fovs={fovs}
                 />
-                <POSelect
-                    pointing_origins={pointingOrigins}
-                    instrument={instrumentFOV}
-                    selPointingOrigins={selPointingOrigins}
-                    setSelPointingOrigins={setSelPointingOrigins}
-                />
+                {pointingOrigins && (
+                    <POSelect
+                        pointing_origins={pointingOrigins}
+                        instrument={instrumentFOV}
+                        selPointingOrigins={selPointingOrigins}
+                        setSelPointingOrigins={setSelPointingOrigins}
+                    />
+                )}
                 <UploadDialog
                     setTargets={setGuideStars}
                 />

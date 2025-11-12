@@ -21,7 +21,7 @@ export interface POPointingOriginCollection extends GeoJSON.FeatureCollection<Ge
 
 
 interface POSelectProps {
-    pointing_origins?: POPointingOriginCollection
+    pointing_origins: POPointingOriginCollection
     selPointingOrigins: POPointFeature[]
     setSelPointingOrigins: React.Dispatch<React.SetStateAction<POPointFeature[]>>
     instrument: string
@@ -30,17 +30,14 @@ interface POSelectProps {
 export const POSelect = (props: POSelectProps) => {
     const { pointing_origins, instrument, selPointingOrigins, setSelPointingOrigins } = props
     const [options, setOptions] = React.useState<(POPointFeature | undefined | 'SELECT_ALL')[]>([])
-    const [filteredFeatures, setFilteredFeatures] = React.useState<POPointFeature[]>([])
 
     const onPointingOriginChange = (value: (POPointFeature | undefined | 'SELECT_ALL')[]) => {
         // Check if "Select All" was clicked
         if (value?.includes('SELECT_ALL')) {
-            // If "Select All" is in the new value, select all filtered options
-            if (!selPointingOrigins || selPointingOrigins.length !== filteredFeatures.length) {
-                setSelPointingOrigins(filteredFeatures)
-            } else {
-                // If all are already selected, deselect all
-                setSelPointingOrigins([])
+            const instFeatures = pointing_origins?.features
+                .filter((feature) => instrument.includes(feature.properties?.instrument))
+            if (instFeatures) {
+                setSelPointingOrigins(instFeatures)
             }
         }
         else if (value?.includes(undefined)) {
@@ -53,22 +50,14 @@ export const POSelect = (props: POSelectProps) => {
 
     useEffect(() => {
         if (!pointing_origins) {
-            setOptions([])
-            setFilteredFeatures([])
             return
         }
-        const filtered = pointing_origins.features
+        const instFeatures = pointing_origins.features
             .filter((feature) => instrument.includes(feature.properties?.instrument))
 
-        setFilteredFeatures(filtered)
-        setOptions([undefined, 'SELECT_ALL', ...filtered])
+        setSelPointingOrigins([]) //reset to empty when instrument changes
+        setOptions([undefined, 'SELECT_ALL', ...instFeatures])
     }, [pointing_origins, instrument])
-
-    useEffect(() => {
-        if (selPointingOrigins.length > 0) {
-            setFilteredFeatures([])
-        }
-    }, [instrument])
 
     return (
         <Tooltip placement="top" title="Select pointing origin">
@@ -90,7 +79,9 @@ export const POSelect = (props: POSelectProps) => {
                     const { key, ...optionProps } = props;
                     
                     if (option === 'SELECT_ALL') {
-                        const allSelected = selPointingOrigins.length === filteredFeatures.length && filteredFeatures.length > 0;
+                        const instFeatures = pointing_origins?.features
+                            .filter((feature) => instrument.includes(feature.properties?.instrument))
+                        const allSelected = selPointingOrigins.length === instFeatures?.length && instFeatures.length > 0;
                         return (
                             <li key={key} {...optionProps}>
                                 <Checkbox
@@ -98,7 +89,7 @@ export const POSelect = (props: POSelectProps) => {
                                     checkedIcon={checkedIcon}
                                     style={{ marginRight: 8 }}
                                     checked={allSelected}
-                                    indeterminate={selPointingOrigins.length > 0 && selPointingOrigins.length < filteredFeatures.length}
+                                    indeterminate={selPointingOrigins.length > 0 && selPointingOrigins.length < instFeatures?.length}
                                 />
                                 <strong>Select All</strong>
                             </li>
