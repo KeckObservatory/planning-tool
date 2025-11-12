@@ -64,6 +64,12 @@ export const POSelect = (props: POSelectProps) => {
         setOptions([undefined, 'SELECT_ALL', ...filtered])
     }, [pointing_origins, instrument])
 
+    useEffect(() => {
+        if (selPointingOrigins.length > 0) {
+            setFilteredFeatures([])
+        }
+    }, [instrument])
+
     return (
         <Tooltip placement="top" title="Select pointing origin">
             <Autocomplete
