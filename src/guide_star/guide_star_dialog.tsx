@@ -115,6 +115,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [pointingOrigins, setPointingOrigins] = React.useState<POPointingOriginCollection | undefined>(undefined)
     const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
     const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
+    const [rotatorAngle, setRotatorAngle] = React.useState(0)
 
     let initTarget = targets.at(0) ?? {} as Target
     const [target, setTarget] = useState<Target>(initTarget)
@@ -227,6 +228,15 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         renderInput={(params) => <TextField {...params} label={'Selected Target'} />}
                     />
                 </Tooltip>
+                <Tooltip title={'Rotator angle for Field of View'}>
+                    <TextField
+                        sx={{ width: '200px', margin: '6px' }}
+                        label={'Rotator Angle'}
+                        id="rotator-angle"
+                        value={rotatorAngle}
+                        onChange={(event) => setRotatorAngle(Number(event.target.value))}
+                    />
+                </Tooltip>
                 <FOVSelect
                     fovs={fovs}
                 />
@@ -252,7 +262,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         guideStars={guidestars}
                         positionAngle={target.rotator_pa ?? 0}
                         pointingOrigins={selPointingOrigins}
-                        fovAngle={0}
+                        fovAngle={rotatorAngle}
                         selPO={selPO}
                         setSelPO={setSelPO}
                         instrumentFOV={instrumentFOV}

@@ -75,7 +75,12 @@ export default function AladinViewer(props: Props) {
             return [];
         }
         
-        const [ra, dec] = aladin.getRaDec() as [number, number];
+        let [ra, dec] = aladin.getRaDec() as [number, number];
+        if (props.selPO) { // this offsets the center of the view to the selected pointing origin 
+            const [dra, ddec] = props.selPO.geometry.coordinates; // arcseconds offset
+            ra = ra - dra / 3600;
+            dec = dec - ddec / 3600;
+        }
         
         return props.pointingOrigins.map((feature) => {
             const [dra, ddec] = feature.geometry.coordinates; // arcseconds offset
@@ -89,7 +94,7 @@ export default function AladinViewer(props: Props) {
                 position: rotatedxy as unknown as [number, number]
             };
         });
-    }, [aladin, props.pointingOrigins, zoom, props.fovAngle]); // Include zoom to trigger recalculation on zoom changes
+    }, [aladin, props.pointingOrigins, zoom, props.fovAngle, props.selPO]); // Include zoom to trigger recalculation on zoom changes
 
     React.useEffect(() => {
         if (props.selectedGuideStarName && aladin) {
@@ -152,14 +157,13 @@ export default function AladinViewer(props: Props) {
 
     const update_shapes = async (aladin: any, updatefov = true, updateCompass = true) => {
 
+        const pointOfOrigin = props.selPO?.geometry.coordinates as [number, number] ?? [0, 0]
         if (props.selPO) { // if there is a selected pointing origin, move the view to it
             let [ra, dec] = aladin.getRaDec() as [number, number]
-            const [dra, ddec] = props.selPO.geometry.coordinates // arcseconds offset
+            const [dra, ddec] = pointOfOrigin // arcseconds offset
             aladin.gotoRaDec(ra + dra / 3600, dec + ddec / 3600)
         }
-
         if (updatefov) {
-            const pointOfOrigin = props.selPO?.geometry.coordinates as [number, number] ?? [0, 0]
             const fovz = await get_fovz(aladin, props.instrumentFOV, props.fovAngle, pointOfOrigin)
             setFOV(() => [...fovz.fov])
         }
