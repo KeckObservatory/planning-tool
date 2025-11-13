@@ -200,8 +200,6 @@ export default function AladinViewer(props: Props) {
             })
             alad.on('positionChanged', function () {
                 debounced_update_shapes(alad, false, true)
-                console.log('Position changed, PO reset to undefined')
-                props.setSelPO(undefined)
             })
             alad.on('objectClicked', function (obj: any) {
                 const targetName = obj.popupTitle.split(':').at(0) // guide star names are in the format "name:idx"
