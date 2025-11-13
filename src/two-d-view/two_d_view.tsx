@@ -142,7 +142,8 @@ const TwoDView = ({ targets }: Props) => {
     const [showMoon, setShowMoon] = React.useState(true)
     const [showCurrLoc, setShowCurrLoc] = React.useState(true)
     const [showLimits, setShowLimits] = React.useState(true)
-    const [rotatorAngle, setRotatorAngle] = React.useState(0)
+    const firstTarget = targets.find(t => t.ra_deg !== undefined && t.dec_deg !== undefined)
+    const [rotatorAngle, setRotatorAngle] = React.useState(firstTarget?.rotator_pa ?? 0) // default to 0 if not provided
     const [positionAngle] = React.useState(0)
     const lngLatEl = context.config.tel_lat_lng_el[dome]
     const [suncalcTimes, setSuncalcTimes] = React.useState(util.get_suncalc_times(lngLatEl, obsdate))
@@ -154,6 +155,7 @@ const TwoDView = ({ targets }: Props) => {
     const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
     const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
     const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
+
 
 
     React.useEffect(() => {
