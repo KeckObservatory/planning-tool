@@ -70,7 +70,7 @@ export default function AladinViewer(props: Props) {
     const [zoom, setZoom] = React.useState(5)
 
     const get_offset_ra_dec = () => {
-        let [ra, dec] = aladin?.getRaDec() as [number, number] ?? [0, 0];
+        let [ra, dec] = aladin?.getRaDec() as [number, number] ?? [0, 0]; //sometimes aladin is null
         if (props.selPO) { // this offsets the center of the view to the selected pointing origin 
             const [dra, ddec] = props.selPO.geometry.coordinates; // arcseconds offset
             ra = ra - dra / 3600;
