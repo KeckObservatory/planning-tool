@@ -67,14 +67,14 @@ export const get_compass = async (aladin: any, height: number, width: number, po
     return fc
 }
 
-export const get_fovz = async (aladin: any, instrumentFOV: string, angle: number) => {
+export const get_fovz = async (aladin: any, instrumentFOV: string, angle: number, offset: [number, number]) => {
     const [ra, dec] = aladin.getRaDec() as [number, number]
     const fc = await get_shapes('fov')
     const features = fc['features'].filter((f: any) => f['properties'].type === 'FOV')
     const feature = features.find((f: any) => f['properties'].instrument === instrumentFOV)
     if (!feature) return { fov: [], zoom: 5 } 
     const multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
-    const rotPolygon = rotate_multipolygon(multipolygon, angle)
+    const rotPolygon = rotate_multipolygon(multipolygon, angle, offset )
     const polygons = rotPolygon.map((polygon: Position[][]) => {
         let absPolygon = [...polygon, polygon[0]]
         absPolygon = absPolygon

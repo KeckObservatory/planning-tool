@@ -114,6 +114,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [fovs, setFOVs] = React.useState<string[]>([])
     const [pointingOrigins, setPointingOrigins] = React.useState<POPointingOriginCollection | undefined>(undefined)
     const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
+    const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
 
     let initTarget = targets.at(0) ?? {} as Target
     const [target, setTarget] = useState<Target>(initTarget)
@@ -235,6 +236,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         instrument={instrumentFOV}
                         selPointingOrigins={selPointingOrigins}
                         setSelPointingOrigins={setSelPointingOrigins}
+                        selPO={selPO}
+                        setSelPO={setSelPO}
                     />
                 )}
                 <UploadDialog
@@ -250,6 +253,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         positionAngle={target.rotator_pa ?? 0}
                         pointingOrigins={selPointingOrigins}
                         fovAngle={0}
+                        selPO={selPO}
+                        setSelPO={setSelPO}
                         instrumentFOV={instrumentFOV}
                         height={height}
                         width={width}

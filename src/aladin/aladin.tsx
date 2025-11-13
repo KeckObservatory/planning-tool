@@ -6,6 +6,7 @@ import { useDebounceCallback } from "../use_debounce_callback.tsx"
 import { Feature, FeatureCollection, Polygon, Position, Point } from 'geojson'
 import { PointingOriginMarkers, PointingOriginMarker } from "./pointing_origin_markers.tsx"
 import { get_compass, get_fovz, rotate_point } from "./aladin-utils.tsx"
+import { POPointFeature } from "../two-d-view/pointing_origin_select.tsx"
 // import { color } from "html2canvas/dist/types/css/types/color"
 
 interface Props {
@@ -13,6 +14,8 @@ interface Props {
     height: number,
     instrumentFOV: string,
     targets: Target[],
+    selPO: POPointFeature | undefined ,
+    setSelPO: React.Dispatch<React.SetStateAction<POPointFeature | undefined>>,
     guideStars?: Partial<Target>[],
     pointingOrigins?: Feature<Point, { name?: string }>[],
     fovAngle: number
@@ -149,7 +152,8 @@ export default function AladinViewer(props: Props) {
 
     const update_shapes = async (aladin: any, updatefov = true, updateCompass = true) => {
         if (updatefov) {
-            const fovz = await get_fovz(aladin, props.instrumentFOV, props.fovAngle)
+            const pointOfOrigin = props.selPO?.geometry.coordinates as [number, number] ?? [0, 0]
+            const fovz = await get_fovz(aladin, props.instrumentFOV, props.fovAngle, pointOfOrigin)
             setFOV(() => [...fovz.fov])
         }
         if (updateCompass) {
@@ -184,6 +188,7 @@ export default function AladinViewer(props: Props) {
             })
             alad.on('positionChanged', function () {
                 debounced_update_shapes(alad, false, true)
+                props.setSelPO && props.setSelPO(undefined)
             })
             alad.on('objectClicked', function (obj: any) {
                 const targetName = obj.popupTitle.split(':').at(0) // guide star names are in the format "name:idx"
@@ -191,7 +196,15 @@ export default function AladinViewer(props: Props) {
                     props.selectCallback(targetName)
                 }
             })
-            const fovz = await get_fovz(alad, props.instrumentFOV, props.fovAngle)
+
+            if (props.selPO) { // if there is a selected pointing origin, move the view to it
+                let [ra, dec] = alad.getRaDec() as [number, number]
+                const [dra, ddec] = props.selPO.geometry.coordinates // arcseconds offset
+                alad.gotoRaDec(ra + dra / 3600, dec + ddec / 3600)
+            }
+
+            const pointOfOrigin = props.selPO?.geometry.coordinates as [number, number] ?? [0, 0]
+            const fovz = await get_fovz(alad, props.instrumentFOV, props.fovAngle, pointOfOrigin)
             const newCompass = await get_compass(alad, props.height, props.width, props.positionAngle)
             setZoom(fovz.zoom)
             alad.setFoV(fovz.zoom) // set zoom level of shape

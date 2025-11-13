@@ -153,6 +153,8 @@ const TwoDView = ({ targets }: Props) => {
     const [pointingOrigins, setPointingOrigins] = React.useState<POPointingOriginCollection | undefined>(undefined)
     const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
     const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
+    const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
+
 
     React.useEffect(() => {
         const fun = async () => {
@@ -321,6 +323,8 @@ const TwoDView = ({ targets }: Props) => {
                                 instrument={instrumentFOV}
                                 selPointingOrigins={selPointingOrigins}
                                 setSelPointingOrigins={setSelPointingOrigins}
+                                selPO={selPO}
+                                setSelPO={setSelPO}
                             />
 
                         )
@@ -386,6 +390,8 @@ const TwoDView = ({ targets }: Props) => {
                 <AladinViewer
                     height={height}
                     width={width}
+                    selPO={selPO}
+                    setSelPO={setSelPO}
                     fovAngle={rotatorAngle}
                     positionAngle={positionAngle}
                     instrumentFOV={instrumentFOV}

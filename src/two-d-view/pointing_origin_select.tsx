@@ -8,22 +8,24 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export interface POPointingOriginProperties {
-        name: string;
-        instrument: string;
-        xpos:  number;
-        ypos: number;
-        units: string;
-        source_file: string;
+    name: string;
+    instrument: string;
+    xpos: number;
+    ypos: number;
+    units: string;
+    source_file: string;
 }
 
-export interface POPointFeature extends GeoJSON.Feature<GeoJSON.Point, POPointingOriginProperties> {}
-export interface POPointingOriginCollection extends GeoJSON.FeatureCollection<GeoJSON.Point, POPointingOriginProperties> {}
+export interface POPointFeature extends GeoJSON.Feature<GeoJSON.Point, POPointingOriginProperties> { }
+export interface POPointingOriginCollection extends GeoJSON.FeatureCollection<GeoJSON.Point, POPointingOriginProperties> { }
 
 
 interface POSelectProps {
     pointing_origins: POPointingOriginCollection
     selPointingOrigins: POPointFeature[]
     setSelPointingOrigins: React.Dispatch<React.SetStateAction<POPointFeature[]>>
+    selPO: POPointFeature | undefined,
+    setSelPO: React.Dispatch<React.SetStateAction<POPointFeature | undefined>>
     instrument: string
 }
 
@@ -60,56 +62,69 @@ export const POSelect = (props: POSelectProps) => {
     }, [pointing_origins, instrument])
 
     return (
-        <Tooltip placement="top" title="Select pointing origin">
-            <Autocomplete
-                disablePortal
-                id="pointing-origin-selection"
-                value={selPointingOrigins}
-                onChange={(_, value) => onPointingOriginChange(value)}
-                options={options}
-                sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
-                renderInput={(params) => <TextField {...params} label="PO" />}
-                multiple
-                disableCloseOnSelect
-                getOptionLabel={(option) => {
-                    if (option === 'SELECT_ALL') return 'Select All';
-                    return option?.properties?.name || 'None';
-                }}
-                renderOption={(props, option, { selected }) => {
-                    const { key, ...optionProps } = props;
-                    
-                    if (option === 'SELECT_ALL') {
-                        const instFeatures = pointing_origins?.features
-                            .filter((feature) => instrument.includes(feature.properties?.instrument))
-                        const allSelected = selPointingOrigins.length === instFeatures?.length && instFeatures.length > 0;
+        <>
+            <Tooltip placement="top" title="Select pointing origin">
+                <Autocomplete
+                    disablePortal
+                    id="pointing-origin-selection"
+                    value={selPointingOrigins}
+                    onChange={(_, value) => onPointingOriginChange(value)}
+                    options={options}
+                    sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
+                    renderInput={(params) => <TextField {...params} label="PO" />}
+                    multiple
+                    disableCloseOnSelect
+                    getOptionLabel={(option) => {
+                        if (option === 'SELECT_ALL') return 'Select All';
+                        return option?.properties?.name || 'None';
+                    }}
+                    renderOption={(props, option, { selected }) => {
+                        const { key, ...optionProps } = props;
+
+                        if (option === 'SELECT_ALL') {
+                            const instFeatures = pointing_origins?.features
+                                .filter((feature) => instrument.includes(feature.properties?.instrument))
+                            const allSelected = selPointingOrigins.length === instFeatures?.length && instFeatures.length > 0;
+                            return (
+                                <li key={key} {...optionProps}>
+                                    <Checkbox
+                                        icon={icon}
+                                        checkedIcon={checkedIcon}
+                                        style={{ marginRight: 8 }}
+                                        checked={allSelected}
+                                        indeterminate={selPointingOrigins.length > 0 && selPointingOrigins.length < instFeatures?.length}
+                                    />
+                                    <strong>Select All</strong>
+                                </li>
+                            );
+                        }
+
                         return (
                             <li key={key} {...optionProps}>
                                 <Checkbox
                                     icon={icon}
                                     checkedIcon={checkedIcon}
                                     style={{ marginRight: 8 }}
-                                    checked={allSelected}
-                                    indeterminate={selPointingOrigins.length > 0 && selPointingOrigins.length < instFeatures?.length}
+                                    checked={selected}
                                 />
-                                <strong>Select All</strong>
+                                {option?.properties?.name || 'None'}
                             </li>
                         );
-                    }
-                    
-                    return (
-                        <li key={key} {...optionProps}>
-                            <Checkbox
-                                icon={icon}
-                                checkedIcon={checkedIcon}
-                                style={{ marginRight: 8 }}
-                                checked={selected}
-                            />
-                            {option?.properties?.name || 'None'}
-                        </li>
-                    );
-                }}
-                style={{ width: 500 }}
-            />
-        </Tooltip>
+                    }}
+                    style={{ width: 500 }}
+                />
+            </Tooltip>
+            <Tooltip placement="top" title="Center FOV on pointing origin">
+                <Autocomplete
+                    disablePortal
+                    id="pointing-origin-selection"
+                    value={props.selPO}
+                    onChange={(_, value) => value !== null && props.setSelPO(value)}
+                    options={[undefined, ...selPointingOrigins]}
+                    renderInput={(params) => <TextField {...params} label="PO" />}
+                    style={{ width: 50 }}
+                />
+            </Tooltip>
+        </>
     )
 }
