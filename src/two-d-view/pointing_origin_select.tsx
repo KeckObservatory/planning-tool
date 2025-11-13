@@ -30,7 +30,7 @@ interface POSelectProps {
 }
 
 export const POSelect = (props: POSelectProps) => {
-    const { pointing_origins, instrument, selPointingOrigins, setSelPointingOrigins } = props
+    const { pointing_origins, instrument, selPointingOrigins, setSelPointingOrigins, setSelPO, selPO } = props
     const [options, setOptions] = React.useState<(POPointFeature | undefined | 'SELECT_ALL')[]>([])
 
     const onPointingOriginChange = (value: (POPointFeature | undefined | 'SELECT_ALL')[]) => {
@@ -52,6 +52,7 @@ export const POSelect = (props: POSelectProps) => {
 
     useEffect(() => {
         if (!pointing_origins) {
+            setSelPO(undefined)
             return
         }
         const instFeatures = pointing_origins.features
@@ -118,8 +119,8 @@ export const POSelect = (props: POSelectProps) => {
                 <Autocomplete
                     disablePortal
                     id="pointing-origin-selection"
-                    value={props.selPO}
-                    onChange={(_, value) => value !== null && props.setSelPO(value)}
+                    value={selPO}
+                    onChange={(_, value) => value !== null && setSelPO(value)}
                     options={[undefined, ...selPointingOrigins]}
                     getOptionLabel={(option) => {
                         return option?.properties?.name || 'None';
