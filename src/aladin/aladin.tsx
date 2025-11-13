@@ -165,7 +165,7 @@ export default function AladinViewer(props: Props) {
         const [ra, dec] = get_offset_ra_dec();
 
         if (updatefov) {
-            const fovz = await get_fovz(ra, dec, aladin.world2pix, props.instrumentFOV, props.fovAngle, pointOfOrigin)
+            const fovz = await get_fovz(ra, dec, aladin, props.instrumentFOV, props.fovAngle, pointOfOrigin)
             setFOV(() => [...fovz.fov])
         }
         if (updateCompass) {
@@ -211,7 +211,7 @@ export default function AladinViewer(props: Props) {
 
 
             const pointOfOrigin = props.selPO?.geometry.coordinates as [number, number] ?? [0, 0]
-            const fovz = await get_fovz(ra, dec, alad.world2pix, props.instrumentFOV, props.fovAngle, pointOfOrigin)
+            const fovz = await get_fovz(ra, dec, alad, props.instrumentFOV, props.fovAngle, pointOfOrigin)
             const newCompass = await get_compass(alad, props.height, props.width, props.positionAngle)
             setZoom(fovz.zoom)
             alad.setFoV(fovz.zoom) // set zoom level of shape
