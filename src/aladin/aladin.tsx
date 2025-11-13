@@ -69,19 +69,23 @@ export default function AladinViewer(props: Props) {
     const [aladin, setAladin] = React.useState<null | any>(null)
     const [zoom, setZoom] = React.useState(5)
 
-    // Convert pointing origins to pixel coordinates for SVG markers
-    const pointingOriginMarkers = React.useMemo((): PointingOriginMarker[] => {
-        if (!aladin || !props.pointingOrigins) {
-            return [];
-        }
-        
+    const get_offset_ra_dec = () => {
         let [ra, dec] = aladin.getRaDec() as [number, number];
         if (props.selPO) { // this offsets the center of the view to the selected pointing origin 
             const [dra, ddec] = props.selPO.geometry.coordinates; // arcseconds offset
             ra = ra - dra / 3600;
             dec = dec - ddec / 3600;
         }
-        
+        return [ra, dec]
+    }
+
+    // Convert pointing origins to pixel coordinates for SVG markers
+    const pointingOriginMarkers = React.useMemo((): PointingOriginMarker[] => {
+        if (!aladin || !props.pointingOrigins) {
+            return [];
+        }
+        const [ra, dec] = get_offset_ra_dec();
+
         return props.pointingOrigins.map((feature) => {
             const [dra, ddec] = feature.geometry.coordinates; // arcseconds offset
             const [pora, podec] = [ra + dra / 3600, dec + ddec / 3600]; // convert to degrees
@@ -158,13 +162,10 @@ export default function AladinViewer(props: Props) {
     const update_shapes = async (aladin: any, updatefov = true, updateCompass = true) => {
 
         const pointOfOrigin = props.selPO?.geometry.coordinates as [number, number] ?? [0, 0]
-        if (props.selPO) { // if there is a selected pointing origin, move the view to it
-            let [ra, dec] = aladin.getRaDec() as [number, number]
-            const [dra, ddec] = pointOfOrigin // arcseconds offset
-            aladin.gotoRaDec(ra + dra / 3600, dec + ddec / 3600)
-        }
+        const [ra, dec] = get_offset_ra_dec();
+
         if (updatefov) {
-            const fovz = await get_fovz(aladin, props.instrumentFOV, props.fovAngle, pointOfOrigin)
+            const fovz = await get_fovz(ra, dec, props.instrumentFOV, props.fovAngle, pointOfOrigin)
             setFOV(() => [...fovz.fov])
         }
         if (updateCompass) {
@@ -210,7 +211,7 @@ export default function AladinViewer(props: Props) {
 
 
             const pointOfOrigin = props.selPO?.geometry.coordinates as [number, number] ?? [0, 0]
-            const fovz = await get_fovz(alad, props.instrumentFOV, props.fovAngle, pointOfOrigin)
+            const fovz = await get_fovz(ra, dec, props.instrumentFOV, props.fovAngle, pointOfOrigin)
             const newCompass = await get_compass(alad, props.height, props.width, props.positionAngle)
             setZoom(fovz.zoom)
             alad.setFoV(fovz.zoom) // set zoom level of shape
