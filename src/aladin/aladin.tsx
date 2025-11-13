@@ -151,6 +151,13 @@ export default function AladinViewer(props: Props) {
     }
 
     const update_shapes = async (aladin: any, updatefov = true, updateCompass = true) => {
+
+        if (props.selPO) { // if there is a selected pointing origin, move the view to it
+            let [ra, dec] = aladin.getRaDec() as [number, number]
+            const [dra, ddec] = props.selPO.geometry.coordinates // arcseconds offset
+            aladin.gotoRaDec(ra + dra / 3600, dec + ddec / 3600)
+        }
+
         if (updatefov) {
             const pointOfOrigin = props.selPO?.geometry.coordinates as [number, number] ?? [0, 0]
             const fovz = await get_fovz(aladin, props.instrumentFOV, props.fovAngle, pointOfOrigin)
@@ -197,11 +204,6 @@ export default function AladinViewer(props: Props) {
                 }
             })
 
-            if (props.selPO) { // if there is a selected pointing origin, move the view to it
-                let [ra, dec] = alad.getRaDec() as [number, number]
-                const [dra, ddec] = props.selPO.geometry.coordinates // arcseconds offset
-                alad.gotoRaDec(ra + dra / 3600, dec + ddec / 3600)
-            }
 
             const pointOfOrigin = props.selPO?.geometry.coordinates as [number, number] ?? [0, 0]
             const fovz = await get_fovz(alad, props.instrumentFOV, props.fovAngle, pointOfOrigin)
