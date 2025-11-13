@@ -73,7 +73,7 @@ export const POSelect = (props: POSelectProps) => {
                     sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
                     renderInput={(params) => <TextField {...params} label="PO" />}
                     multiple
-                    disableCloseOnSelect
+                    // disableCloseOnSelect
                     getOptionLabel={(option) => {
                         if (option === 'SELECT_ALL') return 'Select All';
                         return option?.properties?.name || 'None';
@@ -121,8 +121,11 @@ export const POSelect = (props: POSelectProps) => {
                     value={props.selPO}
                     onChange={(_, value) => value !== null && props.setSelPO(value)}
                     options={[undefined, ...selPointingOrigins]}
+                    getOptionLabel={(option) => {
+                        return option?.properties?.name || 'None';
+                    }}
                     renderInput={(params) => <TextField {...params} label="PO" />}
-                    style={{ width: 50 }}
+                    style={{ width: 100 }}
                 />
             </Tooltip>
         </>
