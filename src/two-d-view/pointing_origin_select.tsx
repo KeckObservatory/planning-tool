@@ -71,7 +71,7 @@ export const POSelect = (props: POSelectProps) => {
                     onChange={(_, value) => onPointingOriginChange(value)}
                     options={options}
                     sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
-                    renderInput={(params) => <TextField {...params} label="PO" />}
+                    renderInput={(params) => <TextField {...params} label="Available Pointing Origins" />}
                     multiple
                     // disableCloseOnSelect
                     getOptionLabel={(option) => {
@@ -124,8 +124,8 @@ export const POSelect = (props: POSelectProps) => {
                     getOptionLabel={(option) => {
                         return option?.properties?.name || 'None';
                     }}
-                    renderInput={(params) => <TextField {...params} label="PO" />}
-                    style={{ width: 100 }}
+                    renderInput={(params) => <TextField {...params} label="Selected PO" />}
+                    style={{ width: 150 }}
                 />
             </Tooltip>
         </>

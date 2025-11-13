@@ -233,11 +233,7 @@ export default function AladinViewer(props: Props) {
     React.useEffect(() => {
         if(!aladin) return
         debounced_update_shapes(aladin)
-    }, [aladin, props.instrumentFOV, zoom, props.fovAngle, props.positionAngle])
-
-    React.useEffect(() => {
-    }, [props.targets])
-
+    }, [aladin, props.instrumentFOV, zoom, props.fovAngle, props.positionAngle, props.selPO])
 
     return (
         <div id='aladin-lite-div' style={{ margin: '0px', width: props.width, height: props.height }} >
