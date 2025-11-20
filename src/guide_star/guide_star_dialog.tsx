@@ -165,7 +165,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         const fun = async () => {
             const featureCollection = await get_shapes('fov')
             const pos = await get_shapes('pointing_origins') as POPointingOriginCollection
-            const cntrs = await get_shapes('vignetting_contours')
+            const cntrs = await get_shapes('laser_contours')
             const features = featureCollection['features'].filter((feature: any) => {
                 return feature['properties'].type === 'FOV'
             })
