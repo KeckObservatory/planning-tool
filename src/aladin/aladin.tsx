@@ -99,7 +99,7 @@ export default function AladinViewer(props: Props) {
                 position: rotatedxy as unknown as [number, number]
             };
         });
-    }, [aladin, props.pointingOrigins, props.fovAngle, props.selPO]); // Include zoom to trigger recalculation on zoom changes
+    }, [aladin, props.pointingOrigins, zoom, props.fovAngle, props.selPO]); // Include zoom to trigger recalculation on zoom changes
 
     const laserContours = React.useMemo(() => {
         if (!aladin || !props.contours || !props.contours.features) {
@@ -198,7 +198,7 @@ export default function AladinViewer(props: Props) {
         }
     }
 
-    const debounced_update_shapes = useDebounceCallback(update_shapes, 250)
+    const debounced_update_shapes = useDebounceCallback(update_shapes, 500)
 
     const scriptloaded = async () => {
         const firstRow = props.targets.at(0) ?? { ra: '0', dec: '0', ra_deg: 0, dec_deg: 0 }
