@@ -2,10 +2,11 @@ import React from "react"
 import { ra_dec_to_deg } from '../two-d-view/sky_view_util.tsx'
 import { Target } from "../App.tsx"
 import A from 'aladin-lite'
-import { useDebounceCallback } from "../use_debounce_callback.        A.init.then(async () => {
+import { useDebounceCallback } from "../use_debounce_callback.tsx"
 import { PointingOriginMarkers, PointingOriginMarker } from "./pointing_origin_markers.tsx"
 import { get_compass, get_fovz, rotate_point } from "./aladin-utils.tsx"
 import { POPointFeature, TelescopeContours } from "../two-d-view/pointing_origin_select.tsx"
+import { Feature, Point, Position, Polygon, FeatureCollection } from "geojson"
 // import { color } from "html2canvas/dist/types/css/types/color"
 
 interface Props {
@@ -274,7 +275,9 @@ export default function AladinViewer(props: Props) {
                 height={props.height}
                 color={f.properties?.color}
                 fill={f.properties?.fill}
-                className='compass-overlay' />)}
+                className='compass-overlay' />
+            )
+            }
 
             {/* Render pointing origin markers with labels */}
             {pointingOriginMarkers.length > 0 && (
