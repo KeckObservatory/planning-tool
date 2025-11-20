@@ -45,6 +45,7 @@ const get_angle = (aladin: any) => {
 }
 
 export const get_compass = async (aladin: any, height: number, width: number, positionAngle: number) => {
+    console.log('Getting compass for aladin', aladin, 'with height', height, 'and width', width, 'and positionAngle', positionAngle)
     const fc = await get_shapes('compass_rose') as FeatureCollection<Polygon>
     const angle = 90 + get_angle(aladin) // rotate to match compass
     const aladinAngle = aladin.getViewCenter2NorthPoleAngle()
@@ -68,6 +69,7 @@ export const get_compass = async (aladin: any, height: number, width: number, po
 }
 
 export const get_fovz = async (ra: number, dec: number, aladin: any, instrumentFOV: string, angle: number, offset: [number, number]) => {
+    console.log('Getting FOV for instrument', instrumentFOV, 'with angle', angle, 'and offset', offset)
     const fc = await get_shapes('fov')
     const features = fc['features'].filter((f: any) => f['properties'].type === 'FOV')
     const feature = features.find((f: any) => f['properties'].instrument === instrumentFOV)

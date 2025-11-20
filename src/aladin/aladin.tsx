@@ -275,10 +275,8 @@ export default function AladinViewer(props: Props) {
                 height={props.height}
                 color={f.properties?.color}
                 fill={f.properties?.fill}
-                className='compass-overlay' />
-            )
+                className='compass-overlay' />)
             }
-
             {/* Render pointing origin markers with labels */}
             {pointingOriginMarkers.length > 0 && (
                 <PointingOriginMarkers
