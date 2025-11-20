@@ -230,8 +230,8 @@ export default function AladinViewer(props: Props) {
                     props.selectCallback(targetName)
                 }
             })
-            alad.on('zoomChanged', function (zoom: number) {
-                setZoom(zoom)
+            alad.on('zoomChanged', function (zm: number) {
+                setZoom(zm)
             })
 
             const pointOfOrigin = props.selPO?.geometry.coordinates as [number, number] ?? [0, 0]
@@ -264,7 +264,12 @@ export default function AladinViewer(props: Props) {
     React.useEffect(() => {
         if (!aladin) return
         debounced_update_shapes(aladin)
-    }, [aladin, props.instrumentFOV, zoom, props.fovAngle, props.positionAngle, props.selPO])
+    }, [aladin, props.instrumentFOV, props.fovAngle, props.positionAngle, props.selPO])
+
+    React.useEffect(() => {
+        if (!aladin) return
+        debounced_update_shapes(aladin, true, false)  // Only update FOV, not compass
+    }, [zoom])
 
     return (
         <div id='aladin-lite-div' style={{ margin: '0px', width: props.width, height: props.height }} >
