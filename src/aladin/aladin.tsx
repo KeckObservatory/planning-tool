@@ -111,8 +111,8 @@ export default function AladinViewer(props: Props) {
             const lines = feature.geometry.coordinates.map((lineseg: Position[]) => {
                 let [x1, y1] = aladin.world2pix(ra + lineseg[0][0] / 3600, dec + lineseg[0][1] / 3600) as Position[];
                 let [x2, y2] = aladin.world2pix(ra + lineseg[1][0] / 3600, dec + lineseg[1][1] / 3600) as Position[];
-                [x1, y1] = rotate_point([x1, y1], props.fovAngle, [props.width / 2, props.height / 2]);
-                [x2, y2] = rotate_point([x2, y2], props.fovAngle, [props.width / 2, props.height / 2]);
+                [x1, y1] = rotate_point([x1, y1], props.fovAngle + 180, [props.width / 2, props.height / 2]);
+                [x2, y2] = rotate_point([x2, y2], props.fovAngle + 180, [props.width / 2, props.height / 2]);
                 const line = [[x1, y1], [x2, y2]];
                 return line;
             })
