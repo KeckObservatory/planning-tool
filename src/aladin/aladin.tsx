@@ -6,7 +6,8 @@ import { useDebounceCallback } from "../use_debounce_callback.tsx"
 import { Feature, FeatureCollection, Polygon, Position, Point } from 'geojson'
 import { PointingOriginMarkers, PointingOriginMarker } from "./pointing_origin_markers.tsx"
 import { get_compass, get_fovz, rotate_point } from "./aladin-utils.tsx"
-import { POPointFeature, TelescopeContours } from "../two-d-view/pointing_origin_select.tsx"
+import { LaserContours, POPointFeature, TelescopeContours } from "../two-d-view/pointing_origin_select.tsx"
+import { color } from "html2canvas/dist/types/css/types/color"
 // import { color } from "html2canvas/dist/types/css/types/color"
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
     height: number,
     instrumentFOV: string,
     targets: Target[],
-    selPO: POPointFeature | undefined ,
+    selPO: POPointFeature | undefined,
     setSelPO: React.Dispatch<React.SetStateAction<POPointFeature | undefined>>,
     guideStars?: Partial<Target>[],
     pointingOrigins?: Feature<Point, { name?: string }>[],
@@ -93,7 +94,7 @@ export default function AladinViewer(props: Props) {
             const [x, y] = aladin.world2pix(pora, podec);
             const rotatedxy = rotate_point([x, y], props.fovAngle, [props.width / 2, props.height / 2]);
             const name = feature.properties?.name ?? 'Unknown';
-            
+
             return {
                 name,
                 position: rotatedxy as unknown as [number, number]
@@ -101,12 +102,38 @@ export default function AladinViewer(props: Props) {
         });
     }, [aladin, props.pointingOrigins, zoom, props.fovAngle, props.selPO]); // Include zoom to trigger recalculation on zoom changes
 
+    const laserContours = React.useMemo(() => {
+        if (!aladin || !props.contours || !props.contours.features) {
+            return [];
+        }
+        const [ra, dec] = get_offset_ra_dec();
+
+        const contours = props.contours.features.map((feature: GeoJSON.Feature<GeoJSON.MultiLineString>) => {
+            const lines = feature.geometry.coordinates.map((lineseg: Position[]) => {
+                let [x1, y1] = aladin.world2pix(ra + lineseg[0][0] / 3600, dec + lineseg[0][1] / 3600) as Position[];
+                let [x2, y2] = aladin.world2pix(ra + lineseg[1][0] / 3600, dec + lineseg[1][1] / 3600) as Position[];
+                [x1, y1] = rotate_point([x1, y1], props.fovAngle, [props.width / 2, props.height / 2]);
+                [x2, y2] = rotate_point([x2, y2], props.fovAngle, [props.width / 2, props.height / 2]);
+                const line = [[x1, y1], [x2, y2]];
+                return line;
+            })
+            const name = feature.properties?.name ?? 'Unknown';
+            const contour = {
+                name,
+                color: feature.properties?.color ?? 'magenta',
+                lines: lines
+            };
+            return contour
+        })
+        return contours;
+    }, [aladin, props.pointingOrigins, zoom, props.fovAngle, props.selPO]); // Include zoom to trigger recalculation on zoom changes
+
     React.useEffect(() => {
         if (props.selectedGuideStarName && aladin) {
             const overlays = aladin.getOverlays()
             overlays.forEach((cat: any) => {
                 if (cat.name === 'Guide Stars') {
-                    cat.select( (source: any) => {
+                    cat.select((source: any) => {
                         return source.popupTitle.startsWith(props.selectedGuideStarName + ':')
                     })
                 }
@@ -161,7 +188,7 @@ export default function AladinViewer(props: Props) {
     }
 
     const update_shapes = async (aladin: any, updatefov = true, updateCompass = true) => {
-        if(!aladin) return
+        if (!aladin) return
         const pointOfOrigin = props.selPO?.geometry.coordinates as [number, number] ?? [0, 0]
         const [ra, dec] = get_offset_ra_dec();
 
@@ -238,14 +265,14 @@ export default function AladinViewer(props: Props) {
 
 
     React.useEffect(() => {
-        if(!aladin) return
+        if (!aladin) return
         debounced_update_shapes(aladin)
     }, [aladin, props.instrumentFOV, zoom, props.fovAngle, props.positionAngle, props.selPO])
 
     return (
         <div id='aladin-lite-div' style={{ margin: '0px', width: props.width, height: props.height }} >
             {fov.map((f, idx) => <PolylineComponent key={`fov-${idx}`} points={f} width={props.width} height={props.height} />)}
-            {compass.features.map((f, idx) => <PolylineComponent 
+            {compass.features.map((f, idx) => <PolylineComponent
                 key={`compass-${idx}`}
                 points={f.geometry.coordinates}
                 width={props.width}
@@ -253,7 +280,7 @@ export default function AladinViewer(props: Props) {
                 color={f.properties?.color}
                 fill={f.properties?.fill}
                 className='compass-overlay' />)}
-            
+
             {/* Render pointing origin markers with labels */}
             {pointingOriginMarkers.length > 0 && (
                 <PointingOriginMarkers
@@ -268,16 +295,19 @@ export default function AladinViewer(props: Props) {
                     markerColor="#FFFF00" // Yellow markers
                 />
             )}
-            {props.contours && props.contours.features.map((feature, idx) => (
-                <PolylineComponent
-                    key={`contour-${idx}`}
-                    points={feature.geometry.coordinates}
-                    width={props.width}
-                    height={props.height}
-                    color={feature.properties.color}
-                    className='contour-overlay'
-                />
-            ))}
+            {
+                laserContours.map((contour, idx) => (
+                    contour.lines.map((line, lineIdx) => (
+                        <PolylineComponent
+                            key={`contour-${idx}-${lineIdx}`}
+                            points={line}
+                            width={props.width}
+                            height={props.height}
+                            color={contour.color}
+                            className='contour-overlay'
+                        />
+                    ))))
+            }
         </div>
     )
 }
