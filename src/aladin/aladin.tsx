@@ -2,8 +2,7 @@ import React from "react"
 import { ra_dec_to_deg } from '../two-d-view/sky_view_util.tsx'
 import { Target } from "../App.tsx"
 import A from 'aladin-lite'
-import { useDebounceCallback } from "../use_debounce_callback.tsx"
-import { Feature, FeatureCollection, Polygon, Position, Point } from 'geojson'
+import { useDebounceCallback } from "../use_debounce_callback.        A.init.then(async () => {
 import { PointingOriginMarkers, PointingOriginMarker } from "./pointing_origin_markers.tsx"
 import { get_compass, get_fovz, rotate_point } from "./aladin-utils.tsx"
 import { POPointFeature, TelescopeContours } from "../two-d-view/pointing_origin_select.tsx"
@@ -162,11 +161,6 @@ export default function AladinViewer(props: Props) {
             var cat = A.catalog({ name: name, shape: 'square', color: 'magenta' });
         }
 
-        alad.on('zoomChanged', function (zoom: number) {
-            setZoom(zoom)
-        })
-
-
         for (let idx = 0; idx < targets.length; idx++) {
             const tgt = targets[idx]
             const popupTitle = tgt.target_name ?? tgt._id ?? 'Unknown'
@@ -226,7 +220,7 @@ export default function AladinViewer(props: Props) {
                 debounced_update_shapes(alad)
             })
             alad.on('positionChanged', function () {
-                debounced_update_shapes(alad, false, false)  // Don't update compass on position change
+                debounced_update_shapes(alad, false, true)  // Don't update compass on position change
             })
             alad.on('objectClicked', function (obj: any) {
                 const targetName = obj.popupTitle.split(':').at(0) // guide star names are in the format "name:idx"
@@ -234,7 +228,9 @@ export default function AladinViewer(props: Props) {
                     props.selectCallback(targetName)
                 }
             })
-
+            alad.on('zoomChanged', function (zoom: number) {
+                setZoom(zoom)
+            })
 
             const pointOfOrigin = props.selPO?.geometry.coordinates as [number, number] ?? [0, 0]
             const fovz = await get_fovz(ra, dec, alad, props.instrumentFOV, props.fovAngle, pointOfOrigin)
