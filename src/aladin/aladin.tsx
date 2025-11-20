@@ -215,6 +215,7 @@ export default function AladinViewer(props: Props) {
             target: startPos
         }
         A.init.then(async () => {
+            console.log('Aladin script loaded, initializing viewer with params')
             const alad = A.aladin('#aladin-lite-div', params);
             if (!alad) return
             alad.on('fullScreenToggled', function () {
