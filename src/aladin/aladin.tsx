@@ -99,7 +99,7 @@ export default function AladinViewer(props: Props) {
                 position: rotatedxy as unknown as [number, number]
             };
         });
-    }, [aladin, props.pointingOrigins, zoom, props.fovAngle, props.selPO]); // Include zoom to trigger recalculation on zoom changes
+    }, [aladin, props.pointingOrigins, props.fovAngle, props.selPO]); // Include zoom to trigger recalculation on zoom changes
 
     const laserContours = React.useMemo(() => {
         if (!aladin || !props.contours || !props.contours.features) {
