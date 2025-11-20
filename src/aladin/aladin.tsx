@@ -125,7 +125,7 @@ export default function AladinViewer(props: Props) {
             return contour
         })
         return contours;
-    }, [aladin, props.pointingOrigins, zoom, props.fovAngle, props.selPO]); // Include zoom to trigger recalculation on zoom changes
+    }, [aladin, props.contours, zoom, props.fovAngle, props.selPO]); // Include zoom to trigger recalculation on zoom changes
 
     React.useEffect(() => {
         if (props.selectedGuideStarName && aladin) {
