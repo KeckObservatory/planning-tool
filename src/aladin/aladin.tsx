@@ -6,8 +6,7 @@ import { useDebounceCallback } from "../use_debounce_callback.tsx"
 import { Feature, FeatureCollection, Polygon, Position, Point } from 'geojson'
 import { PointingOriginMarkers, PointingOriginMarker } from "./pointing_origin_markers.tsx"
 import { get_compass, get_fovz, rotate_point } from "./aladin-utils.tsx"
-import { LaserContours, POPointFeature, TelescopeContours } from "../two-d-view/pointing_origin_select.tsx"
-import { color } from "html2canvas/dist/types/css/types/color"
+import { POPointFeature, TelescopeContours } from "../two-d-view/pointing_origin_select.tsx"
 // import { color } from "html2canvas/dist/types/css/types/color"
 
 interface Props {
