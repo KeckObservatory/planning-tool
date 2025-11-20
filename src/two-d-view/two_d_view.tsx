@@ -62,7 +62,7 @@ interface ShapeCfgFile {
     fov: FeatureCollection<MultiPolygon>
     compass_rose: FeatureCollection<Polygon>
     pointing_origins: FeatureCollection<GeoJSON.Geometry>
-    vignetting_contours: FeatureCollection<GeoJSON.MultiLineString>
+    laser_contours: FeatureCollection<GeoJSON.MultiLineString>
 }
 
 
