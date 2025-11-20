@@ -200,8 +200,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         <span>Guide Star Selection</span>
     )
 
-    console.log('telContours', telContours)
     const telContours = contours?.find((feature) => feature.properties.telescope === dome)
+    console.log('telContours', telContours)
 
     const dialogContent = (
         <Stack
