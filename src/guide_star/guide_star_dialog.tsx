@@ -5,16 +5,16 @@ import Tooltip from '@mui/material/Tooltip'
 import AladinViewer from '../aladin/aladin';
 
 import { Target, useStateContext } from '../App';
-import { Autocomplete, Stack, TextField } from '@mui/material';
+import { Autocomplete, Stack, TextField, Switch, FormControlLabel } from '@mui/material';
 import { DialogComponent } from '../dialog_component';
 import GuideStarTable from './guide_star_table';
 import { ra_dec_to_deg } from '../catalog_button';
 import { FOVSelect } from '../two-d-view/fov_select';
-import { get_shapes } from '../two-d-view/two_d_view';
+import { Dome, DomeParam, DomeSelect, get_shapes } from '../two-d-view/two_d_view';
 import { StringParam, useQueryParam, withDefault } from 'use-query-params';
 import { get_catalog_targets, get_catalogs } from '../api/api_root';
 import UploadDialog from '../upload_targets_dialog';
-import { POPointFeature, POPointingOriginCollection, POSelect } from '../two-d-view/pointing_origin_select';
+import { ContourFeature, ContourFeatureCollection, POPointFeature, POPointingOriginCollection, POSelect, VignettingContours } from '../two-d-view/pointing_origin_select';
 
 export interface CatalogTarget {
     name: string;
@@ -113,9 +113,13 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [instrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
     const [fovs, setFOVs] = React.useState<string[]>([])
     const [pointingOrigins, setPointingOrigins] = React.useState<POPointingOriginCollection | undefined>(undefined)
+    const [contours, setContours] = React.useState<ContourFeatureCollection | undefined>(undefined)
     const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
     const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
+    const [showLaser, setShowLaser] = React.useState<boolean>(false)
     const [rotatorAngle, setRotatorAngle] = React.useState(0)
+
+    const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'Keck 2' as Dome))
 
     let initTarget = targets.at(0) ?? {} as Target
     const [target, setTarget] = useState<Target>(initTarget)
@@ -161,12 +165,14 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         const fun = async () => {
             const featureCollection = await get_shapes('fov')
             const pos = await get_shapes('pointing_origins') as POPointingOriginCollection
+            const cntrs = await get_shapes('vignetting_contours')
             const features = featureCollection['features'].filter((feature: any) => {
                 return feature['properties'].type === 'FOV'
             })
             const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
             setFOVs(newFovs)
             setPointingOrigins(pos)
+            setContours(cntrs as ContourFeatureCollection)
         }
         fun()
     }, [])
@@ -192,6 +198,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const dialogTitle = (
         <span>Guide Star Selection</span>
     )
+
+    const telContours = contours?.features.find((feature) => feature.properties.telescope === dome)
 
     const dialogContent = (
         <Stack
@@ -253,6 +261,16 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 <UploadDialog
                     setTargets={setGuideStars}
                 />
+                <FormControlLabel
+                    label="Show Laser"
+                    value={showLaser}
+                    control={<Switch checked={showLaser} />}
+                    onChange={(_, checked) => setShowLaser(checked)}
+                />
+                <DomeSelect
+                    dome={dome}
+                    setDome={setDome}
+                />
             </Stack>
             <Stack direction='row' spacing={2} sx={{ marginTop: '16px' }}>
                 {
@@ -270,6 +288,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         width={width}
                         selectCallback={onGuideStarNameSelect}
                         selectedGuideStarName={guideStarName}
+                        contours={telContours}
                     />)
                 }
                 <GuideStarTable

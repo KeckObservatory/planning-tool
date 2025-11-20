@@ -4041,18 +4041,21 @@
       {
         "type": "Feature",
         "properties": {
-          "telescope": "k2"
+          "telescope": "Keck 2"
         },
         "geometry": {
           "type": "FeatureCollection",
           "properties": {
-            "telescope": "k2"
+            "telescope": "Keck 2"
           },
           "features": [
             {
               "type": "Feature",
               "properties": {
-                "index": 0
+                "index": 0,
+                "name": "vignetting_contour_0",
+                "label": "boarder",
+                "color": "#0000FF"
               },
               "geometry": {
                 "type": "MultiLineString",
@@ -4103,7 +4106,10 @@
             {
               "type": "Feature",
               "properties": {
-                "index": 179
+                "index": 179,
+                "name": "vignetting_contour_179",
+                "label": "90%",
+                "color": "#008080"
               },
               "geometry": {
                 "type": "MultiLineString",
@@ -5264,7 +5270,10 @@
             {
               "type": "Feature",
               "properties": {
-                "index": 204
+                "index": 204,
+                "name": "vignetting_contour_204",
+                "label": "80%",
+                "color": "#FFFF00"
               },
               "geometry": {
                 "type": "MultiLineString",
@@ -6825,7 +6834,10 @@
             {
               "type": "Feature",
               "properties": {
-                "index": 230
+                "index": 230,
+                "name": "vignetting_contour_230",
+                "label": "70%",
+                "color": "#00FFFF"
               },
               "geometry": {
                 "type": "MultiLineString",
@@ -9439,18 +9451,21 @@
       {
         "type": "Feature",
         "properties": {
-          "telescope": "k1"
+          "telescope": "Keck 1"
         },
         "geometry": {
           "type": "FeatureCollection",
           "properties": {
-            "telescope": "k1"
+            "telescope": "Keck 1"
           },
           "features": [
             {
               "type": "Feature",
               "properties": {
-                "index": 0
+                "index": 0,
+                "name": "vignetting_contour_0",
+                "label": "boarder",
+                "color": "#0000FF"
               },
               "geometry": {
                 "type": "MultiLineString",
@@ -9501,7 +9516,10 @@
             {
               "type": "Feature",
               "properties": {
-                "index": 179
+                "index": 179,
+                "name": "vignetting_contour_179",
+                "label": "90%",
+                "color": "#008080"
               },
               "geometry": {
                 "type": "MultiLineString",
@@ -11612,7 +11630,10 @@
             {
               "type": "Feature",
               "properties": {
-                "index": 204
+                "index": 204,
+                "name": "vignetting_contour_204",
+                "label": "80%",
+                "color": "#FFFF00"
               },
               "geometry": {
                 "type": "MultiLineString",
@@ -14063,7 +14084,10 @@
             {
               "type": "Feature",
               "properties": {
-                "index": 230
+                "index": 230,
+                "name": "vignetting_contour_230",
+                "label": "70%",
+                "color": "#00FFFF"
               },
               "geometry": {
                 "type": "MultiLineString",

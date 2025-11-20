@@ -22,6 +22,7 @@ interface Props {
     positionAngle: number
     selectCallback?: (targetName: string) => void
     selectedGuideStarName?: string
+    contours?: FeatureCollection<Polygon, { telescope: string, fill: string, color: string }>
 }
 
 interface PolylineProps {
@@ -267,6 +268,17 @@ export default function AladinViewer(props: Props) {
                     markerColor="#FFFF00" // Yellow markers
                 />
             )}
+            {props.contours && props.contours.features.map((feature, idx) => (
+                <PolylineComponent
+                    key={`contour-${idx}`}
+                    points={feature.geometry.coordinates}
+                    width={props.width}
+                    height={props.height}
+                    color={feature.properties.color}
+                    fill={feature.properties.fill}
+                    className='contour-overlay'
+                />
+            ))}
         </div>
     )
 }

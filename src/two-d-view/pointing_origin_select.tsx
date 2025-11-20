@@ -19,6 +19,9 @@ export interface POPointingOriginProperties {
 export interface POPointFeature extends GeoJSON.Feature<GeoJSON.Point, POPointingOriginProperties> { }
 export interface POPointingOriginCollection extends GeoJSON.FeatureCollection<GeoJSON.Point, POPointingOriginProperties> { }
 
+export interface ContourFeature extends GeoJSON.Feature<GeoJSON.MultiLineString, { telescope: string }> { }
+export interface ContourFeatureCollection extends GeoJSON.FeatureCollection<GeoJSON.MultiLineString, { telescope: string }> { }
+
 
 interface POSelectProps {
     pointing_origins: POPointingOriginCollection
