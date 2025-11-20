@@ -226,7 +226,7 @@ export default function AladinViewer(props: Props) {
                 debounced_update_shapes(alad)
             })
             alad.on('positionChanged', function () {
-                debounced_update_shapes(alad, false, true)
+                debounced_update_shapes(alad, false, false)  // Don't update compass on position change
             })
             alad.on('objectClicked', function (obj: any) {
                 const targetName = obj.popupTitle.split(':').at(0) // guide star names are in the format "name:idx"
