@@ -129,13 +129,39 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [catalogs, setCatalogs] = useState<string[]>([])
 
     useEffect(() => {
+        console.log('fetching catalogs and shapes')
+
         const fun = async () => {
             const cats = await get_catalogs()
             setCatalogs(cats)
             setCatalog(cats.at(0))
         }
+
+        const set_shapes_fun = async () => {
+            const featureCollection = await get_shapes('fov')
+            const pos = await get_shapes('pointing_origins') as POPointingOriginCollection
+            const cntrs = showLaser ? await get_shapes('laser_contours') : []
+            const features = featureCollection['features'].filter((feature: any) => {
+                return feature['properties'].type === 'FOV'
+            })
+            const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
+            setFOVs(newFovs)
+            setPointingOrigins(pos)
+            console.log('cntrs', cntrs)
+            setContours(cntrs as unknown as LaserContours)
+        }
         fun()
+        set_shapes_fun()
     }, [])
+
+    useEffect(() => {
+        const set_shapes_fun = async () => {
+            const cntrs = showLaser ? await get_shapes('laser_contours') : []
+            console.log('cntrs', cntrs)
+            setContours(cntrs as unknown as LaserContours)
+        }
+        set_shapes_fun()
+    }, [showLaser])
 
     useEffect(() => {
         if (targets.length > 0) {
@@ -145,6 +171,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     }, [targets])
 
     useEffect(() => {
+        console.log('catalog or target changed')
         const fun = async () => {
             const ra = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
             const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
@@ -160,23 +187,6 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         }
         fun()
     }, [catalog, target])
-
-    React.useEffect(() => {
-        const fun = async () => {
-            const featureCollection = await get_shapes('fov')
-            const pos = await get_shapes('pointing_origins') as POPointingOriginCollection
-            const cntrs = await get_shapes('laser_contours')
-            const features = featureCollection['features'].filter((feature: any) => {
-                return feature['properties'].type === 'FOV'
-            })
-            const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
-            setFOVs(newFovs)
-            setPointingOrigins(pos)
-            console.log('cntrs', cntrs)
-            setContours(cntrs as unknown as LaserContours)
-        }
-        fun()
-    }, [])
 
     const onGuideStarNameSelect = (name: string) => {
         if (name !== guideStarName) { //ignore setting guide star if the target is selected
