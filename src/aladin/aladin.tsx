@@ -6,7 +6,7 @@ import { useDebounceCallback } from "../use_debounce_callback.tsx"
 import { Feature, FeatureCollection, Polygon, Position, Point } from 'geojson'
 import { PointingOriginMarkers, PointingOriginMarker } from "./pointing_origin_markers.tsx"
 import { get_compass, get_fovz, rotate_point } from "./aladin-utils.tsx"
-import { POPointFeature } from "../two-d-view/pointing_origin_select.tsx"
+import { POPointFeature, TelescopeContours } from "../two-d-view/pointing_origin_select.tsx"
 // import { color } from "html2canvas/dist/types/css/types/color"
 
 interface Props {
@@ -22,7 +22,7 @@ interface Props {
     positionAngle: number
     selectCallback?: (targetName: string) => void
     selectedGuideStarName?: string
-    contours?: FeatureCollection<Polygon, { telescope: string, fill: string, color: string }>
+    contours?: TelescopeContours
 }
 
 interface PolylineProps {
@@ -275,7 +275,6 @@ export default function AladinViewer(props: Props) {
                     width={props.width}
                     height={props.height}
                     color={feature.properties.color}
-                    fill={feature.properties.fill}
                     className='contour-overlay'
                 />
             ))}

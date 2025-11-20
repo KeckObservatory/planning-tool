@@ -19,8 +19,21 @@ export interface POPointingOriginProperties {
 export interface POPointFeature extends GeoJSON.Feature<GeoJSON.Point, POPointingOriginProperties> { }
 export interface POPointingOriginCollection extends GeoJSON.FeatureCollection<GeoJSON.Point, POPointingOriginProperties> { }
 
-export interface ContourFeature extends GeoJSON.Feature<GeoJSON.MultiLineString, { telescope: string }> { }
-export interface ContourFeatureCollection extends GeoJSON.FeatureCollection<GeoJSON.MultiLineString, { telescope: string }> { }
+// Laser contour types
+export interface ContourLineProperties {
+    index: number;
+    name: string;
+    label: string;
+    color: string;
+}
+
+export interface TelescopeContours extends GeoJSON.FeatureCollection<GeoJSON.MultiLineString, ContourLineProperties> {
+    properties: {
+        telescope: string;
+    };
+}
+
+export type LaserContours = TelescopeContours[];
 
 
 interface POSelectProps {

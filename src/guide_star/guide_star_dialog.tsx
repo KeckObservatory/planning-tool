@@ -14,7 +14,7 @@ import { Dome, DomeParam, DomeSelect, get_shapes } from '../two-d-view/two_d_vie
 import { StringParam, useQueryParam, withDefault } from 'use-query-params';
 import { get_catalog_targets, get_catalogs } from '../api/api_root';
 import UploadDialog from '../upload_targets_dialog';
-import { ContourFeature, ContourFeatureCollection, POPointFeature, POPointingOriginCollection, POSelect, VignettingContours } from '../two-d-view/pointing_origin_select';
+import { LaserContours, POPointFeature, POPointingOriginCollection, POSelect } from '../two-d-view/pointing_origin_select';
 
 export interface CatalogTarget {
     name: string;
@@ -113,7 +113,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [instrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
     const [fovs, setFOVs] = React.useState<string[]>([])
     const [pointingOrigins, setPointingOrigins] = React.useState<POPointingOriginCollection | undefined>(undefined)
-    const [contours, setContours] = React.useState<ContourFeatureCollection | undefined>(undefined)
+    const [contours, setContours] = React.useState<LaserContours | undefined>(undefined)
     const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
     const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
     const [showLaser, setShowLaser] = React.useState<boolean>(false)
@@ -172,7 +172,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
             setFOVs(newFovs)
             setPointingOrigins(pos)
-            setContours(cntrs as ContourFeatureCollection)
+            setContours(cntrs as unknown as LaserContours)
         }
         fun()
     }, [])
@@ -199,7 +199,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         <span>Guide Star Selection</span>
     )
 
-    const telContours = contours?.features.find((feature) => feature.properties.telescope === dome)
+    const telContours = contours?.find((feature) => feature.properties.telescope === dome)
+    console.log('telContours', telContours)
 
     const dialogContent = (
         <Stack
