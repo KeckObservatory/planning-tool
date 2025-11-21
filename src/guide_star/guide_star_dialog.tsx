@@ -231,7 +231,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                                 value={catalog}
                                 onChange={(_, value) => value && (setCatalog(value))}
                                 options={catalogs}
-                                sx={{ width: 200 }}
+                                sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
                                 renderInput={(params) => <TextField {...params} label={'Selected Catalog'} />}
                             />
                         </Tooltip>
@@ -244,13 +244,13 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         value={target.target_name ?? target._id}
                         onChange={(_, value) => value && onTargetNameSelect(value)}
                         options={targets.map(target => target.target_name ?? target._id)}
-                        sx={{ width: 200 }}
+                        sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
                         renderInput={(params) => <TextField {...params} label={'Selected Target'} />}
                     />
                 </Tooltip>
                 <Tooltip title={'Rotator angle for Field of View'}>
                     <TextField
-                        sx={{ width: '200px', margin: '6px' }}
+                        sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
                         label={'Rotator Angle'}
                         id="rotator-angle"
                         value={rotatorAngle}
