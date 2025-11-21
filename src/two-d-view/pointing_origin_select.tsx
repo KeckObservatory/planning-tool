@@ -87,7 +87,7 @@ export const POSelect = (props: POSelectProps) => {
                     value={selPointingOrigins}
                     onChange={(_, value) => onPointingOriginChange(value)}
                     options={options}
-                    sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
+                    sx={{ width: '500px', paddingTop: '9px', margin: '6px' }}
                     renderInput={(params) => <TextField {...params} label="Available Pointing Origins" />}
                     multiple
                     disableCloseOnSelect
@@ -128,7 +128,6 @@ export const POSelect = (props: POSelectProps) => {
                             </li>
                         );
                     }}
-                    style={{ width: 500 }}
                 />
             </Tooltip>
             <Tooltip placement="top" title="Center FOV on pointing origin">
@@ -142,7 +141,7 @@ export const POSelect = (props: POSelectProps) => {
                         return option?.properties?.name || 'None';
                     }}
                     renderInput={(params) => <TextField {...params} label="Selected PO" />}
-                    style={{ width: 150 }}
+                    sx={{ width: '150px', paddingTop: '9px', margin: '6px' }}
                 />
             </Tooltip>
         </>
