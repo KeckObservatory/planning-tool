@@ -87,7 +87,7 @@ export const POSelect = (props: POSelectProps) => {
                     value={selPointingOrigins}
                     onChange={(_, value) => onPointingOriginChange(value)}
                     options={options}
-                    sx={{ width: '500px', paddingTop: '9px', margin: '6px' }}
+                    sx={{ width: '400px', paddingTop: '9px', margin: '6px' }}
                     renderInput={(params) => <TextField {...params} label="Available Pointing Origins" />}
                     multiple
                     disableCloseOnSelect
