@@ -221,7 +221,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 flexWrap: 'wrap',
             }}
             direction='column'>
-            <Stack direction='row' spacing={1}>
+            <Stack direction='row' spacing={0}>
                 {
                     catalog && (
                         <Tooltip title={'Select Guide Star from Catalog'}>
@@ -270,6 +270,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         setSelPO={setSelPO}
                     />
                 )}
+            </Stack>
+            <Stack direction='row' spacing={0}>
                 <UploadDialog
                     setTargets={setGuideStars}
                 />
