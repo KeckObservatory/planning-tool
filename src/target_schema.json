@@ -41,9 +41,10 @@
             ]
         },
         "rotator_pa": {
-            "type": "number",
+            "type": ["number", "string"],
             "minimum": 0,
             "maximum": 360,
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$",
             "short_description": "Pointing Angle",
             "description": "Rotator Pointing Angle in degrees"
         },
