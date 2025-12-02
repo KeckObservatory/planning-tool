@@ -237,6 +237,7 @@ export default function TargetTable(props: TargetTableProps) {
     const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
 
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
+      console.log('validating edit Target', editTarget, 'row', row)
       return validate_sanitized_target(row);
     }, [editTarget, count, row])
 
