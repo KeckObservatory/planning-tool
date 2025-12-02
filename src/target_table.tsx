@@ -238,7 +238,7 @@ export default function TargetTable(props: TargetTableProps) {
 
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
       console.log('validating', editTarget, 'row', row)
-      return validate_sanitized_target(editTarget);
+      return validate_sanitized_target(row);
     }, [editTarget, count, row])
 
     const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
