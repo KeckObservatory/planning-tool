@@ -31,10 +31,9 @@ import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 import { format_target_property } from './upload_targets_dialog.tsx';
 import { Tooltip } from '@mui/material';
-import { CatalogTarget } from './guide_star/guide_star_dialog.tsx';
 
 
-export const convert_schema_to_columns = (schema: JSONSchemaType<Target | CatalogTarget>) => {
+export const convert_schema_to_columns = (schema: JSONSchemaType<Target>) => {
   const columns: GridColDef[] = []
   Object.entries(schema.properties).forEach(([key, valueProps]: [string, any]) => {
     // format value for display
