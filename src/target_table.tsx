@@ -183,8 +183,6 @@ export default function TargetTable(props: TargetTableProps) {
     setRows(targets)
   }, [targets])
 
-  const debounced_save = useDebounceCallback(edit_target, 2000)
-
   const handleEditClick = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
@@ -244,15 +242,29 @@ export default function TargetTable(props: TargetTableProps) {
     const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
     const apiRef = useGridApiContext();
 
-    const handleRowChange = async (override = false) => {
-      if (count > 0 || override) {
-        let newTgt: Target | undefined = undefined
-        const isEdited = editTarget.status?.includes('EDITED')
-        if (isEdited) newTgt = await debounced_save(editTarget)
-        processRowUpdate(editTarget) //TODO: May want to wait till save is successful
+    const saveTarget = async (target: Target) => {
+      const isEdited = target.status?.includes('EDITED')
+      if (isEdited) {
+        const newTgt = await edit_target(target)
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
           debounced_edit_click(id)
+        }
+      }
+    }
+
+    const debouncedSaveTarget = useDebounceCallback(saveTarget, 2000)
+
+    const handleRowChange = async (override = false) => {
+      if (count > 0 || override) {
+        processRowUpdate(editTarget)
+        if (override) {
+          // For catalog updates, save immediately
+          debouncedSaveTarget.cancel()
+          await saveTarget(editTarget)
+        } else {
+          // For regular edits, debounce the save
+          debouncedSaveTarget(editTarget)
         }
       }
     }
