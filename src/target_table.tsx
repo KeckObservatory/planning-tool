@@ -270,8 +270,8 @@ export default function TargetTable(props: TargetTableProps) {
     }
 
 
-    React.useEffect(() => { // when targed is edited in target edit dialog or catalog dialog
-      handleRowChange()
+    React.useEffect(() => { // when target is edited in target edit dialog or catalog dialog
+      handleRowChange(true)
       setCount((prev: number) => prev + 1)
     }, [editTarget])
 
