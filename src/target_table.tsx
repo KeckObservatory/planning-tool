@@ -233,16 +233,22 @@ export default function TargetTable(props: TargetTableProps) {
     const [editTarget, setEditTarget] = React.useState<Target>(row);
     const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
     const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
+    const editTargetRef = React.useRef<Target>(editTarget);
+
+    // Keep ref in sync with state
+    React.useEffect(() => {
+      editTargetRef.current = editTarget;
+    }, [editTarget]);
 
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
-      console.log('validating', editTarget, 'row', row)
       return validate_sanitized_target(row);
     }, [editTarget, count, row])
 
     const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
     const apiRef = useGridApiContext();
 
-    const saveTarget = async (target: Target) => {
+    const saveTarget = React.useCallback(async () => {
+      const target = editTargetRef.current;
       const isEdited = target.status?.includes('EDITED')
       if (isEdited) {
         const newTgt = await edit_target(target)
@@ -251,7 +257,7 @@ export default function TargetTable(props: TargetTableProps) {
           debounced_edit_click(id)
         }
       }
-    }
+    }, [id]);
 
     const debouncedSaveTarget = useDebounceCallback(saveTarget, 2000)
 
@@ -261,17 +267,17 @@ export default function TargetTable(props: TargetTableProps) {
         if (override) {
           // For catalog updates, save immediately
           debouncedSaveTarget.cancel()
-          await saveTarget(editTarget)
+          await saveTarget()
         } else {
           // For regular edits, debounce the save
-          debouncedSaveTarget(editTarget)
+          debouncedSaveTarget()
         }
       }
     }
 
 
     React.useEffect(() => { // when target is edited in target edit dialog or catalog dialog
-      handleRowChange(true)
+      handleRowChange()
       setCount((prev: number) => prev + 1)
     }, [editTarget])
 
