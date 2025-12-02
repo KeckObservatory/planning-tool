@@ -234,14 +234,22 @@ export default function TargetTable(props: TargetTableProps) {
     const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
     const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
     const editTargetRef = React.useRef<Target>(editTarget);
+    const isEditingRef = React.useRef(false);
 
     // Keep ref in sync with state
     React.useEffect(() => {
       editTargetRef.current = editTarget;
     }, [editTarget]);
 
+    // Sync editTarget with row prop when row updates from parent (but not when we're actively editing)
+    React.useEffect(() => {
+      if (!isEditingRef.current) {
+        setEditTarget(row);
+      }
+    }, [row]);
+
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
-      return validate_sanitized_target(row);
+      return validate_sanitized_target(editTarget);
     }, [editTarget, count, row])
 
     const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
@@ -256,6 +264,8 @@ export default function TargetTable(props: TargetTableProps) {
           newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
           debounced_edit_click(id)
         }
+        // Mark that we're done editing after save completes
+        isEditingRef.current = false;
       }
     }, [id]);
 
@@ -263,6 +273,8 @@ export default function TargetTable(props: TargetTableProps) {
 
     const handleRowChange = async (override = false) => {
       if (count > 0 || override) {
+        // Mark that we're actively editing
+        isEditingRef.current = true;
         processRowUpdate(editTarget)
         if (override) {
           // For catalog updates, save immediately
