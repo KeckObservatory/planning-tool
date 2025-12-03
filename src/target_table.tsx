@@ -309,16 +309,23 @@ export default function TargetTable(props: TargetTableProps) {
             value = format_edit_entry(params.field, value, isNumber)
           }
           const newTgt = rowSetter(editTarget, params.field, value)
+          isEditingRef.current = true; // Mark as editing before state update
           setEditTarget(newTgt)
         }
       }, 300)
     }
 
     const catalogSetTarget = async (newTgt: Target) => {
+      isEditingRef.current = true; // Mark as editing before state update
       await setEditTarget(newTgt)
       handleRowChange(true) //override save
       setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
       setCount((prev: number) => prev + 1)
+    }
+
+    const wrappedSetEditTarget = (newTgt: Target | ((prev: Target) => Target)) => {
+      isEditingRef.current = true; // Mark as editing before state update
+      setEditTarget(newTgt)
     }
 
     useGridApiEventHandler(apiRef, 'cellEditStop', handleEvent)
@@ -329,7 +336,7 @@ export default function TargetTable(props: TargetTableProps) {
       <ValidationDialogButton errors={errors} target={editTarget} />,
       <TargetEditDialogButton
         target={editTarget}
-        setTarget={setEditTarget}
+        setTarget={wrappedSetEditTarget}
       />,
       <GridActionsCellItem
         icon={
