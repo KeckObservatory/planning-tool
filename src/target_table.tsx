@@ -294,7 +294,12 @@ export default function TargetTable(props: TargetTableProps) {
     }, [editTarget])
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
-    const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
+    const handleCellEditStart: GridEventListener<'cellEditStart'> = () => {
+      // Mark as editing as soon as cell editing starts
+      isEditingRef.current = true;
+    }
+
+    const handleCellEditStop: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
         let value = apiRef.current.getCellValue(id, params.field);
         let type = (target_schema.properties as TargetProps)[params.field as keyof PropertyProps].type
@@ -309,7 +314,6 @@ export default function TargetTable(props: TargetTableProps) {
             value = format_edit_entry(params.field, value, isNumber)
           }
           const newTgt = rowSetter(editTarget, params.field, value)
-          isEditingRef.current = true; // Mark as editing before state update
           setEditTarget(newTgt)
         }
       }, 300)
@@ -328,7 +332,8 @@ export default function TargetTable(props: TargetTableProps) {
       setEditTarget(newTgt)
     }
 
-    useGridApiEventHandler(apiRef, 'cellEditStop', handleEvent)
+    useGridApiEventHandler(apiRef, 'cellEditStart', handleCellEditStart)
+    useGridApiEventHandler(apiRef, 'cellEditStop', handleCellEditStop)
 
     return [
       <CatalogButton hasCatalog={hasCatalog} target={editTarget} setTarget={catalogSetTarget} />,
