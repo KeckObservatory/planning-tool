@@ -230,6 +230,7 @@ export default function TargetTable(props: TargetTableProps) {
     const editTargetRef = React.useRef<Target>(editTarget);
     const isEditingRef = React.useRef(false);
     const isInitialMount = React.useRef(true);
+    const skipNextEffect = React.useRef(false); // Flag to skip useEffect when handling catalog update directly
 
     // Keep ref in sync with state
     React.useEffect(() => {
@@ -283,6 +284,11 @@ export default function TargetTable(props: TargetTableProps) {
     }, [editTarget, debouncedSaveTarget, saveTarget]);
 
     React.useEffect(() => {
+      // Skip this effect if we're handling the update directly (e.g., catalog update)
+      if (skipNextEffect.current) {
+        skipNextEffect.current = false;
+        return;
+      }
       handleEdit();
     }, [editTarget]);
 
@@ -313,14 +319,16 @@ export default function TargetTable(props: TargetTableProps) {
     }
 
     const catalogSetTarget = async (newTgt: Target) => {
+      skipNextEffect.current = true; // Skip the normal handleEdit flow
       setEditTarget(newTgt)
       setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
-      // Force immediate save by setting the ref and calling handleEdit with immediate flag
+      // Handle the catalog update directly with immediate save
       isEditingRef.current = true;
       editTargetRef.current = newTgt;
       processRowUpdate(newTgt);
       debouncedSaveTarget.cancel();
       await saveTarget();
+      // isEditingRef.current is set to false in saveTarget after save completes
     }
 
     const wrappedSetEditTarget = (newTgt: Target | ((prev: Target) => Target)) => {
