@@ -258,10 +258,12 @@ export default function TargetTable(props: TargetTableProps) {
       const target = editTargetRef.current;
       const isEdited = target.status?.includes('EDITED')
       if (isEdited) {
+        console.log(`[${id}] Saving target...`);
         const newTgt = await edit_target(target)
         if (newTgt) {
           setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
         }
+        console.log(`[${id}] Save complete, setting isEditing=false`);
         // Mark that we're done editing after save completes
         isEditingRef.current = false;
       }
