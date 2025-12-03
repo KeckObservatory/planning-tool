@@ -239,8 +239,12 @@ export default function TargetTable(props: TargetTableProps) {
 
     // Sync editTarget with row prop when row updates from parent (but not when we're actively editing)
     React.useEffect(() => {
+      console.log(`[${id}] Row sync useEffect: isEditing=${isEditingRef.current}, row:`, row.target_name, row._id);
       if (!isEditingRef.current) {
+        console.log(`[${id}] Syncing editTarget with row`);
         setEditTarget(row);
+      } else {
+        console.log(`[${id}] Skipping sync (currently editing)`);
       }
     }, [row]);
 
@@ -300,11 +304,13 @@ export default function TargetTable(props: TargetTableProps) {
 
     const handleCellEditStop: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
+        console.log(`[${id}] Cell edit STOP timeout - editTarget:`, editTarget.target_name);
         let value = apiRef.current.getCellValue(id, params.field);
         let type = (target_schema.properties as TargetProps)[params.field as keyof PropertyProps].type
         // convert type to string if array
         const changeDetected = editTarget[params.field as keyof Target] !== value
         if (changeDetected) {
+          console.log(`[${id}] Change detected: ${params.field}, building newTgt from editTarget:`, Object.keys(editTarget).length, 'keys');
           const isNumber = type.includes('number') || type.includes('integer')
           if (type === 'array') {
             value = format_string_array(Array.isArray(value) ? value.flat(Infinity) : value.split(','))
@@ -313,6 +319,7 @@ export default function TargetTable(props: TargetTableProps) {
             value = format_edit_entry(params.field, value, isNumber)
           }
           const newTgt = rowSetter(editTarget, params.field, value)
+          console.log(`[${id}] newTgt has`, Object.keys(newTgt).length, 'keys');
           setEditTarget(newTgt)
         }
       }, 300)
@@ -320,15 +327,18 @@ export default function TargetTable(props: TargetTableProps) {
 
     const catalogSetTarget = async (newTgt: Target) => {
       skipNextEffect.current = true; // Skip the normal handleEdit flow
+      isEditingRef.current = true; // Mark as editing BEFORE setting state
       setEditTarget(newTgt)
       setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
       // Handle the catalog update directly with immediate save
-      isEditingRef.current = true;
       editTargetRef.current = newTgt;
       processRowUpdate(newTgt);
       debouncedSaveTarget.cancel();
       await saveTarget();
-      // isEditingRef.current is set to false in saveTarget after save completes
+      // Note: isEditingRef.current is set to false in saveTarget after save completes
+      // But we want to keep the editTarget in sync with the saved data
+      // The server response will update rows, which will trigger the row sync useEffect
+      // At that point isEditingRef will be false, so it will sync correctly
     }
 
     const wrappedSetEditTarget = (newTgt: Target | ((prev: Target) => Target)) => {
