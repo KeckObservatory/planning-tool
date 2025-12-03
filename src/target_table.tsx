@@ -299,12 +299,22 @@ export default function TargetTable(props: TargetTableProps) {
     }, [editTarget]);
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
-    const handleCellEditStart: GridEventListener<'cellEditStart'> = () => {
+    const handleCellEditStart: GridEventListener<'cellEditStart'> = (params) => {
+      // Only process if this event is for OUR row
+      if (params.id !== id) {
+        return;
+      }
+      console.log(`[${id}] Cell edit START - setting isEditing=true`);
       // Mark as editing as soon as cell editing starts
       isEditingRef.current = true;
     }
 
     const handleCellEditStop: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
+      // Only process if this event is for OUR row
+      if (params.id !== id) {
+        return;
+      }
+      
       setTimeout(() => { //wait for cell to update before setting editTarget
         console.log(`[${id}] Cell edit STOP timeout - editTarget:`, editTarget.target_name);
         let value = apiRef.current.getCellValue(id, params.field);
