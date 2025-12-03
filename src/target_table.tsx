@@ -231,6 +231,7 @@ export default function TargetTable(props: TargetTableProps) {
     const isEditingRef = React.useRef(false);
     const isInitialMount = React.useRef(true);
     const skipNextEffect = React.useRef(false); // Flag to skip useEffect when handling catalog update directly
+    const cellEditStopTimeoutRef = React.useRef<number | null>(null); // Track the timeout to cancel it
 
     // Keep ref in sync with state
     React.useEffect(() => {
@@ -315,7 +316,14 @@ export default function TargetTable(props: TargetTableProps) {
         return;
       }
       
-      setTimeout(() => { //wait for cell to update before setting editTarget
+      // Cancel any previous timeout to avoid processing stale data
+      if (cellEditStopTimeoutRef.current !== null) {
+        console.log(`[${id}] Canceling previous cellEditStop timeout`);
+        clearTimeout(cellEditStopTimeoutRef.current);
+      }
+      
+      cellEditStopTimeoutRef.current = window.setTimeout(() => { //wait for cell to update before setting editTarget
+        cellEditStopTimeoutRef.current = null;
         // Use ref to get the LATEST editTarget value, not the one from closure
         const currentEditTarget = editTargetRef.current;
         console.log(`[${id}] Cell edit STOP timeout - editTarget:`, currentEditTarget.target_name);
