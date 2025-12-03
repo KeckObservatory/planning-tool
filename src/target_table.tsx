@@ -5,7 +5,6 @@ import { ErrorObject, JSONSchemaType } from 'ajv/dist/2019'
 import { EditToolbarProps, EditToolbar } from './table_toolbar.tsx';
 import {
   GridRowModesModel,
-  GridRowModes,
   DataGrid,
   GridColDef,
   GridActionsCellItem,
@@ -183,10 +182,6 @@ export default function TargetTable(props: TargetTableProps) {
     setRows(targets)
   }, [targets])
 
-  const handleEditClick = (id: GridRowId) => () => {
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
-  };
-
   const handleDeleteClick = async (id: GridRowId) => {
     const delRow = rows.find((row) => row._id === id);
     console.log('deleting', id, delRow)
@@ -231,10 +226,10 @@ export default function TargetTable(props: TargetTableProps) {
   const ActionsCell = (params: GridRowParams<Target>) => {
     const { id, row } = params;
     const [editTarget, setEditTarget] = React.useState<Target>(row);
-    const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
     const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
     const editTargetRef = React.useRef<Target>(editTarget);
     const isEditingRef = React.useRef(false);
+    const isInitialMount = React.useRef(true);
 
     // Keep ref in sync with state
     React.useEffect(() => {
@@ -250,9 +245,8 @@ export default function TargetTable(props: TargetTableProps) {
 
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
       return validate_sanitized_target(editTarget);
-    }, [editTarget, count, row])
+    }, [editTarget])
 
-    const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
     const apiRef = useGridApiContext();
 
     const saveTarget = React.useCallback(async () => {
@@ -261,37 +255,36 @@ export default function TargetTable(props: TargetTableProps) {
       if (isEdited) {
         const newTgt = await edit_target(target)
         if (newTgt) {
-          newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
-          debounced_edit_click(id)
+          setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
         }
         // Mark that we're done editing after save completes
         isEditingRef.current = false;
       }
-    }, [id]);
+    }, []);
 
     const debouncedSaveTarget = useDebounceCallback(saveTarget, 2000)
 
-    const handleRowChange = async (override = false) => {
-      if (count > 0 || override) {
-        // Mark that we're actively editing
-        isEditingRef.current = true;
-        processRowUpdate(editTarget)
-        if (override) {
-          // For catalog updates, save immediately
-          debouncedSaveTarget.cancel()
-          await saveTarget()
-        } else {
-          // For regular edits, debounce the save
-          debouncedSaveTarget()
-        }
+    // Unified function to handle any edit with optional immediate save
+    const handleEdit = React.useCallback((immediatelySave = false) => {
+      if (isInitialMount.current) {
+        isInitialMount.current = false;
+        return; // Don't save on initial mount
       }
-    }
 
+      isEditingRef.current = true;
+      processRowUpdate(editTarget);
 
-    React.useEffect(() => { // when target is edited in target edit dialog or catalog dialog
-      handleRowChange()
-      setCount((prev: number) => prev + 1)
-    }, [editTarget])
+      if (immediatelySave) {
+        debouncedSaveTarget.cancel();
+        saveTarget();
+      } else {
+        debouncedSaveTarget();
+      }
+    }, [editTarget, debouncedSaveTarget, saveTarget]);
+
+    React.useEffect(() => {
+      handleEdit();
+    }, [editTarget]);
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
     const handleCellEditStart: GridEventListener<'cellEditStart'> = () => {
@@ -320,15 +313,18 @@ export default function TargetTable(props: TargetTableProps) {
     }
 
     const catalogSetTarget = async (newTgt: Target) => {
-      isEditingRef.current = true; // Mark as editing before state update
-      await setEditTarget(newTgt)
-      handleRowChange(true) //override save
+      setEditTarget(newTgt)
       setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
-      setCount((prev: number) => prev + 1)
+      // Force immediate save by setting the ref and calling handleEdit with immediate flag
+      isEditingRef.current = true;
+      editTargetRef.current = newTgt;
+      processRowUpdate(newTgt);
+      debouncedSaveTarget.cancel();
+      await saveTarget();
     }
 
     const wrappedSetEditTarget = (newTgt: Target | ((prev: Target) => Target)) => {
-      isEditingRef.current = true; // Mark as editing before state update
+      isEditingRef.current = true;
       setEditTarget(newTgt)
     }
 
