@@ -316,13 +316,15 @@ export default function TargetTable(props: TargetTableProps) {
       }
       
       setTimeout(() => { //wait for cell to update before setting editTarget
-        console.log(`[${id}] Cell edit STOP timeout - editTarget:`, editTarget.target_name);
+        // Use ref to get the LATEST editTarget value, not the one from closure
+        const currentEditTarget = editTargetRef.current;
+        console.log(`[${id}] Cell edit STOP timeout - editTarget:`, currentEditTarget.target_name);
         let value = apiRef.current.getCellValue(id, params.field);
         let type = (target_schema.properties as TargetProps)[params.field as keyof PropertyProps].type
         // convert type to string if array
-        const changeDetected = editTarget[params.field as keyof Target] !== value
+        const changeDetected = currentEditTarget[params.field as keyof Target] !== value
         if (changeDetected) {
-          console.log(`[${id}] Change detected: ${params.field}, building newTgt from editTarget:`, Object.keys(editTarget).length, 'keys');
+          console.log(`[${id}] Change detected: ${params.field}, building newTgt from editTarget:`, Object.keys(currentEditTarget).length, 'keys');
           const isNumber = type.includes('number') || type.includes('integer')
           if (type === 'array') {
             value = format_string_array(Array.isArray(value) ? value.flat(Infinity) : value.split(','))
@@ -330,7 +332,7 @@ export default function TargetTable(props: TargetTableProps) {
           else {
             value = format_edit_entry(params.field, value, isNumber)
           }
-          const newTgt = rowSetter(editTarget, params.field, value)
+          const newTgt = rowSetter(currentEditTarget, params.field, value)
           console.log(`[${id}] newTgt has`, Object.keys(newTgt).length, 'keys');
           setEditTarget(newTgt)
         }
