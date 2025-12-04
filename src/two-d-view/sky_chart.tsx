@@ -21,6 +21,7 @@ interface Props {
     targetView: TargetView[]
     chartType: SkyChart
     showMoon: boolean
+    showSchedule: boolean
     showCurrLoc: boolean
     showLimits: boolean
     times: Date[]
@@ -206,7 +207,7 @@ interface State {
 }
 
 export const SkyChart = (props: Props) => {
-    const { targetView, chartType, time, showCurrLoc, showLimits, width, height, dome, suncalcTimes } = props
+    const { targetView, chartType, time, showCurrLoc, showLimits, width, height, dome, suncalcTimes, showSchedule } = props
 
     const context = useStateContext()
     const plotRef = useRef<any>(null);
@@ -215,27 +216,35 @@ export const SkyChart = (props: Props) => {
         chartType,
         context.config.tel_geometry[dome],
         false,
-        showLimits,)
+        showLimits)
 
     const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, 5, suncalcTimes, context.config.timezone);
     const [state, setState] = useState({ layout: scLayout, y2Axis: y2Axis } as State);
 
 
     useEffect(() => {
-        const shapes = util.get_shapes(suncalcTimes,
-            chartType,
-            context.config.tel_geometry[dome],
-            deckBlocking,
-            showLimits,)
 
-        console.log('chartType', chartType, dome)
+        const fun = async () => {
+            let schedShapes: Plotly.Shape[] = []
+            if (showSchedule) {
+                const telNr = Number(dome.at(dome.length - 1));
+                schedShapes = await util.get_schedule_shapes(dayjs(time).format('YYYY-MM-DD'), telNr)
+            }
+            let shapes = util.get_shapes(suncalcTimes,
+                chartType,
+                context.config.tel_geometry[dome],
+                deckBlocking,
+                showLimits)
+            shapes = [...shapes, ...schedShapes]
+            const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, maxAirmass, suncalcTimes, context.config.timezone);
+            setState({
+                layout: scLayout,
+                y2Axis,
+            });
+        }
 
-        const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, maxAirmass, suncalcTimes, context.config.timezone);
-        setState({
-            layout: scLayout,
-            y2Axis,
-        });
-    }, [chartType, dome, targetView, time, showLimits, suncalcTimes])
+    fun();
+    }, [chartType, dome, targetView, time, showLimits, suncalcTimes, showSchedule])
 
     // useEffect(() => {
     //     debounced_elevation_axis_draw();

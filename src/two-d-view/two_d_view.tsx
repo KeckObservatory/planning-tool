@@ -136,6 +136,7 @@ const TwoDView = ({ targets }: Props) => {
     const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'Keck 2' as Dome))
     const [skyChart, setSkyChart] = React.useState<SkyChart>("Airmass")
     const [showMoon, setShowMoon] = React.useState(true)
+    const [showSchedule, setShowSchedule] = React.useState(false)
     const [showCurrLoc, setShowCurrLoc] = React.useState(true)
     const [showLimits, setShowLimits] = React.useState(true)
     const [rotatorAngle, setRotatorAngle] = React.useState(0)
@@ -289,6 +290,12 @@ const TwoDView = ({ targets }: Props) => {
                             control={<Switch checked={showMoon} />}
                             onChange={(_, checked) => setShowMoon(checked)}
                         />
+                        <FormControlLabel
+                            label="Show Schedule"
+                            value={showSchedule}
+                            control={<Switch checked={showSchedule} />}
+                            onChange={(_, checked) => setShowSchedule(checked)}
+                        />
                     </Stack>
                     <TimeSlider
                         times={times}
@@ -369,6 +376,7 @@ const TwoDView = ({ targets }: Props) => {
                         showLimits={showLimits}
                         targetView={targetView}
                         showMoon={showMoon}
+                        showSchedule={showSchedule}
                         showCurrLoc={showCurrLoc}
                         times={times}
                         suncalcTimes={suncalcTimes}

@@ -4,6 +4,7 @@ import { handleResponse, handleError, intResponse, intError } from './response.t
 import { Target } from '../App.tsx';
 const SIMBAD_ADDR = "https://simbad.u-strasbg.fr/simbad/sim-id?NbIdent=1&submit=submit+id&output.format=ASCII&obj.bibsel=off&Ident="
 const BASE_URL = "/api/planning_tool"
+const SCHEDULE_URL = "/api/schedule"
 
 
 export interface UserInfo {
@@ -33,6 +34,32 @@ export interface GaiaResp {
     gaia_params?: GaiaParams
 }
 
+interface Schedule {
+    Account: string,
+    BaseInstrument: string,
+    Comment: string | null,
+    Date: string,
+    EndTime: string,
+    FractionOfNight: number,
+    Institution: string,
+    Instrument: string,
+    Length: number,
+    Location: string,
+    ObsId: string,
+    ObsType: string,
+    Observers: string,
+    ObservingStatus: string,
+    PiEmail: string,
+    PiFirstName: string,
+    PiId: number,
+    PiLastName: string,
+    Principal: string,
+    ProjCode: string,
+    SchedId: number,
+    Semester: string,
+    StartTime: string,
+    TelNr: number
+}
 
 const axiosInstance = axios.create({
     withCredentials: false,
@@ -52,6 +79,13 @@ export interface GetLogsArgs {
     startdatetime?: string,
     enddatetime?: string,
     dateformat?: string
+}
+
+export const get_schedule = (date: string, telnr: number): Promise<Schedule[]> => {
+    const url = SCHEDULE_URL + `/getSchedule?date=${date}&telnr=${telnr}`
+    return axiosInstance.get(url)
+        .then(handleResponse)
+        .catch(handleError)
 }
 
 export const get_simbad = (obj: string): Promise<string> => {

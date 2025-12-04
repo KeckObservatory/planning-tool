@@ -9,11 +9,12 @@ import {
     TIMES_START,
     TIMES_END
 } from './constants'
-import {AMATEUR_TWILIGHT_SHADE, ASTRONOMICAL_TWILIGHT_SHADE, TWILIGHT_SHADE } from "./constants.tsx";
+import { AMATEUR_TWILIGHT_SHADE, ASTRONOMICAL_TWILIGHT_SHADE, TWILIGHT_SHADE } from "./constants.tsx";
 import { GeoModel, LngLatEl } from '../App'
 import { SkyChart } from './sky_chart';
 import { alt_az_observable } from './target_viz_chart.tsx';
 import { hidate, TargetView } from './two_d_view.tsx';
+import { get_schedule } from '../api/api_root.tsx';
 
 export const colors = [
     '#1f77b4',  // muted blue
@@ -38,10 +39,10 @@ export const get_gmt = (date?: Date) => {
     if (!date) date = new Date()
     const JD = date_to_juld(date)
     const T = (JD - 2451545) / 36525;
-    let ThetaGMST = 67310.54841 + (876600 * 3600 + 8640184.812866) * T 
-    + .093104 * (T**2) - ( 6.2 * 10**-6 ) * ( T**3 )
-    ThetaGMST = ( ThetaGMST % ( 86400 * ( ThetaGMST / Math.abs(ThetaGMST) ) ) / 240) % 360
-    return ThetaGMST 
+    let ThetaGMST = 67310.54841 + (876600 * 3600 + 8640184.812866) * T
+        + .093104 * (T ** 2) - (6.2 * 10 ** -6) * (T ** 3)
+    ThetaGMST = (ThetaGMST % (86400 * (ThetaGMST / Math.abs(ThetaGMST))) / 240) % 360
+    return ThetaGMST
 }
 
 export const ra_dec_to_deg = (time: string, dec = false) => {
@@ -72,7 +73,7 @@ export const d2r = (deg: number) => {
 }
 
 export const r2d = (rad: number) => {
-    return rad / d2r(1) 
+    return rad / d2r(1)
 }
 
 export const cosd = (deg: number): number => {
@@ -149,18 +150,18 @@ const round_date_down = (date: Date, minutes: number) => {
     return new Date(Math.floor(date.getTime() / coeff) * coeff)
 }
 
-export const get_day_times = (startDateTime: Date, endDateTime: Date, stepSize=STEP_SIZE) => {
+export const get_day_times = (startDateTime: Date, endDateTime: Date, stepSize = STEP_SIZE) => {
     //Used for viz chart
-    const start = round_date_up(startDateTime, stepSize) 
+    const start = round_date_up(startDateTime, stepSize)
     const end = round_date_down(endDateTime, stepSize)
-    const nLen = Math.round( ( end.getTime() - start.getTime() ) / (stepSize * 60 * 1000) )
-    let times = Array.from({ length: nLen }, (_, idx) => new Date(start.getTime() + stepSize * 60 * 1000 * idx ))
+    const nLen = Math.round((end.getTime() - start.getTime()) / (stepSize * 60 * 1000))
+    let times = Array.from({ length: nLen }, (_, idx) => new Date(start.getTime() + stepSize * 60 * 1000 * idx))
     return [start, ...times, end] //and start and end
 }
 
-export const get_times_using_nadir = (nadir: Date, roundMin=ROUND_MINUTES, stepSize=STEP_SIZE) => {
-    const nLen = Math.round( ( TIMES_END - TIMES_START ) / stepSize)
-    const deltaNadir = Array.from({ length: nLen }, (_, idx) => TIMES_START + stepSize * idx )
+export const get_times_using_nadir = (nadir: Date, roundMin = ROUND_MINUTES, stepSize = STEP_SIZE) => {
+    const nLen = Math.round((TIMES_END - TIMES_START) / stepSize)
+    const deltaNadir = Array.from({ length: nLen }, (_, idx) => TIMES_START + stepSize * idx)
     const roundedNadir = round_date(roundMin, nadir)
     return deltaNadir.map((hour: number) => {
         return add_hours(roundedNadir, hour)
@@ -185,7 +186,7 @@ export function alt_from_air_mass(am: number, el?: number) {
     const a = RADIUS_EARTH + el
     const b = ATMOSPHERE_HEIGHT + RADIUS_EARTH
     const s = am * ATMOSPHERE_HEIGHT
-    const zenith = r2d(Math.acos(( a * a + s * s - b * b ) / (2 * a * s)))
+    const zenith = r2d(Math.acos((a * a + s * s - b * b) / (2 * a * s)))
     return 90 - zenith
 }
 
@@ -199,10 +200,10 @@ export function air_mass(alt: number, el?: number) {
     const y = el / ATMOSPHERE_HEIGHT
     const z = RADIUS_EARTH / ATMOSPHERE_HEIGHT
     const a2 = ATMOSPHERE_HEIGHT * ATMOSPHERE_HEIGHT
-    const r = RADIUS_EARTH + el 
-    const g = ATMOSPHERE_HEIGHT - el 
+    const r = RADIUS_EARTH + el
+    const g = ATMOSPHERE_HEIGHT - el
     const zenith = 90 - alt
-    const firstTerm = (r * r) * cosd(zenith) * cosd(zenith) / ( a2 )
+    const firstTerm = (r * r) * cosd(zenith) * cosd(zenith) / (a2)
     const secondTerm = 2 * RADIUS_EARTH * (g) / a2
     const thirdTerm = y * y
     const forthTerm = (y + z) * cosd(zenith)
@@ -249,34 +250,68 @@ const angular_separation = (lon1: number, lat1: number, lon2: number, lat2: numb
     const denominator = slat1 * slat2 + clat1 * clat2 * cdlon
     const numerator = Math.sqrt(numerator1 ** 2 + numerator2 ** 2)
     //return Math.atan(numerator/denominator) * 180 / Math.PI
-    return r2d(Math.atan2(numerator,denominator))
+    return r2d(Math.atan2(numerator, denominator))
 }
 
 export const add_pi = (angle: number) => {
     return angle + Math.PI
-} 
+}
 
 export const get_moon_position = (date: Date, lngLatEl: LngLatEl) => {
     // convert azel to degrees and set az coordinate such that 0 is north
     let moon_position = SunCalc.getMoonPosition(date, lngLatEl.lat, lngLatEl.lng)
     moon_position.azimuth = r2d(add_pi(moon_position.azimuth))
     moon_position.altitude = r2d(moon_position.altitude)
-    return moon_position 
+    return moon_position
 }
 
-export const lunar_angle = (ra: number, 
-    dec: number, date: Date, 
-    lngLatEl: LngLatEl, 
+export const lunar_angle = (ra: number,
+    dec: number, date: Date,
+    lngLatEl: LngLatEl,
     mp: SunCalc.GetMoonPositionResult) => {
-    const [az, alt]= ra_dec_to_az_alt(ra, dec, date, lngLatEl)
+    const [az, alt] = ra_dec_to_az_alt(ra, dec, date, lngLatEl)
     const angle = angular_separation(az, alt, mp.azimuth, mp.altitude)
     return angle
 }
 
-export const get_shapes = (suncalcTimes: DayViz, 
-    chartType: string, 
-    tel_geometry: GeoModel, 
-    deckBlocking: boolean, 
+export const get_schedule_shapes = async (date: string, dome: number) => {
+    const schedule_data = await get_schedule(date, dome)
+    const shapes = schedule_data.map((sched) => {
+
+        const startTimeUT = dayjs(sched.Date + 'T' + sched.StartTime).toDate().getTime()
+        const endTimeUT = dayjs(sched.Date + 'T' + sched.EndTime).toDate().getTime()
+
+        const startTime = startTimeUT + 10 * 3600000 //HT to UT
+        const endTime = endTimeUT + 10 * 3600000 //HT to UT
+        const text = `${sched.ProjCode}`
+        return {
+            type: 'rect',
+            xref: 'x',
+            yref: 'paper',
+            x0: startTime,
+            y0: 0,
+            x1: endTime,
+            y1: 1,
+            fillcolor: '#000000',
+            layer: 'above',
+            opacity: 0.3,
+            label: {
+                text: text,
+                textposition: 'top center',
+            },
+            line: {
+                width: 0
+            }
+        } as Plotly.Shape
+    })
+    return shapes
+}
+
+
+export const get_shapes = (suncalcTimes: DayViz,
+    chartType: string,
+    tel_geometry: GeoModel,
+    deckBlocking: boolean,
     showLimits: boolean) => {
     const shapes: Partial<Plotly.Shape>[] = [
         {
@@ -482,67 +517,67 @@ export const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType:
     return val
 }
 
-export const get_curr_loc_trace = (targetView: TargetView[], 
+export const get_curr_loc_trace = (targetView: TargetView[],
     maxAirmass: number,
     minAirmass: number,
-    time: Date, 
-    lngLatEl: LngLatEl, 
-    chartType: SkyChart, 
-    geoModel: GeoModel, 
-    timezone: string, 
+    time: Date,
+    lngLatEl: LngLatEl,
+    chartType: SkyChart,
+    geoModel: GeoModel,
+    timezone: string,
     date_time_format: string) => {
     //get curr marker
     const traces = targetView.map((tgtv: TargetView, idx: number) => { //add current location trace
-            const ra = tgtv.ra_deg as number
-            const dec = tgtv.dec_deg as number
-            const azEl = ra_dec_to_az_alt(ra, dec, time, lngLatEl)
-            const moon_illumination = SunCalc.getMoonIllumination(time)
-            let moon_position = get_moon_position(time, lngLatEl)
-            const { observable, reasons } = alt_az_observable(azEl[1], azEl[0], geoModel)
-            const viz: VizRow = {
-                az: azEl[0],
-                alt: azEl[1],
-                datetime: time,
-                moon_illumination,
-                moon_position,
-                observable,
-                reasons,
-                air_mass: air_mass(azEl[1], lngLatEl.el)
-            }
-            const datum = get_chart_datum(ra, dec, viz, chartType, lngLatEl)
-            const currTime = hidate(time, timezone)
-            const airmass = air_mass(azEl[1], lngLatEl.el)
-            maxAirmass = Math.max(maxAirmass, airmass)
-            minAirmass = Math.min(minAirmass, airmass)
-            let text = `<b>${tgtv.target_name}</b><br>` 
-            text += `Az: ${azEl[0].toFixed(2)}<br>`
-            text += `El: ${azEl[1].toFixed(2)}<br>`
-            text += `Airmass: ${airmass.toFixed(2)}<br>`
-            chartType.includes('Lunar Angle') && (text += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`)
-            // text += `Airmass: ${util.air_mass(azEl[1]).toFixed(2)}<br>`
-            text += `HT: ${currTime.format(date_time_format)}`
+        const ra = tgtv.ra_deg as number
+        const dec = tgtv.dec_deg as number
+        const azEl = ra_dec_to_az_alt(ra, dec, time, lngLatEl)
+        const moon_illumination = SunCalc.getMoonIllumination(time)
+        let moon_position = get_moon_position(time, lngLatEl)
+        const { observable, reasons } = alt_az_observable(azEl[1], azEl[0], geoModel)
+        const viz: VizRow = {
+            az: azEl[0],
+            alt: azEl[1],
+            datetime: time,
+            moon_illumination,
+            moon_position,
+            observable,
+            reasons,
+            air_mass: air_mass(azEl[1], lngLatEl.el)
+        }
+        const datum = get_chart_datum(ra, dec, viz, chartType, lngLatEl)
+        const currTime = hidate(time, timezone)
+        const airmass = air_mass(azEl[1], lngLatEl.el)
+        maxAirmass = Math.max(maxAirmass, airmass)
+        minAirmass = Math.min(minAirmass, airmass)
+        let text = `<b>${tgtv.target_name}</b><br>`
+        text += `Az: ${azEl[0].toFixed(2)}<br>`
+        text += `El: ${azEl[1].toFixed(2)}<br>`
+        text += `Airmass: ${airmass.toFixed(2)}<br>`
+        chartType.includes('Lunar Angle') && (text += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`)
+        // text += `Airmass: ${util.air_mass(azEl[1]).toFixed(2)}<br>`
+        text += `HT: ${currTime.format(date_time_format)}`
 
-            const trace: Plotly.Data = {
-                x: [currTime.toDate()],
-                y: [datum],
-                text: [text],
-                hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
-                showlegend: false,
-                marker: {
-                    size: 12,
-                    // color: 'red',
-                    color: colors[idx % colors.length],
-                    line: {
-                        color: 'black',
-                        width: 3
-                    }
-                },
-                textposition: 'top left',
-                type: 'scatter',
-                mode: 'markers',
-                name: tgtv.target_name
-            }
-            return trace
-        })
+        const trace: Plotly.Data = {
+            x: [currTime.toDate()],
+            y: [datum],
+            text: [text],
+            hovertemplate: '<b>%{text}</b>', //disable to show xyz coords
+            showlegend: false,
+            marker: {
+                size: 12,
+                // color: 'red',
+                color: colors[idx % colors.length],
+                line: {
+                    color: 'black',
+                    width: 3
+                }
+            },
+            textposition: 'top left',
+            type: 'scatter',
+            mode: 'markers',
+            name: tgtv.target_name
+        }
+        return trace
+    })
     return traces
 }
