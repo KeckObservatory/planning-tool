@@ -279,7 +279,7 @@ export const get_schedule_shapes = async (date: string, dome: number) => {
     const shapes = schedule_data.map((sched) => {
 
         const startTimeUT = dayjs(sched.Date + 'T' + sched.StartTime).toDate().getTime()
-        const endTimeUT = dayjs(sched.Date + 'T' + sched.EndTime).toDate().getTime()
+        // const endTimeUT = dayjs(sched.Date + 'T' + sched.EndTime).toDate().getTime()
 
         const startTime = startTimeUT + 0 * 10 * 3600000 //HT to UT
         // const endTime = endTimeUT + 0 * 10 * 3600000 //HT to UT
@@ -297,7 +297,7 @@ export const get_schedule_shapes = async (date: string, dome: number) => {
             opacity: 0.3,
             label: {
                 text: text,
-                textposition: 'top center',
+                textposition: 'middle right',
             },
             line: {
                 width: 2
