@@ -5,27 +5,28 @@ import { ErrorObject, JSONSchemaType } from 'ajv/dist/2019'
 import { EditToolbarProps, EditToolbar } from './table_toolbar.tsx';
 import {
   GridRowModesModel,
+  GridRowModes,
   DataGrid,
   GridColDef,
   GridActionsCellItem,
+  GridEventListener,
   GridRowId,
+  useGridApiContext,
+  useGridApiEventHandler,
   GridRowParams,
   GRID_CHECKBOX_SELECTION_COL_DEF,
   GridRowSelectionModel,
   GridValueParser,
   GridValueSetter,
-  GridRowModel,
-  useGridApiContext,
-  GridEventListener,
   GridCellEditStopParams,
-  useGridApiEventHandler,
+  GridRowModel,
 } from '@mui/x-data-grid';
 import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
 import CatalogButton from './catalog_button.tsx';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
 import { Target, useSnackbarContext, useStateContext } from './App.tsx';
-import TargetEditDialogButton, { format_edit_entry, format_string_array, PropertyProps, rowSetter, TargetProps } from './target_edit_dialog.tsx';
+import TargetEditDialogButton, { format_string_array, format_edit_entry, PropertyProps, rowSetter, TargetProps } from './target_edit_dialog.tsx';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 import { format_target_property } from './upload_targets_dialog.tsx';
@@ -182,6 +183,10 @@ export default function TargetTable(props: TargetTableProps) {
     setRows(targets)
   }, [targets])
 
+  const handleEditClick = (id: GridRowId) => () => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
+  };
+
   const handleDeleteClick = async (id: GridRowId) => {
     const delRow = rows.find((row) => row._id === id);
     console.log('deleting', id, delRow)
@@ -226,34 +231,20 @@ export default function TargetTable(props: TargetTableProps) {
   const ActionsCell = (params: GridRowParams<Target>) => {
     const { id, row } = params;
     const [editTarget, setEditTarget] = React.useState<Target>(row);
+    const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
     const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
     const editTargetRef = React.useRef<Target>(editTarget);
-    const isEditingRef = React.useRef(false);
-    const cellEditStopTimeoutRef = React.useRef<number | null>(null); // Track the timeout to cancel it
-
-    const isInitialMount = React.useRef(true);
-    const skipNextEffect = React.useRef(false); // Flag to skip useEffect when handling catalog update directly
 
     // Keep ref in sync with state
     React.useEffect(() => {
       editTargetRef.current = editTarget;
     }, [editTarget]);
 
-    // Sync editTarget with row prop when row updates from parent (but not when we're actively editing)
-    React.useEffect(() => {
-      console.log(`[${id}] Row sync useEffect: isEditing=${isEditingRef.current}, row:`, row.target_name, row._id);
-      if (!isEditingRef.current) {
-        console.log(`[${id}] Syncing editTarget with row`);
-        setEditTarget(row);
-      } else {
-        console.log(`[${id}] Skipping sync (currently editing)`);
-      }
-    }, [row]);
-
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
-      return validate_sanitized_target(editTarget);
-    }, [editTarget])
+      return validate_sanitized_target(row);
+    }, [editTarget, count, row])
 
+    const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
     const apiRef = useGridApiContext();
 
     const saveTarget = React.useCallback(async () => {
@@ -262,93 +253,42 @@ export default function TargetTable(props: TargetTableProps) {
       if (isEdited) {
         const newTgt = await edit_target(target)
         if (newTgt) {
-          setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
+          newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
+          debounced_edit_click(id)
         }
-        // Mark that we're done editing after save completes
-        isEditingRef.current = false;
       }
-    }, []);
+    }, [id]);
 
     const debouncedSaveTarget = useDebounceCallback(saveTarget, 2000)
 
-    // Unified function to handle any edit with optional immediate save
-    const handleEdit = React.useCallback((immediatelySave = false) => {
-      if (isInitialMount.current) {
-        isInitialMount.current = false;
-        return; // Don't save on initial mount
+    const handleRowChange = async (override = false) => {
+      if (count > 0 || override) {
+        processRowUpdate(editTarget)
+        if (override) {
+          // For catalog updates, save immediately
+          debouncedSaveTarget.cancel()
+          await saveTarget()
+        } else {
+          // For regular edits, debounce the save
+          debouncedSaveTarget()
+        }
       }
-
-      isEditingRef.current = true;
-      processRowUpdate(editTarget);
-
-      if (immediatelySave) {
-        debouncedSaveTarget.cancel();
-        saveTarget();
-      } else {
-        debouncedSaveTarget();
-      }
-    }, [editTarget, debouncedSaveTarget, saveTarget]);
-
-    React.useEffect(() => {
-      // Skip this effect if we're handling the update directly (e.g., catalog update)
-      if (skipNextEffect.current) {
-        skipNextEffect.current = false;
-        return;
-      }
-      handleEdit();
-    }, [editTarget]);
-
-    const catalogSetTarget = async (newTgt: Target) => {
-      skipNextEffect.current = true; // Skip the normal handleEdit flow
-      isEditingRef.current = true; // Mark as editing BEFORE setting state
-      setEditTarget(newTgt)
-      setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
-      // Handle the catalog update directly with immediate save
-      editTargetRef.current = newTgt;
-      processRowUpdate(newTgt);
-      debouncedSaveTarget.cancel();
-      await saveTarget();
     }
 
-    const wrappedSetEditTarget = (newTgt: Target | ((prev: Target) => Target)) => {
-      isEditingRef.current = true;
-      setEditTarget(newTgt)
-    }
+
+    React.useEffect(() => { // when target is edited in target edit dialog or catalog dialog
+      handleRowChange()
+      setCount((prev: number) => prev + 1)
+    }, [editTarget])
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
-    const handleCellEditStart: GridEventListener<'cellEditStart'> = (params) => {
-      // Only process if this event is for OUR row
-      if (params.id !== id) {
-        return;
-      }
-      console.log(`[${id}] Cell edit START - setting isEditing=true`);
-      // Mark as editing as soon as cell editing starts
-      isEditingRef.current = true;
-    }
-
-    const handleCellEditStop: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
-      // Only process if this event is for OUR row
-      if (params.id !== id) {
-        return;
-      }
-      
-      // Cancel any previous timeout to avoid processing stale data
-      if (cellEditStopTimeoutRef.current !== null) {
-        console.log(`[${id}] Canceling previous cellEditStop timeout`);
-        clearTimeout(cellEditStopTimeoutRef.current);
-      }
-      
-      cellEditStopTimeoutRef.current = window.setTimeout(() => { //wait for cell to update before setting editTarget
-        cellEditStopTimeoutRef.current = null;
-        // Use ref to get the LATEST editTarget value, not the one from closure
-        const currentEditTarget = editTargetRef.current;
-        console.log(`[${id}] Cell edit STOP timeout - editTarget:`, currentEditTarget.target_name);
+    const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
+      setTimeout(() => { //wait for cell to update before setting editTarget
         let value = apiRef.current.getCellValue(id, params.field);
         let type = (target_schema.properties as TargetProps)[params.field as keyof PropertyProps].type
         // convert type to string if array
-        const changeDetected = currentEditTarget[params.field as keyof Target] !== value
+        const changeDetected = editTarget[params.field as keyof Target] !== value
         if (changeDetected) {
-          console.log(`[${id}] Change detected: ${params.field}, building newTgt from editTarget:`, Object.keys(currentEditTarget).length, 'keys');
           const isNumber = type.includes('number') || type.includes('integer')
           if (type === 'array') {
             value = format_string_array(Array.isArray(value) ? value.flat(Infinity) : value.split(','))
@@ -356,15 +296,20 @@ export default function TargetTable(props: TargetTableProps) {
           else {
             value = format_edit_entry(params.field, value, isNumber)
           }
-          const newTgt = rowSetter(currentEditTarget, params.field, value)
-          console.log(`[${id}] newTgt has`, Object.keys(newTgt).length, 'keys');
+          const newTgt = rowSetter(editTarget, params.field, value)
           setEditTarget(newTgt)
         }
       }, 300)
     }
 
-    useGridApiEventHandler(apiRef, 'cellEditStart', handleCellEditStart)
-    useGridApiEventHandler(apiRef, 'cellEditStop', handleCellEditStop)
+    const catalogSetTarget = async (newTgt: Target) => {
+      await setEditTarget(newTgt)
+      handleRowChange(true) //override save
+      setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
+      setCount((prev: number) => prev + 1)
+    }
+
+    useGridApiEventHandler(apiRef, 'cellEditStop', handleEvent)
 
     return [
       <CatalogButton hasCatalog={hasCatalog} target={editTarget} setTarget={catalogSetTarget} />,
@@ -372,7 +317,7 @@ export default function TargetTable(props: TargetTableProps) {
       <ValidationDialogButton errors={errors} target={editTarget} />,
       <TargetEditDialogButton
         target={editTarget}
-        setTarget={wrappedSetEditTarget}
+        setTarget={setEditTarget}
       />,
       <GridActionsCellItem
         icon={
