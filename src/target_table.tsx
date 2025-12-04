@@ -235,24 +235,33 @@ export default function TargetTable(props: TargetTableProps) {
     const [editTarget, setEditTarget] = React.useState<Target>(row);
     const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
     const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
+    const editTargetRef = React.useRef<Target>(editTarget);
+    const countRef = React.useRef<number>(count);
+    
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
       return validate_sanitized_target(row);
     }, [editTarget, count])
 
     const apiRef = useGridApiContext();
 
-    const handleRowChange = async (override = false) => {
-      if (count > 0 || override) {
+    // Update refs when state changes
+    React.useEffect(() => {
+      editTargetRef.current = editTarget;
+      countRef.current = count;
+    }, [editTarget, count]);
+
+    const handleRowChange = React.useCallback(async (override = false) => {
+      if (countRef.current > 0 || override) {
         let newTgt: Target | undefined = undefined
-        const isEdited = editTarget.status?.includes('EDITED')
-        if (isEdited) newTgt = await edit_target(editTarget)
-        processRowUpdate(editTarget) //TODO: May want to wait till save is successful
+        const isEdited = editTargetRef.current.status?.includes('EDITED')
+        if (isEdited) newTgt = await edit_target(editTargetRef.current)
+        processRowUpdate(editTargetRef.current) //TODO: May want to wait till save is successful
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
           debounced_edit_click(id)
         }
       }
-    }
+    }, [id])
 
     const debouncedHandleRowChange = useDebounceCallback(handleRowChange, 2000)
 
