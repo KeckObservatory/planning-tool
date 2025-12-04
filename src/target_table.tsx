@@ -183,8 +183,6 @@ export default function TargetTable(props: TargetTableProps) {
     setRows(targets)
   }, [targets])
 
-  const debounced_save = useDebounceCallback(edit_target, 2000)
-
   const handleEditClick = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
@@ -247,7 +245,7 @@ export default function TargetTable(props: TargetTableProps) {
       if (count > 0 || override) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTarget.status?.includes('EDITED')
-        if (isEdited) newTgt = await debounced_save(editTarget)
+        if (isEdited) newTgt = await edit_target(editTarget)
         processRowUpdate(editTarget) //TODO: May want to wait till save is successful
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
@@ -256,9 +254,10 @@ export default function TargetTable(props: TargetTableProps) {
       }
     }
 
+    const debouncedHandleRowChange = useDebounceCallback(handleRowChange, 2000)
 
     React.useEffect(() => { // when targed is edited in target edit dialog or catalog dialog
-      handleRowChange()
+      debouncedHandleRowChange()
       setCount((prev: number) => prev + 1)
     }, [editTarget])
 
