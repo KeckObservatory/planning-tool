@@ -282,7 +282,7 @@ export const get_schedule_shapes = async (date: string, dome: number) => {
         const endTimeUT = dayjs(sched.Date + 'T' + sched.EndTime).toDate().getTime()
 
         const startTime = startTimeUT + 0 * 10 * 3600000 //HT to UT
-        const endTime = endTimeUT + 0 * 10 * 3600000 //HT to UT
+        // const endTime = endTimeUT + 0 * 10 * 3600000 //HT to UT
         const text = `${sched.ProjCode}`
         return {
             type: 'rect',
