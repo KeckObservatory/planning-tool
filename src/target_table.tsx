@@ -228,7 +228,7 @@ export default function TargetTable(props: TargetTableProps) {
     expand: false
   }
 
-  const ActionsCellMemoized = React.memo((params: GridRowParams<Target>) => {
+  const ActionsCell = (params: GridRowParams<Target>) => {
     const { id, row } = params;
     const [editTarget, setEditTarget] = React.useState<Target>(row);
     const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
@@ -330,6 +330,10 @@ export default function TargetTable(props: TargetTableProps) {
         color="inherit"
       />,
     ];
+  }
+
+  const ActionsCellMemoized = React.memo((params: GridRowParams<Target>) => {
+    return <ActionsCell {...params} />;
   }, (prevProps, nextProps) => {
     // Return true if props are equal (don't re-render), false if different (re-render)
     // Always allow re-render if ID changes
@@ -351,9 +355,10 @@ export default function TargetTable(props: TargetTableProps) {
       width: 250,
       disableExport: true,
       cellClassName: 'actions',
-      getActions: (params: GridRowParams<Target>) => {
-       return [<ActionsCellMemoized key={params.id} id={params.id} row={params.row} columns={params.columns}/>]
-      }
+      getActions: ActionsCell
+      // getActions: (params: GridRowParams<Target>) => {
+      //  return [<ActionsCellMemoized key={params.id} id={params.id} row={params.row} columns={params.columns}/>]
+      // }
     }
   ];
 
