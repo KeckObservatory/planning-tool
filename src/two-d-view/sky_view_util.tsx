@@ -297,7 +297,7 @@ export const get_schedule_shapes = async (date: string, dome: number) => {
             opacity: 0.3,
             label: {
                 text: text,
-                textposition: 'middle right',
+                textposition: 'middle left',
             },
             line: {
                 width: 2
