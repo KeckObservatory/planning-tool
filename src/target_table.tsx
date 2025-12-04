@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import { ErrorObject, JSONSchemaType } from 'ajv/dist/2019'
+import { ErrorObject } from 'ajv/dist/2019'
 import { EditToolbarProps, EditToolbar } from './table_toolbar.tsx';
 import {
   GridRowModesModel,
@@ -33,9 +33,9 @@ import { format_target_property } from './upload_targets_dialog.tsx';
 import { Tooltip } from '@mui/material';
 
 
-export const convert_schema_to_columns = (schema: JSONSchemaType<Target>) => {
+function convert_schema_to_columns() {
   const columns: GridColDef[] = []
-  Object.entries(schema.properties).forEach(([key, valueProps]: [string, any]) => {
+  Object.entries(target_schema.properties).forEach(([key, valueProps]: [string, any]) => {
     // format value for display
     const valueParser: GridValueParser = (value: unknown) => {
       value = format_target_property(key as keyof Target, value, valueProps)
@@ -134,7 +134,7 @@ export default function TargetTable(props: TargetTableProps) {
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
   const cfg = context.config
-  let columns = convert_schema_to_columns(target_schema as any); //TODO: fix type issue
+  let columns = convert_schema_to_columns();
   const sortOrder = cfg.default_table_columns
   columns = columns.sort((a, b) => {
     return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);
@@ -182,6 +182,8 @@ export default function TargetTable(props: TargetTableProps) {
   React.useEffect(() => { // when semid is changed
     setRows(targets)
   }, [targets])
+
+  const debounced_save = useDebounceCallback(edit_target, 2000)
 
   const handleEditClick = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
@@ -233,50 +235,28 @@ export default function TargetTable(props: TargetTableProps) {
     const [editTarget, setEditTarget] = React.useState<Target>(row);
     const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
     const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
-    const editTargetRef = React.useRef<Target>(editTarget);
-
-    // Keep ref in sync with state
-    React.useEffect(() => {
-      editTargetRef.current = editTarget;
-    }, [editTarget]);
-
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
       return validate_sanitized_target(row);
-    }, [editTarget, count, row])
+    }, [editTarget, count])
 
     const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
     const apiRef = useGridApiContext();
 
-    const saveTarget = React.useCallback(async () => {
-      const target = editTargetRef.current;
-      const isEdited = target.status?.includes('EDITED')
-      if (isEdited) {
-        const newTgt = await edit_target(target)
+    const handleRowChange = async (override = false) => {
+      if (count > 0 || override) {
+        let newTgt: Target | undefined = undefined
+        const isEdited = editTarget.status?.includes('EDITED')
+        if (isEdited) newTgt = await debounced_save(editTarget)
+        processRowUpdate(editTarget) //TODO: May want to wait till save is successful
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
           debounced_edit_click(id)
         }
       }
-    }, [id]);
-
-    const debouncedSaveTarget = useDebounceCallback(saveTarget, 2000)
-
-    const handleRowChange = async (override = false) => {
-      if (count > 0 || override) {
-        processRowUpdate(editTarget)
-        if (override) {
-          // For catalog updates, save immediately
-          debouncedSaveTarget.cancel()
-          await saveTarget()
-        } else {
-          // For regular edits, debounce the save
-          debouncedSaveTarget()
-        }
-      }
     }
 
 
-    React.useEffect(() => { // when target is edited in target edit dialog or catalog dialog
+    React.useEffect(() => { // when targed is edited in target edit dialog or catalog dialog
       handleRowChange()
       setCount((prev: number) => prev + 1)
     }, [editTarget])
@@ -332,20 +312,6 @@ export default function TargetTable(props: TargetTableProps) {
     ];
   }
 
-  const ActionsCellMemoized = React.memo((params: GridRowParams<Target>) => {
-    return <ActionsCell {...params} />;
-  }, (prevProps, nextProps) => {
-    // Return true if props are equal (don't re-render), false if different (re-render)
-    // Always allow re-render if ID changes
-    if (prevProps.id !== nextProps.id) return false;
-    
-    // If the row reference is the same, no need to re-render
-    if (prevProps.row === nextProps.row) return true;
-    
-    // Otherwise allow re-render for row updates
-    return false;
-  })
-
   const addColumns: GridColDef[] = [
     {
       field: 'actions',
@@ -355,10 +321,7 @@ export default function TargetTable(props: TargetTableProps) {
       width: 250,
       disableExport: true,
       cellClassName: 'actions',
-      getActions: ActionsCell
-      // getActions: (params: GridRowParams<Target>) => {
-      //  return [<ActionsCellMemoized key={params.id} id={params.id} row={params.row} columns={params.columns}/>]
-      // }
+      getActions: ActionsCell,
     }
   ];
 
