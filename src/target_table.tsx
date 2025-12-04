@@ -239,7 +239,7 @@ export default function TargetTable(props: TargetTableProps) {
     const countRef = React.useRef<number>(count);
     
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
-      return validate_sanitized_target(row);
+      return validate_sanitized_target(editTargetRef.current);
     }, [editTarget, count])
 
     const apiRef = useGridApiContext();
