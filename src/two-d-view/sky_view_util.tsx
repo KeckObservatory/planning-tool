@@ -281,8 +281,8 @@ export const get_schedule_shapes = async (date: string, dome: number) => {
         const startTimeUT = dayjs(sched.Date + 'T' + sched.StartTime).toDate().getTime()
         const endTimeUT = dayjs(sched.Date + 'T' + sched.EndTime).toDate().getTime()
 
-        const startTime = startTimeUT + 10 * 3600000 //HT to UT
-        const endTime = endTimeUT + 10 * 3600000 //HT to UT
+        const startTime = startTimeUT + 0 * 10 * 3600000 //HT to UT
+        const endTime = endTimeUT + 0 * 10 * 3600000 //HT to UT
         const text = `${sched.ProjCode}`
         return {
             type: 'rect',
@@ -290,7 +290,7 @@ export const get_schedule_shapes = async (date: string, dome: number) => {
             yref: 'paper',
             x0: startTime,
             y0: 0,
-            x1: endTime,
+            x1: startTime + 1,
             y1: 1,
             fillcolor: '#000000',
             layer: 'above',
@@ -300,7 +300,7 @@ export const get_schedule_shapes = async (date: string, dome: number) => {
                 textposition: 'top center',
             },
             line: {
-                width: 0
+                width: 2
             }
         } as Plotly.Shape
     })
