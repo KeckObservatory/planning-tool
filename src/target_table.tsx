@@ -230,6 +230,8 @@ export default function TargetTable(props: TargetTableProps) {
     expand: false
   }
 
+  const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
+
   const ActionsCell = (params: GridRowParams<Target>) => {
     const { id, row } = params;
     const [editTarget, setEditTarget] = React.useState<Target>(row);
@@ -239,7 +241,6 @@ export default function TargetTable(props: TargetTableProps) {
       return validate_sanitized_target(row);
     }, [editTarget, count])
 
-    const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
     const apiRef = useGridApiContext();
 
     const handleRowChange = async (override = false) => {
