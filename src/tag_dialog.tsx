@@ -91,7 +91,6 @@ function TagDialog(props: TagDialogProps) {
 
 
 export default function TagDialogButton(props: Props) {
-    console.log('TagDialogButton props', props)
     const [open, setOpen] = React.useState(false);
 
     const handleClickOpen = () => {
