@@ -177,12 +177,14 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
             if (catalog) {
                 const gs = await get_catalog_targets(catalog, ra, dec, 0.5)
+                if (gs) {
+                    const gsTgts = gs.map((star: CatalogTarget) => {
+                        const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
+                        return tgt
+                    })
+                    setGuideStars(gsTgts)
+                }
 
-                const gsTgts = gs.map((star: CatalogTarget) => {
-                    const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
-                    return tgt
-                })
-                setGuideStars(gsTgts)
             }
         }
         fun()
