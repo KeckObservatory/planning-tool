@@ -25,5 +25,5 @@ show:
 		@echo CURDIR = $(CURDIR)
 		@echo SYSNAM = $(SYSNAM)
 		@echo VERNUM = $(VERNUM)
-		@echo RELDIR = $(RELDIR)                                 tcoda@vm-www3build-new:/wwwbuild/sandbox/tcoda/observers/planning-tool/1-2-1$ 
+		@echo RELDIR = $(RELDIR)
 
