@@ -14,6 +14,7 @@ import Skeleton from '@mui/material/Skeleton';
 import { get_targets, get_userinfo } from './api/api_root.tsx';
 import { SimbadTargetData } from './catalog_button.tsx';
 import { config } from './config.tsx';
+import { mockTargets } from './mock_targets.tsx';
 
 export type Status = "EDITED" | "CREATED"
 
@@ -23,6 +24,8 @@ export type TelescopeWrap = "shortest" | "south" | "north"
 export interface Target extends SimbadTargetData {
   _id: string,
   obsid: number,
+  del_flag?: number,
+  state?: string,
   target_name?: string,
   v_mag?: number,
   h_mag?: number,
@@ -32,7 +35,7 @@ export interface Target extends SimbadTargetData {
   ra_offset?: number,
   dec_offset?: number,
   rotator_mode?: RotatorMode,
-  rotator_pa?: number,
+  rotator_pa?: number | string,
   telescope_wrap?: TelescopeWrap
   d_ra?: number,
   d_dec?: number,
@@ -159,6 +162,7 @@ function App() {
   // const [targets, setTargets] = useState<Target[] | undefined>(undefined)
 
   useEffect(() => {
+
     const fetch_targets = async () => {
       if (semid) {
         let tgts = await get_targets(undefined, undefined, semid)
@@ -173,6 +177,7 @@ function App() {
   }, [semid])
 
   useEffect(() => {
+
     const fetch_data = async () => {
       const userinfo = await get_userinfo();
       const username = `${userinfo.FirstName} ${userinfo.LastName}`;
@@ -190,7 +195,21 @@ function App() {
         setState((prevState) => ({ ...prevState, targets: [...tgts] }))
       }
     }
-    fetch_data()
+
+    if (import.meta.env.DEV) {
+      console.log('Running in development mode');
+      const init_state = {
+        config,
+        username: 'Test User',
+        obsid: 1234,
+        semids: [],
+        is_admin: false,
+        targets: mockTargets as Target[] 
+      }
+      setState(init_state)
+    } else {
+      fetch_data()
+    }
   }, [])
 
   const handleThemeChange = () => {

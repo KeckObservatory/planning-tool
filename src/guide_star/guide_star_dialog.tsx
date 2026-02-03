@@ -15,6 +15,7 @@ import { StringParam, useQueryParam, withDefault } from 'use-query-params';
 import { get_catalog_targets, get_catalogs } from '../api/api_root';
 import UploadDialog from '../upload_targets_dialog';
 import { LaserContours, POPointFeature, POPointingOriginCollection, POSelect } from '../two-d-view/pointing_origin_select';
+import { mock_catalog_targets } from './mock_catalog_targets';
 
 export interface CatalogTarget {
     name: string;
@@ -58,7 +59,9 @@ interface VizDialogProps {
 export const GuideStarButton = (props: ButtonProps) => {
 
     const { targets, setRows } = props
-    const [open, setOpen] = React.useState(false);
+    const initOpen = import.meta.env.DEV // TODO: remove before production
+    console.log('GuideStarButton initOpen:', initOpen)
+    const [open, setOpen] = React.useState(initOpen);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -175,7 +178,15 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         const fun = async () => {
             const ra = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
             const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
-            if (catalog) {
+            if (import.meta.env.DEV && catalog) { //TODO: remove before production
+                console.log('Using mock catalog targets in development mode')
+                const gsTgts = mock_catalog_targets.map((star: CatalogTarget) => {
+                    const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
+                    return tgt
+                })
+                setGuideStars(gsTgts)
+            }
+            else if (catalog) {
                 const gs = await get_catalog_targets(catalog, ra, dec, 0.5)
                 if (gs) {
                     const gsTgts = gs.map((star: CatalogTarget) => {
@@ -293,9 +304,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     guidestars.length > 0 &&
                     (<AladinViewer
                         targets={[target]}
-                        guideStars={guidestars}
-                        positionAngle={target.rotator_pa ?? 0}
-                        pointingOrigins={selPointingOrigins}
+                        // guideStars={guidestars}
+                        positionAngle={Number(target.rotator_pa) ?? 0}
+                        // pointingOrigins={selPointingOrigins}
                         fovAngle={rotatorAngle}
                         selPO={selPO}
                         setSelPO={setSelPO}
@@ -303,8 +314,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         height={height}
                         width={width}
                         selectCallback={onGuideStarNameSelect}
-                        selectedGuideStarName={guideStarName}
-                        contours={telContours}
+                        // selectedGuideStarName={guideStarName}
+                        // contours={telContours}
                     />)
                 }
                 <GuideStarTable
