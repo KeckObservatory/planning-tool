@@ -126,11 +126,6 @@ export const NGSViewer = (props: Props) => {
   React.useEffect(() => {
     console.log('Drawing contours effect - laserContours:', laserContours);
     
-    if (!laserContours || laserContours.length === 0) {
-      console.log('No laser contours to draw');
-      return;
-    }
-
     // We'll add the contours to the FOV SVG layer
     const fovSvg = fovSvgRef.current;
     if (!fovSvg) {
@@ -138,10 +133,15 @@ export const NGSViewer = (props: Props) => {
       return;
     }
 
-    console.log('Clearing previous contours and drawing new ones');
-
-    // Remove previous contour lines
+    // Remove previous contour lines (always clear first)
     d3.select(fovSvg).selectAll('line.laser-contour').remove();
+    
+    if (!laserContours || laserContours.length === 0) {
+      console.log('No laser contours to draw');
+      return;
+    }
+
+    console.log('Drawing new contours');
 
     // Draw each contour
     laserContours.forEach((contour, contourIdx) => {
