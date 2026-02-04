@@ -402,7 +402,7 @@ const TwoDView = ({ targets }: Props) => {
                     width={width}
                     selPO={selPO}
                     setSelPO={setSelPO}
-                    fovAngle={rotatorAngle}
+                    fovAngle={Number(rotatorAngle)}
                     positionAngle={positionAngle}
                     instrumentFOV={instrumentFOV}
                     pointingOrigins={selPointingOrigins}

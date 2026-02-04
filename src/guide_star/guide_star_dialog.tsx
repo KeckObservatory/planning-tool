@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
-import AladinViewer from '../aladin/aladin';
+// import AladinViewer from '../aladin/aladin';
 
 import { Target, useStateContext } from '../App';
 import { Autocomplete, Stack, TextField, Switch, FormControlLabel, Typography } from '@mui/material';
@@ -17,7 +17,6 @@ import UploadDialog from '../upload_targets_dialog';
 import { LaserContours, POPointFeature, POPointingOriginCollection, POSelect } from '../two-d-view/pointing_origin_select';
 import { mock_catalog_targets } from './mock_catalog_targets';
 import { NGSViewer } from './NGSViewer';
-import { time } from 'console';
 
 export interface CatalogTarget {
     name: string;
@@ -47,9 +46,6 @@ interface ButtonProps {
 
 export interface TargetViz extends Target {
 }
-
-const height = 500
-const width = 500
 
 interface VizDialogProps {
     open: boolean,
@@ -230,14 +226,14 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         }
     }
 
-    const onGuideStarNameSelect = (name: string) => {
-        if (name !== guideStarName) { //ignore setting guide star if the target is selected
-            let newGuideStar = guidestars.find((gs: Partial<Target>) => gs.target_name === name)
-            if (newGuideStar) {
-                setGuideStarName(name)
-            }
-        }
-    }
+    // const onGuideStarNameSelect = (name: string) => {
+    //     if (name !== guideStarName) { //ignore setting guide star if the target is selected
+    //         let newGuideStar = guidestars.find((gs: Partial<Target>) => gs.target_name === name)
+    //         if (newGuideStar) {
+    //             setGuideStarName(name)
+    //         }
+    //     }
+    // }
 
     const dialogTitle = (
         <span>Guide Star Selection</span>
@@ -338,7 +334,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             </Stack>
             <Stack direction='row' spacing={2} sx={{ marginTop: '16px' }}>
                 <Stack direction='column' sx={{ position: 'relative', display: 'inline-block' }}>
-                    {/* {imageLoading && (
+                    {imageLoading && (
                         <Typography
                             sx={{
                                 position: 'absolute',
@@ -356,7 +352,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         >
                             Loading...
                         </Typography>
-                    )} */}
+                    )}
                     {
                         < NGSViewer
                             imgUrl={image ?? ''}

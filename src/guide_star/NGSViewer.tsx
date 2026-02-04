@@ -80,7 +80,7 @@ export const NGSViewer = (props: Props) => {
     image.src = props.imgUrl;
     image.crossOrigin = "Anonymous"; // Handle potential CORS issues if images are external
 
-    image.onload = (event) => {
+    image.onload = () => {
       // Set canvas dimensions to match the image
       canvas.width = props.width;
       canvas.height = props.height;
@@ -173,13 +173,11 @@ export const NGSViewer = (props: Props) => {
     // Clear previous FOV
     d3.select(fovSvg).selectAll('path').remove();
 
-    const [offsetRa, offsetDec] = get_offset_ra_dec();
-
     const feature = fov;
     if (feature.geometry.type === 'MultiPolygon') {
       const polygons = feature.geometry.coordinates; // array of polygons
       
-      polygons.forEach((coordinates: [number, number][], polyIdx: number) => {
+      polygons.forEach((coordinates: [number, number][]) => {
         
         // Transform world coordinates to pixel coordinates
         const points = coordinates.map((coord: [number, number]) => {
