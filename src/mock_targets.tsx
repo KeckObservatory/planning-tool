@@ -1,6 +1,28 @@
 import { Target } from './App.tsx';
 export const mockTargets: Target[] = [
   {
+    "_id": "140cc8e7-10f3-4ff3-9ce7-f4f20efeabbe",
+    "comment": "tis but a test",
+    "dec": "+30:39:36.630403128",
+    "dec_deg": 30.660175112,
+    "del_flag": 0,
+    "epoch": "J2000",
+    "equinox": "2000",
+    "g_mag": 15.113876,
+    "j_mag": 5.039,
+    "obsid": 4866,
+    "pm_dec": 0.827,
+    "pm_ra": 0.707,
+    "ra": "01:33:50.8965749232",
+    "ra_deg": 23.4620690622,
+    "state": "ROW_EDITED",
+    "systemic_velocity": -179.2,
+    "tags": [
+      "testing"
+    ],
+    "target_name": "M33"
+  },
+  {
     "_id": "3272fa23-b4eb-4781-8f60-7b9dc706190d",
     "catalog_comment": "'J1957': No known catalog could be found",
     "comment": "",
@@ -88,28 +110,6 @@ export const mockTargets: Target[] = [
     "state": "ROW_EDITED",
     "systemic_velocity": 4076,
     "target_name": "NGC4711"
-  },
-  {
-    "_id": "140cc8e7-10f3-4ff3-9ce7-f4f20efeabbe",
-    "comment": "tis but a test",
-    "dec": "+30:39:36.630403128",
-    "dec_deg": 30.660175112,
-    "del_flag": 0,
-    "epoch": "J2000",
-    "equinox": "2000",
-    "g_mag": 15.113876,
-    "j_mag": 5.039,
-    "obsid": 4866,
-    "pm_dec": 0.827,
-    "pm_ra": 0.707,
-    "ra": "01:33:50.8965749232",
-    "ra_deg": 23.4620690622,
-    "state": "ROW_EDITED",
-    "systemic_velocity": -179.2,
-    "tags": [
-      "testing"
-    ],
-    "target_name": "M33"
   },
   {
     "_id": "6cf7919a-b272-4157-a761-beba916821c9",

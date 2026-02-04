@@ -126,7 +126,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'Keck 2' as Dome))
 
     const imgSize = 0.5 //in degrees
-    let initTarget = targets.at(4) ?? {} as Target
+    let initTarget = targets.at(0) ?? {} as Target
     const [target, setTarget] = useState<Target>(initTarget)
     const [guidestars, setGuideStars] = useState<Partial<Target>[]>([])
 
@@ -185,7 +185,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     useEffect(() => {
         if (targets.length > 0) {
-            const target = targets.at(4) ?? {} as Target
+            const target = targets.at(0) ?? {} as Target
             setTarget(target)
         }
     }, [targets])
