@@ -144,10 +144,15 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         console.log('fetching catalogs and shapes')
 
         const fun = async () => {
-            const cats = await get_catalogs()
+            ///const cats = await get_catalogs()
+            const cats = import.meta.env.DEV ?
+                ['GAIA DR3', 'DSS2 Red', 'PanSTARRS DR1'] :
+                await get_catalogs() //TODO: remove before production
             setCatalogs(cats)
             setCatalog(cats.at(0))
-            const getImageCat = await get_image_catalogs()
+            const getImageCat = import.meta.env.DEV ?
+                ['DSS2 Red', 'DSS2 Blue', 'DSS2 IR', 'PanSTARRS DR1']: //TODO: remove before production
+                await get_image_catalogs()
             setImageCatalogs(getImageCat)
             setImageCatalog(getImageCat.at(0))
         }
@@ -209,12 +214,12 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 }
 
             }
-            if (imageCatalog) {
-                setImageLoading(true)
-                const img = get_catalog_image(imageCatalog, ra, dec, imgSize)
-                console.log('img', img)
-                setImage(img)
-            }
+            // if (imageCatalog) {
+            //     setImageLoading(true)
+            //     const img = get_catalog_image(imageCatalog, ra, dec, imgSize)
+            //     console.log('img', img)
+            //     setImage(img)
+            // }
 
         }
         fun()
@@ -227,6 +232,15 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             let newTarget = targets.find((t: Target) => t.target_name === name || t._id === name)
             newTarget = (newTarget && newTarget.ra && newTarget.dec) ? newTarget : {} as Target
             setTarget(newTarget)
+        }
+    }
+
+    const onGuideStarNameSelect = (name: string) => {
+        if (name !== guideStarName) { //ignore setting guide star if the target is selected
+            let newGuideStar = guidestars.find((gs: Partial<Target>) => gs.target_name === name)
+            if (newGuideStar) {
+                setGuideStarName(name)
+            }
         }
     }
 
@@ -329,7 +343,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             </Stack>
             <Stack direction='row' spacing={2} sx={{ marginTop: '16px' }}>
                 <Stack direction='column' sx={{ position: 'relative', display: 'inline-block' }}>
-                    {imageLoading && (
+                    {/* {imageLoading && (
                         <Typography
                             sx={{
                                 position: 'absolute',
@@ -347,8 +361,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         >
                             Loading...
                         </Typography>
-                    )}
-                    {
+                    )} */}
+                    {/* {
                         < NGSViewer
                             imgUrl={image ?? ''}
                             guideStars={guidestars as Target[]}
@@ -366,26 +380,26 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             selPO={selPO}
                             pointingOrigins={selPointingOrigins}
                         />
-                    }
-                </Stack>
-                {/* {
-                    guidestars.length > 0 &&
-                    (<AladinViewer
-                        targets={[target]}
-                        // guideStars={guidestars}
-                        positionAngle={Number(target.rotator_pa) ?? 0}
-                        // pointingOrigins={selPointingOrigins}
-                        fovAngle={rotatorAngle}
-                        selPO={selPO}
-                        setSelPO={setSelPO}
-                        instrumentFOV={instrumentFOV}
-                        height={height}
-                        width={width}
-                        selectCallback={onGuideStarNameSelect}
+                    } */}
+                    {
+                        guidestars.length > 0 &&
+                        (<AladinViewer
+                            targets={[target]}
+                            // guideStars={guidestars}
+                            positionAngle={Number(target.rotator_pa) ?? 0}
+                            // pointingOrigins={selPointingOrigins}
+                            fovAngle={rotatorAngle}
+                            selPO={selPO}
+                            setSelPO={setSelPO}
+                            instrumentFOV={instrumentFOV}
+                            height={height}
+                            width={width}
+                            selectCallback={onGuideStarNameSelect}
                         // selectedGuideStarName={guideStarName}
                         // contours={telContours}
-                    />)
-                } */}
+                        />)
+                    }
+                </Stack>
                 <GuideStarTable
                     selectedGuideStarName={guideStarName}
                     setSelectedGuideStarName={setGuideStarName}
@@ -407,3 +421,4 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         />
     )
 }
+
