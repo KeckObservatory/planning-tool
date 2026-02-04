@@ -144,15 +144,10 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         console.log('fetching catalogs and shapes')
 
         const fun = async () => {
-            ///const cats = await get_catalogs()
-            const cats = import.meta.env.DEV ?
-                ['GAIA DR3', 'DSS2 Red', 'PanSTARRS DR1'] :
-                await get_catalogs() //TODO: remove before production
+            const cats = await get_catalogs()
             setCatalogs(cats)
             setCatalog(cats.at(0))
-            const getImageCat = import.meta.env.DEV ?
-                ['DSS2 Red', 'DSS2 Blue', 'DSS2 IR', 'PanSTARRS DR1']: //TODO: remove before production
-                await get_image_catalogs()
+            const getImageCat = await get_image_catalogs()
             setImageCatalogs(getImageCat)
             setImageCatalog(getImageCat.at(0))
         }
@@ -214,12 +209,12 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 }
 
             }
-            // if (imageCatalog) {
-            //     setImageLoading(true)
-            //     const img = get_catalog_image(imageCatalog, ra, dec, imgSize)
-            //     console.log('img', img)
-            //     setImage(img)
-            // }
+            if (imageCatalog) {
+                setImageLoading(true)
+                const img = get_catalog_image(imageCatalog, ra, dec, imgSize)
+                console.log('img', img)
+                setImage(img)
+            }
 
         }
         fun()
@@ -362,7 +357,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             Loading...
                         </Typography>
                     )} */}
-                    {/* {
+                    {
                         < NGSViewer
                             imgUrl={image ?? ''}
                             guideStars={guidestars as Target[]}
@@ -380,8 +375,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             selPO={selPO}
                             pointingOrigins={selPointingOrigins}
                         />
-                    } */}
-                    {
+                    }
+                    {/* {
                         guidestars.length > 0 &&
                         (<AladinViewer
                             targets={[target]}
@@ -398,7 +393,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         // selectedGuideStarName={guideStarName}
                         // contours={telContours}
                         />)
-                    }
+                    } */}
                 </Stack>
                 <GuideStarTable
                     selectedGuideStarName={guideStarName}

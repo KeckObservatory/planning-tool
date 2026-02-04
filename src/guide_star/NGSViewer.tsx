@@ -106,6 +106,7 @@ export const NGSViewer = (props: Props) => {
     d3.select(svg).selectAll('circle').remove();
 
     const handleStarClick = (event: MouseEvent, d: Target) => {
+      event.stopPropagation(); // Prevent pan from triggering
       const starName = d.target_name || `RA: ${d.ra_deg}, Dec: ${d.dec_deg}`;
       console.log('Clicked guide star:', starName);
       if (props.setGuideStarName) {
@@ -319,8 +320,7 @@ export const NGSViewer = (props: Props) => {
           top: 0, 
           left: 0, 
           transform: `translate(${panOffset.x}px, ${panOffset.y}px) rotate(${props.fovAngle || 0}deg)`,
-          transformOrigin: 'center center',
-          pointerEvents: 'none'
+          transformOrigin: 'center center'
         }}
       />
       <svg

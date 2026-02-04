@@ -70,6 +70,12 @@ export default function GuideStarTable(props: Props) {
     const context = useStateContext()
     const cfg = context.config
     let columns = convert_schema_to_columns(target_schema as any); //TODO: fix this
+    columns = columns.map((col) => {
+        if (col.field === 'target_name') {
+            return { ...col, width: 150}
+        }
+        return { ...col, width: 100 }
+    })
     //add dist column
     columns.push({
         field: 'dist',
@@ -124,8 +130,8 @@ export default function GuideStarTable(props: Props) {
     return (
         <Box
             sx={{
-                height: 1000,
-                width: 1200,
+                height: 600,
+                width: 900,
                 '& .actions': {
                     color: 'text.secondary',
                 },
@@ -145,12 +151,17 @@ export default function GuideStarTable(props: Props) {
                         setRowSelectModel(newRowSelectionModel);
                         setSelectedGuideStarName && setSelectedGuideStarName(newRowSelectionModel[0] as string);
                     }}
+                    density="compact"
                     initialState={{
                         columns: {
                             columnVisibilityModel:
                                 visibleColumns
+                        },
+                        pagination: {
+                            paginationModel: { pageSize: 25 }
                         }
                     }}
+                    pageSizeOptions={[10, 25, 50, 100]}
                 />
             )}
         </Box>
