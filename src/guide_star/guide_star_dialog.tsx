@@ -5,17 +5,19 @@ import Tooltip from '@mui/material/Tooltip'
 import AladinViewer from '../aladin/aladin';
 
 import { Target, useStateContext } from '../App';
-import { Autocomplete, Stack, TextField, Switch, FormControlLabel } from '@mui/material';
+import { Autocomplete, Stack, TextField, Switch, FormControlLabel, Typography } from '@mui/material';
 import { DialogComponent } from '../dialog_component';
 import GuideStarTable from './guide_star_table';
 import { ra_dec_to_deg } from '../catalog_button';
 import { FOVSelect } from '../two-d-view/fov_select';
 import { Dome, DomeParam, DomeSelect, get_shapes } from '../two-d-view/two_d_view';
 import { StringParam, useQueryParam, withDefault } from 'use-query-params';
-import { get_catalog_targets, get_catalogs } from '../api/api_root';
+import { get_catalog_targets, get_catalogs, get_image_catalogs, get_catalog_image } from '../api/api_root';
 import UploadDialog from '../upload_targets_dialog';
 import { LaserContours, POPointFeature, POPointingOriginCollection, POSelect } from '../two-d-view/pointing_origin_select';
 import { mock_catalog_targets } from './mock_catalog_targets';
+import { NGSViewer } from './NGSViewer';
+import { time } from 'console';
 
 export interface CatalogTarget {
     name: string;
@@ -124,12 +126,19 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'Keck 2' as Dome))
 
-    let initTarget = targets.at(0) ?? {} as Target
+    const imgSize = 0.5 //in degrees
+    let initTarget = targets.at(4) ?? {} as Target
     const [target, setTarget] = useState<Target>(initTarget)
     const [guidestars, setGuideStars] = useState<Partial<Target>[]>([])
 
+    const [image, setImage] = useState<string | undefined>(undefined)
+    const [imageLoading, setImageLoading] = useState<boolean>(false)
+
     const [catalog, setCatalog] = useState<string | undefined>(undefined)
     const [catalogs, setCatalogs] = useState<string[]>([])
+
+    const [imageCatalog, setImageCatalog] = useState<string | undefined>(undefined)
+    const [imageCatalogs, setImageCatalogs] = useState<string[]>([])
 
     useEffect(() => {
         console.log('fetching catalogs and shapes')
@@ -138,6 +147,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const cats = await get_catalogs()
             setCatalogs(cats)
             setCatalog(cats.at(0))
+            const getImageCat = await get_image_catalogs()
+            setImageCatalogs(getImageCat)
+            setImageCatalog(getImageCat.at(0))
         }
 
         const set_shapes_fun = async () => {
@@ -168,7 +180,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     useEffect(() => {
         if (targets.length > 0) {
-            const target = targets.at(0) ?? {} as Target
+            const target = targets.at(4) ?? {} as Target
             setTarget(target)
         }
     }, [targets])
@@ -197,18 +209,17 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 }
 
             }
+            if (imageCatalog) {
+                setImageLoading(true)
+                const img = get_catalog_image(imageCatalog, ra, dec, imgSize)
+                console.log('img', img)
+                setImage(img)
+            }
+
         }
         fun()
-    }, [catalog, target])
+    }, [catalog, target, imageCatalog])
 
-    const onGuideStarNameSelect = (name: string) => {
-        if (name !== guideStarName) { //ignore setting guide star if the target is selected
-            let newGuideStar = guidestars.find((gs: Partial<Target>) => gs.target_name === name)
-            if (newGuideStar) {
-                setGuideStarName(name)
-            }
-        }
-    }
 
     const onTargetNameSelect = (name: string) => {
         const targetName = target.target_name ?? target._id
@@ -225,6 +236,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     const telContours = contours?.find((feature) => feature.properties.telescope === dome)
     console.log('telContours', telContours)
+    const centerRa = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
+    const centerDec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
 
     const dialogContent = (
         <Stack
@@ -236,6 +249,21 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             direction='column'>
             <Stack direction='row' spacing={0}>
                 {
+                    imageCatalog && (
+                        <Tooltip title={'Select Image Catalog'}>
+                            <Autocomplete
+                                disablePortal
+                                id="selected-image-catalog"
+                                value={imageCatalog}
+                                onChange={(_, value) => value && (setImageCatalog(value))}
+                                options={imageCatalogs}
+                                sx={{ width: '150px', paddingTop: '9px', margin: '6px' }}
+                                renderInput={(params) => <TextField {...params} label={'Selected Image Catalog'} />}
+                            />
+                        </Tooltip>
+                    )
+                }
+                {
                     catalog && (
                         <Tooltip title={'Select Guide Star from Catalog'}>
                             <Autocomplete
@@ -244,7 +272,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                                 value={catalog}
                                 onChange={(_, value) => value && (setCatalog(value))}
                                 options={catalogs}
-                                sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
+                                sx={{ width: '150px', paddingTop: '9px', margin: '6px' }}
                                 renderInput={(params) => <TextField {...params} label={'Selected Catalog'} />}
                             />
                         </Tooltip>
@@ -263,7 +291,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 </Tooltip>
                 <Tooltip title={'Rotator angle for Field of View'}>
                     <TextField
-                        sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
+                        sx={{ width: '100px', paddingTop: '9px', margin: '6px' }}
                         label={'Rotator Angle'}
                         id="rotator-angle"
                         value={rotatorAngle}
@@ -300,7 +328,47 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 />
             </Stack>
             <Stack direction='row' spacing={2} sx={{ marginTop: '16px' }}>
-                {
+                <Stack direction='column' sx={{ position: 'relative', display: 'inline-block' }}>
+                    {imageLoading && (
+                        <Typography
+                            sx={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                fontSize: '24px',
+                                fontWeight: 'bold',
+                                color: 'white',
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                padding: '16px',
+                                borderRadius: '8px',
+                                zIndex: 10
+                            }}
+                        >
+                            Loading...
+                        </Typography>
+                    )}
+                    {
+                        < NGSViewer
+                            imgUrl={image ?? ''}
+                            guideStars={guidestars as Target[]}
+                            height={500}
+                            width={500}
+                            size={imgSize} // in degrees
+                            centerRA={centerRa} // in degrees
+                            centerDec={centerDec} // in degrees
+                            guideStarName={guideStarName}
+                            setGuideStarName={setGuideStarName}
+                            setImageLoading={setImageLoading}
+                            instrumentFOV={instrumentFOV}
+                            fovAngle={rotatorAngle}
+                            positionAngle={Number(target.rotator_pa) ?? 0}
+                            selPO={selPO}
+                            pointingOrigins={selPointingOrigins}
+                        />
+                    }
+                </Stack>
+                {/* {
                     guidestars.length > 0 &&
                     (<AladinViewer
                         targets={[target]}
@@ -317,7 +385,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         // selectedGuideStarName={guideStarName}
                         // contours={telContours}
                     />)
-                }
+                } */}
                 <GuideStarTable
                     selectedGuideStarName={guideStarName}
                     setSelectedGuideStarName={setGuideStarName}

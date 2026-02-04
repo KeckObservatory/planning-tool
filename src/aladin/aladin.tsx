@@ -34,7 +34,7 @@ interface PolylineProps {
     className?: string
 }
 
-const PolylineComponent = (props: PolylineProps) => {
+export const PolylineComponent = (props: PolylineProps) => {
     let pointsStr = "";
     props.points.forEach(val => {
         pointsStr += `${val.at(0)},${val.at(1)} `;
