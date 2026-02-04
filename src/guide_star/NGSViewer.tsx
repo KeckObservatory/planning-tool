@@ -2,10 +2,11 @@ import { Target } from "../App"
 import React from "react"
 import * as d3 from "d3"
 import { get_shapes } from "../two-d-view/two_d_view"
-import { POPointFeature } from "../two-d-view/pointing_origin_select"
+import { POPointFeature, TelescopeContours } from "../two-d-view/pointing_origin_select"
 import { Feature, Point } from "geojson"
 import { PointingOriginMarkers, PointingOriginMarker } from "../aladin/pointing_origin_markers"
-
+import { ScaleBar } from "./scale_bar"
+import { CompassRose } from "./compass_rose"
 interface Props {
     imgUrl: string
     guideStars: Target[]
@@ -22,6 +23,9 @@ interface Props {
     positionAngle?: number
     selPO?: POPointFeature
     pointingOrigins?: Feature<Point, { name?: string }>[]
+    invertImage?: boolean
+    showLaser?: boolean
+    contours?: TelescopeContours// LaserContours
 }
 export const NGSViewer = (props: Props) => {
 
@@ -35,6 +39,7 @@ export const NGSViewer = (props: Props) => {
   const [dragStart, setDragStart] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const pxlScale = (props.size / props.width) / zoom // degrees per pixel, adjusted for zoom
   const [fov, setFOV] = React.useState<any>(null)
+  const [laserContours, setLaserContours] = React.useState<Array<{name: string; color: string; lines: Array<Array<[number, number]>>}>>([]);
 
   const get_offset_ra_dec = () => {
     let ra = props.centerRA;
@@ -45,6 +50,13 @@ export const NGSViewer = (props: Props) => {
       dec = dec - ddec / 3600;
     }
     return [ra, dec];
+  }
+
+  // Convert arcseconds offset to pixel coordinates
+  const arcsecToPixel = (dra: number, ddec: number): [number, number] => {
+    const x = (dra / (3600 * pxlScale)) + props.width / 2;
+    const y = (ddec / (3600 * pxlScale)) + props.height / 2;
+    return [x, y];
   }
 
   // Convert pointing origins to pixel coordinates for markers
@@ -69,6 +81,87 @@ export const NGSViewer = (props: Props) => {
     });
   }, [props.pointingOrigins, props.centerRA, props.centerDec, props.width, props.height, pxlScale, props.selPO, zoom, props.fovAngle]);
 
+  // Convert laser contours to pixel coordinates
+  React.useMemo(() => {
+    console.log('Contour useMemo triggered:', { showLaser: props.showLaser, contours: props.contours });
+    
+    if (!props.showLaser || !props.contours) {
+      setLaserContours([]);
+      return;
+    }
+
+    // Handle both FeatureCollection format and direct array format
+    const features = (props.contours.features || props.contours) as any[];
+    if (!features || features.length === 0) {
+      console.log('No features found in contours');
+      setLaserContours([]);
+      return;
+    }
+
+    console.log('Processing contour features:', features);
+
+    const convertedContours = features.map((feature: any) => {
+      const lines = feature.geometry.coordinates.map((lineseg: [[number, number], [number, number]]) => {
+        // Convert from arcseconds to pixel coordinates
+        const [dra1, ddec1] = lineseg[0]; // arcseconds
+        const [dra2, ddec2] = lineseg[1]; // arcseconds
+        const [x1, y1] = arcsecToPixel(dra1, ddec1);
+        const [x2, y2] = arcsecToPixel(dra2, ddec2);
+        return [[x1, y1] as [number, number], [x2, y2] as [number, number]];
+      });
+      const name = feature.properties?.name ?? 'Unknown';
+      const color = feature.properties?.color ?? 'magenta';
+      return {
+        name,
+        color,
+        lines
+      };
+    });
+
+    console.log('Converted contours:', convertedContours);
+    setLaserContours(convertedContours);
+  }, [props.contours, props.showLaser, props.width, props.height, pxlScale, zoom]);
+
+  // Draw laser contours on SVG
+  React.useEffect(() => {
+    console.log('Drawing contours effect - laserContours:', laserContours);
+    
+    if (!laserContours || laserContours.length === 0) {
+      console.log('No laser contours to draw');
+      return;
+    }
+
+    // We'll add the contours to the FOV SVG layer
+    const fovSvg = fovSvgRef.current;
+    if (!fovSvg) {
+      console.log('FOV SVG ref is null');
+      return;
+    }
+
+    console.log('Clearing previous contours and drawing new ones');
+
+    // Remove previous contour lines
+    d3.select(fovSvg).selectAll('line.laser-contour').remove();
+
+    // Draw each contour
+    laserContours.forEach((contour, contourIdx) => {
+      console.log(`Drawing contour ${contourIdx}:`, contour);
+      contour.lines.forEach((line) => {
+        const [x1, y1] = line[0];
+        const [x2, y2] = line[1];
+        
+        d3.select(fovSvg).append('line')
+          .attr('x1', x1)
+          .attr('y1', y1)
+          .attr('x2', x2)
+          .attr('y2', y2)
+          .attr('stroke', contour.color)
+          .attr('stroke-width', 1.5)
+          .attr('opacity', 0.7)
+          .attr('class', 'laser-contour');
+      });
+    });
+  }, [laserContours, panOffset, zoom]);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -298,6 +391,7 @@ export const NGSViewer = (props: Props) => {
         cursor: isDragging ? 'grabbing' : 'grab'
       }}
     >
+      {/* DSS Image Layer */}
       <canvas 
         ref={canvasRef} 
         style={{ 
@@ -306,9 +400,11 @@ export const NGSViewer = (props: Props) => {
           left: 0,
           transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom}) rotate(${props.fovAngle || 0}deg)`,
           transformOrigin: 'center center',
-          pointerEvents: 'none'
+          pointerEvents: 'none',
+          filter: props.invertImage !== false ? 'invert(1)' : 'none'
         }} 
       />
+      {/* Targets SVG Layer */}
       <svg
         ref={svgRef}
         width={props.width}
@@ -321,6 +417,7 @@ export const NGSViewer = (props: Props) => {
           transformOrigin: 'center center'
         }}
       />
+      {/* FOV SVG Layer */}
       <svg
         ref={fovSvgRef}
         width={props.width}
@@ -329,7 +426,8 @@ export const NGSViewer = (props: Props) => {
           position: 'absolute', 
           top: 0, 
           left: 0, 
-          transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
+          transform: `translate(${panOffset.x}px, ${panOffset.y}px) `,
+          transformOrigin: 'center center',
           pointerEvents: 'none' 
         }}
       />
@@ -357,6 +455,8 @@ export const NGSViewer = (props: Props) => {
           />
         </div>
       )}
+      <ScaleBar width={props.width} height={props.height} />
+      <CompassRose width={props.width} height={props.height} fovAngle={props.fovAngle} />
     </div>
   );
 };

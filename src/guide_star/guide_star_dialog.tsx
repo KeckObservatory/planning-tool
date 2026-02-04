@@ -118,6 +118,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
     const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
     const [showLaser, setShowLaser] = React.useState<boolean>(false)
+    const [invertImage, setInvertImage] = React.useState<boolean>(true)
     const [rotatorAngle, setRotatorAngle] = React.useState(0)
 
     const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'Keck 2' as Dome))
@@ -322,6 +323,12 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     setTargets={setGuideStars}
                 />
                 <FormControlLabel
+                    label="Invert Image"
+                    value={invertImage}
+                    control={<Switch checked={invertImage} />}
+                    onChange={(_, checked) => setInvertImage(checked)}
+                />
+                <FormControlLabel
                     label="Show Laser"
                     value={showLaser}
                     control={<Switch checked={showLaser} />}
@@ -370,6 +377,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             positionAngle={Number(target.rotator_pa) ?? 0}
                             selPO={selPO}
                             pointingOrigins={selPointingOrigins}
+                            invertImage={invertImage}
+                            showLaser={showLaser}
+                            contours={telContours}
                         />
                     }
                     {/* {
