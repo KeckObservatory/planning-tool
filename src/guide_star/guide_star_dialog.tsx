@@ -115,9 +115,11 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [fovs, setFOVs] = React.useState<string[]>([])
     const [pointingOrigins, setPointingOrigins] = React.useState<POPointingOriginCollection | undefined>(undefined)
     const [contours, setContours] = React.useState<LaserContours>([])
+    const [trickMap, setTrickMap] = React.useState<any>(undefined)
     const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
     const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
     const [showLaser, setShowLaser] = React.useState<boolean>(false)
+    const [showTrickMap, setShowTrickMap] = React.useState<boolean>(false)
     const [invertImage, setInvertImage] = React.useState<boolean>(true)
     const [rotatorAngle, setRotatorAngle] = React.useState(0)
 
@@ -153,6 +155,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const featureCollection = await get_shapes('fov')
             const pos = await get_shapes('pointing_origins') as POPointingOriginCollection
             const cntrs = showLaser ? await get_shapes('laser_contours') : []
+            const trkMap = showTrickMap ? await get_shapes('trick_map') : undefined
             const features = featureCollection['features'].filter((feature: any) => {
                 return feature['properties'].type === 'FOV'
             })
@@ -160,7 +163,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             setFOVs(newFovs)
             setPointingOrigins(pos)
             console.log('cntrs', cntrs)
+            console.log('trkMap', trkMap)
             setContours(cntrs as unknown as LaserContours)
+            setTrickMap(trkMap)
         }
         fun()
         set_shapes_fun()
@@ -169,11 +174,14 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     useEffect(() => {
         const set_shapes_fun = async () => {
             const cntrs = showLaser ? await get_shapes('laser_contours') : []
+            const trkMap = showTrickMap ? await get_shapes('trick_map') : undefined
             console.log('cntrs', cntrs)
+            console.log('trkMap', trkMap)
             setContours(cntrs as unknown as LaserContours)
+            setTrickMap(trkMap)
         }
         set_shapes_fun()
-    }, [showLaser])
+    }, [showLaser, showTrickMap])
 
     useEffect(() => {
         if (targets.length > 0) {
@@ -334,6 +342,12 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     control={<Switch checked={showLaser} />}
                     onChange={(_, checked) => setShowLaser(checked)}
                 />
+                <FormControlLabel
+                    label="Show Trick Map"
+                    value={showTrickMap}
+                    control={<Switch checked={showTrickMap} />}
+                    onChange={(_, checked) => setShowTrickMap(checked)}
+                />
                 <DomeSelect
                     dome={dome}
                     setDome={setDome}
@@ -380,7 +394,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             invertImage={invertImage}
                             showLaser={showLaser}
                             contours={telContours}
-                        />
+                            showTrickMap={showTrickMap}
+                            trickMap={trickMap}
+                            />
                     }
                     {/* {
                         guidestars.length > 0 &&

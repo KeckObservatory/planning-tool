@@ -26,6 +26,8 @@ interface Props {
     invertImage?: boolean
     showLaser?: boolean
     contours?: TelescopeContours// LaserContours
+    showTrickMap?: boolean
+    trickMap?: any // trick_map FeatureCollection
 }
 export const NGSViewer = (props: Props) => {
 
@@ -40,6 +42,7 @@ export const NGSViewer = (props: Props) => {
   const pxlScale = (props.size / props.width) / zoom // degrees per pixel, adjusted for zoom
   const [fov, setFOV] = React.useState<any>(null)
   const [laserContours, setLaserContours] = React.useState<Array<{name: string; color: string; lines: Array<Array<[number, number]>>}>>([]);
+  const [trickMapContours, setTrickMapContours] = React.useState<Array<{name: string; color: string; lines: Array<Array<[number, number]>>}>>([]);
 
   const get_offset_ra_dec = () => {
     let ra = props.centerRA;
@@ -122,6 +125,47 @@ export const NGSViewer = (props: Props) => {
     setLaserContours(convertedContours);
   }, [props.contours, props.showLaser, props.width, props.height, pxlScale, zoom]);
 
+  // Convert trick map to pixel coordinates
+  React.useMemo(() => {
+    console.log('Trick map useMemo triggered:', { showTrickMap: props.showTrickMap, trickMap: props.trickMap });
+    
+    if (!props.showTrickMap || !props.trickMap) {
+      setTrickMapContours([]);
+      return;
+    }
+
+    // Handle both FeatureCollection format and direct array format
+    const features = (props.trickMap.features || props.trickMap) as any[];
+    if (!features || features.length === 0) {
+      console.log('No features found in trick map');
+      setTrickMapContours([]);
+      return;
+    }
+
+    console.log('Processing trick map features:', features);
+
+    const convertedTrickMap = features.map((feature: any) => {
+      const lines = feature.geometry.coordinates.map((lineseg: [[number, number], [number, number]]) => {
+        // Convert from arcseconds to pixel coordinates
+        const [dra1, ddec1] = lineseg[0]; // arcseconds
+        const [dra2, ddec2] = lineseg[1]; // arcseconds
+        const [x1, y1] = arcsecToPixel(dra1, ddec1);
+        const [x2, y2] = arcsecToPixel(dra2, ddec2);
+        return [[x1, y1] as [number, number], [x2, y2] as [number, number]];
+      });
+      const name = feature.properties?.name ?? 'Unknown';
+      const color = feature.properties?.color ?? '#FF00FF'; // Default magenta
+      return {
+        name,
+        color,
+        lines
+      };
+    });
+
+    console.log('Converted trick map:', convertedTrickMap);
+    setTrickMapContours(convertedTrickMap);
+  }, [props.trickMap, props.showTrickMap, props.width, props.height, pxlScale, zoom]);
+
   // Draw laser contours on SVG
   React.useEffect(() => {
     console.log('Drawing contours effect - laserContours:', laserContours);
@@ -162,6 +206,47 @@ export const NGSViewer = (props: Props) => {
       });
     });
   }, [laserContours, panOffset, zoom]);
+
+  // Draw trick map contours on SVG
+  React.useEffect(() => {
+    console.log('Drawing trick map effect - trickMapContours:', trickMapContours);
+    
+    // We'll add the contours to the FOV SVG layer
+    const fovSvg = fovSvgRef.current;
+    if (!fovSvg) {
+      console.log('FOV SVG ref is null');
+      return;
+    }
+
+    // Remove previous trick map lines (always clear first)
+    d3.select(fovSvg).selectAll('line.trick-map-contour').remove();
+    
+    if (!trickMapContours || trickMapContours.length === 0) {
+      console.log('No trick map contours to draw');
+      return;
+    }
+
+    console.log('Drawing new trick map contours');
+
+    // Draw each contour
+    trickMapContours.forEach((contour, contourIdx) => {
+      console.log(`Drawing trick map contour ${contourIdx}:`, contour);
+      contour.lines.forEach((line) => {
+        const [x1, y1] = line[0];
+        const [x2, y2] = line[1];
+        
+        d3.select(fovSvg).append('line')
+          .attr('x1', x1)
+          .attr('y1', y1)
+          .attr('x2', x2)
+          .attr('y2', y2)
+          .attr('stroke', contour.color)
+          .attr('stroke-width', 1.0)
+          .attr('opacity', 0.5)
+          .attr('class', 'trick-map-contour');
+      });
+    });
+  }, [trickMapContours, panOffset, zoom]);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
