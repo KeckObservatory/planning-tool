@@ -67,7 +67,7 @@ export const NGSViewer = (props: Props) => {
         position: [x, y] as [number, number]
       };
     });
-  }, [props.pointingOrigins, props.centerRA, props.centerDec, props.width, props.height, pxlScale, props.selPO, zoom]);
+  }, [props.pointingOrigins, props.centerRA, props.centerDec, props.width, props.height, pxlScale, props.selPO, zoom, props.fovAngle]);
 
 
   React.useEffect(() => {
@@ -143,7 +143,7 @@ export const NGSViewer = (props: Props) => {
       .attr('stroke-width', 2)
       .attr('cursor', 'pointer')
       .on('click', handleStarClick);
-  }, [props.guideStars, props.centerRA, props.centerDec, props.width, props.height, pxlScale, props.guideStarName, zoom]);
+  }, [props.guideStars, props.centerRA, props.centerDec, props.width, props.height, pxlScale, props.guideStarName, zoom, props.fovAngle]);
 
   // Fetch and update FOV shapes
   React.useEffect(() => {
@@ -227,7 +227,7 @@ export const NGSViewer = (props: Props) => {
         .attr('stroke-width', 2)
         .attr('opacity', 0.7);
     }
-  }, [fov, props.centerRA, props.centerDec, props.width, props.height, pxlScale, props.selPO, zoom]);
+  }, [fov, props.centerRA, props.centerDec, props.width, props.height, pxlScale, props.selPO, zoom, props.fovAngle]);
 
   // Handle mouse wheel zoom
   React.useEffect(() => {
@@ -305,7 +305,7 @@ export const NGSViewer = (props: Props) => {
           position: 'absolute', 
           top: 0, 
           left: 0,
-          transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
+          transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom}) rotate(${props.fovAngle || 0}deg)`,
           transformOrigin: 'center center',
           pointerEvents: 'none'
         }} 
@@ -318,7 +318,8 @@ export const NGSViewer = (props: Props) => {
           position: 'absolute', 
           top: 0, 
           left: 0, 
-          transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
+          transform: `translate(${panOffset.x}px, ${panOffset.y}px) rotate(${props.fovAngle || 0}deg)`,
+          transformOrigin: 'center center',
           pointerEvents: 'none'
         }}
       />
