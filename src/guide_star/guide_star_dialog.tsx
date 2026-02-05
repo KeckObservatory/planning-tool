@@ -151,7 +151,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             setCatalogs(cats)
             setCatalog(cats.at(0))
             const getImageCat = import.meta.env.DEV ?
-                ['DSS2 Red', 'DSS2 Blue', 'DSS2 IR', 'PanSTARRS DR1']: //TODO: remove before production
+                ['DSS2 Red', 'DSS2 Blue', 'DSS2 IR', 'PanSTARRS DR1'] : //TODO: remove before production
                 await get_image_catalogs()
             setImageCatalogs(getImageCat)
             setImageCatalog(getImageCat.at(0))
@@ -385,9 +385,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         guidestars.length > 0 &&
                         (<AladinViewer
                             targets={[target]}
-                            // guideStars={guidestars}
+                            guideStars={guidestars}
                             positionAngle={target.rotator_pa ? Number(target.rotator_pa) : 0}
-                            // pointingOrigins={selPointingOrigins}
+                            pointingOrigins={selPointingOrigins}
                             fovAngle={rotatorAngle}
                             selPO={selPO}
                             setSelPO={setSelPO}
@@ -395,8 +395,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             height={height}
                             width={width}
                             selectCallback={onGuideStarNameSelect}
-                        // selectedGuideStarName={guideStarName}
-                        // contours={telContours}
+                            selectedGuideStarName={guideStarName}
+                            contours={telContours}
                         />)
                     }
                 </Stack>
