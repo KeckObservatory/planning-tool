@@ -73,8 +73,7 @@ export const NGSViewer = (props: Props) => {
       const [dra, ddec] = feature.geometry.coordinates; // arcseconds offset
       const pora = offsetRa + dra / 3600; // convert to degrees
       const podec = offsetDec + ddec / 3600;
-      const x = ((pora - props.centerRA) / pxlScale) + props.width / 2;
-      const y = ((podec - props.centerDec) / pxlScale) + props.height / 2;
+      const [x, y] = arcsecToPixel((pora - props.centerRA) * 3600, (podec - props.centerDec) * 3600);
       const name = feature.properties?.name ?? 'Unknown';
 
       return {
@@ -86,7 +85,6 @@ export const NGSViewer = (props: Props) => {
 
   // Convert laser contours to pixel coordinates
   React.useMemo(() => {
-    console.log('Contour useMemo triggered:', { showLaser: props.showLaser, contours: props.contours });
     
     if (!props.showLaser || !props.contours) {
       setLaserContours([]);
@@ -96,12 +94,9 @@ export const NGSViewer = (props: Props) => {
     // Handle both FeatureCollection format and direct array format
     const features = (props.contours.features || props.contours) as any[];
     if (!features || features.length === 0) {
-      console.log('No features found in contours');
       setLaserContours([]);
       return;
     }
-
-    console.log('Processing contour features:', features);
 
     const convertedContours = features.map((feature: any) => {
       const lines = feature.geometry.coordinates.map((lineseg: [[number, number], [number, number]]) => {
@@ -121,13 +116,11 @@ export const NGSViewer = (props: Props) => {
       };
     });
 
-    console.log('Converted contours:', convertedContours);
     setLaserContours(convertedContours);
   }, [props.contours, props.showLaser, props.width, props.height, pxlScale, zoom]);
 
   // Convert trick map to pixel coordinates
   React.useMemo(() => {
-    console.log('Trick map useMemo triggered:', { showTrickMap: props.showTrickMap, trickMap: props.trickMap });
     
     if (!props.showTrickMap || !props.trickMap) {
       setTrickMapContours([]);
@@ -142,7 +135,6 @@ export const NGSViewer = (props: Props) => {
       return;
     }
 
-    console.log('Processing trick map features:', features);
 
     const convertedTrickMap = features.map((feature: any) => {
       const lines = feature.geometry.coordinates.map((lineseg: [[number, number], [number, number]]) => {
@@ -162,13 +154,11 @@ export const NGSViewer = (props: Props) => {
       };
     });
 
-    console.log('Converted trick map:', convertedTrickMap);
     setTrickMapContours(convertedTrickMap);
   }, [props.trickMap, props.showTrickMap, props.width, props.height, pxlScale, zoom]);
 
   // Draw laser contours on SVG
   React.useEffect(() => {
-    console.log('Drawing contours effect - laserContours:', laserContours);
     
     // We'll add the contours to the FOV SVG layer
     const fovSvg = fovSvgRef.current;
@@ -188,8 +178,7 @@ export const NGSViewer = (props: Props) => {
     console.log('Drawing new contours');
 
     // Draw each contour
-    laserContours.forEach((contour, contourIdx) => {
-      console.log(`Drawing contour ${contourIdx}:`, contour);
+    laserContours.forEach((contour) => {
       contour.lines.forEach((line) => {
         const [x1, y1] = line[0];
         const [x2, y2] = line[1];
@@ -209,7 +198,6 @@ export const NGSViewer = (props: Props) => {
 
   // Draw trick map contours on SVG
   React.useEffect(() => {
-    console.log('Drawing trick map effect - trickMapContours:', trickMapContours);
     
     // We'll add the contours to the FOV SVG layer
     const fovSvg = fovSvgRef.current;
@@ -226,11 +214,8 @@ export const NGSViewer = (props: Props) => {
       return;
     }
 
-    console.log('Drawing new trick map contours');
-
     // Draw each contour
-    trickMapContours.forEach((contour, contourIdx) => {
-      console.log(`Drawing trick map contour ${contourIdx}:`, contour);
+    trickMapContours.forEach((contour) => {
       contour.lines.forEach((line) => {
         const [x1, y1] = line[0];
         const [x2, y2] = line[1];
@@ -265,7 +250,6 @@ export const NGSViewer = (props: Props) => {
       // Draw the image onto the canvas
       ctx.drawImage(image, 0, 0, props.width, props.height);
       // Draw guide stars on top of the image
-      //drawGuideStars(ctx, props.guideStars);
       // Image has truly loaded, set loading to false
       props.setImageLoading(false);
     };
@@ -286,7 +270,6 @@ export const NGSViewer = (props: Props) => {
     const handleStarClick = (event: MouseEvent, d: Target) => {
       event.stopPropagation(); // Prevent pan from triggering
       const starName = d.target_name || `RA: ${d.ra_deg}, Dec: ${d.dec_deg}`;
-      console.log('Clicked guide star:', starName);
       if (props.setGuideStarName) {
         props.setGuideStarName(starName);
       }
@@ -377,7 +360,7 @@ export const NGSViewer = (props: Props) => {
           .attr('fill', 'none')
           .attr('stroke', 'cyan')
           .attr('stroke-width', 2)
-          .attr('opacity', 0.7);
+          .attr('opacity', 0.7)
       });
     } else if (feature.geometry.type === 'Polygon') {
       const coordinates = feature.geometry.coordinates[0]; // exterior ring
