@@ -82,7 +82,7 @@ export default function GuideStarTable(props: Props) {
     React.useEffect(() => {
         // console.log("Selected guide star name:", selectedGuideStarName, apiRef.current)
         // apiRef.current.selectRow(selectedGuideStarName);
-        setRowSelectModel([selectedGuideStarName])
+        setRowSelectModel(selectedGuideStarName ? [selectedGuideStarName] : [])
     }, [selectedGuideStarName]);
 
     columns = columns.sort((a, b) => {

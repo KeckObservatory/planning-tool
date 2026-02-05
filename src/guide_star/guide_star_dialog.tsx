@@ -386,7 +386,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         (<AladinViewer
                             targets={[target]}
                             // guideStars={guidestars}
-                            positionAngle={Number(target.rotator_pa) ?? 0}
+                            positionAngle={target.rotator_pa ? Number(target.rotator_pa) : 0}
                             // pointingOrigins={selPointingOrigins}
                             fovAngle={rotatorAngle}
                             selPO={selPO}
