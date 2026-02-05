@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
-// import AladinViewer from '../aladin/aladin';
 
 import { Target, useStateContext } from '../App';
 import { Autocomplete, Stack, TextField, Switch, FormControlLabel, Typography } from '@mui/material';
@@ -17,6 +16,7 @@ import UploadDialog from '../upload_targets_dialog';
 import { LaserContours, POPointFeature, POPointingOriginCollection, POSelect } from '../two-d-view/pointing_origin_select';
 import { mock_catalog_targets } from './mock_catalog_targets';
 import { NGSViewer } from './NGSViewer';
+import AladinViewer from '../aladin/aladin';
 
 export interface CatalogTarget {
     name: string;
@@ -235,14 +235,14 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         }
     }
 
-    // const onGuideStarNameSelect = (name: string) => {
-    //     if (name !== guideStarName) { //ignore setting guide star if the target is selected
-    //         let newGuideStar = guidestars.find((gs: Partial<Target>) => gs.target_name === name)
-    //         if (newGuideStar) {
-    //             setGuideStarName(name)
-    //         }
-    //     }
-    // }
+    const onGuideStarNameSelect = (name: string) => {
+        if (name !== guideStarName) { //ignore setting guide star if the target is selected
+            let newGuideStar = guidestars.find((gs: Partial<Target>) => gs.target_name === name)
+            if (newGuideStar) {
+                setGuideStarName(name)
+            }
+        }
+    }
 
     const dialogTitle = (
         <span>Guide Star Selection</span>
@@ -388,7 +388,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             setImageLoading={setImageLoading}
                             instrumentFOV={instrumentFOV}
                             fovAngle={rotatorAngle}
-                            positionAngle={Number(target.rotator_pa) ?? 0}
+                            positionAngle={target.rotator_pa ? Number(target.rotator_pa) : 0}
                             selPO={selPO}
                             pointingOrigins={selPointingOrigins}
                             invertImage={invertImage}
@@ -398,24 +398,24 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             trickMap={trickMap}
                             />
                     }
-                    {/* {
+                    {
                         guidestars.length > 0 &&
                         (<AladinViewer
                             targets={[target]}
-                            // guideStars={guidestars}
-                            positionAngle={Number(target.rotator_pa) ?? 0}
-                            // pointingOrigins={selPointingOrigins}
+                            guideStars={guidestars}
+                            positionAngle={target.rotator_pa ? Number(target.rotator_pa) : 0}
+                            pointingOrigins={selPointingOrigins}
                             fovAngle={rotatorAngle}
                             selPO={selPO}
                             setSelPO={setSelPO}
                             instrumentFOV={instrumentFOV}
-                            height={height}
-                            width={width}
+                            height={500}
+                            width={500}
                             selectCallback={onGuideStarNameSelect}
-                        // selectedGuideStarName={guideStarName}
-                        // contours={telContours}
+                            selectedGuideStarName={guideStarName}
+                            contours={telContours}
                         />)
-                    } */}
+                    }
                 </Stack>
                 <GuideStarTable
                     selectedGuideStarName={guideStarName}
