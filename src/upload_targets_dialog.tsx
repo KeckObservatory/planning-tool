@@ -272,6 +272,14 @@ const parse_txt = (contents: string, obsid: number) => {
         // if there are comment lines above the target, add them to the comment field as well
         if (commentLines.length > 0) {
             comment = commentLines.join('\n') + '\n' + comment
+            // if there are tags, separate them out and add them to the tags field instead of the comment field
+            const tagLineIdx = commentLines.findIndex((line) => line.toLowerCase().includes('tags'))
+            if (tagLineIdx > -1) {
+                const tagLine = commentLines[tagLineIdx]
+                const tags = tagLine.split(':')[1].split(',').map((tag) => tag.trim())
+                opts.push(`tags=${tags.join(',')}`)
+                comment = comment.replace(tagLine, '') // remove the tag line from the comment
+            }
             commentLines = [] // reset comment lines after adding them to the target
         }
         opts = opts.find((opt) => opt.startsWith('#')) ? opts.slice(0, opts.findIndex((opt) => opt.startsWith('#'))) : opts
@@ -294,6 +302,12 @@ const parse_txt = (contents: string, obsid: number) => {
             const tgtKey = starlistToKeyMapping[key as keyof StarListOptionalKeys] as keyof Target
             if (!tgtKey) {
                 console.warn('invalid key', key, value, opts, row)
+                return
+            }
+            if (key === 'tags') {
+                const tags = value.split(',').map((tag) => tag.trim())
+                //@ts-ignore
+                tgt[tgtKey] = tags //tags are an array of strings
                 return
             }
             //@ts-ignore
