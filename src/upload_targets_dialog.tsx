@@ -96,6 +96,7 @@ interface StarListOptionalKeys {
     ddec?: number,
 }
 
+//TODO: this should be in the target_schema config.
 let starlistToKeyMapping = {
     'gmag': 'g_mag',
     'jmag': 'j_mag',
@@ -111,6 +112,7 @@ let starlistToKeyMapping = {
     'wrap': 'telescope_wrap',
     'dra': 'd_ra',
     'ddec': 'd_dec',
+    'tags': 'tags',
     'lgs': 'lgs'
 }
 
