@@ -269,7 +269,7 @@ const parse_txt = (contents: string, obsid: number) => {
         if (inlineComment > 0 && opts.length > 0) {
             opts = opts.slice(0, inlineComment)
             const comment = opts.slice(inlineComment).join(' ')
-            commentLines.push(comment) // add inline comment to comment lines so it gets added to the comment field
+            commentLines.push(comment.replace('#', '').trim()) // add inline comment to comment lines so it gets added to the comment field
         }
         // if there are comment lines above the target, add them to the comment field as well
         let comment: string = ''
