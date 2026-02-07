@@ -273,7 +273,7 @@ const parse_txt = (contents: string, obsid: number) => {
         }
         // if there are comment lines above the target, add them to the comment field as well
         if (commentLines.length > 0) {
-            comment = commentLines.join('\n') + '\n' + comment
+            comment = commentLines.join('\n')
             // if there are tags, separate them out and add them to the tags field instead of the comment field
             const tagLineIdx = commentLines.findIndex((line) => line.toLowerCase().includes('tags:'))
             if (tagLineIdx > -1) {
