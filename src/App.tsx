@@ -20,6 +20,7 @@ export type Status = "EDITED" | "CREATED"
 
 export type RotatorMode = "pa" | "vertical" | "stationary"
 export type TelescopeWrap = "shortest" | "south" | "north"
+export type Lgs = '0' | '1' | 'None' 
 
 export interface Target extends SimbadTargetData {
   _id: string,
@@ -27,6 +28,7 @@ export interface Target extends SimbadTargetData {
   del_flag?: number,
   state?: string,
   target_name?: string,
+  lgs?: Lgs,
   v_mag?: number,
   h_mag?: number,
   k_mag?: number,

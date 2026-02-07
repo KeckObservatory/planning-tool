@@ -44,6 +44,13 @@ const convert_target_to_targetlist_row = (target: Target) => {
   row = target.dec_offset ? row + ` decoffset=${target.dec_offset}` : row
   row = target.rotator_mode ? row + ` rotmode=${target.rotator_mode}` : row
   row = target.telescope_wrap ? row + ` wrap=${target.telescope_wrap}` : row
+  if (target.lgs === '1') {
+    row = row + ` lgs=1`
+  }
+  else if (target.lgs === '0') {
+    row = row + ` lgs=0`
+  }
+  else {}
   //comment and tags go before the row
   row = target.comment ? `# ${name} comment: ${target.comment}\n` + row : row
   const tags = target.tags ?? []

@@ -5,7 +5,7 @@ export const config = {
         "ra",
         "dec",
         "equinox",
-        "b_mag",
+        "h_mag",
         "v_mag",
         "r_mag",
         "j_mag",

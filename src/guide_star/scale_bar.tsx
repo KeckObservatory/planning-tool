@@ -3,9 +3,10 @@ import React from 'react';
 interface ScaleBarProps {
   width: number;
   height: number;
+  invertImage?: boolean;
 }
 
-export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height }) => {
+export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height, invertImage }) => {
   return (
     <svg
       width={width}
@@ -25,7 +26,7 @@ export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height }) => {
           y1="0"
           x2="100"
           y2="0"
-          stroke="white"
+          stroke= {invertImage ? "white" : "black"}
           strokeWidth="2"
         />
         {/* Left tick */}
@@ -34,7 +35,7 @@ export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height }) => {
           y1="-3"
           x2="0"
           y2="3"
-          stroke="white"
+          stroke= {invertImage ? "white" : "black"}
           strokeWidth="2"
         />
         {/* Right tick */}
@@ -43,17 +44,17 @@ export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height }) => {
           y1="-3"
           x2="100"
           y2="3"
-          stroke="white"
+          stroke= {invertImage ? "white" : "black"}
           strokeWidth="2"
         />
         {/* Label */}
         <text
           x="50"
           y="15"
-          fill="white"
           fontSize="12"
           textAnchor="middle"
           fontFamily="monospace"
+          fill={invertImage ? "white" : "black"}
         >
           20"
         </text>

@@ -523,8 +523,8 @@ export const NGSViewer = (props: Props) => {
           />
         </div>
       )}
-      <ScaleBar width={props.width} height={props.height} />
-      <CompassRose width={props.width} height={props.height} fovAngle={props.fovAngle} />
+      <ScaleBar width={props.width} height={props.height} invertImage={props.invertImage} />
+      <CompassRose width={props.width} height={props.height} fovAngle={props.fovAngle} invertImage={props.invertImage} />
     </div>
   );
 };

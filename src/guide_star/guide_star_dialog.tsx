@@ -10,7 +10,7 @@ import GuideStarTable from './guide_star_table';
 import { ra_dec_to_deg } from '../catalog_button';
 import { FOVSelect } from '../two-d-view/fov_select';
 import { Dome, DomeParam, DomeSelect, get_shapes } from '../two-d-view/two_d_view';
-import { StringParam, useQueryParam, withDefault } from 'use-query-params';
+import { BooleanParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
 import { get_catalog_targets, get_catalogs, get_image_catalogs, get_catalog_image } from '../api/api_root';
 import UploadDialog from '../upload_targets_dialog';
 import { LaserContours, POPointFeature, POPointingOriginCollection, POSelect } from '../two-d-view/pointing_origin_select';
@@ -118,9 +118,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [trickMap, setTrickMap] = React.useState<any>(undefined)
     const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
     const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
-    const [showLaser, setShowLaser] = React.useState<boolean>(false)
-    const [showTrickMap, setShowTrickMap] = React.useState<boolean>(false)
-    const [invertImage, setInvertImage] = React.useState<boolean>(true)
+    const [showLaser, setShowLaser] = useQueryParam('show_laser', withDefault(BooleanParam, true)) 
+    const [showTrickMap, setShowTrickMap] = useQueryParam('show_trick_map', withDefault(BooleanParam, false)) 
+    const [invertImage, setInvertImage] = useQueryParam('invert_image', withDefault(BooleanParam, false)) 
     const [rotatorAngle, setRotatorAngle] = React.useState(0)
 
     const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'Keck 2' as Dome))
@@ -132,6 +132,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     const [image, setImage] = useState<string | undefined>(undefined)
     const [imageLoading, setImageLoading] = useState<boolean>(false)
+    const [catalogLoading, setCatalogLoading] = useState<boolean>(false)
 
     const [catalog, setCatalog] = useState<string | undefined>(undefined)
     const [catalogs, setCatalogs] = useState<string[]>([])
@@ -197,13 +198,16 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
             if (import.meta.env.DEV && catalog) { //TODO: remove before production
                 console.log('Using mock catalog targets in development mode')
+                setCatalogLoading(true)
                 const gsTgts = mock_catalog_targets.map((star: CatalogTarget) => {
                     const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
                     return tgt
                 })
                 setGuideStars(gsTgts)
+                setCatalogLoading(false)
             }
             else if (catalog) {
+                setCatalogLoading(true)
                 const gs = await get_catalog_targets(catalog, ra, dec, 0.5)
                 if (gs) {
                     const gsTgts = gs.map((star: CatalogTarget) => {
@@ -212,6 +216,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     })
                     setGuideStars(gsTgts)
                 }
+                setCatalogLoading(false)
 
             }
             if (imageCatalog) {
@@ -417,13 +422,34 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         />)
                     }
                 </Stack>
-                <GuideStarTable
-                    selectedGuideStarName={guideStarName}
-                    setSelectedGuideStarName={setGuideStarName}
-                    guidestars={guidestars}
-                    setRows={setRows}
-                    science_target_name={target.target_name ?? target._id}
-                />
+                <Stack direction='column' sx={{ position: 'relative', display: 'inline-block' }}>
+                    {catalogLoading && (
+                        <Typography
+                            sx={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                fontSize: '24px',
+                                fontWeight: 'bold',
+                                color: 'white',
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                padding: '16px',
+                                borderRadius: '8px',
+                                zIndex: 10
+                            }}
+                        >
+                            Catalog Loading...
+                        </Typography>
+                    )}
+                    <GuideStarTable
+                        selectedGuideStarName={guideStarName}
+                        setSelectedGuideStarName={setGuideStarName}
+                        guidestars={guidestars}
+                        setRows={setRows}
+                        science_target_name={target.target_name ?? target._id}
+                    />
+                </Stack>
             </Stack>
         </Stack>
     )

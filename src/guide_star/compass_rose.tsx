@@ -4,9 +4,10 @@ interface CompassRoseProps {
   width: number;
   height: number;
   fovAngle?: number;
+  invertImage?: boolean;
 }
 
-export const CompassRose: React.FC<CompassRoseProps> = ({ width, height, fovAngle }) => {
+export const CompassRose: React.FC<CompassRoseProps> = ({ width, height, fovAngle, invertImage }) => {
   return (
     <svg
       width={width}
@@ -26,7 +27,7 @@ export const CompassRose: React.FC<CompassRoseProps> = ({ width, height, fovAngl
           cy="0"
           r="30"
           fill="none"
-          stroke="white"
+          stroke={invertImage ? "white" : "black"}
           strokeWidth="1.5"
           opacity="0.7"
         />
@@ -42,16 +43,16 @@ export const CompassRose: React.FC<CompassRoseProps> = ({ width, height, fovAngl
         <line x1="0" y1="0" x2="0" y2="25" stroke="#4ECDC4" strokeWidth="1.5" opacity="0.7" />
         
         {/* East arrow (green) */}
-        <line x1="0" y1="0" x2="25" y2="0" stroke="#95E77D" strokeWidth="1.5" opacity="0.7" />
+        <line x1="0" y1="0" x2="-25" y2="0" stroke="#95E77D" strokeWidth="1.5" opacity="0.7" />
         
         {/* West arrow (yellow) */}
-        <line x1="0" y1="0" x2="-25" y2="0" stroke="#FFE66D" strokeWidth="1.5" opacity="0.7" />
+        <line x1="0" y1="0" x2="25" y2="0" stroke="#FFE66D" strokeWidth="1.5" opacity="0.7" />
         
         {/* Cardinal direction labels */}
         <text
           x="0"
           y="-35"
-          fill="white"
+          fill={invertImage ? "white" : "black"}
           fontSize="11"
           fontWeight="bold"
           textAnchor="middle"
@@ -62,7 +63,7 @@ export const CompassRose: React.FC<CompassRoseProps> = ({ width, height, fovAngl
         <text
           x="0"
           y="40"
-          fill="white"
+          fill={invertImage ? "white" : "black"}
           fontSize="11"
           textAnchor="middle"
           fontFamily="sans-serif"
@@ -73,24 +74,24 @@ export const CompassRose: React.FC<CompassRoseProps> = ({ width, height, fovAngl
         <text
           x="38"
           y="4"
-          fill="white"
-          fontSize="11"
-          textAnchor="middle"
-          fontFamily="sans-serif"
-          opacity="0.7"
-        >
-          E
-        </text>
-        <text
-          x="-38"
-          y="4"
-          fill="white"
+          fill={invertImage ? "white" : "black"}
           fontSize="11"
           textAnchor="middle"
           fontFamily="sans-serif"
           opacity="0.7"
         >
           W
+        </text>
+        <text
+          x="-38"
+          y="4"
+          fill={invertImage ? "white" : "black"}
+          fontSize="11"
+          textAnchor="middle"
+          fontFamily="sans-serif"
+          opacity="0.7"
+        >
+          E
         </text>
       </g>
     </svg>

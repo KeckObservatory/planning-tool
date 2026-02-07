@@ -240,6 +240,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
 
     const rotOptions = targetProps.rotator_mode?.enum?.map((s) => { return { label: s } })
     const wrapOptions = targetProps.telescope_wrap?.enum?.map((s) => { return { label: s } })
+    const lgsOptions = targetProps.lgs.enum?.map((s) => { return { label: s } })
 
     const titleContent = (
         <Stack direction='row' spacing={2}>
@@ -531,6 +532,17 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 value={target.equinox}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('equinox', event.target.value)}
+                            />
+                        </Tooltip>
+                        <Tooltip title={input_label('lgs', true)}>
+                            <Autocomplete
+                                disablePortal
+                                id="lgs"
+                                value={target.lgs? { label: target.lgs } : { label: ''}}
+                                onChange={(_, value) => handleTextChange('lgs', value?.label)}
+                                options={lgsOptions ?? []}
+                                sx={{ width: 125 }}
+                                renderInput={(params) => <TextField {...params} label={input_label('lgs')} />}
                             />
                         </Tooltip>
                     </Stack>

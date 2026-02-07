@@ -54,10 +54,14 @@
             "not_editable_by_user": false
         },
         "lgs": {
-            "type":  ["number", "string"],
-            "description": "Is LGS target",
+            "type":  "string",
+            "description": "LGS=1, LGS=0 for NGS, select None if neither.",
             "short_description": "LGS",
-            "pattern": "^[10]$"
+            "enum": [
+                "None",
+                "1",
+                "0"
+            ]
         },
         "v_mag": {
             "type":  ["number", "string"],
