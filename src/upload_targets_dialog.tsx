@@ -241,8 +241,12 @@ const split_at = (index: number, str: string) => {
 
 const parse_txt = (contents: string, obsid: number) => {
     let tgts = [] as UploadedTarget[]
+    let commentLines: string[] = []
     contents.split(/\r\n|\n/).forEach((row) => {
-        if (row.startsWith('#')) return //skip comments
+        if (row.startsWith('#')) {
+            commentLines.push(row)
+            return //skip comments
+        }
         if (row.trim() === '' || !row) return //whitespace rows are ignored
         const [target_name, tail] = split_at(TARGET_NAME_LENGTH_PADDED, row)
         let [rah, ram, ras, dech, decm, decs, equinox, ...opts] = tail.trimStart().replace(/\s\s+/g, ' ').split(' ')
@@ -264,6 +268,11 @@ const parse_txt = (contents: string, obsid: number) => {
         if (inlineComment > 0 && opts.length > 0) {
             opts = opts.slice(0, inlineComment)
             comment = opts.slice(inlineComment).join(' ')
+        }
+        // if there are comment lines above the target, add them to the comment field as well
+        if (commentLines.length > 0) {
+            comment = commentLines.join('\n') + '\n' + comment
+            commentLines = [] // reset comment lines after adding them to the target
         }
         opts = opts.find((opt) => opt.startsWith('#')) ? opts.slice(0, opts.findIndex((opt) => opt.startsWith('#'))) : opts
         let tgt: UploadedTarget = {
