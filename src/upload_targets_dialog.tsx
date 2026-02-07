@@ -111,6 +111,7 @@ let starlistToKeyMapping = {
     'wrap': 'telescope_wrap',
     'dra': 'd_ra',
     'ddec': 'd_dec',
+    'lgs': 'lgs'
 }
 
 const parse_json = (contents: string) => {
