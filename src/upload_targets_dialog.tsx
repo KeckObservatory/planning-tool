@@ -265,11 +265,11 @@ const parse_txt = (contents: string, obsid: number) => {
         }
         // ignore anything after # in the row
         //inline comments are added to comments field
-        const inlineComment = opts.findIndex((opt) => opt.startsWith('#'))
-        if (inlineComment > 0 && opts.length > 0) {
-            opts = opts.slice(0, inlineComment)
-            const comment = opts.slice(inlineComment).join(' ').replace('#', '').trim()
-            console.log('inline comment', inlineComment, comment)
+        const inlineCommentIdx = opts.findIndex((opt) => opt.startsWith('#'))
+        if (inlineCommentIdx > 0 && opts.length > 0) {
+            const comment = opts.slice(inlineCommentIdx).join(' ').replace('#', '').trim()
+            opts = opts.slice(0, inlineCommentIdx)
+            console.log('inline comment', inlineCommentIdx, comment)
             commentLines.push(comment) // add inline comment to comment lines so it gets added to the comment field
         }
         // if there are comment lines above the target, add them to the comment field as well
