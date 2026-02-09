@@ -269,7 +269,6 @@ const parse_txt = (contents: string, obsid: number) => {
         if (inlineCommentIdx > 0 && opts.length > 0) {
             const comment = opts.slice(inlineCommentIdx).join(' ').replace('#', '').trim()
             opts = opts.slice(0, inlineCommentIdx)
-            console.log('inline comment', inlineCommentIdx, comment)
             commentLines.push(comment) // add inline comment to comment lines so it gets added to the comment field
         }
         // if there are comment lines above the target, add them to the comment field as well
@@ -283,7 +282,7 @@ const parse_txt = (contents: string, obsid: number) => {
                 const tags = tagLine.split(':')[1].split(',').map((tag) => tag.trim())
                 opts.push(`tags=${tags.join(',')}`)
                 comment = comment.replace(tagLine, '') // remove the tag line from the comment
-                comment = comment.replace('#', '').trim() // remove # from comment
+                comment = comment.replaceAll('#', '').trim() // remove # from comment
             }
             commentLines = [] // reset comment lines after adding them to the target
         }
