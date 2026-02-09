@@ -283,6 +283,7 @@ const parse_txt = (contents: string, obsid: number) => {
                 const tags = tagLine.split(':')[1].split(',').map((tag) => tag.trim())
                 opts.push(`tags=${tags.join(',')}`)
                 comment = comment.replace(tagLine, '') // remove the tag line from the comment
+                comment = comment.replace('#', '').trim() // remove # from comment
             }
             commentLines = [] // reset comment lines after adding them to the target
         }
