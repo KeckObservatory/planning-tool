@@ -70,7 +70,7 @@ export const raDecFormat = (input: string) => {
     } else if (size < 7) {
         input = input.substring(0, 2) + ':' + input.substring(2, 4) + ':' + input.substring(4, 6) + '.';
     } else {
-        input = input.substring(0, 2) + ':' + input.substring(2, 4) + ':' + input.substring(4, 6) + '.' + input.substring(6);
+        input = input.substring(0, 2) + ':' + input.substring(2, 4) + ':' + input.substring(4, 6) + '.' + input.substring(6, 10);
     }
     return sign + input;
 }

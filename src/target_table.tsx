@@ -20,6 +20,7 @@ import {
   GridValueSetter,
   GridCellEditStopParams,
   GridRowModel,
+  GridValueFormatter,
 } from '@mui/x-data-grid';
 import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
@@ -43,6 +44,11 @@ export const convert_schema_to_columns = (schema: JSONSchemaType<Target | Catalo
       if (value && valueProps.type === 'array') { //convert array to string for display
         value = Array.isArray(value) ? (value as string[]).join(',') : value as string
       }
+      if (value && key === 'ra' || key === 'dec') { //format ra/dec for display
+        console.log('formatting', key, value)
+        value = format_edit_entry(key, value as string, true)
+        console.log('formatted value', value)
+      }
       return value
     }
 
@@ -53,6 +59,13 @@ export const convert_schema_to_columns = (schema: JSONSchemaType<Target | Catalo
       }
       tgt = { ...tgt, [key]: value }
       return tgt
+    }
+
+    const valueFormatter: GridValueFormatter = (value) => {
+      if ((valueProps.type === 'ra' || valueProps.type === 'dec') && typeof value === 'string') {
+        return format_edit_entry(key, value)
+      }
+      return value
     }
 
     let type = valueProps.type === 'array' ? 'string' : valueProps.type
@@ -66,6 +79,7 @@ export const convert_schema_to_columns = (schema: JSONSchemaType<Target | Catalo
       field: key,
       valueParser,
       valueSetter,
+      valueFormatter,
       description: valueProps.description,
       type: valueProps.type === 'array' ? 'string' : valueProps.type, //array cells are cast as string
       headerName: valueProps.short_description ?? valueProps.description,
