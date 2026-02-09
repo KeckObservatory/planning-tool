@@ -461,6 +461,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             titleContent={dialogTitle}
             children={dialogContent}
             maxWidth="xl"
+            minWidth={1600}
         />
     )
 }

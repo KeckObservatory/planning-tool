@@ -22,6 +22,8 @@ export const config = {
         "pm_ra",
         "pm_dec",
         "semids",
+        "rotator_pa",
+        "comment",
         "tags"
     ],
     "csv_order": [
