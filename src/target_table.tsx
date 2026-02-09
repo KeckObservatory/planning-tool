@@ -61,9 +61,10 @@ export const convert_schema_to_columns = (schema: JSONSchemaType<Target | Catalo
       return tgt
     }
 
-    const valueFormatter: GridValueFormatter = (value) => {
-      if ((valueProps.type === 'ra' || valueProps.type === 'dec') && typeof value === 'string') {
-        return format_edit_entry(key, value)
+    const valueFormatter: GridValueFormatter = (value, tgt, col) => {
+      if ((key === 'ra' || key === 'dec') && typeof value === 'string') {
+        const formattedValue = format_edit_entry(key, value)
+        return formattedValue
       }
       return value
     }
