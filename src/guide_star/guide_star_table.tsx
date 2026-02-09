@@ -32,6 +32,7 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
         newTarget = {
             ...newTarget,
             ...guidestar, 
+            equinox: String(guidestar.equinox) ?? '2000',
             tags: [...(newTarget.tags ?? []), 'guide_star for ' + (science_target_name ?? '')],
         }
         const resp = await submit_target([newTarget])
