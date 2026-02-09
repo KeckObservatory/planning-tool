@@ -45,7 +45,18 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
         console.log("Added guide star for target:", resp.targets[0])
         snackbarContext.setSnackbarOpen(true);
         setRows && setRows((oldRows) => {
-            return [resp.targets[0], ...oldRows]
+            //find index of target with same name as science target and insert the new guide star underneath it,
+            //  if it exists. Otherwise add the guide star to the top of the table.
+            const index = oldRows.findIndex(row => row.target_name === science_target_name);
+            let newRows = [...oldRows];
+            if (index !== -1) {
+                newRows.splice(index + 1, 0, resp.targets[0]);
+                return newRows;
+            }
+            else {
+                newRows.unshift(resp.targets[0]);
+            }
+            return newRows;
         });
     }
 
