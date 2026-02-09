@@ -358,7 +358,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     setDome={setDome}
                 />
             </Stack>
-            <Stack direction='row' spacing={2} sx={{ marginTop: '16px' }}>
+            <Stack direction='row' justifyContent={'center'} spacing={2} sx={{ marginTop: '16px' }}>
                 <Stack direction='column' sx={{ position: 'relative', display: 'inline-block' }}>
                     {imageLoading && (
                         <Typography
@@ -422,7 +422,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         />)
                     }
                 </Stack>
-                <Stack direction='column' sx={{ position: 'relative', display: 'inline-block' }}>
+                <Stack direction='column' justifyContent='center' sx={{ position: 'relative', display: 'inline-block' }}>
                     {catalogLoading && (
                         <Typography
                             sx={{
