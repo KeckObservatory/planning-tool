@@ -39,7 +39,7 @@ function LinearProgressWithLabel(props: LinearProgressProps &
 ) {
 
     const [targetName, setTargetName] = React.useState('')
-    const [useSimbad, setUseSimbad] = React.useState(true)
+    const [useSimbad, setUseSimbad] = React.useState(false)
     const [label, setLabel] = React.useState('Create Targets')
     const context = useStateContext()
 
