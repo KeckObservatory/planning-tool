@@ -142,6 +142,16 @@ interface TargetTableProps {
   targets: Target[];
 }
 
+const get_unique_tags= (rows: Target[]): string[] => {
+  const tagsSet = new Set<string>();
+  rows.forEach(row => {
+    if (row.tags && Array.isArray(row.tags)) {
+      row.tags.forEach(tag => tagsSet.add(tag));
+    }
+  });
+  return Array.from(tagsSet).sort();
+};
+
 export default function TargetTable(props: TargetTableProps) {
   const { targets } = props
   const context = useStateContext()
@@ -149,6 +159,7 @@ export default function TargetTable(props: TargetTableProps) {
   const [rows, setRows] = React.useState(targets as Target[]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
+  const [selectedTagFilter, setSelectedTagFilter] = React.useState<string | null>(null);
   const cfg = context.config
   let columns = convert_schema_to_columns(target_schema as any); //TODO: fix type issue
   const sortOrder = cfg.default_table_columns
@@ -356,6 +367,11 @@ export default function TargetTable(props: TargetTableProps) {
     return rows.find((tgt) => tgt._id === id)
   }).filter((tgt) => tgt !== undefined) as Target[]
 
+  const uniqueTags = get_unique_tags(rows);
+  
+  const filteredRows = selectedTagFilter
+    ? rows.filter(row => row.tags && row.tags.includes(selectedTagFilter))
+    : rows;
 
   return (
     <RowsContext.Provider value={{ rows: rows, setRows: setRows }}>
@@ -378,7 +394,7 @@ export default function TargetTable(props: TargetTableProps) {
             processRowUpdate={processRowUpdate}
             autosizeOptions={autosizeOptions}
             checkboxSelection
-            rows={rows ?? []}
+            rows={filteredRows ?? []}
             columns={columns}
             rowModesModel={rowModesModel}
             onRowModesModelChange={handleRowModesModelChange}
@@ -400,7 +416,10 @@ export default function TargetTable(props: TargetTableProps) {
                 setRowModesModel,
                 obsid: context.obsid, //TODO: allow admin to edit obsid
                 submit_one_target,
-                selectedTargets
+                selectedTargets,
+                uniqueTags,
+                selectedTagFilter,
+                setSelectedTagFilter
               } as EditToolbarProps,
             }}
             initialState={{

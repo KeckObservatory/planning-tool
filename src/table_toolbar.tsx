@@ -15,7 +15,7 @@ import { v4 as randomId } from 'uuid';
 import MenuItem from '@mui/material/MenuItem';
 import Button, { ButtonProps } from '@mui/material/Button';
 import { Target, useSnackbarContext } from './App.tsx';
-import { Stack } from '@mui/material';
+import { Stack, Autocomplete, TextField } from '@mui/material';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import DeleteDialogButton from './delete_rows_dialog.tsx';
 import { StarListExportDirMenu } from './starlist_export_to_dir.tsx';
@@ -177,10 +177,13 @@ export interface EditToolbarProps extends Partial<GridToolbarProps & ToolbarProp
   processRowUpdate: (newRow: GridRowModel<Target>) => Promise<GridRowModel<Target>>;
   submit_one_target: Function
   selectedTargets: Target[]
+  uniqueTags: string[];
+  selectedTagFilter: string | null;
+  setSelectedTagFilter: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export function EditToolbar(props: EditToolbarProps) {
-  const { rows, setRows, processRowUpdate, selectedTargets, submit_one_target } = props;
+  const { rows, setRows, processRowUpdate, selectedTargets, submit_one_target, uniqueTags, selectedTagFilter, setSelectedTagFilter } = props;
 
   const snackbarContext = useSnackbarContext()
 
@@ -224,6 +227,14 @@ export function EditToolbar(props: EditToolbarProps) {
         <TargetWizardButton />
         <TagDialogButton targets={props.selectedTargets} />
         <SemidDialogButton targets={props.selectedTargets} />
+        <Autocomplete
+          disablePortal
+          options={uniqueTags}
+          value={selectedTagFilter}
+          onChange={(_, value) => setSelectedTagFilter(value)}
+          sx={{ width: 200 }}
+          renderInput={(params) => <TextField {...params} label="Filter by Tag" />}
+        />
       </Stack>
       <Stack justifyContent={'right'} direction="row" spacing={1}>
         <SemidSelect />
