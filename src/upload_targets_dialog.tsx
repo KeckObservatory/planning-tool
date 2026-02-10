@@ -16,8 +16,6 @@ interface Props {
 }
 
 interface UploadProps extends Props {
-    label: string
-    setLabel?: Function,
     setOpen?: Function
 }
 
@@ -332,6 +330,7 @@ export function UploadComponent(props: UploadProps) {
     const snackbarContext = useSnackbarContext()
 
     const [starlistNames, setStarlistNames] = React.useState<string[]>([])
+    const [label, setLabel] = React.useState("Upload Targets");
 
     React.useEffect(() => {
         const fetchStarlistNames = async () => {
@@ -394,17 +393,16 @@ export function UploadComponent(props: UploadProps) {
                 }
         }
         console.log('uploaded tgts', uploadedTargets)
-        props.setOpen && props.setOpen(false)
         const fmtTgts = format_targets(uploadedTargets, targetProps)
         const txt = `${ext === 'starlisttxt' ? 'Starlist: ' : 'Local File: '}${filename} Uploaded. (${fmtTgts.length} targets)`
-        props.setLabel && props.setLabel(txt)
+        setLabel && setLabel(txt)
         props.setTargets(fmtTgts)
     };
 
     const localFileLoad = (evt: React.ChangeEvent<HTMLInputElement>) => {
         let file: File = new File([], 'empty')
         evt.target?.files && (file = evt.target?.files[0])
-        props.setLabel && props.setLabel(`${file.name} Uploaded`)
+        setLabel && setLabel(`${file.name} Uploaded`)
         const ext = file.name.split('.').pop()
         const fileReader = new FileReader()
         fileReader.readAsText(file, "UTF-8");
@@ -460,7 +458,7 @@ export function UploadComponent(props: UploadProps) {
                 </Menu>
             </Stack>
             <Typography variant="body2" color="text.secondary">
-                {props.label}
+                {label}
             </Typography>
         </Stack>
     )
@@ -493,10 +491,9 @@ export default function UploadDialog(props: Props) {
 
     const dialogActions = (
         <UploadComponent
-            label={label}
-            setLabel={setLabel}
             setOpen={setOpen}
-            setTargets={props.setTargets} />
+            setTargets={props.setTargets} 
+        />
     )
 
     return (

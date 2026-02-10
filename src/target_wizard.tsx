@@ -1,10 +1,6 @@
 import * as React from 'react';
 import UploadIcon from '@mui/icons-material/Upload';
 import Box from '@mui/material/Box';
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import StepContent from '@mui/material/StepContent';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Dialog from '@mui/material/Dialog';
@@ -24,17 +20,13 @@ import { submit_target } from './api/api_root.tsx';
 import { FormControlLabel, FormGroup, Switch } from '@mui/material';
 
 
-interface Props {
-    setOpen: Function
-    open: boolean
-}
 
-
-function LinearProgressWithLabel(props: LinearProgressProps &
+function TargetSubmitter(props: LinearProgressProps &
 {
     targets: Target[]
     setTargets: Function,
-    open: boolean
+    open: boolean,
+    setOpen: Function
 }
 ) {
 
@@ -42,6 +34,9 @@ function LinearProgressWithLabel(props: LinearProgressProps &
     const [useSimbad, setUseSimbad] = React.useState(false)
     const [label, setLabel] = React.useState('Create Targets')
     const context = useStateContext()
+
+    const RowsContext = useRowsContext()
+    const snackbarContext = useSnackbarContext()
 
     const { targets, setTargets, open } = props
     const [progress, setProgress] = React.useState(0)
@@ -51,10 +46,10 @@ function LinearProgressWithLabel(props: LinearProgressProps &
         for (let idx = 0; idx < targets.length; idx++) {
             let tgt = targets[idx]
             const tgtName = tgt.target_name as string
-            setTargetName(`on row ${idx+1} target: ${tgtName}`)
+            setTargetName(`on row ${idx + 1} target: ${tgtName}`)
             if (!tgtName) continue
             if (!open) break
-            
+
             const simbadData = useSimbad ? await get_simbad_data(tgtName) ?? {} : {}
             tgt = { ...simbadData, ...tgt, obsid: context.obsid } as Target
             tgts.push(tgt)
@@ -65,16 +60,35 @@ function LinearProgressWithLabel(props: LinearProgressProps &
         setTargets(tgts)
         console.log('tgts', tgts)
         setLabel('Targets Created')
+        save_targets()
     }
     const onSimbadSwitchChange = (event: React.SyntheticEvent<Element, Event>) => {
         const value = (event.target as HTMLInputElement).checked
         setUseSimbad(value)
     }
+
+    const save_targets = async () => {
+        console.log('saving targets')
+        const tgts = targets.map((tgt) => {
+            return { ...tgt, _id: randomId(), obsid: context.obsid } as Target
+        })
+
+        const resp = await submit_target(tgts)
+        if (resp.errors && resp.errors.length > 0) {
+            console.error('errors', resp.errors)
+            snackbarContext.setSnackbarMessage({ severity: 'error', message: `Error saving targets ${resp.errors}` })
+            snackbarContext.setSnackbarOpen(true);
+        }
+
+        RowsContext.setRows((curTgts) => [...tgts, ...curTgts])
+        props.setOpen(false)
+    }
+
     return (
         <>
-            <Tooltip 
-            title={'Simbad is used to fill in missing target data for a given name (I.E. M31)'}
-            placement="right"
+            <Tooltip
+                title={'Simbad is used to fill in missing target data for a given name (I.E. M31)'}
+                placement="right"
             >
                 <FormGroup>
                     <FormControlLabel
@@ -104,132 +118,6 @@ function LinearProgressWithLabel(props: LinearProgressProps &
         </>
     );
 }
-
-
-const TargetStepper = (props: Props) => {
-
-    const [activeStep, setActiveStep] = React.useState(0);
-    const [label, setLabel] = React.useState("Load Target Names");
-    const [targets, setTargets] = React.useState([] as Target[])
-    const [canContinue, setCanContinue] = React.useState(false)
-    const [saveMessage, setSaveMessage] = React.useState('All steps completed - Targets are ready to be saved')
-    const RowsContext = useRowsContext()
-    const context = useStateContext()
-    const snackbarContext = useSnackbarContext()
-
-    React.useEffect(() => {
-        if (activeStep === 1) {
-            setSaveMessage('All steps completed - Targets are ready to be saved')
-        }
-    }, [targets, activeStep])
-
-    const save_targets = async () => {
-        console.log('saving targets')
-        const tgts = targets.map((tgt) => {
-            return { ...tgt, _id: randomId(), obsid: context.obsid } as Target
-        })
-
-        const resp = await submit_target(tgts)
-        if (resp.errors && resp.errors.length > 0) {
-            console.error('errors', resp.errors)
-            snackbarContext.setSnackbarMessage({ severity: 'error', message: `Error saving targets ${resp.errors}` })
-            snackbarContext.setSnackbarOpen(true);
-        }
-
-        RowsContext.setRows((curTgts) => [...tgts, ...curTgts])
-        props.setOpen(false)
-    }
-
-    const setTargetsAndContinue = (targets: Target[]) => {
-        setTargets(targets)
-        setCanContinue(true)
-    }
-
-    const stepComponents = [
-        {
-            label: 'Select File',
-            component: <UploadComponent
-                setLabel={setLabel}
-                label={label}
-                setTargets={setTargetsAndContinue} />
-        },
-        {
-            label: 'Create Targets',
-            component: <LinearProgressWithLabel
-                targets={targets}
-                setTargets={setTargetsAndContinue}
-                open={props.open} />
-        },
-    ]
-
-    const handleNext = () => {
-        setCanContinue(false)
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    };
-
-    const handleBack = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep - 1);
-    };
-
-    return (
-        <Box sx={{ maxWidth: 1200, minWidth: 600 }}>
-            <Stepper activeStep={activeStep} orientation="vertical">
-                {stepComponents.map((step, index) => (
-                    <Step key={step.label}>
-                        <StepLabel
-                            optional={
-                                index === 2 ? (
-                                    <Typography variant="caption">Last step</Typography>
-                                ) : null
-                            }
-                        >
-                            {step.label}
-                        </StepLabel>
-                        <StepContent>
-                            <Box sx={{ mb: 2 }}>
-                                <Stack>
-                                    {step.component}
-                                    <>
-                                        <Button
-                                            disabled={!canContinue}
-                                            variant="contained"
-                                            onClick={handleNext}
-                                            sx={{ mt: 1, mr: 1 }}
-                                        >
-                                            {index === stepComponents.length - 1 ? 'Finish' : 'Continue'}
-                                        </Button>
-                                        <Button
-                                            disabled={index === 0}
-                                            onClick={handleBack}
-                                            sx={{ mt: 1, mr: 1 }}
-                                        >
-                                            Back
-                                        </Button>
-                                    </>
-                                </Stack>
-                            </Box>
-                        </StepContent>
-                    </Step>
-                ))}
-            </Stepper>
-            {activeStep === stepComponents.length && (
-                <Paper square elevation={0} sx={{ p: 3 }}>
-                    <Typography>{saveMessage}</Typography>
-                    <Button onClick={save_targets} sx={{ mt: 1, mr: 1 }}>
-                        Save Targets
-                    </Button>
-                    <Button
-                        onClick={handleBack}
-                        sx={{ mt: 1, mr: 1 }}
-                    >
-                        Back
-                    </Button>
-                </Paper>
-            )}
-        </Box>
-    );
-}
-
 interface DialogProps {
     open: boolean
     onClose: Function
@@ -239,6 +127,7 @@ interface DialogProps {
 export const TargetWizardDialog = (props: DialogProps) => {
 
     const { onClose, open, setOpen } = props;
+    const [targets, setTargets] = React.useState([] as Target[])
 
     const handleClose = () => {
         onClose();
@@ -247,7 +136,16 @@ export const TargetWizardDialog = (props: DialogProps) => {
     return (
         <Dialog onClose={handleClose} open={open}>
             <DialogTitle>Target Wizard</DialogTitle>
-            <TargetStepper open={open} setOpen={setOpen} />
+            <Stack direction='column' spacing={2} padding={2}>
+                <UploadComponent
+                    setTargets={setTargets}
+                />
+                <TargetSubmitter
+                    targets={targets}
+                    setTargets={setTargets}
+                    setOpen={props.setOpen}
+                    open={props.open} />
+            </Stack>
         </Dialog>
     )
 }

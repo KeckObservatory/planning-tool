@@ -254,7 +254,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
             >
                 Edit Target
             </Typography>
-            <CatalogButton target={target} label={true} setTarget={handleCatalogChange} hasCatalog={hasCatalog} />
         </Stack>
     )
 
@@ -276,6 +275,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
             >
                 <Box>
                     <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
+                        <CatalogButton target={target} label={true} setTarget={handleCatalogChange} hasCatalog={hasCatalog} />
                         <Tooltip title={input_label('target_name', true)}>
                             <TextField
                                 label={input_label('target_name')}
@@ -539,7 +539,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <Autocomplete
                                 disablePortal
                                 id="lgs"
-                                value={target.lgs? { label: target.lgs } : { label: ''}}
+                                value={target.lgs ? { label: target.lgs } : { label: '' }}
                                 onChange={(_, value) => handleTextChange('lgs', value?.label)}
                                 options={lgsOptions ?? []}
                                 sx={{ width: 125 }}
