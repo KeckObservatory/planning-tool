@@ -160,7 +160,7 @@ export const TargetWizardButton = () => {
         setOpen(false);
     };
     return (
-        <div>
+        <>
             <Tooltip title="Upload Targets from .json files or in starlist directory">
                 <Button id={'upload-targets'} onClick={handleClickOpen} startIcon={<UploadIcon />}>
                     Upload Targets
@@ -171,6 +171,6 @@ export const TargetWizardButton = () => {
                 setOpen={setOpen}
                 onClose={handleClose}
             />
-        </div>
+        </>
     )
 }
