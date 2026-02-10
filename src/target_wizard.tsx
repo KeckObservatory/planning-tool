@@ -1,7 +1,6 @@
 import * as React from 'react';
 import UploadIcon from '@mui/icons-material/Upload';
 import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -143,8 +142,8 @@ export const TargetWizardDialog = (props: DialogProps) => {
                 <TargetSubmitter
                     targets={targets}
                     setTargets={setTargets}
-                    setOpen={props.setOpen}
-                    open={props.open} />
+                    setOpen={setOpen}
+                    open={open} />
             </Stack>
         </Dialog>
     )

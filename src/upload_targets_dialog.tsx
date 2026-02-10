@@ -466,7 +466,6 @@ export function UploadComponent(props: UploadProps) {
 
 export default function UploadDialog(props: Props) {
     const [open, setOpen] = React.useState(false);
-    const [label, setLabel] = React.useState("Upload Targets");
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -500,7 +499,7 @@ export default function UploadDialog(props: Props) {
         <>
             <Tooltip title="Upload Targets from .json or .txt file">
                 <Button onClick={handleClickOpen} startIcon={<UploadIcon />}>
-                    {label}
+                    {'Set Targets'}
                 </Button>
             </Tooltip>
             <DialogComponent
