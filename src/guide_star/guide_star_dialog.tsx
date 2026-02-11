@@ -297,11 +297,6 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const centerRa = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
     const centerDec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
 
-    const onMagRangeChange = (newValue: string[]) => {
-        setMagRange(newValue)
-        //query catalog again with new mag range
-    }
-
     const dialogContent = (
         <Stack
             sx={{
