@@ -18,6 +18,7 @@ interface AddGuideStarButtonProps {
     guidestar: Partial<Target>;
     setRows?: React.Dispatch<React.SetStateAction<Target[]>>;
     science_target_name?: string;
+    useLaser?: boolean;
 }
 
 const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
@@ -34,6 +35,9 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
             ...guidestar, 
             equinox: String(guidestar.equinox) ?? '2000',
             tags: [...(newTarget.tags ?? []), 'guide_star for ' + (science_target_name ?? '')],
+        }
+        if (props.useLaser) {
+            newTarget.lgs = '1'
         }
         const resp = await submit_target([newTarget])
         if (resp.errors.length > 0) {
@@ -75,6 +79,7 @@ interface Props {
     science_target_name?: string;
     selectedGuideStarName?: string;
     setSelectedGuideStarName?: (name: string) => void;
+    useLaser?: boolean;
 }
 
 export default function GuideStarTable(props: Props) {
@@ -119,6 +124,7 @@ export default function GuideStarTable(props: Props) {
                 guidestar={row}
                 science_target_name={science_target_name}
                 setRows={props.setRows}
+                useLaser={props.useLaser}
             />
         ];
     }

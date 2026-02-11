@@ -130,7 +130,6 @@ export const NGSViewer = (props: Props) => {
     // Handle both FeatureCollection format and direct array format
     const features = (props.trickMap.features || props.trickMap) as any[];
     if (!features || features.length === 0) {
-      console.log('No features found in trick map');
       setTrickMapContours([]);
       return;
     }
@@ -163,7 +162,6 @@ export const NGSViewer = (props: Props) => {
     // We'll add the contours to the FOV SVG layer
     const fovSvg = fovSvgRef.current;
     if (!fovSvg) {
-      console.log('FOV SVG ref is null');
       return;
     }
 
@@ -171,11 +169,9 @@ export const NGSViewer = (props: Props) => {
     d3.select(fovSvg).selectAll('line.laser-contour').remove();
     
     if (!laserContours || laserContours.length === 0) {
-      console.log('No laser contours to draw');
       return;
     }
 
-    console.log('Drawing new contours');
 
     // Draw each contour
     laserContours.forEach((contour) => {
@@ -202,7 +198,6 @@ export const NGSViewer = (props: Props) => {
     // We'll add the contours to the FOV SVG layer
     const fovSvg = fovSvgRef.current;
     if (!fovSvg) {
-      console.log('FOV SVG ref is null');
       return;
     }
 
@@ -210,7 +205,6 @@ export const NGSViewer = (props: Props) => {
     d3.select(fovSvg).selectAll('line.trick-map-contour').remove();
     
     if (!trickMapContours || trickMapContours.length === 0) {
-      console.log('No trick map contours to draw');
       return;
     }
 
