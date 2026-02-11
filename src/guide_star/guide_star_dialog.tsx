@@ -18,6 +18,7 @@ import { mock_catalog_targets } from './mock_catalog_targets';
 import { NGSViewer } from './NGSViewer';
 import AladinViewer from '../aladin/aladin';
 import { MagRangeSlider } from './mag_range_slider';
+import { MAG_RANGE, WINDOW_SIZE } from '../two-d-view/constants';
 
 export interface CatalogTarget {
     name: string;
@@ -113,7 +114,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const { targets, open, setRows } = props
     const [guideStarName, setGuideStarName] = useState<string>('')
     const [instrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
-    const [magRange, setMagRange] = useQueryParam('mag_range', withDefault(ArrayParam, ['1', '20']))
+    const [magRange, setMagRange] = useQueryParam('mag_range', withDefault(ArrayParam, MAG_RANGE.map(String)))
     const [fovs, setFOVs] = React.useState<string[]>([])
     const [pointingOrigins, setPointingOrigins] = React.useState<POPointingOriginCollection | undefined>(undefined)
     const [contours, setContours] = React.useState<LaserContours>([])
@@ -127,7 +128,6 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'Keck 2' as Dome))
 
-    const imgSize = 0.5 //in degrees
     let initTarget = targets.at(0) ?? {} as Target
     const [target, setTarget] = useState<Target>(initTarget)
     const [guidestars, setGuideStars] = useState<Partial<Target>[]>([])
@@ -145,7 +145,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     useEffect(() => {
         console.log('fetching catalogs and shapes')
 
-        const fun = async () => {
+        const fetch_and_set_catalogs = async () => {
             const cats = await get_catalogs()
             if (cats) {
                 setCatalogs(cats)
@@ -158,7 +158,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             }
         }
 
-        const set_shapes_fun = async () => {
+        const fetch_and_set_shapes = async () => {
             const featureCollection = await get_shapes('fov')
             const pos = await get_shapes('pointing_origins') as POPointingOriginCollection
             const cntrs = showLaser ? await get_shapes('laser_contours') : []
@@ -169,25 +169,23 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
             setFOVs(newFovs)
             setPointingOrigins(pos)
-            console.log('cntrs', cntrs)
-            console.log('trkMap', trkMap)
             setContours(cntrs as unknown as LaserContours)
             setTrickMap(trkMap)
         }
-        fun()
-        set_shapes_fun()
+
+        fetch_and_set_catalogs()
+        fetch_and_set_shapes()
+
     }, [])
 
     useEffect(() => {
-        const set_shapes_fun = async () => {
+        const fetch_and_set_laser_contours = async () => {
             const cntrs = showLaser ? await get_shapes('laser_contours') : []
             const trkMap = showTrickMap ? await get_shapes('trick_map') : undefined
-            console.log('cntrs', cntrs)
-            console.log('trkMap', trkMap)
             setContours(cntrs as unknown as LaserContours)
             setTrickMap(trkMap)
         }
-        set_shapes_fun()
+        fetch_and_set_laser_contours()
     }, [showLaser, showTrickMap])
 
     useEffect(() => {
@@ -199,6 +197,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     useEffect(() => {
         console.log('catalog or target changed')
+
         const fun = async () => {
             const ra = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
             const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
@@ -214,13 +213,14 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             }
             else if (catalog) {
                 setCatalogLoading(true)
-                const mr = Array.isArray(magRange) && magRange.length >= 2 ? [String(magRange[0]), String(magRange[1])] as [string, string] : undefined
+                const mr = Array.isArray(magRange) && magRange.length >= 2 ?
+                    [String(magRange[0]), String(magRange[1])] as [string, string] : undefined
                 if (mr) {
                     const gs = await get_catalog_targets(
                         catalog,
                         ra,
                         dec,
-                        0.5,
+                        WINDOW_SIZE,
                         mr
                     )
                     if (gs) {
@@ -236,7 +236,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             }
             if (imageCatalog) {
                 setImageLoading(true)
-                const img = get_catalog_image(imageCatalog, ra, dec, imgSize)
+                const img = get_catalog_image(imageCatalog, ra, dec, WINDOW_SIZE)
                 console.log('img', img)
                 setImage(img)
             }
@@ -257,7 +257,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     catalog,
                     ra,
                     dec,
-                    0.5,
+                    WINDOW_SIZE,
                     mr
                 )
                 if (gs) {
@@ -436,7 +436,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             guideStars={guidestars as Target[]}
                             height={500}
                             width={500}
-                            size={imgSize} // in degrees
+                            size={WINDOW_SIZE} // in degrees
                             centerRA={centerRa} // in degrees
                             centerDec={centerDec} // in degrees
                             guideStarName={guideStarName}

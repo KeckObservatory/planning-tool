@@ -40,6 +40,10 @@ export const MOON_MARKER_LINE_WIDTH = 2 //pxl
 export const MOON_MARKER_SIZE = 2 //pxl
 export const MOON_RADIUS = .52 // degrees
 
+//GUIDE STAR TOOL
+export const MAG_RANGE = [1, 20] // mag range for guide star catalog queries
+export const WINDOW_SIZE = .5 // degrees, size of window to query for guide stars
+
 
 export const DEFAULT_OPACITY = 'FF' //Hex values appended to color
 export const NON_OBSERVABLE_OPACITY = '80' //Hex values appended to color
