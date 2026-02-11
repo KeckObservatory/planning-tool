@@ -9,15 +9,17 @@ function valuetext(value: number) {
 }
 
 interface Props {
-    range: [string, string]
+    range?: [string, string]
     setRange: (newValue: string[]) => void
 }
 
 export const MagRangeSlider = (props: Props) => {
 
-    const [value, setValue] = React.useState(props.range.map(Number))
+    const [value, setValue] = React.useState(props.range ? props.range.map(Number): MAG_RANGE.map(Number))
 
     const handleChangeCommitted = (_: Event | React.SyntheticEvent<Element, Event>, newValue: number | number[]) => {
+        const curRange = props.range?.map(Number)
+        console.log('new range committed', newValue, curRange)
         if (Array.isArray(newValue)) {
             props.setRange(newValue.map(String));
         }

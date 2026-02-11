@@ -114,7 +114,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const { targets, open, setRows } = props
     const [guideStarName, setGuideStarName] = useState<string>('')
     const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
-    const [magRange, setMagRange] = useQueryParam('mag_range', withDefault(ArrayParam, MAG_RANGE.map(String)))
+    const [magRange, setMagRange] = useQueryParam('mag_range', withDefault(ArrayParam, undefined)) //set to undefined to prevent unwanted rerenders on initial load
     const [fovs, setFOVs] = React.useState<string[]>([])
     const [pointingOrigins, setPointingOrigins] = React.useState<POPointingOriginCollection | undefined>(undefined)
     const [contours, setContours] = React.useState<LaserContours>([])
@@ -233,6 +233,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 const mr = Array.isArray(magRange) && magRange.length >= 2 ?
                     [String(magRange[0]), String(magRange[1])] as [string, string] : undefined
                 if (mr) {
+                    console.log('fetching catalog targets with mag range', mr)
                     const gs = await get_catalog_targets(
                         catalog,
                         ra,
@@ -268,6 +269,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
             const mr = Array.isArray(magRange) && magRange.length >= 2 ? [String(magRange[0]), String(magRange[1])] as [string, string] : undefined
             if (catalog && mr) {
+                console.log('mag range changed. fetching catalog targets with mag range', mr)
                 const gs = await get_catalog_targets(
                     catalog,
                     ra,
@@ -422,11 +424,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     setDome={setDome}
                 />
                 <MagRangeSlider
-                    range={
-                        Array.isArray(magRange) && magRange.length === 2 && magRange[0] !== null && magRange[1] !== null
-                            ? [String(magRange[0]), String(magRange[1])] as [string, string]
-                            : ['1', '20']
-                    }
+                    range={magRange as [string, string]}
                     setRange={setMagRange}
                 />
             </Stack>
