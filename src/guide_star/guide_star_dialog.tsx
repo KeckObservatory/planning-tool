@@ -18,7 +18,7 @@ import { mock_catalog_targets } from './mock_catalog_targets';
 import { NGSViewer } from './NGSViewer';
 // import AladinViewer from '../aladin/aladin';
 import { MagRangeSlider } from './mag_range_slider';
-import { MAG_RANGE, WINDOW_SIZE } from '../two-d-view/constants';
+import { WINDOW_SIZE } from '../two-d-view/constants';
 import { MuiChipsInput } from 'mui-chips-input';
 
 export interface CatalogTarget {
