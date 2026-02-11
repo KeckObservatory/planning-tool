@@ -157,6 +157,7 @@ export default function TargetTable(props: TargetTableProps) {
   const context = useStateContext()
   const sbcontext = useSnackbarContext();
   const [rows, setRows] = React.useState(targets as Target[]);
+  const pendingDeleteIdsRef = React.useRef<Set<string>>(new Set());
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
   const [selectedTagFilter, setSelectedTagFilter] = React.useState<string | null>(null);
@@ -206,9 +207,26 @@ export default function TargetTable(props: TargetTableProps) {
     }
   }, [rows])
 
+  const syncRowsWithTargets = React.useCallback((nextTargets: Target[]) => {
+    if (pendingDeleteIdsRef.current.size === 0) {
+      setRows(nextTargets)
+      return
+    }
+
+    const idsInTargets = new Set(nextTargets.map((tgt) => tgt._id))
+    pendingDeleteIdsRef.current.forEach((id) => {
+      if (!idsInTargets.has(id)) {
+        pendingDeleteIdsRef.current.delete(id)
+      }
+    })
+
+    const filteredTargets = nextTargets.filter((tgt) => !pendingDeleteIdsRef.current.has(tgt._id))
+    setRows(filteredTargets)
+  }, [])
+
   React.useEffect(() => { // when semid is changed
-    setRows(targets)
-  }, [targets])
+    syncRowsWithTargets(targets)
+  }, [targets, syncRowsWithTargets])
 
   const handleEditClick = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
@@ -216,10 +234,30 @@ export default function TargetTable(props: TargetTableProps) {
 
   const handleDeleteClick = async (id: GridRowId) => {
     const delRow = rows.find((row) => row._id === id);
-    console.log('deleting', id, delRow)
-    delRow && delete_target([delRow._id as string])
-    const newRows = rows.filter((row) => row._id !== id)
-    setRows(newRows);
+    if (!delRow) return
+
+    const deletedIndex = rows.findIndex((row) => row._id === id)
+    pendingDeleteIdsRef.current.add(delRow._id as string)
+    setRows((prevRows) => prevRows.filter((row) => row._id !== id));
+
+    const resp = await delete_target([delRow._id as string])
+    if (resp.status !== 'SUCCESS') {
+      pendingDeleteIdsRef.current.delete(delRow._id as string)
+      setRows((prevRows) => {
+        if (prevRows.some((row) => row._id === delRow._id)) {
+          return prevRows
+        }
+        const nextRows = [...prevRows]
+        const insertIndex = deletedIndex >= 0 ? Math.min(deletedIndex, nextRows.length) : 0
+        nextRows.splice(insertIndex, 0, delRow)
+        return nextRows
+      })
+      sbcontext.setSnackbarMessage({ severity: 'error', message: 'Error deleting target' })
+      sbcontext.setSnackbarOpen(true)
+      return
+    }
+
+    pendingDeleteIdsRef.current.delete(delRow._id as string)
   };
 
   const processRowUpdate = async (newRow: GridRowModel<Target>) => {
