@@ -147,11 +147,15 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
         const fun = async () => {
             const cats = await get_catalogs()
-            setCatalogs(cats)
-            setCatalog(cats.at(0))
+            if (cats) {
+                setCatalogs(cats)
+                setCatalog(cats.at(0))
+            }
             const getImageCat = await get_image_catalogs()
-            setImageCatalogs(getImageCat)
-            setImageCatalog(getImageCat.at(0))
+            if (getImageCat) {
+                setImageCatalogs(getImageCat)
+                setImageCatalog(getImageCat.at(0))
+            }
         }
 
         const set_shapes_fun = async () => {
