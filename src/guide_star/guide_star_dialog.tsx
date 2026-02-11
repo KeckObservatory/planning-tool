@@ -10,13 +10,14 @@ import GuideStarTable from './guide_star_table';
 import { ra_dec_to_deg } from '../catalog_button';
 import { FOVSelect } from '../two-d-view/fov_select';
 import { Dome, DomeParam, DomeSelect, get_shapes } from '../two-d-view/two_d_view';
-import { BooleanParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
+import { ArrayParam, BooleanParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
 import { get_catalog_targets, get_catalogs, get_image_catalogs, get_catalog_image } from '../api/api_root';
 import UploadDialog from '../upload_targets_dialog';
 import { LaserContours, POPointFeature, POPointingOriginCollection, POSelect } from '../two-d-view/pointing_origin_select';
 import { mock_catalog_targets } from './mock_catalog_targets';
 import { NGSViewer } from './NGSViewer';
 import AladinViewer from '../aladin/aladin';
+import { MagRangeSlider } from './mag_range_slider';
 
 export interface CatalogTarget {
     name: string;
@@ -112,15 +113,16 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const { targets, open, setRows } = props
     const [guideStarName, setGuideStarName] = useState<string>('')
     const [instrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
+    const [magRange, setMagRange] = useQueryParam('mag_range', withDefault(ArrayParam, ['1', '20']))
     const [fovs, setFOVs] = React.useState<string[]>([])
     const [pointingOrigins, setPointingOrigins] = React.useState<POPointingOriginCollection | undefined>(undefined)
     const [contours, setContours] = React.useState<LaserContours>([])
     const [trickMap, setTrickMap] = React.useState<any>(undefined)
     const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
     const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
-    const [showLaser, setShowLaser] = useQueryParam('show_laser', withDefault(BooleanParam, true)) 
-    const [showTrickMap, setShowTrickMap] = useQueryParam('show_trick_map', withDefault(BooleanParam, false)) 
-    const [invertImage, setInvertImage] = useQueryParam('invert_image', withDefault(BooleanParam, false)) 
+    const [showLaser, setShowLaser] = useQueryParam('show_laser', withDefault(BooleanParam, true))
+    const [showTrickMap, setShowTrickMap] = useQueryParam('show_trick_map', withDefault(BooleanParam, false))
+    const [invertImage, setInvertImage] = useQueryParam('invert_image', withDefault(BooleanParam, false))
     const [rotatorAngle, setRotatorAngle] = React.useState(0)
 
     const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'Keck 2' as Dome))
@@ -208,13 +210,22 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             }
             else if (catalog) {
                 setCatalogLoading(true)
-                const gs = await get_catalog_targets(catalog, ra, dec, 0.5)
-                if (gs) {
-                    const gsTgts = gs.map((star: CatalogTarget) => {
-                        const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
-                        return tgt
-                    })
-                    setGuideStars(gsTgts)
+                const mr = Array.isArray(magRange) && magRange.length >= 2 ? [String(magRange[0]), String(magRange[1])] as [string, string] : undefined
+                if (mr) {
+                    const gs = await get_catalog_targets(
+                        catalog,
+                        ra,
+                        dec,
+                        0.5,
+                        mr
+                    )
+                    if (gs) {
+                        const gsTgts = gs.map((star: CatalogTarget) => {
+                            const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
+                            return tgt
+                        })
+                        setGuideStars(gsTgts)
+                    }
                 }
                 setCatalogLoading(false)
 
@@ -229,6 +240,34 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         }
         fun()
     }, [catalog, target, imageCatalog])
+
+    useEffect(() => {
+        console.log('mag range changed', magRange)
+        const fun = async () => {
+            setCatalogLoading(true)
+            const ra = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
+            const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
+            const mr = Array.isArray(magRange) && magRange.length >= 2 ? [String(magRange[0]), String(magRange[1])] as [string, string] : undefined
+            if (catalog && mr) {
+                const gs = await get_catalog_targets(
+                    catalog,
+                    ra,
+                    dec,
+                    0.5,
+                    mr
+                )
+                if (gs) {
+                    const gsTgts = gs.map((star: CatalogTarget) => {
+                        const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
+                        return tgt
+                    })
+                    setGuideStars(gsTgts)
+                }
+                setCatalogLoading(false)
+            }
+        }
+        fun()
+    }, [magRange])
 
 
     const onTargetNameSelect = (name: string) => {
@@ -257,6 +296,11 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     console.log('telContours', telContours)
     const centerRa = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
     const centerDec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
+
+    const onMagRangeChange = (newValue: string[]) => {
+        setMagRange(newValue)
+        //query catalog again with new mag range
+    }
 
     const dialogContent = (
         <Stack
@@ -357,6 +401,14 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     dome={dome}
                     setDome={setDome}
                 />
+                <MagRangeSlider
+                    range={
+                        Array.isArray(magRange) && magRange.length === 2 && magRange[0] !== null && magRange[1] !== null
+                            ? [String(magRange[0]), String(magRange[1])] as [string, string]
+                            : ['1', '20']
+                    }
+                    setRange={setMagRange}
+                />
             </Stack>
             <Stack direction='row' justifyContent={'center'} spacing={2} sx={{ marginTop: '16px' }}>
                 <Stack direction='column' sx={{ position: 'relative', display: 'inline-block' }}>
@@ -401,7 +453,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             contours={telContours}
                             showTrickMap={showTrickMap}
                             trickMap={trickMap}
-                            />
+                        />
                     }
                     {
                         guidestars.length > 0 &&
