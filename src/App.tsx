@@ -15,7 +15,7 @@ import { get_targets, get_userinfo } from './api/api_root.tsx';
 import { SimbadTargetData } from './catalog_button.tsx';
 import { config } from './config.tsx';
 
-export type Status = "EDITED" | "CREATED"
+export type Status = "EDITED" | "CREATED" | "SAVED"
 
 export type RotatorMode = "pa" | "vertical" | "stationary"
 export type TelescopeWrap = "shortest" | "south" | "north"

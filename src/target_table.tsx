@@ -271,10 +271,10 @@ export default function TargetTable(props: TargetTableProps) {
       if (countRef.current > 0 || override) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTargetRef.current.status?.includes('EDITED')
-        if (isEdited) newTgt = await edit_target(editTargetRef.current)
-        
-	//TODO: what happens if this is disabled?
-	//processRowUpdate(editTargetRef.current) //TODO: May want to wait till save is successful
+        if (isEdited) {
+          newTgt = await edit_target(editTargetRef.current)
+          editTargetRef.current.status = "SAVED"
+        }
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
           debounced_edit_click(id)

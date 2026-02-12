@@ -188,12 +188,6 @@ export function EditToolbar(props: EditToolbarProps) {
       snackbarContext.setSnackbarOpen(true);
       return
     }
-    // TODO: verify not needed
-    //processRowUpdate(submittedTarget)
-    // setRows((oldRows) => {
-    //   const newRows = [submittedTarget, ...oldRows];
-    //   return newRows
-    // });
   };
 
   const vizTargets = selectedTargets.length > 0 ?
