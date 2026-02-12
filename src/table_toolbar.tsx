@@ -7,7 +7,6 @@ import {
   GridToolbarExportContainer,
   GridExportMenuItemProps,
   GridRowsProp,
-  GridRowModel,
   GridToolbar,
   GridToolbarProps,
   ToolbarPropsOverrides
