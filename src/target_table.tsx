@@ -153,12 +153,21 @@ export default function TargetTable(props: TargetTableProps) {
       throw new Error('error updating target')
     }
     const submittedTarget = resp.targets.at(0)
-    //update target in rows 
-    const newTargets = rows.map((tgt) => {
-      return tgt._id === submittedTarget?._id ?
-        submittedTarget : tgt
+    //either add target to rows if it's new or update existing target in rows
+    setRows((curRows) => {
+      let newRows: Target[]
+      const targetExists = curRows.some((tgt) => tgt._id === submittedTarget?._id)
+      if (targetExists) {
+        newRows = curRows.map((tgt) => {
+          return tgt._id === submittedTarget?._id ?
+            submittedTarget : tgt
+        })
+      }
+      else {
+        newRows = [submittedTarget as Target, ...curRows]
+      }
+      return newRows;
     })
-    setRows(newTargets)
     return submittedTarget
   }
 
@@ -246,11 +255,13 @@ export default function TargetTable(props: TargetTableProps) {
 
     // Update refs when state changes
     React.useEffect(() => {
+      console.log('updating refs', editTarget, count)
       editTargetRef.current = editTarget;
       countRef.current = count;
     }, [editTarget, count]);
 
     const handleRowChange = React.useCallback(async (override = false) => {
+      console.log('handle row change', editTargetRef.current, countRef.current)
       if (countRef.current > 0 || override) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTargetRef.current.status?.includes('EDITED')
@@ -272,6 +283,7 @@ export default function TargetTable(props: TargetTableProps) {
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
     const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
+      console.log('cell edit stop', params)
       setTimeout(() => { //wait for cell to update before setting editTarget
         let value = apiRef.current.getCellValue(id, params.field);
         let type = (target_schema.properties as TargetProps)[params.field as keyof PropertyProps].type

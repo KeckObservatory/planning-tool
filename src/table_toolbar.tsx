@@ -188,10 +188,11 @@ export function EditToolbar(props: EditToolbarProps) {
       return
     }
     processRowUpdate(submittedTarget)
-    setRows((oldRows) => {
-      const newRows = [submittedTarget, ...oldRows];
-      return newRows
-    });
+    // TODO: verify not needed
+    // setRows((oldRows) => {
+    //   const newRows = [submittedTarget, ...oldRows];
+    //   return newRows
+    // });
   };
 
   const vizTargets = selectedTargets.length > 0 ?
