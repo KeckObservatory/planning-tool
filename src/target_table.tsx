@@ -272,7 +272,7 @@ export default function TargetTable(props: TargetTableProps) {
       if (countRef.current > 0 || override) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTargetRef.current.status?.includes('EDITED')
-        if (isEdited) {
+        if (isEdited && !pendingSaveRef.current) {
           newTgt = await edit_target(editTargetRef.current)
           editTargetRef.current.status = "SAVED"
           pendingSaveRef.current = false
