@@ -275,8 +275,8 @@ export default function TargetTable(props: TargetTableProps) {
         if (isEdited && !pendingSaveRef.current) {
           newTgt = await edit_target(editTargetRef.current)
           editTargetRef.current.status = "SAVED"
-          pendingSaveRef.current = false
         }
+        pendingSaveRef.current = false
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
           debounced_edit_click(id)
