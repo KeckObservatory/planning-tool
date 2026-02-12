@@ -252,7 +252,7 @@ export default function TargetTable(props: TargetTableProps) {
     const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
     const editTargetRef = React.useRef<Target>(editTarget);
     const countRef = React.useRef<number>(count);
-    const pendingSaveRef = React.useRef<boolean>(false); //prevents multiple saves from being triggered at the same time
+    const pendingSaveRef = React.useRef<boolean>(false); //prevents multiple saves from happening at once
     
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
       return validate_sanitized_target(editTargetRef.current);
@@ -265,6 +265,7 @@ export default function TargetTable(props: TargetTableProps) {
       console.log('updating refs', editTarget, count)
       editTargetRef.current = editTarget;
       countRef.current = count;
+      pendingSaveRef.current = false;
     }, [editTarget, count]);
 
     const handleRowChange = React.useCallback(async (override = false) => {
@@ -273,10 +274,10 @@ export default function TargetTable(props: TargetTableProps) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTargetRef.current.status?.includes('EDITED')
         if (isEdited && !pendingSaveRef.current) {
+          pendingSaveRef.current = true
           newTgt = await edit_target(editTargetRef.current)
           editTargetRef.current.status = "SAVED"
         }
-        pendingSaveRef.current = false
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
           debounced_edit_click(id)
@@ -286,8 +287,7 @@ export default function TargetTable(props: TargetTableProps) {
 
     const debouncedHandleRowChange = useDebounceCallback(handleRowChange, 2000)
 
-    React.useEffect(() => { // when targed is edited in target edit dialog or catalog dialog
-      pendingSaveRef.current = true
+    React.useEffect(() => { // needed when targed is edited in target edit dialog or catalog dialog
       debouncedHandleRowChange()
       setCount((prev: number) => prev + 1)
     }, [editTarget])
