@@ -241,26 +241,25 @@ export default function TargetTable(props: TargetTableProps) {
   const ActionsCell = (params: GridRowParams<Target>) => {
     const { id, row } = params;
     const [editTarget, setEditTarget] = React.useState<Target>(row);
-    const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
     const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
     const editTargetRef = React.useRef<Target>(editTarget);
-    const countRef = React.useRef<number>(count);
+    const initRef = React.useRef<boolean>(false);
     const pendingSaveRef = React.useRef<boolean>(false); //prevents multiple saves from happening at once
     
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
       return validate_sanitized_target(editTargetRef.current);
-    }, [editTarget, count])
+    }, [editTarget, initRef.current])
 
     const apiRef = useGridApiContext();
 
     // Update refs when state changes
     React.useEffect(() => {
+      debouncedHandleRowChange()
       editTargetRef.current = editTarget;
-      countRef.current = count;
-    }, [editTarget, count]);
+    }, [editTarget]);
 
     const handleRowChange = React.useCallback(async (override = false) => {
-      if (countRef.current > 0 || override) {
+      if (initRef.current || override) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTargetRef.current.status?.includes('EDITED')
         if (isEdited && !pendingSaveRef.current) {
@@ -278,9 +277,8 @@ export default function TargetTable(props: TargetTableProps) {
     const debouncedHandleRowChange = useDebounceCallback(handleRowChange, 2000)
 
     React.useEffect(() => {
-      debouncedHandleRowChange()
-      setCount((prev: number) => prev + 1)
-    }, [editTarget, debouncedHandleRowChange])
+      initRef.current = true
+    }, [editTarget])
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
     const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
