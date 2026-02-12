@@ -265,7 +265,6 @@ export default function TargetTable(props: TargetTableProps) {
       console.log('updating refs', editTarget, count)
       editTargetRef.current = editTarget;
       countRef.current = count;
-      pendingSaveRef.current = false;
     }, [editTarget, count]);
 
     const handleRowChange = React.useCallback(async (override = false) => {
@@ -273,8 +272,8 @@ export default function TargetTable(props: TargetTableProps) {
       if (countRef.current > 0 || override) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTargetRef.current.status?.includes('EDITED')
-        if (isEdited && !pendingSaveRef.current) {
-          pendingSaveRef.current = true
+        if (isEdited) {
+          pendingSaveRef.current = false 
           newTgt = await edit_target(editTargetRef.current)
           editTargetRef.current.status = "SAVED"
         }
@@ -288,6 +287,7 @@ export default function TargetTable(props: TargetTableProps) {
     const debouncedHandleRowChange = useDebounceCallback(handleRowChange, 2000)
 
     React.useEffect(() => { // needed when targed is edited in target edit dialog or catalog dialog
+      if (pendingSaveRef.current) return
       debouncedHandleRowChange()
       setCount((prev: number) => prev + 1)
     }, [editTarget])
