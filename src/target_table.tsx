@@ -265,6 +265,7 @@ export default function TargetTable(props: TargetTableProps) {
       console.log('updating refs', editTarget, count)
       editTargetRef.current = editTarget;
       countRef.current = count;
+      pendingSaveRef.current = false;
     }, [editTarget, count]);
 
     const handleRowChange = React.useCallback(async (override = false) => {
@@ -273,7 +274,7 @@ export default function TargetTable(props: TargetTableProps) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTargetRef.current.status?.includes('EDITED')
         if (isEdited) {
-          pendingSaveRef.current = false 
+          pendingSaveRef.current = true 
           newTgt = await edit_target(editTargetRef.current)
           editTargetRef.current.status = "SAVED"
         }
