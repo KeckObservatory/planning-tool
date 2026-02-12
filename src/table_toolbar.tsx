@@ -173,7 +173,8 @@ export interface EditToolbarProps extends Partial<GridToolbarProps & ToolbarProp
 }
 
 export function EditToolbar(props: EditToolbarProps) {
-  const { rows, setRows, processRowUpdate, selectedTargets, submit_one_target } = props;
+  //const { rows, setRows, processRowUpdate, selectedTargets, submit_one_target } = props;
+  const { rows, setRows, selectedTargets, submit_one_target } = props;
 
   const snackbarContext = useSnackbarContext()
 
@@ -187,8 +188,8 @@ export function EditToolbar(props: EditToolbarProps) {
       snackbarContext.setSnackbarOpen(true);
       return
     }
-    processRowUpdate(submittedTarget)
     // TODO: verify not needed
+    //processRowUpdate(submittedTarget)
     // setRows((oldRows) => {
     //   const newRows = [submittedTarget, ...oldRows];
     //   return newRows

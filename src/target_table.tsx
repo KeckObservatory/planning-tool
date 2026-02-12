@@ -148,6 +148,7 @@ export default function TargetTable(props: TargetTableProps) {
   pinnedColumns.left = leftPin
 
   const submit_one_target = async (target: Target) => {
+    console.log('inside submit_one_target')
     const resp = await submit_target([target])
     if (resp.errors.length > 0) {
       throw new Error('error updating target')
@@ -173,6 +174,7 @@ export default function TargetTable(props: TargetTableProps) {
 
 
   const edit_target = async (target: Target) => {
+	  console.log('inisde edit_target')
     const resp = await submit_one_target(target)
     return resp
   }
@@ -189,10 +191,12 @@ export default function TargetTable(props: TargetTableProps) {
   }, [rows])
 
   React.useEffect(() => { // when semid is changed
+	  console.log('targets changed')
     setRows(targets)
   }, [targets])
 
   const handleEditClick = (id: GridRowId) => () => {
+	  console.log('inside handleEditClick')
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
@@ -207,11 +211,13 @@ export default function TargetTable(props: TargetTableProps) {
   const processRowUpdate = async (newRow: GridRowModel<Target>) => {
     //row is sent to DataGrid rows. Used to match row with what was edited.
     const newRows = rows.map((row) => (row._id === newRow._id ? newRow : row))
+    console.log('inside processRowUpdate')
     setRows(newRows);
     return newRow;
   };
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
+	  console.log('inside handleRowModesModelChange')
     setRowModesModel(newRowModesModel);
   };
 
@@ -266,7 +272,9 @@ export default function TargetTable(props: TargetTableProps) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTargetRef.current.status?.includes('EDITED')
         if (isEdited) newTgt = await edit_target(editTargetRef.current)
-        processRowUpdate(editTargetRef.current) //TODO: May want to wait till save is successful
+        
+	//TODO: what happens if this is disabled?
+	//processRowUpdate(editTargetRef.current) //TODO: May want to wait till save is successful
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
           debounced_edit_click(id)
