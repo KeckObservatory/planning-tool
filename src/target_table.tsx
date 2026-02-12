@@ -257,17 +257,16 @@ export default function TargetTable(props: TargetTableProps) {
     React.useEffect(() => {
       editTargetRef.current = editTarget;
       countRef.current = count;
-      pendingSaveRef.current = false; //reset pending save
     }, [editTarget, count]);
 
     const handleRowChange = React.useCallback(async (override = false) => {
       if (countRef.current > 0 || override) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTargetRef.current.status?.includes('EDITED')
-        if (isEdited && pendingSaveRef.current === false) {
-          pendingSaveRef.current = true //prevent triggering multiple saves
+        if (isEdited && !pendingSaveRef.current) {
+          pendingSaveRef.current = true
           newTgt = await edit_target(editTargetRef.current)
-          editTargetRef.current.status = "SAVED"
+          pendingSaveRef.current = false
         }
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
@@ -278,11 +277,10 @@ export default function TargetTable(props: TargetTableProps) {
 
     const debouncedHandleRowChange = useDebounceCallback(handleRowChange, 2000)
 
-    React.useEffect(() => { // needed when targed is edited in target edit dialog or catalog dialog
-      if (pendingSaveRef.current) return //prevent triggering twice when making row edits
+    React.useEffect(() => {
       debouncedHandleRowChange()
       setCount((prev: number) => prev + 1)
-    }, [editTarget])
+    }, [editTarget, debouncedHandleRowChange])
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
     const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
