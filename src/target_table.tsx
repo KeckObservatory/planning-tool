@@ -148,7 +148,6 @@ export default function TargetTable(props: TargetTableProps) {
   pinnedColumns.left = leftPin
 
   const submit_one_target = async (target: Target) => {
-    console.log('inside submit_one_target')
     const resp = await submit_target([target])
     if (resp.errors.length > 0) {
       throw new Error('error updating target')
@@ -174,7 +173,6 @@ export default function TargetTable(props: TargetTableProps) {
 
 
   const edit_target = async (target: Target) => {
-	  console.log('inisde edit_target')
     const resp = await submit_one_target(target)
     return resp
   }
@@ -191,18 +189,15 @@ export default function TargetTable(props: TargetTableProps) {
   }, [rows])
 
   React.useEffect(() => { // when semid is changed
-	  console.log('targets changed')
     setRows(targets)
   }, [targets])
 
   const handleEditClick = (id: GridRowId) => () => {
-	  console.log('inside handleEditClick')
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
   const handleDeleteClick = async (id: GridRowId) => {
     const delRow = rows.find((row) => row._id === id);
-    console.log('deleting', id, delRow)
     delRow && delete_target([delRow._id as string])
     const newRows = rows.filter((row) => row._id !== id)
     setRows(newRows);
@@ -211,13 +206,11 @@ export default function TargetTable(props: TargetTableProps) {
   const processRowUpdate = async (newRow: GridRowModel<Target>) => {
     //row is sent to DataGrid rows. Used to match row with what was edited.
     const newRows = rows.map((row) => (row._id === newRow._id ? newRow : row))
-    console.log('inside processRowUpdate')
     setRows(newRows);
     return newRow;
   };
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
-	  console.log('inside handleRowModesModelChange')
     setRowModesModel(newRowModesModel);
   };
 
@@ -262,19 +255,17 @@ export default function TargetTable(props: TargetTableProps) {
 
     // Update refs when state changes
     React.useEffect(() => {
-      console.log('updating refs', editTarget, count)
       editTargetRef.current = editTarget;
       countRef.current = count;
-      pendingSaveRef.current = false;
+      pendingSaveRef.current = false; //reset pending save
     }, [editTarget, count]);
 
     const handleRowChange = React.useCallback(async (override = false) => {
-      console.log('handle row change', editTargetRef.current, countRef.current)
       if (countRef.current > 0 || override) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTargetRef.current.status?.includes('EDITED')
         if (isEdited) {
-          pendingSaveRef.current = true 
+          pendingSaveRef.current = true //prevent triggering multiple saves
           newTgt = await edit_target(editTargetRef.current)
           editTargetRef.current.status = "SAVED"
         }
@@ -288,14 +279,13 @@ export default function TargetTable(props: TargetTableProps) {
     const debouncedHandleRowChange = useDebounceCallback(handleRowChange, 2000)
 
     React.useEffect(() => { // needed when targed is edited in target edit dialog or catalog dialog
-      if (pendingSaveRef.current) return
+      if (pendingSaveRef.current) return //prevent triggering twice when making row edits
       debouncedHandleRowChange()
       setCount((prev: number) => prev + 1)
     }, [editTarget])
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
     const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
-      console.log('cell edit stop', params)
       setTimeout(() => { //wait for cell to update before setting editTarget
         let value = apiRef.current.getCellValue(id, params.field);
         let type = (target_schema.properties as TargetProps)[params.field as keyof PropertyProps].type
@@ -404,7 +394,6 @@ export default function TargetTable(props: TargetTableProps) {
               toolbar: {
                 rows,
                 setRows,
-                processRowUpdate,
                 setRowModesModel,
                 obsid: context.obsid, //TODO: allow admin to edit obsid
                 submit_one_target,
