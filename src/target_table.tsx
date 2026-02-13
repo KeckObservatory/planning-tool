@@ -266,7 +266,6 @@ export default function TargetTable(props: TargetTableProps) {
     }, [id])
 
     const debouncedHandleRowChange = useDebounceCallback(handleRowChange, 2000)
-    const pendingTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
     
     // Update refs and trigger save when editTarget changes
     React.useEffect(() => {
@@ -275,21 +274,8 @@ export default function TargetTable(props: TargetTableProps) {
         initRef.current = true
         return
       }
-      // Cancel any pending debounced call before scheduling a new one
-      if (pendingTimeoutRef.current) {
-        clearTimeout(pendingTimeoutRef.current)
-      }
       // Only trigger save if editTarget actually changed and we haven't already scheduled a save
-      pendingTimeoutRef.current = setTimeout(() => {
-        debouncedHandleRowChange()
-      }, 0)
-      
-      // Cleanup: cancel pending call if component unmounts or editTarget changes again
-      return () => {
-        if (pendingTimeoutRef.current) {
-          clearTimeout(pendingTimeoutRef.current)
-        }
-      }
+      debouncedHandleRowChange()
     }, [editTarget]);
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
