@@ -244,7 +244,8 @@ export default function TargetTable(props: TargetTableProps) {
     const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
     const editTargetRef = React.useRef<Target>(editTarget);
     const initRef = React.useRef<boolean>(false);
-    const pendingSaveRef = React.useRef<boolean>(false); //prevents multiple saves from happening at once
+    const pendingSaveRef = React.useRef<boolean>(false);
+    const lastEditTargetRef = React.useRef<Target>(editTarget);
     
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
       return validate_sanitized_target(editTargetRef.current);
@@ -252,20 +253,17 @@ export default function TargetTable(props: TargetTableProps) {
 
     const apiRef = useGridApiContext();
 
-    // Update refs when state changes
-    React.useEffect(() => {
-      debouncedHandleRowChange()
-      editTargetRef.current = editTarget;
-    }, [editTarget]);
-
     const handleRowChange = React.useCallback(async (override = false) => {
+      console.log('[handleRowChange] called', { override, initRef: initRef.current, editTarget: editTargetRef.current._id, status: editTargetRef.current.status, pending: pendingSaveRef.current })
       if (initRef.current || override) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTargetRef.current.status?.includes('EDITED')
         if (isEdited && !pendingSaveRef.current) {
           pendingSaveRef.current = true
+          console.log('[handleRowChange] calling edit_target', editTargetRef.current._id)
           newTgt = await edit_target(editTargetRef.current)
           pendingSaveRef.current = false
+          console.log('[handleRowChange] edit_target completed')
         }
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
@@ -275,18 +273,40 @@ export default function TargetTable(props: TargetTableProps) {
     }, [id])
 
     const debouncedHandleRowChange = useDebounceCallback(handleRowChange, 2000)
-
+    const debouncedHandleRowChangeRef = React.useRef(debouncedHandleRowChange)
+    
     React.useEffect(() => {
-      initRef.current = true
-    }, [editTarget])
+      debouncedHandleRowChangeRef.current = debouncedHandleRowChange
+    })
+
+    // Update refs and trigger save when editTarget changes
+    React.useEffect(() => {
+      console.log('[editTarget effect] triggered', { id, initRef: initRef.current, editTarget: editTarget._id, lastEditTarget: lastEditTargetRef.current?._id })
+      editTargetRef.current = editTarget;
+      if (!initRef.current) {
+        initRef.current = true
+        console.log('[editTarget effect] init - skipping')
+        return
+      }
+      // Only trigger save if editTarget actually changed (not just a re-render)
+      if (lastEditTargetRef.current !== editTarget) {
+        lastEditTargetRef.current = editTarget
+        console.log('[editTarget effect] calling debounced save')
+        debouncedHandleRowChangeRef.current()
+      } else {
+        console.log('[editTarget effect] same reference - skipping')
+      }
+    }, [editTarget]);
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
     const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
+      console.log('[cellEditStop] event fired', { field: params.field, id })
       setTimeout(() => { //wait for cell to update before setting editTarget
         let value = apiRef.current.getCellValue(id, params.field);
         let type = (target_schema.properties as TargetProps)[params.field as keyof PropertyProps].type
         // convert type to string if array
         const changeDetected = editTarget[params.field as keyof Target] !== value
+        console.log('[cellEditStop] after timeout', { field: params.field, changeDetected, oldValue: editTarget[params.field as keyof Target], newValue: value })
         if (changeDetected) {
           const isNumber = type.includes('number') || type.includes('integer')
           if (type === 'array') {
@@ -296,6 +316,7 @@ export default function TargetTable(props: TargetTableProps) {
             value = format_edit_entry(params.field, value, isNumber)
           }
           const newTgt = rowSetter(editTarget, params.field, value)
+          console.log('[cellEditStop] calling setEditTarget')
           setEditTarget(newTgt)
         }
       }, 300)
@@ -305,7 +326,7 @@ export default function TargetTable(props: TargetTableProps) {
       await setEditTarget(newTgt)
       handleRowChange(true) //override save
       setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
-      setCount((prev: number) => prev + 1)
+      initRef.current = true
     }
 
     useGridApiEventHandler(apiRef, 'cellEditStop', handleEvent)
