@@ -9,7 +9,7 @@ import { v4 as randomId } from 'uuid';
 import { format_string_array, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog';
 import { DialogComponent } from './dialog_component';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util';
-import { TARGET_NAME_LENGTH_PADDED } from './table_toolbar';
+import { TARGET_NAME_LENGTH_PADDED } from './two-d-view/constants';
 
 interface Props {
     setTargets: Function

@@ -18,7 +18,7 @@ import { mock_catalog_targets } from './mock_catalog_targets';
 import { NGSViewer } from './NGSViewer';
 // import AladinViewer from '../aladin/aladin';
 import { MagRangeSlider } from './mag_range_slider';
-import { WINDOW_SIZE } from '../two-d-view/constants';
+import { MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE } from '../two-d-view/constants';
 import { MuiChipsInput } from 'mui-chips-input';
 
 export interface CatalogTarget {
@@ -114,6 +114,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const { targets, open, setRows } = props
     const [guideStarName, setGuideStarName] = useState<string>('')
     const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
+    const init_img_size = instrumentFOV === 'MOSFIRE' ? MOSFIRE_WINDOW_SIZE : DEFAULT_WINDOW_SIZE 
+    const [imgSize, setImgSize] = useState<number>(init_img_size)
     const [magRange, setMagRange] = useQueryParam('mag_range', withDefault(ArrayParam, undefined)) //set to undefined to prevent unwanted rerenders on initial load
     const [fovs, setFOVs] = React.useState<string[]>([])
     const [pointingOrigins, setPointingOrigins] = React.useState<POPointingOriginCollection | undefined>(undefined)
@@ -163,7 +165,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         const fetch_and_set_shapes = async () => {
             const featureCollection = await get_shapes('fov')
             const pos = await get_shapes('pointing_origins') as POPointingOriginCollection
-            const cntrs = useLaser ? await get_shapes('laser_contours') : []
+            const cntrs = useLaser ? await get_shapes('laser_contours') : await get_shapes('fsm')
             const trkMap = showTrickMap ? await get_shapes('trick_map') : undefined
             const domeFovFeatures = featureCollection['features'].filter((feature: any) => {
                 return feature['properties'].type === 'FOV'
@@ -182,9 +184,13 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     }, [])
 
+    useEffect(() => {  //refetch image when fov changes
+        setImgSize(instrumentFOV === 'MOSFIRE' ? MOSFIRE_WINDOW_SIZE : DEFAULT_WINDOW_SIZE)
+     }, [instrumentFOV])
+
     useEffect(() => {
         const fetch_and_set_laser_contours = async () => {
-            const cntrs = useLaser ? await get_shapes('laser_contours') : []
+            const cntrs = useLaser ? await get_shapes('laser_contours') : await get_shapes('fsm')
             const trkMap = showTrickMap ? await get_shapes('trick_map') : undefined
             setContours(cntrs as unknown as LaserContours)
             setTrickMap(trkMap)
@@ -238,7 +244,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         catalog,
                         ra,
                         dec,
-                        WINDOW_SIZE,
+                        imgSize,
                         mr
                     )
                     if (gs) {
@@ -254,13 +260,13 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             }
             if (imageCatalog) {
                 setImageLoading(true)
-                const img = get_catalog_image(imageCatalog, ra, dec, WINDOW_SIZE)
+                const img = get_catalog_image(imageCatalog, ra, dec, imgSize)
                 setImage(img)
             }
 
         }
         fun()
-    }, [catalog, target, imageCatalog])
+    }, [catalog, target, imageCatalog, imgSize])
 
     useEffect(() => {
         const fun = async () => {
@@ -274,7 +280,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     catalog,
                     ra,
                     dec,
-                    WINDOW_SIZE,
+                    imgSize,
                     mr
                 )
                 if (gs) {
@@ -288,7 +294,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             }
         }
         fun()
-    }, [magRange])
+    }, [magRange, instrumentFOV])
 
 
     const onTargetNameSelect = (name: string) => {
@@ -455,7 +461,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             guideStars={guidestars as Target[]}
                             height={500}
                             width={500}
-                            size={WINDOW_SIZE} // in degrees
+                            size={imgSize} // in degrees
                             centerRA={centerRa} // in degrees
                             centerDec={centerDec} // in degrees
                             guideStarName={guideStarName}
@@ -467,7 +473,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             selPO={selPO}
                             pointingOrigins={selPointingOrigins}
                             invertImage={invertImage}
-                            showLaser={useLaser}
+                            showLaser={true}
                             contours={telContours}
                             showTrickMap={showTrickMap}
                             trickMap={trickMap}

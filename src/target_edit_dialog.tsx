@@ -16,7 +16,7 @@ import target_schema from './target_schema.json'
 import { Status, Target } from './App';
 import { MuiChipsInput } from 'mui-chips-input';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util';
-import { TARGET_LENGTH } from './table_toolbar';
+import { TARGET_LENGTH } from './two-d-view/constants';
 
 interface Props {
     target: Target

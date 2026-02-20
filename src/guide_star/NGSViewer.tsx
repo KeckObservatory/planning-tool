@@ -7,6 +7,7 @@ import { Feature, Point } from "geojson"
 import { PointingOriginMarkers, PointingOriginMarker } from "../aladin/pointing_origin_markers"
 import { ScaleBar } from "./scale_bar"
 import { CompassRose } from "./compass_rose"
+import { ZOOM_SPEED, ZOOM_MIN, ZOOM_MAX } from "../two-d-view/constants"
 interface Props {
     imgUrl: string
     guideStars: Target[]
@@ -39,7 +40,7 @@ export const NGSViewer = (props: Props) => {
   const [panOffset, setPanOffset] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = React.useState<boolean>(false);
   const [dragStart, setDragStart] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const pxlScale = (props.size / props.width) / zoom // degrees per pixel, adjusted for zoom
+  const degPerPixel = (props.size / props.width) / zoom // degrees per pixel, adjusted for zoom
   const [fov, setFOV] = React.useState<any>(null)
   const [laserContours, setLaserContours] = React.useState<Array<{name: string; color: string; lines: Array<Array<[number, number]>>}>>([]);
   const [trickMapContours, setTrickMapContours] = React.useState<Array<{name: string; color: string; lines: Array<Array<[number, number]>>}>>([]);
@@ -57,8 +58,8 @@ export const NGSViewer = (props: Props) => {
 
   // Convert arcseconds offset to pixel coordinates
   const arcsecToPixel = (dra: number, ddec: number): [number, number] => {
-    const x = (dra / (3600 * pxlScale)) + props.width / 2;
-    const y = (ddec / (3600 * pxlScale)) + props.height / 2;
+    const x = (dra / (3600 * degPerPixel)) + props.width / 2;
+    const y = (ddec / (3600 * degPerPixel)) + props.height / 2;
     return [x, y];
   }
 
@@ -81,7 +82,7 @@ export const NGSViewer = (props: Props) => {
         position: [x, y] as [number, number]
       };
     });
-  }, [props.pointingOrigins, props.centerRA, props.centerDec, props.width, props.height, pxlScale, props.selPO, zoom, props.fovAngle]);
+  }, [props.pointingOrigins, props.centerRA, props.centerDec, props.width, props.height, degPerPixel, props.selPO, zoom, props.fovAngle]);
 
   // Convert laser contours to pixel coordinates
   React.useMemo(() => {
@@ -117,7 +118,7 @@ export const NGSViewer = (props: Props) => {
     });
 
     setLaserContours(convertedContours);
-  }, [props.contours, props.showLaser, props.width, props.height, pxlScale, zoom]);
+  }, [props.contours, props.showLaser, props.width, props.height, degPerPixel, zoom]);
 
   // Convert trick map to pixel coordinates
   React.useMemo(() => {
@@ -154,7 +155,7 @@ export const NGSViewer = (props: Props) => {
     });
 
     setTrickMapContours(convertedTrickMap);
-  }, [props.trickMap, props.showTrickMap, props.width, props.height, pxlScale, zoom]);
+  }, [props.trickMap, props.showTrickMap, props.width, props.height, degPerPixel, zoom]);
 
   // Draw laser contours on SVG
   React.useEffect(() => {
@@ -276,11 +277,11 @@ export const NGSViewer = (props: Props) => {
       .enter()
       .append('circle')
       .attr('cx', (d: Target) => {
-        const x = ((d.ra_deg || 0) - props.centerRA) / pxlScale + props.width / 2;
+        const x = ((d.ra_deg || 0) - props.centerRA) / degPerPixel + props.width / 2;
         return x;
       })
       .attr('cy', (d: Target) => {
-        const y = ((d.dec_deg || 0) - props.centerDec) / pxlScale + props.height / 2;
+        const y = ((d.dec_deg || 0) - props.centerDec) / degPerPixel + props.height / 2;
         return y;
       })
       .attr('r', () => {
@@ -299,7 +300,7 @@ export const NGSViewer = (props: Props) => {
       .attr('stroke-width', 2)
       .attr('cursor', 'pointer')
       .on('click', handleStarClick);
-  }, [props.guideStars, props.centerRA, props.centerDec, props.width, props.height, pxlScale, props.guideStarName, zoom, props.fovAngle]);
+  }, [props.guideStars, props.centerRA, props.centerDec, props.width, props.height, degPerPixel, props.guideStarName, zoom, props.fovAngle]);
 
   // Fetch and update FOV shapes
   React.useEffect(() => {
@@ -338,8 +339,8 @@ export const NGSViewer = (props: Props) => {
         const points = coordinates.map((coord: [number, number]) => {
           const dra = coord[0]; // arcseconds offset from center
           const ddec = coord[1]; // arcseconds offset from center
-          const x = (dra / (3600 * pxlScale)) + props.width / 2;
-          const y = (ddec / (3600 * pxlScale)) + props.height / 2;
+          const x = (dra / (3600 * degPerPixel)) + props.width / 2;
+          const y = (ddec / (3600 * degPerPixel)) + props.height / 2;
           return [x, y];
         });
 
@@ -363,8 +364,8 @@ export const NGSViewer = (props: Props) => {
       const points = coordinates.map((coord: [number, number]) => {
         const dra = coord[0]; // arcseconds offset from center
         const ddec = coord[1]; // arcseconds offset from center
-        const x = (dra / (3600 * pxlScale)) + props.width / 2;
-        const y = (ddec / (3600 * pxlScale)) + props.height / 2;
+        const x = (dra / (3600 * degPerPixel)) + props.width / 2;
+        const y = (ddec / (3600 * degPerPixel)) + props.height / 2;
         return [x, y];
       });
 
@@ -381,7 +382,7 @@ export const NGSViewer = (props: Props) => {
         .attr('stroke-width', 2)
         .attr('opacity', 0.7);
     }
-  }, [fov, props.centerRA, props.centerDec, props.width, props.height, pxlScale, props.selPO, zoom, props.fovAngle]);
+  }, [fov, props.centerRA, props.centerDec, props.width, props.height, degPerPixel, props.selPO, zoom, props.fovAngle]);
 
   // Handle mouse wheel zoom
   React.useEffect(() => {
@@ -391,13 +392,12 @@ export const NGSViewer = (props: Props) => {
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       
-      const zoomSpeed = 0.001;
-      const delta = -e.deltaY * zoomSpeed;
+      const delta = -e.deltaY * ZOOM_SPEED;
       
       setZoom((prevZoom) => {
         const newZoom = prevZoom * (1 + delta);
-        // Clamp zoom between 0.5x and 10x
-        return Math.max(0.5, Math.min(10, newZoom));
+        // Clamp zoom between zoomMin and zoomMax
+        return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, newZoom));
       });
     };
 
@@ -517,7 +517,7 @@ export const NGSViewer = (props: Props) => {
           />
         </div>
       )}
-      <ScaleBar width={props.width} height={props.height} invertImage={props.invertImage} />
+      <ScaleBar width={props.width} height={props.height} degPerPixel={degPerPixel} invertImage={props.invertImage} />
       <CompassRose width={props.width} height={props.height} fovAngle={props.fovAngle} invertImage={props.invertImage} />
     </div>
   );

@@ -4,9 +4,22 @@ interface ScaleBarProps {
   width: number;
   height: number;
   invertImage?: boolean;
+  degPerPixel: number; // degrees per pixel at the current zoom
 }
 
-export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height, invertImage }) => {
+export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height, degPerPixel, invertImage }) => {
+
+  const rawArcsec = 100 * (3600 * degPerPixel); // calculate the length in pixels that corresponds to 20 arcseconds
+  console.log('raw arcsec in pixels', rawArcsec)
+  let scaleBarLengthArcsec = Math.floor(rawArcsec / 5) * 5; // Round down to nearest multiple of 10
+  scaleBarLengthArcsec = Math.max(scaleBarLengthArcsec, 5); // Minimum length of 5 arcseconds
+  if (scaleBarLengthArcsec <= 5) {
+      scaleBarLengthArcsec = Math.floor(rawArcsec / 1) * 1; // Round down to nearest multiple of 10
+      scaleBarLengthArcsec = Math.max(scaleBarLengthArcsec, 1); // Minimum length of 1 arcsecond
+  }
+
+  const scaleBarLengthPxl = scaleBarLengthArcsec / rawArcsec;
+
   return (
     <svg
       width={width}
@@ -24,7 +37,7 @@ export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height, invertImage }
         <line
           x1="0"
           y1="0"
-          x2="100"
+          x2={`${scaleBarLengthPxl * 100}`}
           y2="0"
           stroke= {invertImage ? "white" : "black"}
           strokeWidth="2"
@@ -40,9 +53,9 @@ export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height, invertImage }
         />
         {/* Right tick */}
         <line
-          x1="100"
+          x1={scaleBarLengthPxl * 100}
           y1="-3"
-          x2="100"
+          x2={scaleBarLengthPxl * 100}
           y2="3"
           stroke= {invertImage ? "white" : "black"}
           strokeWidth="2"
@@ -56,7 +69,7 @@ export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height, invertImage }
           fontFamily="monospace"
           fill={invertImage ? "white" : "black"}
         >
-          20"
+          {`${scaleBarLengthArcsec}"`}
         </text>
       </g>
     </svg>

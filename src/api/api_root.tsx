@@ -151,9 +151,6 @@ export const get_catalog_image = (dss_name: string, ra: number, dec: number, win
     const ws = JSON.stringify({"size": window_size, "units": "degrees"})
     let url = `https://vm-appserver.keck.hawaii.edu/catalogs-test/image/?position=%7B%22ra%22:${ra},%22dec%22:${dec}%7D&window-size=${ws}&catalog=${dss_name}&external=1&format=png`
     return url
-    // return axiosInstance.get(url)
-    //     .then(handleResponse)
-    //     .catch(handleError)
 }
 
 export const get_catalog_targets = (catalog_name: string, ra: number, dec: number, radius: number, magRange?: [string, string]): Promise<CatalogTarget[]> => {

@@ -42,8 +42,15 @@ export const MOON_RADIUS = .52 // degrees
 
 //GUIDE STAR TOOL
 export const MAG_RANGE = [1, 20] // mag range for guide star catalog queries
-export const WINDOW_SIZE = .5 // degrees, size of window to query for guide stars
+export const DEFAULT_WINDOW_SIZE = 300 / 3600 // degrees, size of window to query for guide stars
+export const MOSFIRE_WINDOW_SIZE = 900 / 3600 // degrees, size of window to query for guide stars
+//img catalog constants
+export const ZOOM_SPEED = 0.001;
+export const ZOOM_MIN = 0.5;
+export const ZOOM_MAX = 20;
 
+export const TARGET_LENGTH = 15 // 15 characters for target name
+export const TARGET_NAME_LENGTH_PADDED = TARGET_LENGTH + 1 // 15 characters for target name, one space at the end
 
 export const DEFAULT_OPACITY = 'FF' //Hex values appended to color
 export const NON_OBSERVABLE_OPACITY = '80' //Hex values appended to color
@@ -51,6 +58,7 @@ export const AIRMASS_LIMIT = 5
 export const TWILIGHT_SHADE= '#BFBFBF'
 export const AMATEUR_TWILIGHT_SHADE = '#9f9f9f'
 export const ASTRONOMICAL_TWILIGHT_SHADE = '#818181'
+
 
 export const EXTINCTION_COEFF = 0.172 // extinction coefficient [mag/airmass]
 
