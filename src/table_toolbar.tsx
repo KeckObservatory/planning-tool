@@ -23,9 +23,8 @@ import TagDialogButton from './tag_dialog.tsx';
 import SemidDialogButton from './semid_dialog.tsx';
 import { SemidSelect } from './semid_select.tsx';
 import { GuideStarButton } from './guide_star/guide_star_dialog.tsx';
+import { TARGET_LENGTH, TARGET_NAME_LENGTH_PADDED } from './two-d-view/constants.tsx';
 
-export const TARGET_LENGTH = 15 // 15 characters for target name
-export const TARGET_NAME_LENGTH_PADDED = TARGET_LENGTH + 1 // 15 characters for target name, one space at the end
 
 const convert_target_to_targetlist_row = (target: Target) => {
   //required params
@@ -38,12 +37,21 @@ const convert_target_to_targetlist_row = (target: Target) => {
   row = valid ? row : '# INVALID row: ' + row
   //optional params
   row = target.v_mag ? row + ` vmag=${target.v_mag}` : row
-  row = target.g_mag ? row + ` gmag=${target.g_mag}` : row
   row = target.j_mag ? row + ` jmag=${target.j_mag}` : row
+  row = target.g_mag ? row + ` gmag=${target.g_mag}` : row
+  row = target.r_mag ? row + ` rmag=${target.r_mag}` : row
+  row = target.b_mag ? row + ` bmag=${target.b_mag}` : row
+  row = target.h_mag ? row + ` hmag=${target.h_mag}` : row
+  row = target.k_mag ? row + ` kmag=${target.k_mag}` : row
   row = target.ra_offset ? row + ` raoffset=${target.ra_offset}` : row
   row = target.dec_offset ? row + ` decoffset=${target.dec_offset}` : row
   row = target.rotator_mode ? row + ` rotmode=${target.rotator_mode}` : row
+  row = target.rotator_pa ? row + ` rotdest=${target.rotator_pa}` : row
   row = target.telescope_wrap ? row + ` wrap=${target.telescope_wrap}` : row
+  row = target.d_dec ? row + ` ddec=${target.d_dec}` : row
+  row = target.d_ra ? row + ` dra=${target.d_ra}` : row
+  row = target.pm_ra ? row + ` pmra=${target.pm_ra}` : row
+  row = target.pm_dec ? row + ` pmdec=${target.pm_dec}` : row
   if (target.lgs === '1') {
     row = row + ` lgs=1`
   }
