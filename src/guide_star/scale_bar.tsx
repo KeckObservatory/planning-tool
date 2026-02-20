@@ -44,26 +44,26 @@ export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height, degPerPixel, 
         {/* Left tick */}
         <line
           x1="0"
-          y1="-3"
+          y1="-6"
           x2="0"
-          y2="3"
+          y2="6"
           stroke= {invertImage ? "white" : "black"}
-          strokeWidth="2"
+          strokeWidth="4"
         />
         {/* Right tick */}
         <line
           x1={scaleBarLengthPxl * 100}
-          y1="-3"
+          y1="-6"
           x2={scaleBarLengthPxl * 100}
-          y2="3"
+          y2="6"
           stroke= {invertImage ? "white" : "black"}
-          strokeWidth="2"
+          strokeWidth="4"
         />
         {/* Label */}
         <text
           x="50"
-          y="15"
-          fontSize="12"
+          y="20"
+          fontSize="16"
           textAnchor="middle"
           fontFamily="monospace"
           fill={invertImage ? "white" : "black"}

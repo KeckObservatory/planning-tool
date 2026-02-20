@@ -456,8 +456,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         < NGSViewer
                             imgUrl={image ?? ''}
                             guideStars={guidestars as Target[]}
-                            height={500}
-                            width={500}
+                            height={600}
+                            width={600}
                             size={imgSize} // in degrees
                             centerRA={centerRa} // in degrees
                             centerDec={centerDec} // in degrees
