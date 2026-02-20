@@ -238,22 +238,19 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 setCatalogLoading(true)
                 const mr = Array.isArray(magRange) && magRange.length >= 2 ?
                     [String(magRange[0]), String(magRange[1])] as [string, string] : undefined
-                if (mr) {
-                    console.log('fetching catalog targets with mag range', mr)
-                    const gs = await get_catalog_targets(
-                        catalog,
-                        ra,
-                        dec,
-                        imgSize,
-                        mr
-                    )
-                    if (gs) {
-                        const gsTgts = gs.map((star: CatalogTarget) => {
-                            const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
-                            return tgt
-                        })
-                        setGuideStars(gsTgts)
-                    }
+                const gs = await get_catalog_targets(
+                    catalog,
+                    ra,
+                    dec,
+                    imgSize,
+                    mr
+                )
+                if (gs) {
+                    const gsTgts = gs.map((star: CatalogTarget) => {
+                        const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
+                        return tgt
+                    })
+                    setGuideStars(gsTgts)
                 }
                 setCatalogLoading(false)
 
@@ -274,7 +271,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const ra = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
             const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
             const mr = Array.isArray(magRange) && magRange.length >= 2 ? [String(magRange[0]), String(magRange[1])] as [string, string] : undefined
-            if (catalog && mr) {
+            if (catalog) {
                 console.log('mag range changed. fetching catalog targets with mag range', mr)
                 const gs = await get_catalog_targets(
                     catalog,

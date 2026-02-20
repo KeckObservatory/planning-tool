@@ -10,7 +10,6 @@ interface ScaleBarProps {
 export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height, degPerPixel, invertImage }) => {
 
   const rawArcsec = 100 * (3600 * degPerPixel); // calculate the length in pixels that corresponds to 20 arcseconds
-  console.log('raw arcsec in pixels', rawArcsec)
   let scaleBarLengthArcsec = Math.floor(rawArcsec / 5) * 5; // Round down to nearest multiple of 10
   scaleBarLengthArcsec = Math.max(scaleBarLengthArcsec, 5); // Minimum length of 5 arcseconds
   if (scaleBarLengthArcsec <= 5) {
