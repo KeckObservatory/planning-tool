@@ -340,34 +340,26 @@ const TwoDView = ({ targets }: Props) => {
 
                         )
                     }
-                    <Tooltip title={'Rotator angle for Field of View'}>
-                        <TextField
-                            sx={{ width: '200px', margin: '6px' }}
-                            label={'Rotator Angle'}
-                            id="rotator-angle"
-                            value={rotatorAngle}
-                            onChange={(event) => setRotatorAngle(Number(event.target.value))}
-                        />
-                    </Tooltip>
-                    <Tooltip title={'Save Image as a .png file'}>
-                        <Button
-                            sx={{ width: '200px', margin: '6px' }}
-                            onClick={save_img}
-                            variant='contained'
-                        >
-                            Save Image as .png
-                        </Button>
-
-                    </Tooltip>
-                    {/* <Tooltip title={'Position angle for the sky'}>
-                        <TextField
-                            sx={{ width: '200px', margin: '6px' }}
-                            label={'Position Angle'}
-                            id="position-angle"
-                            value={positionAngle}
-                            onChange={(event) => setPositionAngle(Number(event.target.value))}
-                        />
-                    </Tooltip> */}
+                    <Stack direction='row' spacing={1} justifyContent='left'>
+                        <Tooltip title={'Rotator angle for Field of View'}>
+                            <TextField
+                                sx={{ width: '200px', margin: '6px' }}
+                                label={'Rotator Angle'}
+                                id="rotator-angle"
+                                value={rotatorAngle}
+                                onChange={(event) => setRotatorAngle(Number(event.target.value))}
+                            />
+                        </Tooltip>
+                        <Tooltip title={'Save Image as a .png file'}>
+                            <Button
+                                sx={{ width: '200px', margin: '6px' }}
+                                onClick={save_img}
+                                variant='contained'
+                            >
+                                Save Image as .png
+                            </Button>
+                        </Tooltip>
+                    </Stack>
                 </Stack>
             </Grid2>
             <Grid2 size={{ xs: 8 }}>
