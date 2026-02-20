@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 import DialogContentText from '@mui/material/DialogContentText';
 import { MenuItem, Menu, Stack, Tooltip, Typography } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
-import { RotatorMode, Target, TelescopeWrap, useStateContext, useSnackbarContext } from './App';
+import { Target, useStateContext, useSnackbarContext } from './App';
 import target_schema from './target_schema.json'
 import { v4 as randomId } from 'uuid';
 import { format_string_array, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog';
