@@ -34,6 +34,8 @@ export interface Target extends SimbadTargetData {
   k_mag?: number,
   b_mag?: number,
   r_mag?: number,
+  b_m_v_mag?: number,
+  b_m_r_mag?: number,
   ra_offset?: number,
   dec_offset?: number,
   rotator_mode?: RotatorMode,

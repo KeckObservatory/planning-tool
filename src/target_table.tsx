@@ -112,7 +112,7 @@ const check_for_duplicates = (targets: Target[]) => {
     const alreadyInList = duplicates.some((dup) => dup.target_name === target.target_name)
     if (
       target.target_name //only check for duplicates if target has a name
-      && (duplicateNames || duplcateRADEC)
+      && (duplicateNames && duplcateRADEC) // duplicate if both name and ra/dec are the same
       && !alreadyInList
     ) {
       const duplicate: Duplicate = {

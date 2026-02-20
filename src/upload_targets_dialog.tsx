@@ -22,6 +22,12 @@ interface UploadProps extends Props {
 
 const targetProps = target_schema.properties as TargetProps
 
+const starlistToKeyMapping = Object.fromEntries(
+    Object.entries(targetProps)
+    .filter(([_key, prop]) => prop.starlist_key)
+    .map(([key, prop]) => [prop.starlist_key, key])
+)
+
 let hdrToKeyMapping = Object.fromEntries(Object.entries(targetProps).map(([key, value]: [keyof TargetProps, PropertyProps]) => {
     const desc = value.short_description ?? value.description
     return [desc, key]
@@ -78,40 +84,6 @@ export const format_targets = (tgts: UploadedTarget[], targetProps: TargetProps)
         return tgt
     })
     return fmtTgts
-}
-
-interface StarListOptionalKeys {
-    gmag?: number,
-    jmag?: number,
-    equinox?: string,
-    raoffset?: number,
-    decoffset?: number,
-    pmra?: number,
-    pmdec?: number,
-    rotmode?: RotatorMode,
-    wrap?: TelescopeWrap,
-    dra?: number,
-    ddec?: number,
-}
-
-//TODO: this should be in the target_schema config.
-let starlistToKeyMapping = {
-    'gmag': 'g_mag',
-    'jmag': 'j_mag',
-    'vmag': 'v_mag',
-    'equinox': 'equinox',
-    'raoffset': 'ra_offset',
-    'decoffset': 'dec_offset',
-    'pmra': 'pm_ra',
-    'pmdec': 'pm_dec',
-    'rotmode': 'rotator_mode',
-    'rotdest': 'rotator_pa',
-    'pa': 'rotator_pa',
-    'wrap': 'telescope_wrap',
-    'dra': 'd_ra',
-    'ddec': 'd_dec',
-    'tags': 'tags',
-    'lgs': 'lgs'
 }
 
 const parse_json = (contents: string) => {
@@ -239,6 +211,38 @@ const split_at = (index: number, str: string) => {
     return [targetName, targetBody]
 }
 
+const parse_comments = (lines: string[]) => {
+
+    let semids = [] as string[]
+    let tags = [] as string[]
+    let comments = [] as string[]
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        // handle semids in comments (e.g. # semids: sem1, sem2)
+        if (line.toLowerCase().includes('semids:')) {
+            const semidLine = line.split('semids:')[1]
+            semids = [...semids, ...semidLine.split(', ').map((sem) => sem.trim())]
+        }
+        // handle tags in comments (e.g. # tags: tag1, tag2)
+        else if (line.toLowerCase().includes('tags:')) {
+            const tagLine = line.split('tags:')[1]
+            tags = [...tags, ...tagLine.split(', ').map((tag) => tag.trim())]
+        }
+        // handle comment lines that have 'comment:'
+        else if (line.toLowerCase().includes('comment:')) {
+            const commentLine = line.split('comment:')[1]
+            comments = [...comments, commentLine.trim()]
+        }
+        else {
+            comments = [...comments, line.replace('#', '').trim()]
+        }
+    }
+
+    return { semids, tags, comments }
+
+}
+
+
 const parse_txt = (contents: string, obsid: number) => {
     let tgts = [] as UploadedTarget[]
     let commentLines: string[] = []
@@ -269,22 +273,7 @@ const parse_txt = (contents: string, obsid: number) => {
             opts = opts.slice(0, inlineCommentIdx)
             commentLines.push(comment) // add inline comment to comment lines so it gets added to the comment field
         }
-        // if there are comment lines above the target, add them to the comment field as well
-        let comment: string = ''
-        if (commentLines.length > 0) {
-            comment = commentLines.join('\n')
-            // if there are tags, separate them out and add them to the tags field instead of the comment field
-            const tagLineIdx = commentLines.findIndex((line) => line.toLowerCase().includes('tags:'))
-            if (tagLineIdx > -1) {
-                const tagLine = commentLines[tagLineIdx]
-                const tags = tagLine.split(':')[1].split(',').map((tag) => tag.trim())
-                opts.push(`tags=${tags.join(',')}`)
-                comment = comment.replace(tagLine, '') // remove the tag line from the comment
-                comment = comment.replaceAll('#', '').trim() // remove # from comment
-            }
-            commentLines = [] // reset comment lines after adding them to the target
-        }
-        opts = opts.find((opt) => opt.startsWith('#')) ? opts.slice(0, opts.findIndex((opt) => opt.startsWith('#'))) : opts
+
         let tgt: UploadedTarget = {
             _id: randomId(),
             target_name: target_name.trimEnd().trimStart(),
@@ -295,21 +284,28 @@ const parse_txt = (contents: string, obsid: number) => {
             dec,
             equinox,
         };
-        if (comment.length > 0) {
-            tgt.comment = comment
+        const { semids, tags, comments } = parse_comments(commentLines)
+
+        if (comments.length > 0) {
+            tgt.comment = comments.join(', ')
         }
+        if (semids.length > 0) {
+            tgt.semids = semids
+        }
+        if (tags.length > 0) {
+            tgt.tags = tags
+        }
+
+        //reset comment lines after adding them to the target so they don't get added to the next target
+        commentLines = []
+
+        opts = opts.find((opt) => opt.startsWith('#')) ? opts.slice(0, opts.findIndex((opt) => opt.startsWith('#'))) : opts
         opts.forEach((opt) => {
             if (!opt.includes('=')) return
             const [key, value] = opt.split('=')
-            const tgtKey = starlistToKeyMapping[key as keyof StarListOptionalKeys] as keyof Target
+            const tgtKey = starlistToKeyMapping[key]
             if (!tgtKey) {
                 console.warn('invalid key', key, value, opts, row)
-                return
-            }
-            if (key === 'tags') {
-                const tags = value.split(',').map((tag) => tag.trim())
-                //@ts-ignore
-                tgt[tgtKey] = tags //tags are an array of strings
                 return
             }
             //@ts-ignore
@@ -321,7 +317,7 @@ const parse_txt = (contents: string, obsid: number) => {
 }
 
 interface UploadedTarget {
-    [key: string]: string | number
+    [key: string]: string | number | string[]
 }
 
 export function UploadComponent(props: UploadProps) {

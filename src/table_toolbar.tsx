@@ -43,6 +43,8 @@ const convert_target_to_targetlist_row = (target: Target) => {
   row = target.b_mag ? row + ` bmag=${target.b_mag}` : row
   row = target.h_mag ? row + ` hmag=${target.h_mag}` : row
   row = target.k_mag ? row + ` kmag=${target.k_mag}` : row
+  row = target.b_m_v_mag ? row + ` b-v=${target.b_m_v_mag}` : row
+  row = target.b_m_r_mag ? row + ` b-r=${target.b_m_r_mag}` : row
   row = target.ra_offset ? row + ` raoffset=${target.ra_offset}` : row
   row = target.dec_offset ? row + ` decoffset=${target.dec_offset}` : row
   row = target.rotator_mode ? row + ` rotmode=${target.rotator_mode}` : row

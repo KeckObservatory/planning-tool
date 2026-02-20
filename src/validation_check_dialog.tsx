@@ -27,6 +27,7 @@ export interface Props {
 const ajv = new AJV2019({allErrors:true, allowUnionTypes: true})
 ajv.addKeyword("short_description")
 ajv.addKeyword("not_editable_by_user")
+ajv.addKeyword("starlist_key")
 let ts = target_schema as any
 delete ts["$schema"]
 export const validate = ajv.compile(ts)

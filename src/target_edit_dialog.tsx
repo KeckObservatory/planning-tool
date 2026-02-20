@@ -35,6 +35,7 @@ interface Items extends PropertyProps {
 export interface PropertyProps {
     description: string,
     type: string | string[],
+    starlist_key?: string,
     short_description?: string,
     default?: unknown,
     pattern?: string,
@@ -402,6 +403,38 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 value={target.k_mag}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('k._mag', event.target.value, true)}
+                            />
+                        </Tooltip>
+                    </Stack>
+                    <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
+                        <Tooltip title={input_label('b_m_v_mag', true)}>
+                            <TextField
+                                label={input_label('b_m_v_mag')}
+                                id="b-m-v-magnitude"
+                                focused={target.b_m_v_mag ? true : false}
+                                value={target.b_m_v_mag}
+                                sx={{ width: 125 }}
+                                onChange={(event) => handleTextChange('b_m_v_mag', event.target.value, true)}
+                            />
+                        </Tooltip>
+                        <Tooltip title={input_label('b_m_r_mag', true)}>
+                            <TextField
+                                label={input_label('b_m_r_mag')}
+                                id="b-m-r-magnitude"
+                                focused={target.b_m_r_mag ? true : false}
+                                value={target.b_m_r_mag}
+                                sx={{ width: 125 }}
+                                onChange={(event) => handleTextChange('b_m_r_mag', event.target.value, true)}
+                            />
+                        </Tooltip>
+                        <Tooltip title={input_label('b_mag', true)}>
+                            <TextField
+                                label={input_label('b_mag')}
+                                id="b-magnitude"
+                                focused={target.b_mag ? true : false}
+                                value={target.b_mag}
+                                sx={{ width: 125 }}
+                                onChange={(event) => handleTextChange('b_mag', event.target.value, true)}
                             />
                         </Tooltip>
                     </Stack>
