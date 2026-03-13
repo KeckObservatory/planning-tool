@@ -263,7 +263,6 @@ export const SkyChart = (props: Props) => {
         }
         const segmentedData = split_into_segments(data)
         let tgtTraces = segmentedData.map(segment => make_trace(segment, tgtv.target_name ?? "Target"))
-        //TODO: debug this.
         tgtTraces = tgtTraces.map((trace, idx) => {//allow only one legend per target
             if (idx > 0) {
                 //@ts-ignore

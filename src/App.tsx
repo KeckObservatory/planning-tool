@@ -183,26 +183,14 @@ function App() {
   useEffect(() => {
 
     const fetch_data = async () => {
-      if (import.meta.env.DEV) { //TODO: remove this before deployment
-        var uinfo = {Id: 0, FirstName: "observer", LastName: "observerson", semids: [], is_admin: false}; //dummy init
-        var username = `${uinfo.FirstName} ${uinfo.LastName}`;
-        var init_state: any = {
-          config,
-          username,
-          obsid: uinfo.Id,
-          semids: uinfo.semids ?? [],
-          is_admin: uinfo.is_admin ?? false
-        }
-      } else {
-        var userinfo = await get_userinfo();
-        var username = `${userinfo.FirstName} ${userinfo.LastName}`;
-        var init_state: any = {
-          config,
-          username,
-          obsid: userinfo.Id,
-          semids: userinfo.semids ?? [],
-          is_admin: userinfo.is_admin ?? false
-        }
+      var userinfo = await get_userinfo();
+      var username = `${userinfo.FirstName} ${userinfo.LastName}`;
+      var init_state: any = {
+        config,
+        username,
+        obsid: userinfo.Id,
+        semids: userinfo.semids ?? [],
+        is_admin: userinfo.is_admin ?? false
       }
       setState(init_state)
       if (init_state.obsid) {
@@ -211,20 +199,7 @@ function App() {
       }
     }
 
-    if (import.meta.env.DEV) { //TODO: remove this before deployment
-      console.log('Running in development mode');
-      const init_state = {
-        config,
-        username: 'Test User',
-        obsid: 1234,
-        semids: [],
-        is_admin: false,
-        targets: mockTargets as Target[] 
-      }
-      setState(init_state)
-    } else {
-      fetch_data()
-    }
+    fetch_data()
   }, [])
 
   const handleThemeChange = () => {

@@ -60,8 +60,7 @@ interface VizDialogProps {
 export const GuideStarButton = (props: ButtonProps) => {
 
     const { targets, setRows } = props
-    const initOpen = import.meta.env.DEV // TODO: remove before production
-    const [open, setOpen] = React.useState(initOpen);
+    const [open, setOpen] = React.useState(false);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -225,16 +224,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         const fun = async () => {
             const ra = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
             const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
-            if (import.meta.env.DEV && catalog) { //TODO: remove before production
-                setCatalogLoading(true)
-                const gsTgts = mock_catalog_targets.map((star: CatalogTarget) => {
-                    const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
-                    return tgt
-                })
-                setGuideStars(gsTgts)
-                setCatalogLoading(false)
-            }
-            else if (catalog) {
+            if (catalog) {
                 setCatalogLoading(true)
                 const mr = Array.isArray(magRange) && magRange.length >= 2 ?
                     [String(magRange[0]), String(magRange[1])] as [string, string] : undefined
