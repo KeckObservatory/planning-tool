@@ -23,7 +23,7 @@ export interface GaiaParams {
     dec_deg?: number,
     parallax?: number,
     systemic_velocity?: number,
-    g_mag?: number,
+    g_mag?: number | string,
     t_eff?: number,
 }
 
