@@ -1,4 +1,16 @@
 export const config = {
+    "default_guide_star_table_columns": [
+        "actions",
+        "target_name",
+        "ra",
+        "dec",
+        "equinox",
+        "h_mag",
+        "v_mag",
+        "r_mag",
+        "j_mag",
+        "dist",
+    ],
     "default_table_columns": [
         "actions",
         "target_name",
@@ -10,6 +22,8 @@ export const config = {
         "pm_ra",
         "pm_dec",
         "semids",
+        "rotator_pa",
+        "comment",
         "tags"
     ],
     "csv_order": [
@@ -40,6 +54,20 @@ export const config = {
             "equinox"
         ],
         "right": ["tags"]
+    },
+    "catalog_to_target_map": {
+        "name": "target_name",
+        "ra": "ra",
+        "dec": "dec",
+        "equinox": "equinox",
+        "pm_ra": "pm_ra",
+        "pm_dec": "pm_dec",
+        "dra": "d_ra",
+        "ddec": "d_dec",
+        "jmag": "j_mag",
+        "rmag": "r_mag",
+        "vmag": "v_mag",
+        "hmag": "h_mag",
     },
     "table_column_width": 140,
     "help_msg_filename": "helpMsg.md",

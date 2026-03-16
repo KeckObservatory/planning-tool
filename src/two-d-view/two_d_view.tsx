@@ -2,7 +2,7 @@ import React from 'react';
 import * as util from './sky_view_util.tsx'
 import NightPicker from '../two-d-view/night_picker'
 import dayjs, { Dayjs } from 'dayjs';
-import { Autocomplete, Button, FormControl, FormControlLabel, FormLabel, Grid2, Radio, RadioGroup, Stack, Switch, TextField, Tooltip } from '@mui/material';
+import { Button, FormControl, FormControlLabel, FormLabel, Grid2, Radio, RadioGroup, Stack, Switch, TextField, Tooltip } from '@mui/material';
 import TimeSlider from './time_slider';
 import { Target, useStateContext } from '../App.tsx';
 import { DomeChart } from './dome_chart.tsx';
@@ -11,7 +11,7 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { alt_az_observable } from './target_viz_chart.tsx';
 import { VizRow } from './viz_dialog.tsx';
-import AladinViewer from '../aladin';
+import AladinViewer from '../aladin/aladin.tsx';
 import { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import { MoonMarker } from './moon_marker.tsx';
 import * as SunCalc from "suncalc";
@@ -19,6 +19,8 @@ import { FOVlink, STEP_SIZE } from './constants.tsx';
 import { createEnumParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
 import html2canvas from 'html2canvas';
 import { SkyChartDataSummary } from './sky_chart_data_summary.tsx';
+import { FOVSelect } from './fov_select.tsx';
+import { POPointFeature, POPointingOriginCollection, POSelect } from './pointing_origin_select.tsx';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -55,10 +57,14 @@ interface SkyChartSelectProps {
     setSkyChart: (skyChart: SkyChart) => void
 }
 
-export type ShapeCatagory = 'fov' | 'compass_rose'
+export type ShapeCatagory = 'fov' | 'compass_rose' | 'pointing_origins' | 'laser_contours' | 'fsm' | 'trick_map'
 interface ShapeCfgFile {
     fov: FeatureCollection<MultiPolygon>
     compass_rose: FeatureCollection<Polygon>
+    pointing_origins: FeatureCollection<GeoJSON.Geometry>
+    laser_contours: FeatureCollection<GeoJSON.MultiLineString>
+    fsm: FeatureCollection<GeoJSON.MultiLineString>
+    trick_map: FeatureCollection<GeoJSON.MultiLineString>
 }
 
 
@@ -139,7 +145,8 @@ const TwoDView = ({ targets }: Props) => {
     const [showSchedule, setShowSchedule] = React.useState(false)
     const [showCurrLoc, setShowCurrLoc] = React.useState(true)
     const [showLimits, setShowLimits] = React.useState(true)
-    const [rotatorAngle, setRotatorAngle] = React.useState(0)
+    const firstTarget = targets.find(t => t.ra_deg !== undefined && t.dec_deg !== undefined)
+    const [rotatorAngle, setRotatorAngle] = React.useState(firstTarget?.rotator_pa ?? 0) // default to 0 if not provided
     const [positionAngle] = React.useState(0)
     const lngLatEl = context.config.tel_lat_lng_el[dome]
     const [suncalcTimes, setSuncalcTimes] = React.useState(util.get_suncalc_times(lngLatEl, obsdate))
@@ -147,17 +154,24 @@ const TwoDView = ({ targets }: Props) => {
     const [time, setTime] = React.useState(suncalcTimes.nadir)
     const [targetView, setTargetView] = React.useState<TargetView[]>([])
     const [fovs, setFOVs] = React.useState<string[]>([])
-    //const [instrumentFOV, setInstrumentFOV] = React.useState('MOSFIRE')
+    const [pointingOrigins, setPointingOrigins] = React.useState<POPointingOriginCollection | undefined>(undefined)
+    const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
     const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
+    const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
+
+
 
     React.useEffect(() => {
         const fun = async () => {
             const featureCollection = await get_shapes('fov')
+            const pos = await get_shapes('pointing_origins') as POPointingOriginCollection
             const features = featureCollection['features'].filter((feature: any) => {
                 return feature['properties'].type === 'FOV'
             })
             const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
             setFOVs(newFovs)
+            console.log('pointing origins', pos)
+            setPointingOrigins(pos)
         }
         fun()
     }, [])
@@ -215,7 +229,7 @@ const TwoDView = ({ targets }: Props) => {
                 return feature['properties'].type === 'FOV' && feature['properties'].dome === dome
             })
             const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
-            console.log('dome', dome, 'obsdate', obsdate, 'instrumentFOV', 'skychart', skyChart)
+            console.log('dome', dome, 'obsdate', obsdate, 'skychart', skyChart)
             !newFovs.includes(instrumentFOV) && setInstrumentFOV(newFovs[0])
             setFOVs(newFovs)
         }
@@ -231,12 +245,6 @@ const TwoDView = ({ targets }: Props) => {
         if (!newDate) return
         const newObsDate = hidate(newDate?.toDate(), context.config.timezone).toDate()
         newDate && setObsdate(newObsDate)
-    }
-
-    const onInstrumentFOVChange = (value: string | undefined | null) => {
-        if (value) {
-            setInstrumentFOV(value)
-        }
     }
 
     const save_img = () => {
@@ -316,45 +324,42 @@ const TwoDView = ({ targets }: Props) => {
             </Grid2>
             <Grid2 size={{ xs: 4 }}>
                 <Stack width="100%" direction="column" justifyContent='center' spacing={1}>
-                    <Tooltip placement="top" title="Select instrument field of view">
-                        <Autocomplete
-                            disablePortal
-                            id="semid-selection"
-                            value={{ label: instrumentFOV }}
-                            onChange={(_, value) => onInstrumentFOVChange(value?.label)}
-                            options={fovs.map((instr) => { return { label: instr } })}
-                            sx={{ width: '200px', paddingTop: '9px', margin: '6px' }}
-                            renderInput={(params) => <TextField {...params} label="Instrument FOV" />}
-                        />
-                    </Tooltip>
-                    <Tooltip title={'Rotator angle for Field of View'}>
-                        <TextField
-                            sx={{ width: '200px', margin: '6px' }}
-                            label={'Rotator Angle'}
-                            id="rotator-angle"
-                            value={rotatorAngle}
-                            onChange={(event) => setRotatorAngle(Number(event.target.value))}
-                        />
-                    </Tooltip>
-                    <Tooltip title={'Save Image as a .png file'}>
-                        <Button
-                            sx={{ width: '200px', margin: '6px' }}
-                            onClick={save_img}
-                            variant='contained'
-                        >
-                            Save Image as .png
-                        </Button>
+                    <FOVSelect
+                        fovs={fovs}
+                    />
+                    {
+                        pointingOrigins && (
+                            <POSelect
+                                pointing_origins={pointingOrigins}
+                                instrument={instrumentFOV}
+                                selPointingOrigins={selPointingOrigins}
+                                setSelPointingOrigins={setSelPointingOrigins}
+                                selPO={selPO}
+                                setSelPO={setSelPO}
+                            />
 
-                    </Tooltip>
-                    {/* <Tooltip title={'Position angle for the sky'}>
-                        <TextField
-                            sx={{ width: '200px', margin: '6px' }}
-                            label={'Position Angle'}
-                            id="position-angle"
-                            value={positionAngle}
-                            onChange={(event) => setPositionAngle(Number(event.target.value))}
-                        />
-                    </Tooltip> */}
+                        )
+                    }
+                    <Stack direction='row' spacing={1} justifyContent='left'>
+                        <Tooltip title={'Rotator angle for Field of View'}>
+                            <TextField
+                                sx={{ width: '200px', margin: '6px' }}
+                                label={'Rotator Angle'}
+                                id="rotator-angle"
+                                value={rotatorAngle}
+                                onChange={(event) => setRotatorAngle(Number(event.target.value))}
+                            />
+                        </Tooltip>
+                        <Tooltip title={'Save Image as a .png file'}>
+                            <Button
+                                sx={{ width: '200px', margin: '6px' }}
+                                onClick={save_img}
+                                variant='contained'
+                            >
+                                Save Image as .png
+                            </Button>
+                        </Tooltip>
+                    </Stack>
                 </Stack>
             </Grid2>
             <Grid2 size={{ xs: 8 }}>
@@ -388,10 +393,13 @@ const TwoDView = ({ targets }: Props) => {
             <Grid2 size={{ xs: 4 }}>
                 <AladinViewer
                     height={height}
-                    fovAngle={rotatorAngle}
+                    width={width}
+                    selPO={selPO}
+                    setSelPO={setSelPO}
+                    fovAngle={Number(rotatorAngle)}
                     positionAngle={positionAngle}
                     instrumentFOV={instrumentFOV}
-                    width={width}
+                    pointingOrigins={selPointingOrigins}
                     targets={targets} />
             </Grid2>
         </Grid2 >
