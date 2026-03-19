@@ -14,11 +14,10 @@ import { ArrayParam, BooleanParam, StringParam, useQueryParam, withDefault } fro
 import { get_catalog_targets, get_catalogs, get_image_catalogs, get_catalog_image } from '../api/api_root';
 import UploadDialog from '../upload_targets_dialog';
 import { LaserContours, POPointFeature, POPointingOriginCollection, POSelect } from '../two-d-view/pointing_origin_select';
-import { mock_catalog_targets } from './mock_catalog_targets';
 import { NGSViewer } from './NGSViewer';
 // import AladinViewer from '../aladin/aladin';
 import { MagRangeSlider } from './mag_range_slider';
-import { MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE } from '../two-d-view/constants';
+import { MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE, DEFAULT_RA, DEFAULT_DEC } from '../two-d-view/constants';
 import { MuiChipsInput } from 'mui-chips-input';
 
 export interface CatalogTarget {
@@ -222,8 +221,8 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     useEffect(() => {
         const fun = async () => {
-            const ra = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
-            const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
+            const ra = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? DEFAULT_RA))
+            const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? DEFAULT_DEC), true)
             if (catalog) {
                 setCatalogLoading(true)
                 const mr = Array.isArray(magRange) && magRange.length >= 2 ?
