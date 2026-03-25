@@ -56,8 +56,8 @@ export interface SimbadTargetData {
     epoch?: string,
     parallax?: number,
     tic?: string,
-    j_mag?: number,
-    g_mag?: number,
+    j_mag?: number | string,
+    g_mag?: number | string,
     systemic_velocity?: number
     gaia_id?: string,
     tic_id?: string,
@@ -108,8 +108,8 @@ export const get_simbad_data = async (targetName: string): Promise<SimbadTargetD
         }
         else if (line.startsWith('Proper motions')) {
             const [pmRa, pmDec] = line.split(' ').slice(2, 4);
-            Number(pmRa) && (simbadData['pm_ra'] = Number(pmRa))
-            Number(pmDec) && (simbadData['pm_dec'] = Number(pmDec))
+            Number(pmRa) && (simbadData['pm_ra'] = Number(pmRa)/1000) //convert from mas/yr to arcsec/yr
+            Number(pmDec) && (simbadData['pm_dec'] = Number(pmDec)/1000) //convert from mas/yr to arcsec/yr
         }
         else if (identifiersSection) //only check if in identifiers section
         {

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import { ErrorObject } from 'ajv/dist/2019'
+import { ErrorObject, JSONSchemaType } from 'ajv/dist/2019'
 import { EditToolbarProps, EditToolbar } from './table_toolbar.tsx';
 import {
   GridRowModesModel,
@@ -20,6 +20,7 @@ import {
   GridValueSetter,
   GridCellEditStopParams,
   GridRowModel,
+  GridValueFormatter,
 } from '@mui/x-data-grid';
 import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
@@ -31,16 +32,22 @@ import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 import { format_target_property } from './upload_targets_dialog.tsx';
 import { Tooltip } from '@mui/material';
+import { CatalogTarget } from './guide_star/guide_star_dialog.tsx';
 
 
-function convert_schema_to_columns() {
+export const convert_schema_to_columns = (schema: JSONSchemaType<Target | CatalogTarget>) => {
   const columns: GridColDef[] = []
-  Object.entries(target_schema.properties).forEach(([key, valueProps]: [string, any]) => {
+  Object.entries(schema.properties).forEach(([key, valueProps]: [string, any]) => {
     // format value for display
     const valueParser: GridValueParser = (value: unknown) => {
       value = format_target_property(key as keyof Target, value, valueProps)
       if (value && valueProps.type === 'array') { //convert array to string for display
         value = Array.isArray(value) ? (value as string[]).join(',') : value as string
+      }
+      if (value && key === 'ra' || key === 'dec') { //format ra/dec for display
+        console.log('formatting', key, value)
+        value = format_edit_entry(key, value as string, true)
+        console.log('formatted value', value)
       }
       return value
     }
@@ -54,6 +61,14 @@ function convert_schema_to_columns() {
       return tgt
     }
 
+    const valueFormatter: GridValueFormatter = (value) => {
+      if ((key === 'ra' || key === 'dec') && typeof value === 'string') {
+        const formattedValue = format_edit_entry(key, value)
+        return formattedValue
+      }
+      return value
+    }
+
     let type = valueProps.type === 'array' ? 'string' : valueProps.type
     type = type.includes('string') ? 'string' : type //multiple typed fields are cast as string and formatted later on
     const editable = valueProps.type === 'array' ? false : valueProps.editable ?? true
@@ -65,6 +80,7 @@ function convert_schema_to_columns() {
       field: key,
       valueParser,
       valueSetter,
+      valueFormatter,
       description: valueProps.description,
       type: valueProps.type === 'array' ? 'string' : valueProps.type, //array cells are cast as string
       headerName: valueProps.short_description ?? valueProps.description,
@@ -96,7 +112,7 @@ const check_for_duplicates = (targets: Target[]) => {
     const alreadyInList = duplicates.some((dup) => dup.target_name === target.target_name)
     if (
       target.target_name //only check for duplicates if target has a name
-      && (duplicateNames || duplcateRADEC)
+      && (duplicateNames && duplcateRADEC) // duplicate if both name and ra/dec are the same
       && !alreadyInList
     ) {
       const duplicate: Duplicate = {
@@ -126,6 +142,16 @@ interface TargetTableProps {
   targets: Target[];
 }
 
+const get_unique_tags= (rows: Target[]): string[] => {
+  const tagsSet = new Set<string>();
+  rows.forEach(row => {
+    if (row.tags && Array.isArray(row.tags)) {
+      row.tags.forEach(tag => tagsSet.add(tag));
+    }
+  });
+  return Array.from(tagsSet).sort();
+};
+
 export default function TargetTable(props: TargetTableProps) {
   const { targets } = props
   const context = useStateContext()
@@ -133,8 +159,9 @@ export default function TargetTable(props: TargetTableProps) {
   const [rows, setRows] = React.useState(targets as Target[]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
+  const [selectedTagFilter, setSelectedTagFilter] = React.useState<string | null>(null);
   const cfg = context.config
-  let columns = convert_schema_to_columns();
+  let columns = convert_schema_to_columns(target_schema as any); //TODO: fix type issue
   const sortOrder = cfg.default_table_columns
   columns = columns.sort((a, b) => {
     return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);
@@ -348,6 +375,11 @@ export default function TargetTable(props: TargetTableProps) {
     return rows.find((tgt) => tgt._id === id)
   }).filter((tgt) => tgt !== undefined) as Target[]
 
+  const uniqueTags = get_unique_tags(rows);
+  
+  const filteredRows = selectedTagFilter
+    ? rows.filter(row => row.tags && row.tags.includes(selectedTagFilter))
+    : rows;
 
   return (
     <RowsContext.Provider value={{ rows: rows, setRows: setRows }}>
@@ -370,7 +402,7 @@ export default function TargetTable(props: TargetTableProps) {
             processRowUpdate={processRowUpdate}
             autosizeOptions={autosizeOptions}
             checkboxSelection
-            rows={rows ?? []}
+            rows={filteredRows ?? []}
             columns={columns}
             rowModesModel={rowModesModel}
             onRowModesModelChange={handleRowModesModelChange}
@@ -391,7 +423,10 @@ export default function TargetTable(props: TargetTableProps) {
                 setRowModesModel,
                 obsid: context.obsid, //TODO: allow admin to edit obsid
                 submit_one_target,
-                selectedTargets
+                selectedTargets,
+                uniqueTags,
+                selectedTagFilter,
+                setSelectedTagFilter
               } as EditToolbarProps,
             }}
             initialState={{

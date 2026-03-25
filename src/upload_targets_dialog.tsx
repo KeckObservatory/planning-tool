@@ -3,26 +3,30 @@ import Button from '@mui/material/Button';
 import DialogContentText from '@mui/material/DialogContentText';
 import { MenuItem, Menu, Stack, Tooltip, Typography } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
-import { RotatorMode, Target, TelescopeWrap, useStateContext, useSnackbarContext } from './App';
+import { Target, useStateContext, useSnackbarContext } from './App';
 import target_schema from './target_schema.json'
 import { v4 as randomId } from 'uuid';
 import { format_string_array, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog';
 import { DialogComponent } from './dialog_component';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util';
-import { TARGET_NAME_LENGTH_PADDED } from './table_toolbar';
+import { TARGET_NAME_LENGTH_PADDED } from './two-d-view/constants';
 
 interface Props {
     setTargets: Function
 }
 
 interface UploadProps extends Props {
-    label: string
-    setLabel?: Function,
     setOpen?: Function
 }
 
 
 const targetProps = target_schema.properties as TargetProps
+
+const starlistToKeyMapping = Object.fromEntries(
+    Object.entries(targetProps)
+    .filter(([_key, prop]) => prop.starlist_key)
+    .map(([key, prop]) => [prop.starlist_key, key])
+)
 
 let hdrToKeyMapping = Object.fromEntries(Object.entries(targetProps).map(([key, value]: [keyof TargetProps, PropertyProps]) => {
     const desc = value.short_description ?? value.description
@@ -80,37 +84,6 @@ export const format_targets = (tgts: UploadedTarget[], targetProps: TargetProps)
         return tgt
     })
     return fmtTgts
-}
-
-interface StarListOptionalKeys {
-    gmag?: number,
-    jmag?: number,
-    equinox?: string,
-    raoffset?: number,
-    decoffset?: number,
-    pmra?: number,
-    pmdec?: number,
-    rotmode?: RotatorMode,
-    wrap?: TelescopeWrap,
-    dra?: number,
-    ddec?: number,
-}
-
-let starlistToKeyMapping = {
-    'gmag': 'g_mag',
-    'jmag': 'j_mag',
-    'vmag': 'v_mag',
-    'equinox': 'equinox',
-    'raoffset': 'ra_offset',
-    'decoffset': 'dec_offset',
-    'pmra': 'pm_ra',
-    'pmdec': 'pm_dec',
-    'rotmode': 'rotator_mode',
-    'rotdest': 'rotator_pa',
-    'pa': 'rotator_pa',
-    'wrap': 'telescope_wrap',
-    'dra': 'd_ra',
-    'ddec': 'd_dec',
 }
 
 const parse_json = (contents: string) => {
@@ -238,10 +211,46 @@ const split_at = (index: number, str: string) => {
     return [targetName, targetBody]
 }
 
+const parse_comments = (lines: string[]) => {
+
+    let semids = [] as string[]
+    let tags = [] as string[]
+    let comments = [] as string[]
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        // handle semids in comments (e.g. # semids: sem1, sem2)
+        if (line.toLowerCase().includes('semids:')) {
+            const semidLine = line.split('semids:')[1]
+            semids = [...semids, ...semidLine.split(', ').map((sem) => sem.trim())]
+        }
+        // handle tags in comments (e.g. # tags: tag1, tag2)
+        else if (line.toLowerCase().includes('tags:')) {
+            const tagLine = line.split('tags:')[1]
+            tags = [...tags, ...tagLine.split(', ').map((tag) => tag.trim())]
+        }
+        // handle comment lines that have 'comment:'
+        else if (line.toLowerCase().includes('comment:')) {
+            const commentLine = line.split('comment:')[1]
+            comments = [...comments, commentLine.trim()]
+        }
+        else {
+            comments = [...comments, line.replace('#', '').trim()]
+        }
+    }
+
+    return { semids, tags, comments }
+
+}
+
+
 const parse_txt = (contents: string, obsid: number) => {
     let tgts = [] as UploadedTarget[]
+    let commentLines: string[] = []
     contents.split(/\r\n|\n/).forEach((row) => {
-        if (row.startsWith('#')) return //skip comments
+        if (row.startsWith('#')) {
+            commentLines.push(row)
+            return //skip comments
+        }
         if (row.trim() === '' || !row) return //whitespace rows are ignored
         const [target_name, tail] = split_at(TARGET_NAME_LENGTH_PADDED, row)
         let [rah, ram, ras, dech, decm, decs, equinox, ...opts] = tail.trimStart().replace(/\s\s+/g, ' ').split(' ')
@@ -258,13 +267,13 @@ const parse_txt = (contents: string, obsid: number) => {
         }
         // ignore anything after # in the row
         //inline comments are added to comments field
-        const inlineComment = opts.findIndex((opt) => opt.startsWith('#'))
-        let comment: string = ''
-        if (inlineComment > 0 && opts.length > 0) {
-            opts = opts.slice(0, inlineComment)
-            comment = opts.slice(inlineComment).join(' ')
+        const inlineCommentIdx = opts.findIndex((opt) => opt.startsWith('#'))
+        if (inlineCommentIdx > 0 && opts.length > 0) {
+            const comment = opts.slice(inlineCommentIdx).join(' ').replace('#', '').trim()
+            opts = opts.slice(0, inlineCommentIdx)
+            commentLines.push(comment) // add inline comment to comment lines so it gets added to the comment field
         }
-        opts = opts.find((opt) => opt.startsWith('#')) ? opts.slice(0, opts.findIndex((opt) => opt.startsWith('#'))) : opts
+
         let tgt: UploadedTarget = {
             _id: randomId(),
             target_name: target_name.trimEnd().trimStart(),
@@ -275,13 +284,26 @@ const parse_txt = (contents: string, obsid: number) => {
             dec,
             equinox,
         };
-        if (comment.length > 0) {
-            tgt.comment = comment
+        const { semids, tags, comments } = parse_comments(commentLines)
+
+        if (comments.length > 0) {
+            tgt.comment = comments.join(', ')
         }
+        if (semids.length > 0) {
+            tgt.semids = semids
+        }
+        if (tags.length > 0) {
+            tgt.tags = tags
+        }
+
+        //reset comment lines after adding them to the target so they don't get added to the next target
+        commentLines = []
+
+        opts = opts.find((opt) => opt.startsWith('#')) ? opts.slice(0, opts.findIndex((opt) => opt.startsWith('#'))) : opts
         opts.forEach((opt) => {
             if (!opt.includes('=')) return
             const [key, value] = opt.split('=')
-            const tgtKey = starlistToKeyMapping[key as keyof StarListOptionalKeys] as keyof Target
+            const tgtKey = starlistToKeyMapping[key]
             if (!tgtKey) {
                 console.warn('invalid key', key, value, opts, row)
                 return
@@ -295,7 +317,7 @@ const parse_txt = (contents: string, obsid: number) => {
 }
 
 interface UploadedTarget {
-    [key: string]: string | number
+    [key: string]: string | number | string[]
 }
 
 export function UploadComponent(props: UploadProps) {
@@ -304,6 +326,7 @@ export function UploadComponent(props: UploadProps) {
     const snackbarContext = useSnackbarContext()
 
     const [starlistNames, setStarlistNames] = React.useState<string[]>([])
+    const [label, setLabel] = React.useState("Upload Targets");
 
     React.useEffect(() => {
         const fetchStarlistNames = async () => {
@@ -366,17 +389,16 @@ export function UploadComponent(props: UploadProps) {
                 }
         }
         console.log('uploaded tgts', uploadedTargets)
-        props.setOpen && props.setOpen(false)
         const fmtTgts = format_targets(uploadedTargets, targetProps)
         const txt = `${ext === 'starlisttxt' ? 'Starlist: ' : 'Local File: '}${filename} Uploaded. (${fmtTgts.length} targets)`
-        props.setLabel && props.setLabel(txt)
+        setLabel && setLabel(txt)
         props.setTargets(fmtTgts)
     };
 
     const localFileLoad = (evt: React.ChangeEvent<HTMLInputElement>) => {
         let file: File = new File([], 'empty')
         evt.target?.files && (file = evt.target?.files[0])
-        props.setLabel && props.setLabel(`${file.name} Uploaded`)
+        setLabel && setLabel(`${file.name} Uploaded`)
         const ext = file.name.split('.').pop()
         const fileReader = new FileReader()
         fileReader.readAsText(file, "UTF-8");
@@ -432,7 +454,7 @@ export function UploadComponent(props: UploadProps) {
                 </Menu>
             </Stack>
             <Typography variant="body2" color="text.secondary">
-                {props.label}
+                {label}
             </Typography>
         </Stack>
     )
@@ -440,7 +462,6 @@ export function UploadComponent(props: UploadProps) {
 
 export default function UploadDialog(props: Props) {
     const [open, setOpen] = React.useState(false);
-    const [label, setLabel] = React.useState("Upload Targets");
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -465,17 +486,16 @@ export default function UploadDialog(props: Props) {
 
     const dialogActions = (
         <UploadComponent
-            label={label}
-            setLabel={setLabel}
             setOpen={setOpen}
-            setTargets={props.setTargets} />
+            setTargets={props.setTargets} 
+        />
     )
 
     return (
         <>
             <Tooltip title="Upload Targets from .json or .txt file">
                 <Button onClick={handleClickOpen} startIcon={<UploadIcon />}>
-                    {label}
+                    {'Set Targets'}
                 </Button>
             </Tooltip>
             <DialogComponent

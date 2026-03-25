@@ -2,6 +2,7 @@ import axios from 'axios';
 
 import { handleResponse, handleError, intResponse, intError } from './response.tsx';
 import { Target } from '../App.tsx';
+import { CatalogTarget } from '../guide_star/guide_star_dialog.tsx';
 const SIMBAD_ADDR = "https://simbad.u-strasbg.fr/simbad/sim-id?NbIdent=1&submit=submit+id&output.format=ASCII&obj.bibsel=off&Ident="
 const BASE_URL = "/api/planning_tool"
 const SCHEDULE_URL = "/api/schedule"
@@ -22,7 +23,7 @@ export interface GaiaParams {
     dec_deg?: number,
     parallax?: number,
     systemic_velocity?: number,
-    g_mag?: number,
+    g_mag?: number | string,
     t_eff?: number,
 }
 
@@ -142,6 +143,36 @@ export const get_targets = (obsid?: number, target_id?: string, semid?: string):
     url += target_id ? "&target_id=" + target_id : ""
     url += semid ? "&semid=" + semid : ""
     return axiosInstance.get(url, { })
+        .then(handleResponse)
+        .catch(handleError)
+}
+
+export const get_catalog_image = (dss_name: string, ra: number, dec: number, window_size: number): string => {
+    const ws = JSON.stringify({"size": window_size, "units": "degrees"})
+    let url = `https://vm-appserver.keck.hawaii.edu/catalogs-test/image/?position=%7B%22ra%22:${ra},%22dec%22:${dec}%7D&window-size=${ws}&catalog=${dss_name}&external=1&format=png`
+    return url
+}
+
+export const get_catalog_targets = (catalog_name: string, ra: number, dec: number, radius: number, magRange?: [string, string]): Promise<CatalogTarget[]> => {
+    let url = `https://vm-appserver.keck.hawaii.edu/catalogs-test/sources/?position=%7B%22ra%22:${ra},%22dec%22:${dec}%7D&radius=${radius}&window-size=%7B%22size%22:${radius},%22units%22:%22degrees%22%7D&catalog=${catalog_name}&external=1`
+    if (magRange) {
+        url += `&mag-min=${magRange[0]}&mag-max=${magRange[1]}`
+    }
+    return axiosInstance.get(url)
+        .then(handleResponse)
+        .catch(handleError)
+}
+
+export const get_image_catalogs = (): Promise<string[]> => {
+    let url = `https://vm-appserver.keck.hawaii.edu/catalogs-test/available/image`
+    return axiosInstance.get(url)
+        .then(handleResponse)
+        .catch(handleError)
+}
+
+export const get_catalogs = (): Promise<string[]> => {
+    let url = `https://vm-appserver.keck.hawaii.edu/catalogs-test/available/source`
+    return axiosInstance.get(url)
         .then(handleResponse)
         .catch(handleError)
 }

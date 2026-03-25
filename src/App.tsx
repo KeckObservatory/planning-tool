@@ -14,25 +14,32 @@ import Skeleton from '@mui/material/Skeleton';
 import { get_targets, get_userinfo } from './api/api_root.tsx';
 import { SimbadTargetData } from './catalog_button.tsx';
 import { config } from './config.tsx';
+import { mockTargets } from './mock_targets.tsx';
 
 export type Status = "EDITED" | "CREATED" | "SAVED"
 
 export type RotatorMode = "pa" | "vertical" | "stationary"
 export type TelescopeWrap = "shortest" | "south" | "north"
+export type Lgs = '0' | '1' | 'None' 
 
 export interface Target extends SimbadTargetData {
   _id: string,
   obsid: number,
+  del_flag?: number,
+  state?: string,
   target_name?: string,
+  lgs?: Lgs,
   v_mag?: number,
   h_mag?: number,
   k_mag?: number,
   b_mag?: number,
   r_mag?: number,
+  b_m_v_mag?: number,
+  b_m_r_mag?: number,
   ra_offset?: number,
   dec_offset?: number,
   rotator_mode?: RotatorMode,
-  rotator_pa?: number,
+  rotator_pa?: number | string,
   telescope_wrap?: TelescopeWrap
   d_ra?: number,
   d_dec?: number,
@@ -87,7 +94,9 @@ export interface LngLatEl {
 
 
 interface ConfigFile {
+  default_guide_star_table_columns: string[];
   default_table_columns: string[];
+  catalog_to_target_map: { [key: string]: string };
   csv_order: string[];
   pinned_table_columns: { 'left': string[], 'right': string[] };
   table_column_width: number,
@@ -104,6 +113,8 @@ export interface State {
   is_admin: boolean;
   semids: string[];
   config: ConfigFile;
+  targets?: Target[]
+  setTargets?: React.Dispatch<React.SetStateAction<Target[] | undefined>>;
 }
 
 export interface UserInfo {
@@ -144,29 +155,37 @@ function App() {
   const [ semid ] = useQueryParam<string>('semid');
   const [openSnackbar, setOpenSnackbar] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState<SnackbarMessage>({ message: 'default message' })
-  const [state, setState] = useState<State>({config, semids: [], is_admin: false, username:""} as unknown as State);
+  const [state, setState] = useState<State>({config, 
+    semids: [], 
+    is_admin: false, 
+    username:"",
+    targets: undefined,
+    setTargets: undefined
+  } as unknown as State);
   const theme = handleTheme(darkState)
-  const [targets, setTargets] = useState<Target[] | undefined>(undefined)
+  // const [targets, setTargets] = useState<Target[] | undefined>(undefined)
 
   useEffect(() => {
+
     const fetch_targets = async () => {
       if (semid) {
         let tgts = await get_targets(undefined, undefined, semid)
-        setTargets([...tgts])
+        setState((prevState) => ({ ...prevState, targets: [...tgts] }))
       }
       else if (state.obsid && (semid === undefined || semid === "")) {
         let tgts = await get_targets(state.obsid)
-        setTargets(tgts)
+        setState((prevState) => ({ ...prevState, targets: [...tgts] }))
       }
     }
     fetch_targets()
   }, [semid])
 
   useEffect(() => {
+
     const fetch_data = async () => {
-      const userinfo = await get_userinfo();
-      const username = `${userinfo.FirstName} ${userinfo.LastName}`;
-      const init_state = {
+      var userinfo = await get_userinfo();
+      var username = `${userinfo.FirstName} ${userinfo.LastName}`;
+      var init_state: any = {
         config,
         username,
         obsid: userinfo.Id,
@@ -174,12 +193,12 @@ function App() {
         is_admin: userinfo.is_admin ?? false
       }
       setState(init_state)
-      // const userinfo = await get_userinfo_mock();
       if (init_state.obsid) {
         let tgts = await get_targets(init_state.obsid, undefined, semid)
-        setTargets(tgts)
+        setState((prevState) => ({ ...prevState, targets: [...tgts] }))
       }
     }
+
     fetch_data()
   }, [])
 
@@ -222,8 +241,8 @@ function App() {
                 flexDirection: 'column',
               }}
             >
-              {targets === undefined ? (<Skeleton variant="rectangular" width="100%" height={500} />) :
-                <TargetTable targets={targets} />}
+              {state.targets === undefined ? (<Skeleton variant="rectangular" width="100%" height={500} />) :
+                <TargetTable targets={state.targets} />}
             </Paper>
           </Stack>
         </SnackbarContext.Provider>

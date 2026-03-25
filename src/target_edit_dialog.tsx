@@ -16,7 +16,7 @@ import target_schema from './target_schema.json'
 import { Status, Target } from './App';
 import { MuiChipsInput } from 'mui-chips-input';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util';
-import { TARGET_LENGTH } from './table_toolbar';
+import { TARGET_LENGTH } from './two-d-view/constants';
 
 interface Props {
     target: Target
@@ -35,6 +35,7 @@ interface Items extends PropertyProps {
 export interface PropertyProps {
     description: string,
     type: string | string[],
+    starlist_key?: string,
     short_description?: string,
     default?: unknown,
     pattern?: string,
@@ -70,7 +71,8 @@ export const raDecFormat = (input: string) => {
     } else if (size < 7) {
         input = input.substring(0, 2) + ':' + input.substring(2, 4) + ':' + input.substring(4, 6) + '.';
     } else {
-        input = input.substring(0, 2) + ':' + input.substring(2, 4) + ':' + input.substring(4, 6) + '.' + input.substring(6);
+        //allow for up to 4 decimal places
+        input = input.substring(0, 2) + ':' + input.substring(2, 4) + ':' + input.substring(4, 6) + '.' + input.substring(6, 10);
     }
     return sign + input;
 }
@@ -240,6 +242,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
 
     const rotOptions = targetProps.rotator_mode?.enum?.map((s) => { return { label: s } })
     const wrapOptions = targetProps.telescope_wrap?.enum?.map((s) => { return { label: s } })
+    const lgsOptions = targetProps.lgs.enum?.map((s) => { return { label: s } })
 
     const titleContent = (
         <Stack direction='row' spacing={2}>
@@ -252,7 +255,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
             >
                 Edit Target
             </Typography>
-            <CatalogButton target={target} label={true} setTarget={handleCatalogChange} hasCatalog={hasCatalog} />
         </Stack>
     )
 
@@ -274,6 +276,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
             >
                 <Box>
                     <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
+                        <CatalogButton target={target} label={true} setTarget={handleCatalogChange} hasCatalog={hasCatalog} />
                         <Tooltip title={input_label('target_name', true)}>
                             <TextField
                                 label={input_label('target_name')}
@@ -400,6 +403,38 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 value={target.k_mag}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('k._mag', event.target.value, true)}
+                            />
+                        </Tooltip>
+                    </Stack>
+                    <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
+                        <Tooltip title={input_label('b_m_v_mag', true)}>
+                            <TextField
+                                label={input_label('b_m_v_mag')}
+                                id="b-m-v-magnitude"
+                                focused={target.b_m_v_mag ? true : false}
+                                value={target.b_m_v_mag}
+                                sx={{ width: 125 }}
+                                onChange={(event) => handleTextChange('b_m_v_mag', event.target.value, true)}
+                            />
+                        </Tooltip>
+                        <Tooltip title={input_label('b_m_r_mag', true)}>
+                            <TextField
+                                label={input_label('b_m_r_mag')}
+                                id="b-m-r-magnitude"
+                                focused={target.b_m_r_mag ? true : false}
+                                value={target.b_m_r_mag}
+                                sx={{ width: 125 }}
+                                onChange={(event) => handleTextChange('b_m_r_mag', event.target.value, true)}
+                            />
+                        </Tooltip>
+                        <Tooltip title={input_label('b_mag', true)}>
+                            <TextField
+                                label={input_label('b_mag')}
+                                id="b-magnitude"
+                                focused={target.b_mag ? true : false}
+                                value={target.b_mag}
+                                sx={{ width: 125 }}
+                                onChange={(event) => handleTextChange('b_mag', event.target.value, true)}
                             />
                         </Tooltip>
                     </Stack>
@@ -531,6 +566,17 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 value={target.equinox}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('equinox', event.target.value)}
+                            />
+                        </Tooltip>
+                        <Tooltip title={input_label('lgs', true)}>
+                            <Autocomplete
+                                disablePortal
+                                id="lgs"
+                                value={target.lgs ? { label: target.lgs } : { label: '' }}
+                                onChange={(_, value) => handleTextChange('lgs', value?.label)}
+                                options={lgsOptions ?? []}
+                                sx={{ width: 125 }}
+                                renderInput={(params) => <TextField {...params} label={input_label('lgs')} />}
                             />
                         </Tooltip>
                     </Stack>

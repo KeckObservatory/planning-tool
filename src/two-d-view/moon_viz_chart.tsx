@@ -146,7 +146,6 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
                     units = "log10"
                     break
                 case 'moon_illuminance':
-                    //TODO: verify that this is correct
                     datum = moon_illuminance(phase_angle_moon)
                     break
                 case 'target_pathlength':
