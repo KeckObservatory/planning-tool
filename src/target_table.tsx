@@ -180,12 +180,21 @@ export default function TargetTable(props: TargetTableProps) {
       throw new Error('error updating target')
     }
     const submittedTarget = resp.targets.at(0)
-    //update target in rows 
-    const newTargets = rows.map((tgt) => {
-      return tgt._id === submittedTarget?._id ?
-        submittedTarget : tgt
+    //either add target to rows if it's new or update existing target in rows
+    setRows((curRows) => {
+      let newRows: Target[]
+      const targetExists = curRows.some((tgt) => tgt._id === submittedTarget?._id)
+      if (targetExists) {
+        newRows = curRows.map((tgt) => {
+          return tgt._id === submittedTarget?._id ?
+            submittedTarget : tgt
+        })
+      }
+      else {
+        newRows = [submittedTarget as Target, ...curRows]
+      }
+      return newRows;
     })
-    setRows(newTargets)
     return submittedTarget
   }
 
@@ -216,7 +225,6 @@ export default function TargetTable(props: TargetTableProps) {
 
   const handleDeleteClick = async (id: GridRowId) => {
     const delRow = rows.find((row) => row._id === id);
-    console.log('deleting', id, delRow)
     delRow && delete_target([delRow._id as string])
     const newRows = rows.filter((row) => row._id !== id)
     setRows(newRows);
@@ -260,29 +268,23 @@ export default function TargetTable(props: TargetTableProps) {
   const ActionsCell = (params: GridRowParams<Target>) => {
     const { id, row } = params;
     const [editTarget, setEditTarget] = React.useState<Target>(row);
-    const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
     const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
     const editTargetRef = React.useRef<Target>(editTarget);
-    const countRef = React.useRef<number>(count);
+    const initRef = React.useRef<boolean>(false);
     
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
       return validate_sanitized_target(editTargetRef.current);
-    }, [editTarget, count])
+    }, [editTarget, initRef.current])
 
     const apiRef = useGridApiContext();
 
-    // Update refs when state changes
-    React.useEffect(() => {
-      editTargetRef.current = editTarget;
-      countRef.current = count;
-    }, [editTarget, count]);
-
     const handleRowChange = React.useCallback(async (override = false) => {
-      if (countRef.current > 0 || override) {
+      if (initRef.current || override) {
         let newTgt: Target | undefined = undefined
         const isEdited = editTargetRef.current.status?.includes('EDITED')
-        if (isEdited) newTgt = await edit_target(editTargetRef.current)
-        processRowUpdate(editTargetRef.current) //TODO: May want to wait till save is successful
+        if (isEdited) {
+          newTgt = await edit_target(editTargetRef.current)
+        }
         if (newTgt) {
           newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
           debounced_edit_click(id)
@@ -291,11 +293,17 @@ export default function TargetTable(props: TargetTableProps) {
     }, [id])
 
     const debouncedHandleRowChange = useDebounceCallback(handleRowChange, 2000)
-
-    React.useEffect(() => { // when targed is edited in target edit dialog or catalog dialog
+    
+    // Update refs and trigger save when editTarget changes
+    React.useEffect(() => {
+      editTargetRef.current = editTarget;
+      if (!initRef.current) {
+        initRef.current = true
+        return
+      }
+      // Only trigger save if editTarget actually changed and we haven't already scheduled a save
       debouncedHandleRowChange()
-      setCount((prev: number) => prev + 1)
-    }, [editTarget])
+    }, [editTarget]);
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
     const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
@@ -322,7 +330,7 @@ export default function TargetTable(props: TargetTableProps) {
       await setEditTarget(newTgt)
       handleRowChange(true) //override save
       setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
-      setCount((prev: number) => prev + 1)
+      initRef.current = true
     }
 
     useGridApiEventHandler(apiRef, 'cellEditStop', handleEvent)
@@ -412,7 +420,6 @@ export default function TargetTable(props: TargetTableProps) {
               toolbar: {
                 rows,
                 setRows,
-                processRowUpdate,
                 setRowModesModel,
                 obsid: context.obsid, //TODO: allow admin to edit obsid
                 submit_one_target,

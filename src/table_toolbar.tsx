@@ -6,7 +6,6 @@ import {
   GridToolbarContainer,
   GridToolbarExportContainer,
   GridExportMenuItemProps,
-  GridRowModel,
   GridToolbar,
   GridToolbarProps,
   ToolbarPropsOverrides
@@ -184,7 +183,6 @@ export interface EditToolbarProps extends Partial<GridToolbarProps & ToolbarProp
   rows: Target[];
   setRows: React.Dispatch<React.SetStateAction<Target[]>>;
   obsid: number;
-  processRowUpdate: (newRow: GridRowModel<Target>) => Promise<GridRowModel<Target>>;
   submit_one_target: Function
   selectedTargets: Target[]
   uniqueTags: string[];
@@ -193,7 +191,7 @@ export interface EditToolbarProps extends Partial<GridToolbarProps & ToolbarProp
 }
 
 export function EditToolbar(props: EditToolbarProps) {
-  const { rows, setRows, processRowUpdate, selectedTargets, submit_one_target, uniqueTags, selectedTagFilter, setSelectedTagFilter } = props;
+  const { rows, setRows, selectedTargets, submit_one_target, uniqueTags, selectedTagFilter, setSelectedTagFilter } = props;
 
   const snackbarContext = useSnackbarContext()
 
@@ -207,11 +205,6 @@ export function EditToolbar(props: EditToolbarProps) {
       snackbarContext.setSnackbarOpen(true);
       return
     }
-    processRowUpdate(submittedTarget)
-    setRows((oldRows) => {
-      const newRows = [submittedTarget, ...oldRows];
-      return newRows
-    });
   };
 
   const vizTargets = selectedTargets.length > 0 ?
