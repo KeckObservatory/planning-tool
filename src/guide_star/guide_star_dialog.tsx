@@ -14,7 +14,6 @@ import { ArrayParam, BooleanParam, StringParam, useQueryParam, withDefault } fro
 import { get_catalog_targets, get_catalogs, get_image_catalogs, get_catalog_image } from '../api/api_root';
 import UploadDialog from '../upload_targets_dialog';
 import { LaserContours, POPointFeature, POPointingOriginCollection, POSelect } from '../two-d-view/pointing_origin_select';
-import { mock_catalog_targets } from './mock_catalog_targets';
 import { NGSViewer } from './NGSViewer';
 // import AladinViewer from '../aladin/aladin';
 import { MagRangeSlider } from './mag_range_slider';
