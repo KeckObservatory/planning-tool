@@ -234,7 +234,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     useEffect(() => {
         setDisableLaser(!is_ao_instrument(instrumentFOV))
+        setUseLaser(is_ao_instrument(instrumentFOV) ? useLaser : false) //turn off laser if switching to non-AO instrument 
         setDisableTrickMap(!is_trick_instrument(instrumentFOV))
+        setShowTrickMap(is_trick_instrument(instrumentFOV) ? showTrickMap : false) //turn off trick map if switching to non-trick instrument
     }, [instrumentFOV])
 
     useEffect(() => {
