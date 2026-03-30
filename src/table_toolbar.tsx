@@ -140,7 +140,7 @@ export interface ExportProps extends GridExportMenuItemProps<{}> {
 function JsonExportMenuItem(props: ExportProps) {
   const { hideMenu } = props;
   const [open, setOpen] = React.useState(false);
-  const [fileName, setFileName] = React.useState('starlist.txt');
+  const [fileName, setFileName] = React.useState('targets.json');
 
   const onSubmit = () => {
     const targets = props.exportTargets;
