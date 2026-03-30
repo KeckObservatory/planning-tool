@@ -1,3 +1,4 @@
+import * as React from 'react';
 import target_schema from './target_schema.json';
 import AddIcon from '@mui/icons-material/Add';
 import { TargetWizardButton } from './target_wizard';
@@ -18,7 +19,7 @@ import { Target, useSnackbarContext } from './App.tsx';
 import { Stack, Autocomplete, TextField } from '@mui/material';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import DeleteDialogButton from './delete_rows_dialog.tsx';
-import { StarListExportDirMenu } from './starlist_export_to_dir.tsx';
+import { ExportTargetsNameDialog, StarListExportDirMenu } from './starlist_export_to_dir.tsx';
 import TagDialogButton from './tag_dialog.tsx';
 import SemidDialogButton from './semid_dialog.tsx';
 import { SemidSelect } from './semid_select.tsx';
@@ -60,7 +61,7 @@ const convert_target_to_targetlist_row = (target: Target) => {
   else if (target.lgs === '0') {
     row = row + ` lgs=0`
   }
-  else {}
+  else { }
   //comment and tags go before the row
   row = target.comment ? `# ${name} comment: ${target.comment}\n` + row : row
   const tags = target.tags ?? []
@@ -96,22 +97,38 @@ const exportBlob = (blob: Blob, filename: string) => {
 
 function StarListExportMenu(props: ExportProps) {
 
-  const { hideMenu, exportTargets } = props;
+  const { exportTargets } = props;
+  const [open, setOpen] = React.useState(false);
+  const [fileName, setFileName] = React.useState('starlist.txt');
+
+  const onSubmit = () => {
+
+    const txt = getStarlist(exportTargets);
+    const blob = new Blob([txt], {
+      type: 'text/json',
+    });
+    exportBlob(blob, fileName);
+    setOpen(false);
+    // Hide the export menu after the export
+  }
 
   return (
-    <MenuItem
-      onClick={() => {
-        const txt = getStarlist(exportTargets);
-        const blob = new Blob([txt], {
-          type: 'text/json',
-        });
-        exportBlob(blob, 'starlist.txt');
-        // Hide the export menu after the export
-        hideMenu?.();
-      }}
-    >
-      Export Starlist Text File
-    </MenuItem>
+    <>
+      <MenuItem
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        Export Starlist Text File
+      </MenuItem>
+      <ExportTargetsNameDialog
+        open={open}
+        handleClose={() => setOpen(false)}
+        handleSubmit={onSubmit}
+        fileName={fileName}
+        setFileName={setFileName}
+      />
+    </>
   );
 }
 
@@ -122,22 +139,37 @@ export interface ExportProps extends GridExportMenuItemProps<{}> {
 
 function JsonExportMenuItem(props: ExportProps) {
   const { hideMenu } = props;
+  const [open, setOpen] = React.useState(false);
+  const [fileName, setFileName] = React.useState('targets.json');
+
+  const onSubmit = () => {
+    const targets = props.exportTargets;
+    const blob = new Blob([JSON.stringify(targets, null, 2)], {
+      type: 'text/json',
+    });
+    exportBlob(blob, fileName);
+    setOpen(false);
+    // Hide the export menu after the export
+    hideMenu?.();
+  }
 
   return (
-    <MenuItem
-      onClick={() => {
-        const targets = props.exportTargets;
-        const blob = new Blob([JSON.stringify(targets, null, 2)], {
-          type: 'text/json',
-        });
-        exportBlob(blob, 'targets.json');
-
-        // Hide the export menu after the export
-        hideMenu?.();
-      }}
-    >
-      Export JSON
-    </MenuItem>
+    <>
+      <MenuItem
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        Export JSON
+      </MenuItem>
+      <ExportTargetsNameDialog
+        open={open}
+        handleClose={() => setOpen(false)}
+        handleSubmit={onSubmit}
+        fileName={fileName}
+        setFileName={setFileName}
+      />
+    </>
   );
 }
 
@@ -149,9 +181,11 @@ interface ExportButtonProps extends ButtonProps {
 function CustomExportButton(props: ExportButtonProps) {
 
   return (
-    <GridToolbarExportContainer {...props} slotProps={{ tooltip: {
-      title: 'Export selected targets (or all if none selected)',
-    }}}>
+    <GridToolbarExportContainer {...props} slotProps={{
+      tooltip: {
+        title: 'Export selected targets (or all if none selected)',
+      }
+    }}>
       <JsonExportMenuItem exportTargets={props.exportTargets} />
       <StarListExportMenu exportTargets={props.exportTargets} />
       <StarListExportDirMenu exportTargets={props.exportTargets} />
@@ -219,7 +253,7 @@ export function EditToolbar(props: EditToolbarProps) {
     :
     rows.filter((target) => target.ra && target.dec)
 
-  const exportTargets = props.selectedTargets.length > 0 ? 
+  const exportTargets = props.selectedTargets.length > 0 ?
     get_targets_from_selected_targets(selectedTargets, rows)
     : rows
 
@@ -248,7 +282,7 @@ export function EditToolbar(props: EditToolbarProps) {
       </Stack>
       <Stack justifyContent={'right'} direction="row" spacing={1}>
         <SemidSelect />
-        <CustomExportButton exportTargets={exportTargets}/>
+        <CustomExportButton exportTargets={exportTargets} />
         <GridToolbar
           printOptions={{ disableToolbarButton: true }}
           csvOptions={{ disableToolbarButton: true }}
