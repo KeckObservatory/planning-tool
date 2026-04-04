@@ -165,15 +165,15 @@ export const get_catalog_targets = (catalog_name: string, ra: number, dec: numbe
 }
 
 export const get_image_catalogs = (): Promise<string[]> => {
-    let url = CATALOG_URL + 'available/image'
-    return axiosInstance.get(url)
+    let url = CATALOG_URL + '/available/image'
+    return axiosInstance.get(encodeURIComponent(url))
         .then(handleResponse)
         .catch(handleError)
 }
 
 export const get_catalogs = (): Promise<string[]> => {
-    let url = CATALOG_URL + 'available/source'
-    return axiosInstance.get(url)
+    let url = CATALOG_URL + '/available/source'
+    return axiosInstance.get(encodeURIComponent(url))
         .then(handleResponse)
         .catch(handleError)
 }
