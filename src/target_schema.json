@@ -77,28 +77,28 @@
         "r_mag": {
             "type":  ["number", "string"],
             "starlist_key": "rmag",
-            "description": "R Magnitude. Relavent for AO observations with the optical WFS.",
+            "description": "R Magnitude. Relavant for AO observations with the optical WFS.",
             "short_description": "R mag",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "b_mag": {
             "type":  ["number", "string"],
             "starlist_key": "bmag",
-            "description": "B Magnitude. Relavent for AO observations with the optical WFS.",
+            "description": "B Magnitude. Relavant for AO observations with the optical WFS.",
             "short_description": "B mag",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "h_mag": {
             "type":  ["number", "string"],
             "starlist_key": "hmag",
-            "description": "H Magnitude. Relavent fro AO observations with TRICK.",
+            "description": "H Magnitude. Relavant for AO observations with TRICK.",
             "short_description": "H mag",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "k_mag": {
             "type":  ["number", "string"],
             "starlist_key": "kmag",
-            "description": "K Magnitude relavent for AO observations with TRICK.",
+            "description": "K Magnitude. Relavent for AO observations with TRICK.",
             "short_description": "K mag",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
