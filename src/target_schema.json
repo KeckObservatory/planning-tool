@@ -91,7 +91,7 @@
         "h_mag": {
             "type":  ["number", "string"],
             "starlist_key": "hmag",
-            "description": "H Magnitude. Relavant fro AO observations with TRICK.",
+            "description": "H Magnitude. Relavant for AO observations with TRICK.",
             "short_description": "H mag",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
