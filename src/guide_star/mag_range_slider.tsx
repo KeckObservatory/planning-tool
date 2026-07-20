@@ -10,6 +10,7 @@ function valuetext(value: number) {
 
 interface Props {
     range?: [string, string]
+    disabled?: boolean
     setRange: (newValue: string[]) => void
 }
 
@@ -41,6 +42,7 @@ export const MagRangeSlider = (props: Props) => {
                 value={value}
                 min={MAG_RANGE[0]}
                 step={.2}
+                disabled={props.disabled}
                 max={MAG_RANGE[1]}
                 onChange={handleChange}
                 onChangeCommitted={handleChangeCommitted}

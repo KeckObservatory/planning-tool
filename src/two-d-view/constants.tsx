@@ -46,6 +46,8 @@ export const DEFAULT_WINDOW_SIZE = 300 / 3600 // degrees, size of window to quer
 export const MOSFIRE_WINDOW_SIZE = 900 / 3600 // degrees, size of window to query for guide stars
 export const DEFAULT_RA = "12:48:45.8623" //NGC4711
 export const DEFAULT_DEC = "+35:19:57.8810"  //NGC4711
+export const AO_INSTRUMENTS: string[] = ['NIRC2', 'OSIRIS', 'NIRC2', 'NIRSPAO', 'LRIS'] //instruments that can use AO guide stars
+export const TRICK_INSTRUMENTS: string[] = ['OSIRISImager']
 //img catalog constants
 export const ZOOM_SPEED = 0.001;
 export const ZOOM_MIN = 0.5;

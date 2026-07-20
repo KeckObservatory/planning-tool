@@ -4,6 +4,7 @@ import {
     DataGrid,
     GridColDef,
     GridRowParams,
+    useGridApiRef,
 } from '@mui/x-data-grid';
 import { Target, useSnackbarContext, useStateContext } from '../App.tsx';
 import { v4 as randomId } from 'uuid';
@@ -101,11 +102,37 @@ export default function GuideStarTable(props: Props) {
     });
     const sortOrder = cfg.default_guide_star_table_columns;
     const [rowSelectModel, setRowSelectModel] = React.useState<any>([]);
+    const apiRef = useGridApiRef();
 
     React.useEffect(() => {
-        // console.log("Selected guide star name:", selectedGuideStarName, apiRef.current)
-        // apiRef.current.selectRow(selectedGuideStarName);
         setRowSelectModel(selectedGuideStarName ? [selectedGuideStarName] : [])
+
+        if (!selectedGuideStarName) {
+            return;
+        }
+
+        // Wait a frame so the grid has rendered/paginated before we measure it.
+        const frame = requestAnimationFrame(() => {
+            const api = apiRef.current;
+            if (!api) {
+                return;
+            }
+            const rowIndex = api.getRowIndexRelativeToVisibleRows(selectedGuideStarName);
+            const dimensions = api.getRootDimensions();
+            if (rowIndex === undefined || rowIndex === null || rowIndex < 0 || !dimensions?.isReady) {
+                return;
+            }
+            const { rowHeight, viewportInnerSize } = dimensions;
+            const rowTop = rowIndex * rowHeight;
+            const totalHeight = api.getRowsCount() * rowHeight;
+            // Try to center the row in the viewport, but clamp so we don't
+            // overscroll past the top or bottom of the table.
+            const desiredScrollTop = rowTop + rowHeight / 2 - viewportInnerSize.height / 2;
+            const maxScrollTop = Math.max(0, totalHeight - viewportInnerSize.height);
+            const scrollTop = Math.min(Math.max(desiredScrollTop, 0), maxScrollTop);
+            api.scroll({ top: scrollTop });
+        });
+        return () => cancelAnimationFrame(frame);
     }, [selectedGuideStarName]);
 
     columns = columns.sort((a, b) => {
@@ -160,6 +187,7 @@ export default function GuideStarTable(props: Props) {
         >
             {Object.keys(visibleColumns).length > 0 && (
                 <DataGrid
+                    apiRef={apiRef}
                     getRowId={(row: Partial<Target>) => row.target_name ?? row._id ?? randomId()}
                     rows={guidestars ?? []}
                     columns={columns}
@@ -176,7 +204,7 @@ export default function GuideStarTable(props: Props) {
                                 visibleColumns
                         },
                         pagination: {
-                            paginationModel: { pageSize: 25 }
+                            paginationModel: { pageSize: 100 }
                         }
                     }}
                     pageSizeOptions={[10, 25, 50, 100]}

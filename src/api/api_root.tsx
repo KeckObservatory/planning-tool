@@ -150,7 +150,8 @@ export const get_targets = (obsid?: number, target_id?: string, semid?: string):
 
 export const get_catalog_image = (dss_name: string, ra: number, dec: number, window_size: number): string => {
     const ws = JSON.stringify({"size": window_size, "units": "degrees"})
-    let url = location.origin + CATALOG_URL + `/image/?position=%7B%22ra%22:${ra},%22dec%22:${dec}%7D&window-size=${ws}&catalog=${dss_name}&external=1&format=png`
+    let url = location.origin + CATALOG_URL + encodeURIComponent(`/image/?position=%7B%22ra%22:${ra},%22dec%22:${dec}%7D&window-size=${ws}&catalog=${dss_name}&external=1&format=png`)
+    console.log(url)
     return url
 }
 
@@ -159,6 +160,7 @@ export const get_catalog_targets = (catalog_name: string, ra: number, dec: numbe
     if (magRange) {
         url += `&mag-min=${magRange[0]}&mag-max=${magRange[1]}`
     }
+    console.log(url)
     return axiosInstance.get(url)
         .then(handleResponse)
         .catch(handleError)
@@ -166,6 +168,7 @@ export const get_catalog_targets = (catalog_name: string, ra: number, dec: numbe
 
 export const get_image_catalogs = (): Promise<string[]> => {
     let url = location.origin + CATALOG_URL + `/available/image`
+    console.log(url)
     return axiosInstance.get(url)
         .then(handleResponse)
         .catch(handleError)
@@ -173,6 +176,7 @@ export const get_image_catalogs = (): Promise<string[]> => {
 
 export const get_catalogs = (): Promise<string[]> => {
     let url = location.origin + CATALOG_URL + `/available/source`
+    console.log(url)
     return axiosInstance.get(url)
         .then(handleResponse)
         .catch(handleError)
