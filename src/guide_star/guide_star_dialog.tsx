@@ -4,7 +4,7 @@ import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 
 import { Target, useStateContext } from '../App';
-import { Autocomplete, Stack, TextField, Switch, FormControlLabel, Typography } from '@mui/material';
+import { Autocomplete, Box, Stack, TextField, Switch, FormControlLabel, Typography } from '@mui/material';
 import { DialogComponent } from '../dialog_component';
 import GuideStarTable from './guide_star_table';
 import { ra_dec_to_deg } from '../catalog_button';
@@ -439,16 +439,17 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     dome={dome}
                     setDome={setDome}
                 />
+                <Box sx={{ flexGrow: 1 }} />
+                <MagRangeSlider
+                    range={magRange as [string, string]}
+                    setRange={setMagRange}
+                    disabled={!enableMagRange}
+                />
                 <FormControlLabel
                     label="Enable Mag Range"
                     value={enableMagRange}
                     control={<Switch checked={enableMagRange} />}
                     onChange={(_, checked) => setEnableMagRange(checked)}
-                />
-                <MagRangeSlider
-                    range={magRange as [string, string]}
-                    setRange={setMagRange}
-                    disabled={!enableMagRange}
                 />
             </Stack>
             <Stack direction='row' justifyContent={'center'} spacing={2} sx={{ marginTop: '16px' }}>
