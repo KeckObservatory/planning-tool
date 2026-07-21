@@ -118,7 +118,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const { targets, open, setRows } = props
     const [guideStarName, setGuideStarName] = useState<string>('')
     const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
-    const init_img_size = instrumentFOV === 'MOSFIRE' ? MOSFIRE_WINDOW_SIZE : DEFAULT_WINDOW_SIZE 
+    const init_img_size = instrumentFOV === 'MOSFIRE' ? MOSFIRE_WINDOW_SIZE : DEFAULT_WINDOW_SIZE
     const [imgSize, setImgSize] = useState<number>(init_img_size)
     const [magRange, setMagRange] = useQueryParam('mag_range', withDefault(ArrayParam, undefined)) //set to undefined to prevent unwanted rerenders on initial load
     const [fovs, setFOVs] = React.useState<string[]>([])
@@ -198,7 +198,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     useEffect(() => {  //refetch image when fov changes
         setImgSize(instrumentFOV === 'MOSFIRE' ? MOSFIRE_WINDOW_SIZE : DEFAULT_WINDOW_SIZE)
-     }, [instrumentFOV])
+    }, [instrumentFOV])
 
     useEffect(() => {
         const fetch_and_set_laser_contours = async () => {
@@ -235,9 +235,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     useEffect(() => {
         setDisableLaser(!is_ao_instrument(instrumentFOV))
-	setUseLaser(is_ao_instrument(instrumentFOV) ? useLaser : false)
+        setUseLaser(is_ao_instrument(instrumentFOV) ? useLaser : false)
         setDisableTrickMap(!is_trick_instrument(instrumentFOV))
-	setShowTrickMap(is_trick_instrument(instrumentFOV) ? showTrickMap : false)
+        setShowTrickMap(is_trick_instrument(instrumentFOV) ? showTrickMap : false)
     }, [instrumentFOV])
 
     useEffect(() => {
@@ -248,7 +248,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 setCatalogLoading(true)
                 let mr = Array.isArray(magRange) && magRange.length >= 2 ?
                     [String(magRange[0]), String(magRange[1])] as [string, string] : undefined
-                mr = enableMagRange ? mr : undefined 
+                mr = enableMagRange ? mr : undefined
                 const gs = await get_catalog_targets(
                     catalog,
                     ra,
@@ -440,11 +440,13 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     setDome={setDome}
                 />
                 <Box sx={{ flexGrow: 1 }} />
-                <MagRangeSlider
-                    range={magRange as [string, string]}
-                    setRange={setMagRange}
-                    disabled={!enableMagRange}
-                />
+                <div style={{marginRight: "16px"}}>
+                    <MagRangeSlider
+                        range={magRange as [string, string]}
+                        setRange={setMagRange}
+                        disabled={!enableMagRange}
+                    />
+                </div>
                 <FormControlLabel
                     label="Enable Mag Range"
                     value={enableMagRange}
