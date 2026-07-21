@@ -106,7 +106,7 @@ export const get_gaia = (gaia_id: string): Promise<GaiaResp> => {
 
 export const get_userinfo = (): Promise<UserInfo> => {
     let url = BASE_URL + '/userinfo'
-    return axiosInstance.post(url, { })
+    return axiosInstance.post(url, {})
         .then(handleResponse)
         .catch(handleError)
 }
@@ -117,7 +117,7 @@ export const submit_target_to_starlist_dir = (formData: FormData): Promise<strin
             'Content-Type': 'application/octet-stream',
         }
     }).then(handleResponse)
-    .catch(handleError)
+        .catch(handleError)
 }
 
 export interface DeleteResponse {
@@ -143,14 +143,14 @@ export const get_targets = (obsid?: number, target_id?: string, semid?: string):
     url += obsid ? "obsid=" + obsid : ""
     url += target_id ? "&target_id=" + target_id : ""
     url += semid ? "&semid=" + semid : ""
-    return axiosInstance.get(url, { })
+    return axiosInstance.get(url, {})
         .then(handleResponse)
         .catch(handleError)
 }
 
 export const get_catalog_image = (dss_name: string, ra: number, dec: number, window_size: number): string => {
-    const ws = JSON.stringify({"size": window_size, "units": "degrees"})
-    let url = location.origin + CATALOG_URL + encodeURIComponent(`/image/?position=%7B%22ra%22:${ra},%22dec%22:${dec}%7D&window-size=${ws}&catalog=${dss_name}&external=1&format=png`)
+    const ws = JSON.stringify({ "size": window_size, "units": "degrees" })
+    let url = location.origin + CATALOG_URL + `/image/?position={"ra":${ra},"dec":${dec}}&window-size=${ws}&catalog=${dss_name}&external=1&format=png`
     console.log(url)
     return url
 }
@@ -193,4 +193,3 @@ export const submit_target = (targets: Target[]): Promise<SubmitTargetResponse> 
         .then(handleResponse)
         .catch(handleError)
 }
-
