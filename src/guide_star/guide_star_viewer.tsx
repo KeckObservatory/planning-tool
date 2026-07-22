@@ -277,11 +277,13 @@ export const GSViewer = (props: Props) => {
       .enter()
       .append('circle')
       .attr('cx', (d: Target) => {
-        const x = ((d.ra_deg || 0) - props.centerRA) / degPerPixel + props.width / 2;
+        // RA degrees must be scaled by cos(dec) to get true angular separation on the sky.
+        const cosDec = Math.cos(props.centerDec * Math.PI / 180);
+        const x = (props.centerRA - (d.ra_deg || 0)) * cosDec / degPerPixel + props.width / 2;
         return x;
       })
       .attr('cy', (d: Target) => {
-        const y = ((d.dec_deg || 0) - props.centerDec) / degPerPixel + props.height / 2;
+        const y = (props.centerDec - (d.dec_deg || 0)) / degPerPixel + props.height / 2;
         return y;
       })
       .attr('r', () => {
