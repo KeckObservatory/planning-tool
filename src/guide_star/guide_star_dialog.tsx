@@ -129,6 +129,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
 
     const [useLaser, setUseLaser] = useQueryParam('show_laser', withDefault(BooleanParam, true))
+    const [showCatalog, setShowCatalog] = useQueryParam('show_catalog', withDefault(BooleanParam, true))
     const [showTrickMap, setShowTrickMap] = useQueryParam('show_trick_map', withDefault(BooleanParam, false))
     const [enableMagRange, setEnableMagRange] = React.useState<boolean>(false)
     const [disableLaser, setDisableLaser] = React.useState<boolean>(
@@ -256,7 +257,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     imgSize,
                     mr
                 )
-                if (gs) {
+                if (Array.isArray(gs)) {
                     const gsTgts = gs.map((star: CatalogTarget) => {
                         const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
                         return tgt
@@ -291,7 +292,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     imgSize,
                     mr
                 )
-                if (gs) {
+                if (Array.isArray(gs)) {
                     const gsTgts = gs.map((star: CatalogTarget) => {
                         const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
                         return tgt
@@ -429,6 +430,12 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     onChange={(_, checked) => setUseLaser(checked)}
                 />
                 <FormControlLabel
+                    label="Show Catalog Icons"
+                    value={showCatalog}
+                    control={<Switch checked={showCatalog} />}
+                    onChange={(_, checked) => setShowCatalog(checked)}
+                />
+                <FormControlLabel
                     label="Show Trick Map"
                     value={showTrickMap}
                     disabled={disableTrickMap}
@@ -494,6 +501,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             pointingOrigins={selPointingOrigins}
                             invertImage={invertImage}
                             showLaser={true}
+                            showCatalog={showCatalog}
                             contours={telContours}
                             showTrickMap={showTrickMap}
                             trickMap={trickMap}

@@ -8,6 +8,22 @@ import { PointingOriginMarkers, PointingOriginMarker } from "../aladin/pointing_
 import { ScaleBar } from "./scale_bar"
 import { CompassRose } from "./compass_rose"
 import { ZOOM_SPEED, ZOOM_MIN, ZOOM_MAX } from "../two-d-view/constants"
+
+// Compute brightness/contrast percentages from a pointer position within the viewer bounds.
+// Contrast is driven by the y-axis: top of the viewer = 100%, bottom = 0%.
+// Brightness/bias is driven by the x-axis: left of the viewer = 0%, right = 100%.
+const computeColorStretch = (
+  clientX: number,
+  clientY: number,
+  bounds: DOMRect
+): { brightness: number; contrast: number } => {
+  const relX = Math.min(1, Math.max(0, (clientX - bounds.left) / bounds.width));
+  const relY = Math.min(1, Math.max(0, (clientY - bounds.top) / bounds.height));
+  const brightness = relX * 100;
+  const contrast = (1 - relY) * 100;
+  return { brightness, contrast };
+};
+
 interface Props {
     imgUrl: string
     guideStars: Target[]
@@ -26,6 +42,7 @@ interface Props {
     pointingOrigins?: Feature<Point, { name?: string }>[]
     invertImage?: boolean
     showLaser?: boolean
+    showCatalog?: boolean
     contours?: TelescopeContours// LaserContours
     showTrickMap?: boolean
     trickMap?: any // trick_map FeatureCollection
@@ -40,6 +57,9 @@ export const GSViewer = (props: Props) => {
   const [panOffset, setPanOffset] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = React.useState<boolean>(false);
   const [dragStart, setDragStart] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isStretching, setIsStretching] = React.useState<boolean>(false);
+  const [brightness, setBrightness] = React.useState<number>(100);
+  const [contrast, setContrast] = React.useState<number>(100);
   const degPerPixel = (props.size / props.width) / zoom // degrees per pixel, adjusted for zoom
   const [fov, setFOV] = React.useState<any>(null)
   const [laserContours, setLaserContours] = React.useState<Array<{name: string; color: string; lines: Array<Array<[number, number]>>}>>([]);
@@ -262,6 +282,11 @@ export const GSViewer = (props: Props) => {
     // Clear previous circles
     d3.select(svg).selectAll('circle').remove();
 
+    //if show catalog is off, do not draw icons
+    if (!props.showCatalog) {
+      return
+    }
+
     const handleStarClick = (event: MouseEvent, d: Target) => {
       event.stopPropagation(); // Prevent pan from triggering
       const starName = d.target_name || `RA: ${d.ra_deg}, Dec: ${d.dec_deg}`;
@@ -302,7 +327,7 @@ export const GSViewer = (props: Props) => {
       .attr('stroke-width', 2)
       .attr('cursor', 'pointer')
       .on('click', handleStarClick);
-  }, [props.guideStars, props.centerRA, props.centerDec, props.width, props.height, degPerPixel, props.guideStarName, zoom, props.fovAngle]);
+  }, [props.guideStars, props.centerRA, props.showCatalog, props.centerDec, props.width, props.height, degPerPixel, props.guideStarName, zoom, props.fovAngle]);
 
   // Fetch and update FOV shapes
   React.useEffect(() => {
@@ -416,6 +441,7 @@ export const GSViewer = (props: Props) => {
     if (!container) return;
 
     const handleMouseDown = (e: MouseEvent) => {
+      if (e.button !== 0) return; // left button only; right button drives color stretch
       setIsDragging(true);
       setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
     };
@@ -436,13 +462,58 @@ export const GSViewer = (props: Props) => {
     container.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
-    
+
     return () => {
       container.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, dragStart, panOffset]);
+
+  // Handle right-click drag for brightness/contrast (color stretch)
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleContextMenu = (e: MouseEvent) => {
+      // Right-click is reserved for the color stretch tool, not the browser menu
+      e.preventDefault();
+    };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (e.button !== 2) return; // right button only
+      e.preventDefault();
+      setIsStretching(true);
+      const bounds = container.getBoundingClientRect();
+      const { brightness: b, contrast: c } = computeColorStretch(e.clientX, e.clientY, bounds);
+      setBrightness(b);
+      setContrast(c);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isStretching) return;
+      const bounds = container.getBoundingClientRect();
+      const { brightness: b, contrast: c } = computeColorStretch(e.clientX, e.clientY, bounds);
+      setBrightness(b);
+      setContrast(c);
+    };
+
+    const handleMouseUp = () => {
+      setIsStretching(false);
+    };
+
+    container.addEventListener('contextmenu', handleContextMenu);
+    container.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      container.removeEventListener('contextmenu', handleContextMenu);
+      container.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isStretching]);
 
   return (
     <div 
@@ -452,7 +523,7 @@ export const GSViewer = (props: Props) => {
         width: props.width, 
         height: props.height, 
         overflow: 'hidden',
-        cursor: isDragging ? 'grabbing' : 'grab'
+        cursor: isStretching ? 'crosshair' : (isDragging ? 'grabbing' : 'grab')
       }}
     >
       {/* DSS Image Layer */}
@@ -465,8 +536,8 @@ export const GSViewer = (props: Props) => {
           transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom}) rotate(${props.fovAngle || 0}deg)`,
           transformOrigin: 'center center',
           pointerEvents: 'none',
-          filter: props.invertImage !== false ? 'invert(1)' : 'none'
-        }} 
+          filter: `${props.invertImage !== false ? 'invert(1) ' : ''}brightness(${brightness}%) contrast(${contrast}%)`
+        }}
       />
       {/* Targets SVG Layer */}
       <svg
