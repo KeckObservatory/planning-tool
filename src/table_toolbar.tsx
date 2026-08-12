@@ -25,9 +25,10 @@ import SemidDialogButton from './semid_dialog.tsx';
 import { SemidSelect } from './semid_select.tsx';
 import { GuideStarButton } from './guide_star/guide_star_dialog.tsx';
 import { TARGET_LENGTH, TARGET_NAME_LENGTH_PADDED } from './two-d-view/constants.tsx';
+import { send_to_starlist_submission } from './api/api_root.tsx';
 
 
-const convert_target_to_targetlist_row = (target: Target) => {
+const convert_target_to_targetlist_row = (target: Target, includeComments = true) => {
   //required params
   const name = target.target_name?.slice(0, TARGET_LENGTH).padEnd(TARGET_NAME_LENGTH_PADDED, " ") //columns 1-16 are text last column is a space
   const ra = target.ra?.replaceAll(':', ' ')
@@ -63,19 +64,21 @@ const convert_target_to_targetlist_row = (target: Target) => {
   }
   else { }
   //comment and tags go before the row
-  row = target.comment ? `# ${name} comment: ${target.comment}\n` + row : row
-  const tags = target.tags ?? []
-  row = tags.length > 0 ? `# ${name} tags: ${tags.join(', ')}\n` + row : row
-  const semids = target.semids ?? []
-  row = semids.length > 0 ? `# ${name} semids: ${semids.join(', ')}\n` + row : row
+  if (includeComments) {
+    row = target.comment ? `# ${name} comment: ${target.comment}\n` + row : row
+    const tags = target.tags ?? []
+    row = tags.length > 0 ? `# ${name} tags: ${tags.join(', ')}\n` + row : row
+    const semids = target.semids ?? []
+    row = semids.length > 0 ? `# ${name} semids: ${semids.join(', ')}\n` + row : row
+  }
   return row
 }
 
-export const getStarlist = (targets: Target[]) => {
+export const getStarlist = (targets: Target[], includeComments = true): string => {
   // Select rows and columns
   let rows = ""
   targets.forEach((target) => {
-    const row = convert_target_to_targetlist_row(target as Target)
+    const row = convert_target_to_targetlist_row(target, includeComments)
     rows += row + '\n'
   })
   return rows
@@ -94,6 +97,25 @@ const exportBlob = (blob: Blob, filename: string) => {
     URL.revokeObjectURL(url);
   });
 };
+
+function StarlistSubmissionMenu(props: ExportProps) {
+  const send_to_starlist_submission_tool = async () => {
+
+      const starList = getStarlist(props.exportTargets, false)
+      const ok = await send_to_starlist_submission(starList)
+      if (!ok) {
+        console.warn('did not open submission tab')
+      }
+  }
+  return (
+    <MenuItem
+      onClick={() => {
+        send_to_starlist_submission_tool();
+      }}
+    >
+      Export to Starlist Submission Tool 
+    </MenuItem>)
+}
 
 function StarListExportMenu(props: ExportProps) {
 
@@ -189,6 +211,7 @@ function CustomExportButton(props: ExportButtonProps) {
       <JsonExportMenuItem exportTargets={props.exportTargets} />
       <StarListExportMenu exportTargets={props.exportTargets} />
       <StarListExportDirMenu exportTargets={props.exportTargets} />
+      <StarlistSubmissionMenu exportTargets={props.exportTargets} />
     </GridToolbarExportContainer>
   );
 }
@@ -208,7 +231,7 @@ export const create_new_target = (id?: string, obsid?: number, target_name?: str
     ...newTarget,
     obsid: obsid,
     _id: id,
-    target_name: target_name,
+    target_name: String(target_name),
     status: 'CREATED'
   }
   return newTarget as Target

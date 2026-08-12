@@ -28,12 +28,17 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
     const context = useStateContext()
     const snackbarContext = useSnackbarContext() 
 
+    //remove nulls
+    let sanitizedGuideStar = Object.fromEntries(Object.entries(guidestar).filter(([_, v]) => v != null));
+    sanitizedGuideStar.target_name = String(sanitizedGuideStar.target_name).slice(0, 15) ?? randomId();
+
+
     const handleClick = async () => {
         const id = randomId();
         let newTarget = create_new_target(id, context.obsid, guidestar.target_name)
         newTarget = {
             ...newTarget,
-            ...guidestar, 
+            ...sanitizedGuideStar, 
             equinox: String(guidestar.equinox) ?? '2000',
             tags: [...(newTarget.tags ?? []), 'guide_star for ' + (science_target_name ?? '')],
         }
