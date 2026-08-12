@@ -1,4 +1,4 @@
-import { GeoModel, useStateContext } from "../App";
+import { useStateContext } from "../App";
 import {
     MARKER_SIZE,
     XAXIS_DTICK,
@@ -9,7 +9,7 @@ import Plot from "react-plotly.js";
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
-import { BlockReason, DayViz, TargetViz, VizRow } from "./viz_dialog";
+import { DayViz, TargetViz, VizRow } from "./viz_dialog";
 import { air_mass } from "./sky_view_util";
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -17,33 +17,6 @@ dayjs.extend(timezone)
 
 interface Props {
     targetViz: TargetViz,
-}
-
-
-export const alt_az_observable = (alt: number, az: number, geoModel: GeoModel) => {
-    const minDeckAz = geoModel.t2
-    const maxDeckAz = geoModel.t3
-    const minAlt = geoModel.r1
-    const deckAlt = geoModel.r3
-    const trackLimit = geoModel.trackLimit
-
-    const reasons: Array<BlockReason> = []
-    //nasdeck is blocking the target?
-    const targetOverlapsDeck = az >= minDeckAz && az <= maxDeckAz
-    const targetBelowDeck = alt >= minAlt && alt <= deckAlt
-    const deckBlocking = targetOverlapsDeck && targetBelowDeck
-    deckBlocking && reasons.push('Deck Blocking')
-
-    //target is below telescope horizon?
-    const targetBelowHorizon = alt < minAlt
-    targetBelowHorizon && reasons.push('Below Horizon')
-
-    //target is above tracking limits?
-    const targetAboveTrackingLimits = alt > trackLimit
-    targetAboveTrackingLimits && reasons.push('Above Tracking Limits')
-
-    const observable = !deckBlocking && !targetBelowHorizon && !targetAboveTrackingLimits
-    return { observable, reasons }
 }
 
 export const date_normalize = (date: Date, utctz = false) => {

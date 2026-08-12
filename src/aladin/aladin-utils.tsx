@@ -1,6 +1,6 @@
 import { cosd, sind, r2d } from '../two-d-view/sky_view_util.tsx'
 import { Feature, FeatureCollection, MultiPolygon, Polygon, Position } from 'geojson'
-import { get_shapes } from "../two-d-view/two_d_view.tsx"
+import { get_shapes } from "../two-d-view/two_d_view_common.tsx"
 
 export const rotate_point = (point: Position[], angle: number, pnt=[0,0]) => {
         let [x, y] = point as unknown as [number, number]

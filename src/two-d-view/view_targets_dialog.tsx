@@ -3,8 +3,12 @@ import MultilineChartIcon from '@mui/icons-material/MultilineChart';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { Target } from '../App';
-import TwoDView from './two_d_view';
 import { DialogComponent } from '../dialog_component';
+import { LazyFallback } from '../lazy_fallback';
+
+// plotly + aladin-lite live behind this import. Keep it lazy so they stay out of
+// the initial bundle and only load when the dialog is first opened.
+const TwoDView = React.lazy(() => import('./two_d_view'));
 
 
 export interface VTDProps {
@@ -21,7 +25,9 @@ function ViewTargetsDialog(props: VTDProps) {
   );
 
   const dialogContent = (
-    <TwoDView targets={targets} />
+    <React.Suspense fallback={<LazyFallback />}>
+      <TwoDView targets={targets} />
+    </React.Suspense>
   )
 
   return (

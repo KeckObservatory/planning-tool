@@ -9,16 +9,20 @@ import { DialogComponent } from '../dialog_component';
 import GuideStarTable from './guide_star_table';
 import { ra_dec_to_deg } from '../catalog_button';
 import { FOVSelect } from '../two-d-view/fov_select';
-import { Dome, DomeParam, DomeSelect, get_shapes } from '../two-d-view/two_d_view';
+import { Dome, DomeParam, DomeSelect, get_shapes } from '../two-d-view/two_d_view_common.tsx';
 import { ArrayParam, BooleanParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
 import { get_catalog_targets, get_catalogs, get_image_catalogs, get_catalog_image } from '../api/api_root';
 import UploadDialog from '../upload_targets_dialog';
 import { LaserContours, POPointFeature, POPointingOriginCollection, POSelect } from '../two-d-view/pointing_origin_select';
-import { GSViewer } from './guide_star_viewer';
+import { LazyFallback } from '../lazy_fallback';
 // import AladinViewer from '../aladin/aladin';
 import { MagRangeSlider } from './mag_range_slider';
 import { MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE, DEFAULT_RA, DEFAULT_DEC, AO_INSTRUMENTS, TRICK_INSTRUMENTS } from '../two-d-view/constants';
 import { MuiChipsInput } from 'mui-chips-input';
+
+// d3 + the aladin marker helpers live behind this import. Keep it lazy so they
+// load when the guide star dialog is first opened, not at app startup.
+const GSViewer = React.lazy(() => import('./guide_star_viewer').then(m => ({ default: m.GSViewer })))
 
 export interface CatalogTarget {
     name: string;
@@ -482,7 +486,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             Loading...
                         </Typography>
                     )}
-                    {
+                    <React.Suspense fallback={<LazyFallback height={600} />}>
                         < GSViewer
                             imgUrl={image ?? ''}
                             guideStars={guidestars as Target[]}
@@ -506,7 +510,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             showTrickMap={showTrickMap}
                             trickMap={trickMap}
                         />
-                    }
+                    </React.Suspense>
                 </Stack>
                 <Stack direction='column' justifyContent='center' sx={{ position: 'relative', display: 'inline-block' }}>
                     {catalogLoading && (

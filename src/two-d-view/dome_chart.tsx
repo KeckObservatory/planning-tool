@@ -1,7 +1,7 @@
 import dayjs from "dayjs"
 import * as SunCalc from 'suncalc'
 import * as util from './sky_view_util.tsx'
-import { Dome, TargetView } from "./two_d_view"
+import { Dome, TargetView } from "./two_d_view_common.tsx"
 import Plot from "react-plotly.js"
 import { LngLatEl, GeoModel, useStateContext } from "../App.tsx"
 import { reason_to_color_mapping } from "./target_viz_chart.tsx"

@@ -1,7 +1,7 @@
 import { Target } from "../App"
 import React from "react"
 import * as d3 from "d3"
-import { get_shapes } from "../two-d-view/two_d_view"
+import { get_shapes } from "../two-d-view/two_d_view_common.tsx"
 import { POPointFeature, TelescopeContours } from "../two-d-view/pointing_origin_select"
 import { Feature, Point } from "geojson"
 import { PointingOriginMarkers, PointingOriginMarker } from "../aladin/pointing_origin_markers"

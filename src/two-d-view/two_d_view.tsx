@@ -9,14 +9,13 @@ import { DomeChart } from './dome_chart.tsx';
 import { SkyChart } from './sky_chart.tsx';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
-import { alt_az_observable } from './target_viz_chart.tsx';
 import { VizRow } from './viz_dialog.tsx';
 import AladinViewer from '../aladin/aladin.tsx';
-import { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import { MoonMarker } from './moon_marker.tsx';
 import * as SunCalc from "suncalc";
-import { FOVlink, STEP_SIZE } from './constants.tsx';
-import { createEnumParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
+import { STEP_SIZE } from './constants.tsx';
+import { StringParam, useQueryParam, withDefault } from 'use-query-params';
+import { alt_az_observable, Dome, DomeParam, DomeSelect, get_shapes, hidate, TargetView } from './two_d_view_common.tsx';
 import html2canvas from 'html2canvas';
 import { SkyChartDataSummary } from './sky_chart_data_summary.tsx';
 import { FOVSelect } from './fov_select.tsx';
@@ -30,50 +29,12 @@ interface Props {
     targets: Target[]
 }
 
-export type Dome = "Keck 1" | "Keck 2"
-
 const height = 500
 const width = 500
-
-
-
-export interface TargetView extends Target {
-    dome: Dome,
-    date: Date,
-    ra_deg: number,
-    dec_deg: number,
-    visibility: VizRow[],
-    visibilitySum: number
-}
-
-
-interface DomeSelectProps {
-    dome: Dome
-    setDome: (dome: Dome) => void
-}
 
 interface SkyChartSelectProps {
     skyChart: SkyChart
     setSkyChart: (skyChart: SkyChart) => void
-}
-
-export type ShapeCatagory = 'fov' | 'compass_rose' | 'pointing_origins' | 'laser_contours' | 'fsm' | 'trick_map'
-interface ShapeCfgFile {
-    fov: FeatureCollection<MultiPolygon>
-    compass_rose: FeatureCollection<Polygon>
-    pointing_origins: FeatureCollection<GeoJSON.Geometry>
-    laser_contours: FeatureCollection<GeoJSON.MultiLineString>
-    fsm: FeatureCollection<GeoJSON.MultiLineString>
-    trick_map: FeatureCollection<GeoJSON.MultiLineString>
-}
-
-
-export const get_shapes = async (fcType: ShapeCatagory) => {
-    const resp = await fetch(FOVlink)
-    const data = await resp.text()
-    const json = JSON.parse(data) as ShapeCfgFile
-    const featureCollection = json[fcType]
-    return featureCollection
 }
 
 export const SkyChartSelect = (props: SkyChartSelectProps) => {
@@ -104,36 +65,6 @@ export const SkyChartSelect = (props: SkyChartSelectProps) => {
         </FormControl>
     )
 }
-
-export const DomeSelect = (props: DomeSelectProps) => {
-    const { dome, setDome } = props
-
-    const handleDomeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setDome(event.target.value as Dome)
-    }
-
-    return (
-        <FormControl>
-            <FormLabel id="dome-row-radio-buttons-group-label">Dome</FormLabel>
-            <RadioGroup
-                row
-                aria-labelledby="dome-row-radio-buttons-group-label"
-                name="dome-radio-buttons-group"
-                value={dome}
-                onChange={handleDomeChange}
-            >
-                <FormControlLabel value="Keck 1" control={<Radio />} label="Keck 1" />
-                <FormControlLabel value="Keck 2" control={<Radio />} label="Keck 2" />
-            </RadioGroup>
-        </FormControl>
-    )
-}
-
-export const hidate = (date: Date, timezone: string) => {
-    return dayjs(date).tz(timezone)
-}
-
-export const DomeParam = createEnumParam<Dome>(['Keck 1', 'Keck 2'])
 
 const TwoDView = ({ targets }: Props) => {
     const context = useStateContext()
