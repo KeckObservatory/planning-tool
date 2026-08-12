@@ -3,6 +3,7 @@ import axios from 'axios';
 import { handleResponse, handleError, intResponse, intError } from './response.tsx';
 import { Target } from '../App.tsx';
 import { CatalogTarget } from '../guide_star/guide_star_dialog.tsx';
+import dayjs from 'dayjs';
 const SIMBAD_ADDR = "https://simbad.u-strasbg.fr/simbad/sim-id?NbIdent=1&submit=submit+id&output.format=ASCII&obj.bibsel=off&Ident="
 const BASE_URL = "/api/planning_tool"
 const SCHEDULE_URL = "/api/schedule"
@@ -36,7 +37,7 @@ export interface GaiaResp {
     gaia_params?: GaiaParams
 }
 
-interface Schedule {
+export interface Schedule {
     Account: string,
     BaseInstrument: string,
     Comment: string | null,
@@ -85,6 +86,15 @@ export interface GetLogsArgs {
 
 export const get_schedule = (date: string, telnr: number): Promise<Schedule[]> => {
     const url = SCHEDULE_URL + `/getSchedule?date=${date}&telnr=${telnr}`
+    return axiosInstance.get(url)
+        .then(handleResponse)
+        .catch(handleError)
+}
+
+export const get_user_schedule = (obsid: number, startdate?: string, enddate?: string): Promise<Schedule[]> => {
+    startdate = startdate ?? new Date().toISOString().split('T')[0]
+    enddate = enddate ?? dayjs(new Date()).add(3, 'month').toISOString().split('T')[0]
+    const url = SCHEDULE_URL + `/getScheduleByUser?startdate=${startdate}&enddate=${enddate}&obsid=${obsid}`
     return axiosInstance.get(url)
         .then(handleResponse)
         .catch(handleError)

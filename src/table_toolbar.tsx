@@ -26,6 +26,7 @@ import { SemidSelect } from './semid_select.tsx';
 import { GuideStarButton } from './guide_star/guide_star_dialog.tsx';
 import { TARGET_LENGTH, TARGET_NAME_LENGTH_PADDED } from './two-d-view/constants.tsx';
 import { send_to_starlist_submission } from './api/api_root.tsx';
+import { StarlistSubmissionDialog } from './starlist_submission/starlist_submission_dialog.tsx';
 
 
 const convert_target_to_targetlist_row = (target: Target, includeComments = true) => {
@@ -98,14 +99,14 @@ const exportBlob = (blob: Blob, filename: string) => {
   });
 };
 
-function StarlistSubmissionMenu(props: ExportProps) {
+function SendToStarlistSubmissionMenu(props: ExportProps) {
   const send_to_starlist_submission_tool = async () => {
 
-      const starList = getStarlist(props.exportTargets, false)
-      const ok = await send_to_starlist_submission(starList)
-      if (!ok) {
-        console.warn('did not open submission tab')
-      }
+    const starList = getStarlist(props.exportTargets, false)
+    const ok = await send_to_starlist_submission(starList)
+    if (!ok) {
+      console.warn('did not open submission tab')
+    }
   }
   return (
     <MenuItem
@@ -113,8 +114,26 @@ function StarlistSubmissionMenu(props: ExportProps) {
         send_to_starlist_submission_tool();
       }}
     >
-      Export to Starlist Submission Tool 
+      Export to Old Starlist Submission Tool
     </MenuItem>)
+}
+
+function StarlistSubmissionMenu(props: ExportProps) {
+
+  const [open, setOpen] = React.useState(false)
+
+  return (
+    <>
+      <MenuItem
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        Submit to New Starlist Dialog
+      </MenuItem>
+      <StarlistSubmissionDialog {...props} open={open} handleClose={() => setOpen(false)} />
+    </>
+  )
 }
 
 function StarListExportMenu(props: ExportProps) {
@@ -211,6 +230,7 @@ function CustomExportButton(props: ExportButtonProps) {
       <JsonExportMenuItem exportTargets={props.exportTargets} />
       <StarListExportMenu exportTargets={props.exportTargets} />
       <StarListExportDirMenu exportTargets={props.exportTargets} />
+      <SendToStarlistSubmissionMenu exportTargets={props.exportTargets} />
       <StarlistSubmissionMenu exportTargets={props.exportTargets} />
     </GridToolbarExportContainer>
   );
