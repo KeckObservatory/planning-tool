@@ -5,9 +5,9 @@ import { DialogComponent } from '../dialog_component';
 import { Dome, DomeParam, DomeSelect } from '../two-d-view/two_d_view_common.tsx';
 import { useQueryParam, withDefault } from 'use-query-params';
 import { ExportProps, getStarlist } from '../table_toolbar';
-import { useStateContext } from '../App';
+import { useSnackbarContext, useStateContext } from '../App';
 import React from 'react';
-import { get_user_schedule, Schedule } from '../api/api_root';
+import { get_user_schedule, Schedule, submit_starlist, SubmittedStarList } from '../api/api_root';
 import { TargetListItem } from './target_list_item';
 import { ScheduleTable } from './schedule_table';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -30,13 +30,14 @@ const moveItem = (rows: string[], from: number, to: number): string[] => {
 export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) => {
     // target must have ra dec and be defined
     const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'Keck 2' as Dome))
-    const [piName, setPiName] = useState<string | undefined>(undefined)
+    const [piName, setPiName] = useState<string>("")
     const [date, setDate] = useState<Dayjs | null>(dayjs())
-    const [comments, setComments] = useState<string | undefined>(undefined)
+    const [comments, setComments] = useState<string>("")
     const [isLgs, setIsLgs] = useState(false)
     const [schedule, setSchedule] = useState<Schedule[]>([])
     const [selectedSchedId, setSelectedSchedId] = useState<number | undefined>(undefined)
     const context = useStateContext()
+    const snackbarContext = useSnackbarContext()
 
     // populates the form from a scheduled night. add new form values here.
     const onScheduleRowSelect = (entry: Schedule) => {
@@ -75,17 +76,25 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
         )
     })
 
-    const submit_starlist = () => {
-        const submission = {
-            dome,
-            date: date?.format('YYYY-MM-DD'),
-            piName,
-            comments,
-            isLgs,
-            starlist: (starListStrings ?? []).join('\n'),
+    const submit_starlist_to_database = async () => {
+        const form: SubmittedStarList = {
+            telescope: dome.slice(dome.length - 1),
+            hstDate: date ? date.format('YYYY-MM-DD') : "",
+            piname: piName,
+            comments: comments,
+            lgsMode: isLgs,
+            slist: (starListStrings ?? []).join('\n'),
         }
-        //TODO: send submission to the starlist submission endpoint
-        console.log('submit_starlist', submission)
+        const submit_status = await submit_starlist(form)
+        if (submit_status.includes("File saved sucessfully")) {
+            snackbarContext.setSnackbarMessage({severity: 'success', message:submit_status})
+            snackbarContext.setSnackbarOpen(true)
+            props.handleClose()
+        }
+        else {
+            snackbarContext.setSnackbarMessage({severity: 'error', message: submit_status})
+            snackbarContext.setSnackbarOpen(true)
+        }
     }
 
     const dialogTitle = (
@@ -96,7 +105,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
         <Button
             variant="contained"
             color="primary"
-            onClick={submit_starlist}
+            onClick={submit_starlist_to_database}
         >
             Submit
         </Button>

@@ -130,6 +130,22 @@ export const submit_target_to_starlist_dir = (formData: FormData): Promise<strin
         .catch(handleError)
 }
 
+export interface SubmittedStarList {
+    telescope: string,
+    hstDate: string,
+    piname: string,
+    comments: string,
+    lgsMode: boolean,
+    slist: string,
+}
+
+export const submit_starlist = (starlist: SubmittedStarList): Promise<string> => {
+    return axiosInstance.post(BASE_URL + '/submitStarList', starlist, {
+    }).then(handleResponse)
+        .catch(handleError)
+
+}
+
 export interface DeleteResponse {
     status: string
 }
@@ -166,7 +182,7 @@ export const get_catalog_image = (dss_name: string, ra: number, dec: number, win
 }
 
 export const get_catalog_targets = (catalog_name: string, ra: number, dec: number, radius: number, magRange?: [string, string]): Promise<CatalogTarget[]> => {
-    let url = location.origin + CATALOG_URL + `/sources/?position=%7B%22ra%22:${ra},%22dec%22:${dec}%7D&radius=${radius}&window-size=%7B%22size%22:${radius},%22units%22:%22degrees%22%7D&catalog=${catalog_name}&external=1`
+    let url = location.origin + CATALOG_URL + `/sources/?position=%7B%22ra%22:${ra},%22dec%22:${dec}%7D&radius=${radius}&window-size=%7B%22size%22:${radius},%22units%22:%22degrees%22%7D&catalog=${catalog_name}&external=1&no-limit=1`
     if (magRange) {
         url += `&mag-min=${magRange[0]}&mag-max=${magRange[1]}`
     }

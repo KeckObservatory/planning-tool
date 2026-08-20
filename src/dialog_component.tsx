@@ -41,7 +41,14 @@ export const DialogComponent = (props: Props) => {
                     </Button>
                 </Stack>
             </DialogTitle>
-            <DialogContent >
+            <DialogContent
+                // dialogs opened from a MenuItem stay in the menu's React tree, so keystrokes
+                // portal back up to MenuList's typeahead and steal focus from inputs.
+                // Escape still needs to reach the Modal root to close the dialog.
+                onKeyDown={(event) => {
+                    if (event.key !== 'Escape') event.stopPropagation()
+                }}
+            >
                 {props.children}
             </DialogContent>
             {props.actions && (<DialogActions>{props.actions}</DialogActions>)}
