@@ -69,3 +69,10 @@ export const EXTINCTION_COEFF = 0.172 // extinction coefficient [mag/airmass]
 // dark zenith sky brightness taken from
 //https://www.cfht.hawaii.edu/Instruments/ObservatoryManual/CFHT_ObservatoryManual_(Sec_2).html
 export const DARK_ZENITH_SKY_BRIGHTNESS = 21.1 // mag/arcsec^2 
+
+
+//AGR constants
+// AGR mechanical range is +/-140 deg (InstrumentInfo.inc $agrInfo).
+export const AGR_LIMIT_DEG = 140;
+// Default agrInfo.rotationOffset from InstrumentInfo.inc.
+export const DEFAULT_AGR_OFFSET_DEG = 13;

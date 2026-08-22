@@ -19,6 +19,7 @@ import { LazyFallback } from '../lazy_fallback';
 import { MagRangeSlider } from './mag_range_slider';
 import { MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE, DEFAULT_RA, DEFAULT_DEC, AO_INSTRUMENTS, TRICK_INSTRUMENTS } from '../two-d-view/constants';
 import { MuiChipsInput } from 'mui-chips-input';
+import AGTimeToLimit from './asterism_generator.tsx';
 
 // d3 + the aladin marker helpers live behind this import. Keep it lazy so they
 // load when the guide star dialog is first opened, not at app startup.
@@ -450,8 +451,12 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     dome={dome}
                     setDome={setDome}
                 />
+                {
+                    dome.includes('Keck 1') && 
+                    <AGTimeToLimit target={target} rotatorAngle={rotatorAngle}/>
+                }
                 <Box sx={{ flexGrow: 1 }} />
-                <div style={{marginRight: "16px"}}>
+                <div style={{ marginRight: "16px" }}>
                     <MagRangeSlider
                         range={magRange as [string, string]}
                         setRange={setMagRange}
