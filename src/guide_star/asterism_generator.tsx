@@ -109,14 +109,14 @@ function AGTimeToLimitPanel(props: Props): JSX.Element {
     const lngLatEl = context.config.tel_lat_lng_el["Keck 1"] //AGR is always on Keck 1.
 
     const result = useMemo<AGRResult | null>(() => {
-        const haHours = ra_dec_to_deg(haStr);
-        const raHours = ra_dec_to_deg(target.ra ?? "00:00:00");
+        const haDeg = ra_dec_to_deg(haStr);
+        const raDeg = ra_dec_to_deg(target.ra ?? "00:00:00");
         const decDeg = ra_dec_to_deg(target.dec ?? "00:00:00", true);
         const agrOffsetDeg = Number(agrOffsetStr);
 
         if (
-            Number.isNaN(haHours) ||
-            Number.isNaN(raHours) ||
+            Number.isNaN(haDeg) ||
+            Number.isNaN(raDeg) ||
             Number.isNaN(decDeg) ||
             Number.isNaN(rotatorAngle) ||
             Number.isNaN(agrOffsetDeg)
@@ -124,7 +124,7 @@ function AGTimeToLimitPanel(props: Props): JSX.Element {
             return null;
         }
 
-        const startHADeg = haHours * 15;
+        const startHADeg = haDeg;
 
         const [status, ttl, agr, msg] = get_time_to_limit(
             startHADeg,
