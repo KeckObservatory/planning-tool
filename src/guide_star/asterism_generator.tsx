@@ -34,10 +34,10 @@ type Time2LimitResult = [status: AGRStatus, ttlHours: number, agrDeg: number, ms
 type TTLResult = [status: AGRStatus, ttlHours: number, agrDeg: number];
 
 function get_time_to_limit( startHADeg: number, rotdestDeg: number,
-    raDeg: number, agrOffsetDeg: number, latDeg: number): Time2LimitResult {
+    decDeg: number, agrOffsetDeg: number, latDeg: number): Time2LimitResult {
 
     function calc_agr(ha: number, offset: number): number {
-        const parAngle = get_parallactic_angle(ha, raDeg, latDeg);
+        const parAngle = get_parallactic_angle(ha, decDeg, latDeg);
         return norm_180(rotdestDeg - parAngle + agrOffsetDeg + offset);
     }
 
@@ -125,12 +125,11 @@ function AGTimeToLimitPanel(props: Props): JSX.Element {
         }
 
         const startHADeg = haHours * 15;
-        const raDeg = raHours * 15;
 
         const [status, ttl, agr, msg] = get_time_to_limit(
             startHADeg,
             rotatorAngle,
-            raDeg,
+            decDeg,
             agrOffsetDeg,
             lngLatEl.lat
         );
