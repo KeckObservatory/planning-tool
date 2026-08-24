@@ -91,6 +91,7 @@ const parse_json = (filename: string, contents: string) => {
     const filename_tag = `filename: ${filename}`
     tgts = tgts.map( (tgt: Target) => {
         tgt.tags = tgt.tags ? [filename_tag, ...tgt.tags ] : [filename_tag]
+        tgt.tags = [...new Set(tgt.tags)] //unique tags
         return tgt
     })
 
@@ -186,6 +187,7 @@ const parse_csv = (filename: string, contents: string) => {
         });
 
         tgt.tags = tgt.tags ? [filename_tag, ...(tgt.tags as string[]) ] : [filename_tag]
+        tgt.tags = [...new Set(tgt.tags)] //unique tags
 
         return tgt;
     }).filter((item) => item !== undefined) as UploadedTarget[];
@@ -307,6 +309,8 @@ const parse_txt = (filename: string, contents: string, obsid: number) => {
         if (tags.length > 0) {
             tgt.tags = [...(tgt.tags as string[]), ...tags]
         }
+
+        tgt.tags = [...new Set(tgt.tags as string[])] //unique tags
 
         //reset comment lines after adding them to the target so they don't get added to the next target
         commentLines = []
