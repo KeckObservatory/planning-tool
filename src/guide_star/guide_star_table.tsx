@@ -40,6 +40,7 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
             ...newTarget,
             ...sanitizedGuideStar, 
             equinox: String(guidestar.equinox) ?? '2000',
+            target: science_target_name,
             tags: [...(newTarget.tags ?? []), 'guide_star for ' + (science_target_name ?? '')],
         }
         if (props.useLaser) {

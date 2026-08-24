@@ -175,6 +175,10 @@ export const format_edit_entry = (key: string, value?: string | number, isNumber
         value = String(value).replace(/[^\w^\-^\s]+/g, '').replaceAll('^', '') //remove non alphanumeric characters
         value = value.slice(0, TARGET_LENGTH) //truncate to 15 characters
     }
+    if (value && key === 'science_target') {
+        value = String(value).replace(/[^\w^\-^\s]+/g, '').replaceAll('^', '') //remove non alphanumeric characters
+        value = value.slice(0, TARGET_LENGTH) //truncate to 15 characters
+    }
 
     value = String(value).replace(/\t/, '') //remove tabs
     return value
@@ -427,16 +431,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 onChange={(event) => handleTextChange('b_m_r_mag', event.target.value, true)}
                             />
                         </Tooltip>
-                        <Tooltip title={input_label('b_mag', true)}>
-                            <TextField
-                                label={input_label('b_mag')}
-                                id="b-magnitude"
-                                focused={target.b_mag ? true : false}
-                                value={target.b_mag}
-                                sx={{ width: 125 }}
-                                onChange={(event) => handleTextChange('b_mag', event.target.value, true)}
-                            />
-                        </Tooltip>
                     </Stack>
                     <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
                         <Tooltip title={input_label('ra_offset', true)}>
@@ -577,6 +571,16 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 options={lgsOptions ?? []}
                                 sx={{ width: 125 }}
                                 renderInput={(params) => <TextField {...params} label={input_label('lgs')} />}
+                            />
+                        </Tooltip>
+                        <Tooltip title={input_label('science_target', true)}>
+                            <TextField
+                                label={input_label('science_target')}
+                                focused={target.science_target ? true : false}
+                                id="target-name"
+                                value={target.science_target}
+                                sx={{ width: 200 }}
+                                onChange={(event) => handleTextChange('science_target', event.target.value)}
                             />
                         </Tooltip>
                     </Stack>

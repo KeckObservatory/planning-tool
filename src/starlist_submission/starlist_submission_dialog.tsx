@@ -98,7 +98,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     }
 
     const dialogTitle = (
-        <span>Star List Submission</span>
+        <span>LGS List Submission</span>
     )
 
     const dialogActions = (

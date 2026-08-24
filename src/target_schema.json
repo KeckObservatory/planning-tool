@@ -32,6 +32,15 @@
                 "pattern": "^[^,]+$"
             }
         },
+        "science_target": {
+            "type": "string",
+            "description": "This is the name of the science target this guide star is for.",
+            "short_description": "Target",
+            "minLength": 1,
+            "maxLength": 15,
+            "pattern": "[\\w\\-\\s]+",
+            "starlist_key": "target"
+        },
         "rotator_mode": {
             "type": "string",
             "description": "Rotator Mode",
