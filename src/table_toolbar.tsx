@@ -130,7 +130,7 @@ function StarlistSubmissionMenu(props: ExportProps) {
           setOpen(true);
         }}
       >
-        Submit to New Starlist Dialog
+        Send to LGS Submission Dialog
       </MenuItem>
       <StarlistSubmissionDialog {...props} open={open} handleClose={() => setOpen(false)} />
     </>
