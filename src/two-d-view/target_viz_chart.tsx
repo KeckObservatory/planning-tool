@@ -5,7 +5,7 @@ import {
     MOON_MARKER_LINE_WIDTH,
     MOON_MARKER_SIZE
 } from "./constants";
-import Plot from "react-plotly.js";
+import Plot from "./plotly_custom";
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
