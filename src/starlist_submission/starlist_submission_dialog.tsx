@@ -64,7 +64,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
             snackbarContext.setSnackbarOpen(true)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.exportTargets])
+    }, [props.exportTargets, props.open])
 
     const [starListStrings, setStarListStrings] = useState<string[] | undefined>(starListInit)
 
