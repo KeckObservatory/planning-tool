@@ -71,12 +71,18 @@ interface ShapeCfgFile {
     trick_map: FeatureCollection<GeoJSON.MultiLineString>
 }
 
+let shapesPromise: Promise<ShapeCfgFile> | null = null
+
+const load_shapes = (): Promise<ShapeCfgFile> => {
+    if (!shapesPromise) {
+        shapesPromise = fetch(FOVlink).then((resp) => resp.json())
+    }
+    return shapesPromise
+}
+
 export const get_shapes = async (fcType: ShapeCatagory) => {
-    const resp = await fetch(FOVlink)
-    const data = await resp.text()
-    const json = JSON.parse(data) as ShapeCfgFile
-    const featureCollection = json[fcType]
-    return featureCollection
+    const json = await load_shapes()
+    return json[fcType]
 }
 
 export const alt_az_observable = (alt: number, az: number, geoModel: GeoModel) => {
