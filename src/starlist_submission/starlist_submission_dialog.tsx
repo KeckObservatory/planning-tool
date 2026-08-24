@@ -59,7 +59,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     React.useEffect(() => {
         //check if there are any lgs targets
         const anyLgs = starListInit.some(lst => lst.includes('lgs=1'))
-        if (!anyLgs) {
+        if (!anyLgs && props.open) {
             snackbarContext.setSnackbarMessage({severity: "warning", message: "There are no LGS targets being submitted!"})
             snackbarContext.setSnackbarOpen(true)
         }
