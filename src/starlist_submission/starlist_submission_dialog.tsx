@@ -56,20 +56,15 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     const starListTextInit = getStarlist(props.exportTargets, false)
     const starListInit = starListTextInit.split('\n').filter( row => row.length > 0)
 
-    //check if there are any lgs targets
-    let anyLgs = false
-    for (let idx=0; idx < starListInit.length; idx++) {
-        const lst = starListInit[idx]
-        if (lst.includes('lgs=1')) {
-            anyLgs = true
-            break
+    React.useEffect(() => {
+        //check if there are any lgs targets
+        const anyLgs = starListInit.some(lst => lst.includes('lgs=1'))
+        if (!anyLgs) {
+            snackbarContext.setSnackbarMessage({severity: "warning", message: "There are no LGS targets being submitted!"})
+            snackbarContext.setSnackbarOpen(true)
         }
-    }
-    if (!anyLgs) {
-        snackbarContext.setSnackbarMessage({severity: "warning", message: "There are no LGS targets being submitted!"})
-        snackbarContext.setSnackbarOpen(true)
-    }
-
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.exportTargets])
 
     const [starListStrings, setStarListStrings] = useState<string[] | undefined>(starListInit)
 
