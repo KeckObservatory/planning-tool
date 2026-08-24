@@ -175,6 +175,11 @@ export default function TargetTable(props: TargetTableProps) {
     const visible = cfg.default_table_columns[viewMode].includes(col.field)
     return [col.field, visible]
   }));
+  const [columnVisibilityModel, setColumnVisibilityModel] = React.useState(visibleColumns)
+  React.useEffect(() => {
+    setColumnVisibilityModel(visibleColumns)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode])
   let pinnedColumns = cfg.pinned_table_columns
   const leftPin = [...new Set([GRID_CHECKBOX_SELECTION_COL_DEF.field, ...cfg.pinned_table_columns.left])]
   pinnedColumns.left = leftPin
@@ -412,6 +417,8 @@ export default function TargetTable(props: TargetTableProps) {
               setRowSelectionModel(newRowSelectionModel);
             }}
             rowSelectionModel={rowSelectionModel}
+            columnVisibilityModel={columnVisibilityModel}
+            onColumnVisibilityModelChange={(newModel) => setColumnVisibilityModel(newModel)}
             slotProps={{
               // @ts-ignore
               toolbar: {
@@ -427,13 +434,7 @@ export default function TargetTable(props: TargetTableProps) {
                 setSelectedTagFilter
               } as EditToolbarProps,
             }}
-            initialState={{
-              // pinnedColumns: pinnedColumns, // pro version only
-              columns: {
-                columnVisibilityModel:
-                  visibleColumns
-              }
-            }}
+            // pinnedColumns: pinnedColumns, // pro version only
           />
         )}
       </Box>
