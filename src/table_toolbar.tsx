@@ -15,8 +15,10 @@ import {
 import { v4 as randomId } from 'uuid';
 import MenuItem from '@mui/material/MenuItem';
 import Button, { ButtonProps } from '@mui/material/Button';
-import { Target, useSnackbarContext } from './App.tsx';
-import { Stack, Autocomplete, TextField } from '@mui/material';
+import { Target, useSnackbarContext, ViewMode } from './App.tsx';
+import { Stack, Autocomplete, TextField, Switch, FormControlLabel, Tooltip } from '@mui/material';
+import { useQueryParam, withDefault } from 'use-query-params';
+import { ViewParam } from './target_table.tsx';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import DeleteDialogButton from './delete_rows_dialog.tsx';
 import { ExportTargetsNameDialog, StarListExportDirMenu } from './starlist_export_to_dir.tsx';
@@ -273,6 +275,8 @@ export interface EditToolbarProps extends Partial<GridToolbarProps & ToolbarProp
 export function EditToolbar(props: EditToolbarProps) {
   const { rows, setRows, processRowUpdate, selectedTargets, submit_one_target, uniqueTags, selectedTagFilter, setSelectedTagFilter } = props;
 
+  const [viewMode, setViewMode] = useQueryParam<ViewMode>('view_mode', withDefault(ViewParam, 'non_ao' as ViewMode))
+
   const snackbarContext = useSnackbarContext()
 
   const handleAddTarget = async () => {
@@ -325,6 +329,13 @@ export function EditToolbar(props: EditToolbarProps) {
         />
       </Stack>
       <Stack justifyContent={'right'} direction="row" spacing={1}>
+        <Tooltip title="Toggle On to show AO relavent columns">
+          <FormControlLabel
+            label="AO"
+            control={<Switch checked={viewMode === 'ao'} />}
+            onChange={(_, checked) => setViewMode(checked ? 'ao' : 'non_ao')}
+          />
+        </Tooltip>
         <SemidSelect />
         <CustomExportButton exportTargets={exportTargets} />
         <GridToolbar

@@ -26,13 +26,14 @@ import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
 import CatalogButton from './catalog_button.tsx';
 import { useDebounceCallback } from './use_debounce_callback.tsx';
-import { Target, useSnackbarContext, useStateContext } from './App.tsx';
+import { Target, useSnackbarContext, useStateContext, ViewMode } from './App.tsx';
 import TargetEditDialogButton, { format_string_array, format_edit_entry, PropertyProps, rowSetter, TargetProps } from './target_edit_dialog.tsx';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 import { format_target_property } from './upload_targets_dialog.tsx';
 import { Tooltip } from '@mui/material';
 import { CatalogTarget } from './guide_star/guide_star_dialog.tsx';
+import { createEnumParam, useQueryParam, withDefault } from 'use-query-params';
 
 
 export const convert_schema_to_columns = (schema: JSONSchemaType<Target | CatalogTarget>) => {
@@ -138,6 +139,8 @@ const init_rows_context = {
 const RowsContext = React.createContext<RowsContext>(init_rows_context);
 export const useRowsContext = () => React.useContext(RowsContext);
 
+export const ViewParam = createEnumParam<ViewMode>(['ao', 'non_ao'])
+
 interface TargetTableProps {
   targets: Target[];
 }
@@ -161,13 +164,15 @@ export default function TargetTable(props: TargetTableProps) {
   const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
   const [selectedTagFilter, setSelectedTagFilter] = React.useState<string | null>(null);
   const cfg = context.config
+
+  const [viewMode, _] = useQueryParam<ViewMode>('view_mode', withDefault(ViewParam, 'non_ao' as ViewMode))
   let columns = convert_schema_to_columns(target_schema as any); //TODO: fix type issue
-  const sortOrder = cfg.default_table_columns
+  const sortOrder = cfg.default_table_columns[viewMode]
   columns = columns.sort((a, b) => {
     return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);
   });
   const visibleColumns = Object.fromEntries(columns.map((col) => {
-    const visible = cfg.default_table_columns.includes(col.field)
+    const visible = cfg.default_table_columns[viewMode].includes(col.field)
     return [col.field, visible]
   }));
   let pinnedColumns = cfg.pinned_table_columns

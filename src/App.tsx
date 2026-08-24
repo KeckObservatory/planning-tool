@@ -92,10 +92,11 @@ export interface LngLatEl {
   el: number
 }
 
+export type ViewMode = "ao" | "non_ao"
 
 interface ConfigFile {
   default_guide_star_table_columns: string[];
-  default_table_columns: string[];
+  default_table_columns: {[key in ViewMode]: string[]};
   catalog_to_target_map: { [key: string]: string };
   csv_order: string[];
   pinned_table_columns: { 'left': string[], 'right': string[] };
