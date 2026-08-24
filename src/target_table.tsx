@@ -173,7 +173,7 @@ export default function TargetTable(props: TargetTableProps) {
   const remainingFields = columns
     .map((col) => col.field)
     .filter((field) => ![...leftPinnedFields, ...defaultFields, ...rightPinnedFields].includes(field))
-  const sortOrder = [...leftPinnedFields, ...defaultFields, ...remainingFields, ...rightPinnedFields]
+  const sortOrder = [...leftPinnedFields, ...remainingFields, ...defaultFields, ...rightPinnedFields]
   columns = columns.sort((a, b) => {
     return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);
   });
