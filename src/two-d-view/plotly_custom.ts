@@ -1,3 +1,5 @@
+import type { ComponentClass } from 'react'
+import type { PlotParams } from 'react-plotly.js'
 import Plotly from 'plotly.js/lib/core'
 import scattergl from 'plotly.js/lib/scattergl'
 import scatterpolar from 'plotly.js/lib/scatterpolar'
@@ -11,4 +13,4 @@ import createPlotlyComponent from 'react-plotly.js/factory'
 // trimmed Plotly with just those registered.
 Plotly.register([scattergl, scatterpolar, contour])
 
-export default createPlotlyComponent(Plotly)
+export default createPlotlyComponent(Plotly) as ComponentClass<PlotParams>
