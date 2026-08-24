@@ -167,7 +167,13 @@ export default function TargetTable(props: TargetTableProps) {
 
   const [viewMode, _] = useQueryParam<ViewMode>('view_mode', withDefault(ViewParam, 'non_ao' as ViewMode))
   let columns = convert_schema_to_columns(target_schema as any); //TODO: fix type issue
-  const sortOrder = cfg.default_table_columns[viewMode]
+  const leftPinnedFields = cfg.pinned_table_columns.left.filter((field) => field !== 'selected')
+  const rightPinnedFields = cfg.pinned_table_columns.right
+  const defaultFields = cfg.default_table_columns[viewMode].filter((field) => !leftPinnedFields.includes(field))
+  const remainingFields = columns
+    .map((col) => col.field)
+    .filter((field) => ![...leftPinnedFields, ...defaultFields, ...rightPinnedFields].includes(field))
+  const sortOrder = [...leftPinnedFields, ...defaultFields, ...remainingFields, ...rightPinnedFields]
   columns = columns.sort((a, b) => {
     return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);
   });
