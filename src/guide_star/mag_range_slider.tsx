@@ -2,6 +2,7 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import { Typography } from '@mui/material';
+import RtlProvider from '@mui/system/RtlProvider';
 import { MAG_RANGE } from '../two-d-view/constants';
 
 function valuetext(value: number) {
@@ -37,18 +38,20 @@ export const MagRangeSlider = (props: Props) => {
             <Typography id="input-slider" gutterBottom>
                 Guide Star Magnitude Range
             </Typography>
-            <Slider
-                getAriaLabel={() => 'Temperature range'}
-                value={value}
-                min={MAG_RANGE[1]}
-                step={.2}
-                disabled={props.disabled}
-                max={MAG_RANGE[0]}
-                onChange={handleChange}
-                onChangeCommitted={handleChangeCommitted}
-                valueLabelDisplay="auto"
-                getAriaValueText={valuetext}
-            />
+            <RtlProvider value>
+                <Slider
+                    getAriaLabel={() => 'Magnitude range'}
+                    value={value}
+                    min={MAG_RANGE[0]}
+                    step={.2}
+                    disabled={props.disabled}
+                    max={MAG_RANGE[1]}
+                    onChange={handleChange}
+                    onChangeCommitted={handleChangeCommitted}
+                    valueLabelDisplay="auto"
+                    getAriaValueText={valuetext}
+                />
+            </RtlProvider>
         </Box>
     );
 }
