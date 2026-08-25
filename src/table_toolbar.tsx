@@ -278,7 +278,7 @@ export interface EditToolbarProps extends Partial<GridToolbarProps & ToolbarProp
 }
 
 export function EditToolbar(props: EditToolbarProps) {
-  const { rows, setRows, processRowUpdate, selectedTargets, submit_one_target, uniqueTags, selectedTagFilter, setSelectedTagFilter } = props;
+  const { rows, setRows, selectedTargets, submit_one_target, uniqueTags, selectedTagFilter, setSelectedTagFilter } = props;
 
   const [viewMode, setViewMode] = useQueryParam<ViewMode>('view_mode', withDefault(ViewParam, 'non_ao' as ViewMode))
 
@@ -305,10 +305,18 @@ export function EditToolbar(props: EditToolbarProps) {
         snackbarContext.setSnackbarOpen(true);
         return
       }
-      processRowUpdate(submittedTarget)
       setRows((oldRows) => {
-        const newRows = [submittedTarget, ...oldRows];
-        return newRows
+        // The server is expected to return a fresh, unique _id for a newly
+        // created target. If it instead reuses an _id already in the table,
+        // inserting another row under that same id would make later deletes
+        // of either row remove both (they'd share a getRowId key).
+        if (oldRows.some((row) => row._id === submittedTarget._id)) {
+          console.error('New target was returned with an _id that already exists in the table', submittedTarget)
+          snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error adding target: server returned a duplicate id' })
+          snackbarContext.setSnackbarOpen(true);
+          return oldRows
+        }
+        return [submittedTarget, ...oldRows];
       });
     } finally {
       isAddingTargetRef.current = false;
