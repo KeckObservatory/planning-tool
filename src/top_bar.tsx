@@ -6,10 +6,12 @@ import Button from '@mui/material/Button';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography'
 import DoorFrontIcon from '@mui/icons-material/DoorFront';
+import LogoutIcon from '@mui/icons-material/Logout';
 import IconButton from '@mui/material/IconButton';
 import MarkdownDialogButton from './markdown_dialog.tsx';
 import React from 'react';
 import { config } from './config.tsx';
+import { observer_logout } from './api/api_root.tsx';
 
 interface Props {
   username?: string,
@@ -33,13 +35,10 @@ export function TopBar(props: Props) {
     init_msgs()
   }, [])
 
-  //TODO: Implement logout when observer portal is ready
-  // const handleLogout = async () => {
-  //   console.log('logging out')
-  //   const resp = await observer_logout()
-  //   console.log('resp', resp)
-  //   window.location.reload()
-  // }
+  const handleLogout = async () => {
+    await observer_logout()
+    window.open(piPortal, "_self")
+  }
 
   const handlePortalClick = () => {
     window.open(piPortal, "_self")
@@ -88,11 +87,6 @@ export function TopBar(props: Props) {
         >
           Welcome {props.username}
         </Typography>
-        {/* <Tooltip title="Select to logout via observer portal">
-          <IconButton color={color} onClick={handleLogout} aria-label="logout">
-            <LogoutIcon />
-          </IconButton>
-        </Tooltip> */}
         <Button
           variant='contained'
           onClick={handleSurveyClick}>
@@ -116,6 +110,11 @@ export function TopBar(props: Props) {
           <Switch
             checked={props.darkState}
             onChange={props.handleThemeChange} />
+        </Tooltip>
+        <Tooltip title="Logout and return to the Observer Portal">
+          <IconButton color={color} onClick={handleLogout} aria-label="logout">
+            <LogoutIcon />
+          </IconButton>
         </Tooltip>
       </Toolbar>
     </AppBar>

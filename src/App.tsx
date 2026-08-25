@@ -163,7 +163,6 @@ function App() {
     targets: undefined,
   } as unknown as State);
   const theme = handleTheme(darkState)
-  // const [targets, setTargets] = useState<Target[] | undefined>(undefined)
 
   const setTargets: React.Dispatch<React.SetStateAction<Target[] | undefined>> = (action) => {
     setState((prevState) => ({

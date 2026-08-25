@@ -158,7 +158,7 @@ export const delete_target = (target_ids: string[]): Promise<DeleteResponse> => 
 }
 
 export const observer_logout = (): Promise<string> => {
-    const url = BASE_URL + "/logout"
+    const url = "/logout"
     return axiosInstance.get(url)
         .then(handleResponse)
         .catch(handleError)

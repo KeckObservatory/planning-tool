@@ -98,25 +98,6 @@ function deg_to_hms(deg: number) {
 
 export const rowSetter = (tgt: Target, key: string, value?: string | number | boolean | string[]) => {
 
-    //TODO: handle custom magnitude array
-    // if (key.includes('.') && idx!==undefined) { //used for custom magnitude array
-    //     const [parent, child] = key.split('.') as [keyof Target, keyof Magnitude]
-    //     if (Object.keys(tgt).includes(parent)) {
-    //         const elem = (tgt[parent] as Array<Magnitude>)?.at(idx) as Magnitude
-    //         //@ts-ignore
-    //         elem && (tgt[parent][idx] = { ...elem, [child]: value})
-    //         //@ts-ignore
-    //         !elem && (tgt[parent][0] = { 'mag': undefined, 'band': undefined, [child]: value})
-    //     }
-    //     else {
-    //         //@ts-ignore
-    //         tgt[parent] = [{ 'mag': undefined, 'band': undefined, [child]: value}]
-    //     }
-    //     const newTgt = { ...tgt, 'status': 'EDITED' as Status}
-    //     console.log('newTgt', newTgt)
-    //     return newTgt 
-    // }
-
     let newTgt = { ...tgt, 'status': 'EDITED' as Status, [key]: value }
     switch (key) {
         case 'ra':
