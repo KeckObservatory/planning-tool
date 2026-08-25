@@ -246,7 +246,7 @@ export const SkyChart = (props: Props) => {
         }
 
     fun();
-    }, [chartType, dome, targetView, time, showLimits, suncalcTimes, showSchedule])
+    }, [chartType, dome, targetView, time, showLimits, suncalcTimes, showSchedule, width, height])
 
     // useEffect(() => {
     //     debounced_elevation_axis_draw();

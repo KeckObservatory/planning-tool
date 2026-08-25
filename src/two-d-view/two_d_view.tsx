@@ -90,8 +90,8 @@ const ChartPanel = ({ isFullscreen, onToggleFullscreen, children }: ChartPanelPr
             ref={containerRef}
             sx={{
                 position: 'relative',
-                width: isFullscreen ? '100%' : width,
-                height: isFullscreen ? '70vh' : height,
+                width: isFullscreen ? '100%' : `${width}px`,
+                height: isFullscreen ? '70vh' : `${height}px`,
             }}
         >
             <Tooltip title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}>
