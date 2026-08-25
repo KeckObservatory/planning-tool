@@ -250,11 +250,16 @@ export const create_new_target = (id?: string, obsid?: number, target_name?: str
   Object.entries(target_schema.properties).forEach(([key, value]: [string, any]) => {
     newTarget[key as keyof Target] = value.default
   })
+  // Fall back to a name derived from the (unique) id rather than the literal
+  // string "undefined" - otherwise every blank new target submitted without
+  // an explicit name shares the same target_name, which both trips the
+  // client-side duplicate check and can collide server-side.
+  const fallbackName = id ? `NEW_${id.slice(0, 8)}` : `NEW_${randomId().slice(0, 8)}`
   newTarget = {
     ...newTarget,
     obsid: obsid,
     _id: id,
-    target_name: String(target_name),
+    target_name: target_name ?? fallbackName,
     status: 'CREATED'
   }
   return newTarget as Target
