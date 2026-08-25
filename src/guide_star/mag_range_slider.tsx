@@ -40,10 +40,10 @@ export const MagRangeSlider = (props: Props) => {
             <Slider
                 getAriaLabel={() => 'Temperature range'}
                 value={value}
-                min={MAG_RANGE[0]}
+                min={MAG_RANGE[1]}
                 step={.2}
                 disabled={props.disabled}
-                max={MAG_RANGE[1]}
+                max={MAG_RANGE[0]}
                 onChange={handleChange}
                 onChangeCommitted={handleChangeCommitted}
                 valueLabelDisplay="auto"
