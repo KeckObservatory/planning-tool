@@ -90,7 +90,7 @@ const ChartPanel = ({ isFullscreen, onToggleFullscreen, children }: ChartPanelPr
             ref={containerRef}
             sx={{
                 position: 'relative',
-                width: isFullscreen ? '100%' : `${width}px`,
+                width: isFullscreen ? 'min(85vw, 1400px)' : `${width}px`,
                 height: isFullscreen ? '70vh' : `${height}px`,
             }}
         >
