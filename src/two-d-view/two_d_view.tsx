@@ -32,8 +32,8 @@ interface Props {
     targets: Target[]
 }
 
-const height = 500
-const width = 500
+const height = 525
+const width = 525
 
 interface SkyChartSelectProps {
     skyChart: SkyChart
@@ -98,7 +98,7 @@ const ChartPanel = ({ isFullscreen, onToggleFullscreen, children }: ChartPanelPr
                 <IconButton
                     onClick={onToggleFullscreen}
                     size="small"
-                    sx={{ position: 'absolute', top: 4, right: 4, zIndex: 1, bgcolor: 'background.paper' }}
+                    sx={{ position: 'absolute', top: 4, left: 4, zIndex: 1, bgcolor: 'background.paper' }}
                 >
                     {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
                 </IconButton>
@@ -323,6 +323,7 @@ const TwoDView = ({ targets }: Props) => {
                         <Stack direction='column'>
                             <MoonMarker
                                 moonInfo={moonInfo}
+                                lngLatEl={lngLatEl}
                                 datetime={time} width={width} height={height}
                             />
                         </Stack>

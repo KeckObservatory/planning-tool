@@ -37,6 +37,7 @@ function ViewTargetsDialog(props: VTDProps) {
       titleContent={dialogTitle}
       children={dialogContent}
       maxWidth="xl"
+      paperMaxWidth={1700}
     />
   );
 }

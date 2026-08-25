@@ -83,6 +83,24 @@ export const GSViewer = (props: Props) => {
     return [x, y];
   }
 
+  // The image and catalog stay fixed on screen; the instrument-frame overlays (FOV,
+  // laser/trick contours, pointing origins) carry the rotation instead, so they turn
+  // the opposite way from how the image used to.
+  const overlayRotation = -(props.fovAngle || 0);
+
+  // Rotate a pixel coordinate about the viewer center. Positive degrees are clockwise
+  // on screen, matching the CSS rotate() applied to the FOV layer.
+  const rotateAboutCenter = (x: number, y: number, deg: number): [number, number] => {
+    const rad = (deg * Math.PI) / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+    const cx = props.width / 2;
+    const cy = props.height / 2;
+    const dx = x - cx;
+    const dy = y - cy;
+    return [cx + dx * cos - dy * sin, cy + dx * sin + dy * cos];
+  }
+
   // Convert pointing origins to pixel coordinates for markers
   const pointingOriginMarkers = React.useMemo((): PointingOriginMarker[] => {
     if (!props.pointingOrigins) {
@@ -94,12 +112,14 @@ export const GSViewer = (props: Props) => {
       const [dra, ddec] = feature.geometry.coordinates; // arcseconds offset
       const pora = offsetRa + dra / 3600; // convert to degrees
       const podec = offsetDec + ddec / 3600;
-      const [x, y] = arcsecToPixel((pora - props.centerRA) * 3600, (podec - props.centerDec) * 3600);
+      const [px, py] = arcsecToPixel((pora - props.centerRA) * 3600, (podec - props.centerDec) * 3600);
+      // Rotate the marker position rather than the whole layer, so the labels stay upright.
+      const position = rotateAboutCenter(px, py, overlayRotation);
       const name = feature.properties?.name ?? 'Unknown';
 
       return {
         name,
-        position: [x, y] as [number, number]
+        position
       };
     });
   }, [props.pointingOrigins, props.centerRA, props.centerDec, props.width, props.height, degPerPixel, props.selPO, zoom, props.fovAngle]);
@@ -533,7 +553,7 @@ export const GSViewer = (props: Props) => {
           position: 'absolute', 
           top: 0, 
           left: 0,
-          transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom}) rotate(${props.fovAngle || 0}deg)`,
+          transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
           transformOrigin: 'center center',
           pointerEvents: 'none',
           filter: `${props.invertImage !== false ? 'invert(1) ' : ''}brightness(${brightness}%) contrast(${contrast}%)`
@@ -548,7 +568,7 @@ export const GSViewer = (props: Props) => {
           position: 'absolute', 
           top: 0, 
           left: 0, 
-          transform: `translate(${panOffset.x}px, ${panOffset.y}px) rotate(${props.fovAngle || 0}deg)`,
+          transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
           transformOrigin: 'center center'
         }}
       />
@@ -561,9 +581,9 @@ export const GSViewer = (props: Props) => {
           position: 'absolute', 
           top: 0, 
           left: 0, 
-          transform: `translate(${panOffset.x}px, ${panOffset.y}px) `,
+          transform: `translate(${panOffset.x}px, ${panOffset.y}px) rotate(${overlayRotation}deg)`,
           transformOrigin: 'center center',
-          pointerEvents: 'none' 
+          pointerEvents: 'none'
         }}
       />
       {/* Render pointing origin markers with labels */}
@@ -591,7 +611,8 @@ export const GSViewer = (props: Props) => {
         </div>
       )}
       <ScaleBar width={props.width} height={props.height} degPerPixel={degPerPixel} invertImage={props.invertImage} />
-      <CompassRose width={props.width} height={props.height} fovAngle={props.fovAngle} invertImage={props.invertImage} />
+      {/* The image no longer rotates, so sky north is fixed and the rose stays put */}
+      <CompassRose width={props.width} height={props.height} invertImage={props.invertImage} />
     </div>
   );
 };

@@ -57,7 +57,7 @@ export const TARGET_LENGTH = 15 // 15 characters for target name
 export const TARGET_NAME_LENGTH_PADDED = TARGET_LENGTH + 1 // 15 characters for target name, one space at the end
 
 export const DEFAULT_OPACITY = 'FF' //Hex values appended to color
-export const NON_OBSERVABLE_OPACITY = '80' //Hex values appended to color
+export const NON_OBSERVABLE_OPACITY = '70' //Hex values appended to color
 export const AIRMASS_LIMIT = 5
 export const TWILIGHT_SHADE= '#BFBFBF'
 export const AMATEUR_TWILIGHT_SHADE = '#9f9f9f'

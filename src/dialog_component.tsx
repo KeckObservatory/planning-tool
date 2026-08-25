@@ -8,7 +8,8 @@ import { Breakpoint, DialogActions } from "@mui/material";
 
 interface Props {
     maxWidth?: Breakpoint
-    minWidth?: number | string 
+    minWidth?: number | string
+    paperMaxWidth?: number | string // overrides the pixel cap of maxWidth without disabling it
     open: boolean
     handleClose: Function
     titleContent: JSX.Element
@@ -28,7 +29,10 @@ export const DialogComponent = (props: Props) => {
             onClose={() => props.handleClose()}
             open={props.open}
             fullScreen={props.fullScreen}
-            sx={{ padding: '0px' }}
+            sx={{
+                padding: '0px',
+                ...(props.paperMaxWidth && { '& .MuiDialog-paper': { maxWidth: props.paperMaxWidth } })
+            }}
         >
             <DialogTitle>
                 <Stack direction='row' minWidth={props.minWidth} justifyContent='space-between' spacing={0}>
