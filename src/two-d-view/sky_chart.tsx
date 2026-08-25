@@ -159,8 +159,16 @@ const make_layout = (chartType: SkyChart,
         return `${hst}[HST]<br>${ut}[UT]`
     })
 
+    let ylabel = 'Degrees'
+    if(chartType.includes('Airmass')) {
+        ylabel = 'Airmass'
+    }
+    else if (chartType.includes('Lunar Angle')) {
+        ylabel = 'Degrees from moon'
+    }
+
     const scyaxis: Partial<Plotly.LayoutAxis> = {
-        title: { text: chartType.includes('Airmass') ? 'Airmass' : 'Degrees' },
+        title: { text: ylabel },
         range: yRange,
     }
 
