@@ -26,19 +26,25 @@ const is_guidestar_already_added = (
     science_target_name: string | undefined,
     existingTargets: Target[] | undefined,
 ): boolean => {
-    if (!existingTargets || guidestar.ra_deg == null || guidestar.dec_deg == null) {
+    if (!existingTargets) {
         return false;
     }
+    // target_name is truncated to 15 chars when a guide star is submitted, so
+    // compare against the same truncated form.
+    const guidestarName = guidestar.target_name != null ? String(guidestar.target_name).slice(0, 15) : undefined;
     return existingTargets.some((t) => {
         if (t.science_target !== science_target_name) {
             return false;
         }
-        if (t.ra_deg == null || t.dec_deg == null) {
+        if (guidestarName && t.target_name === guidestarName) {
+            return true;
+        }
+        if (guidestar.ra_deg == null || guidestar.dec_deg == null || t.ra_deg == null || t.dec_deg == null) {
             return false;
         }
         return (
-            Math.abs(t.ra_deg - guidestar.ra_deg!) < COORD_MATCH_TOLERANCE_DEG &&
-            Math.abs(t.dec_deg - guidestar.dec_deg!) < COORD_MATCH_TOLERANCE_DEG
+            Math.abs(t.ra_deg - guidestar.ra_deg) < COORD_MATCH_TOLERANCE_DEG &&
+            Math.abs(t.dec_deg - guidestar.dec_deg) < COORD_MATCH_TOLERANCE_DEG
         );
     });
 }
@@ -56,7 +62,8 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
     const context = useStateContext()
     const snackbarContext = useSnackbarContext()
 
-    const alreadyAdded = is_guidestar_already_added(guidestar, science_target_name, context.targets);
+    const [justAdded, setJustAdded] = React.useState(false);
+    const alreadyAdded = justAdded || is_guidestar_already_added(guidestar, science_target_name, context.targets);
 
     //remove nulls
     let sanitizedGuideStar = Object.fromEntries(Object.entries(guidestar).filter(([_, v]) => v != null));
@@ -85,6 +92,7 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
         snackbarContext.setSnackbarMessage({ severity: 'success', message: 'Guide star added successfully' })
         console.log("Added guide star for target:", resp.targets[0])
         snackbarContext.setSnackbarOpen(true);
+        setJustAdded(true);
         setRows && setRows((oldRows) => {
             //find index of target with same name as science target and insert the new guide star underneath it,
             //  if it exists. Otherwise add the guide star to the top of the table.

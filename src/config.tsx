@@ -35,6 +35,7 @@ export const config = {
             "dec",
             "equinox",
             "lgs",
+            "science_target",
             "h_mag",
             "r_mag",
             "semids",
