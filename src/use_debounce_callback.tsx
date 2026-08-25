@@ -91,22 +91,34 @@ export function useDebounceCallback<T extends (...args: any) => ReturnType<T>>(
   })
 
   const debounced = useMemo(() => {
-    const debouncedFuncInstance = debounce(func, delay, options)
+    // Tracked here rather than via lodash's `pending()`: that method exists at
+    // runtime but isn't declared on DebouncedFunc in the installed @types.
+    let pending = false
+
+    const runner = ((...args: Parameters<T>) => {
+      pending = false
+      return func(...args)
+    }) as T
+
+    const debouncedFuncInstance = debounce(runner, delay, options)
     debouncedFunc.current = debouncedFuncInstance
 
     const wrappedFunc: DebouncedState<T> = (...args: Parameters<T>) => {
+      pending = true
       return debouncedFuncInstance(...args)
     }
 
     wrappedFunc.cancel = () => {
+      pending = false
       debouncedFuncInstance.cancel()
     }
 
     wrappedFunc.isPending = () => {
-      return debouncedFuncInstance.pending()
+      return pending
     }
 
     wrappedFunc.flush = () => {
+      pending = false
       return debouncedFuncInstance.flush()
     }
 
