@@ -4,6 +4,7 @@ import {
     DataGrid,
     GridColDef,
     GridRowParams,
+    GridRowSelectionModel,
     useGridApiRef,
 } from '@mui/x-data-grid';
 import { Target, useSnackbarContext, useStateContext } from '../App.tsx';
@@ -51,19 +52,17 @@ const is_guidestar_already_added = (
 
 interface AddGuideStarButtonProps {
     guidestar: Partial<Target>;
-    setRows?: React.Dispatch<React.SetStateAction<Target[]>>;
     science_target_name?: string;
     useLaser?: boolean;
 }
 
 const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
-    const { guidestar, science_target_name, setRows } = props
+    const { guidestar, science_target_name } = props
 
     const context = useStateContext()
     const snackbarContext = useSnackbarContext()
 
-    const [justAdded, setJustAdded] = React.useState(false);
-    const alreadyAdded = justAdded || is_guidestar_already_added(guidestar, science_target_name, context.targets);
+    const alreadyAdded = is_guidestar_already_added(guidestar, science_target_name, context.targets);
 
     // Guards against a double-click submitting the same guide star twice before
     // the first request resolves, which would insert two rows into the table.
@@ -71,11 +70,6 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
     // updates aren't visible synchronously within the same click.
     const isSubmittingRef = React.useRef(false);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
-
-    //remove nulls
-    let sanitizedGuideStar = Object.fromEntries(Object.entries(guidestar).filter(([_, v]) => v != null));
-    sanitizedGuideStar.target_name = String(sanitizedGuideStar.target_name).slice(0, 15) ?? randomId();
-
 
     const handleClick = async () => {
         if (isSubmittingRef.current) {
@@ -85,11 +79,22 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
         setIsSubmitting(true);
         try {
             const id = randomId();
+            //remove nulls
+            const sanitizedGuideStar = Object.fromEntries(Object.entries(guidestar).filter(([_, v]) => v != null));
+            // target_name is capped at 15 chars by the schema. Only override the
+            // name create_new_target picked if the guide star actually has one -
+            // String(undefined) would otherwise name the target "undefined".
+            if (guidestar.target_name != null) {
+                sanitizedGuideStar.target_name = String(guidestar.target_name).slice(0, 15)
+            } else {
+                delete sanitizedGuideStar.target_name
+            }
+
             let newTarget = create_new_target(id, context.obsid, guidestar.target_name)
             newTarget = {
                 ...newTarget,
                 ...sanitizedGuideStar,
-                equinox: String(guidestar.equinox) ?? '2000',
+                equinox: String(guidestar.equinox ?? '2000'),
                 science_target: science_target_name,
             }
             if (props.useLaser) {
@@ -103,38 +108,25 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
                 return
             }
             snackbarContext.setSnackbarMessage({ severity: 'success', message: 'Guide star added successfully' })
-            console.log("Added guide star for target:", resp.targets[0])
             snackbarContext.setSnackbarOpen(true);
-            setJustAdded(true);
-            // Mirror the add into context.targets - TargetTable resets its own
-            // rows from context.targets whenever it changes, so leaving this
-            // out would make an unrelated context.targets update (e.g. from
-            // deleting a different row) silently drop this newly added target.
+            // context.targets is the single source of truth for the target table:
+            // TargetTable resets its own rows from it whenever it changes, so
+            // adding here is what puts the guide star in the table.
+            const addedTarget = resp.targets[0]
             context.setTargets && context.setTargets((oldTargets) => {
                 const existing = oldTargets ?? []
-                if (existing.some((tgt) => tgt._id === resp.targets[0]._id)) {
+                if (existing.some((tgt) => tgt._id === addedTarget._id)) {
                     return existing;
                 }
-                return [resp.targets[0], ...existing];
-            });
-            setRows && setRows((oldRows) => {
-                // Guard against inserting a duplicate row if this guide star was
-                // already added (e.g. by a submission that resolved just before this one).
-                if (oldRows.some(row => row._id === resp.targets[0]._id)) {
-                    return oldRows;
+                // Place the guide star directly beneath its science target if
+                // that target is present, otherwise at the top of the list.
+                const index = existing.findIndex(tgt => tgt.target_name === science_target_name);
+                if (index === -1) {
+                    return [addedTarget, ...existing];
                 }
-                //find index of target with same name as science target and insert the new guide star underneath it,
-                //  if it exists. Otherwise add the guide star to the top of the table.
-                const index = oldRows.findIndex(row => row.target_name === science_target_name);
-                let newRows = [...oldRows];
-                if (index !== -1) {
-                    newRows.splice(index + 1, 0, resp.targets[0]);
-                    return newRows;
-                }
-                else {
-                    newRows.unshift(resp.targets[0]);
-                }
-                return newRows;
+                const newTargets = [...existing];
+                newTargets.splice(index + 1, 0, addedTarget);
+                return newTargets;
             });
         } finally {
             isSubmittingRef.current = false;
@@ -161,7 +153,6 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
 
 interface Props {
     guidestars?: Partial<Target>[];
-    setRows?: React.Dispatch<React.SetStateAction<Target[]>>;
     science_target_name?: string;
     selectedGuideStarName?: string;
     setSelectedGuideStarName?: (name: string) => void;
@@ -172,21 +163,8 @@ export default function GuideStarTable(props: Props) {
     const { guidestars, selectedGuideStarName, setSelectedGuideStarName, science_target_name } = props;
     const context = useStateContext()
     const cfg = context.config
-    let columns = convert_schema_to_columns(target_schema as any); //TODO: fix this
-    columns = columns.map((col) => {
-        if (col.field === 'target_name') {
-            return { ...col, width: 150}
-        }
-        return { ...col, width: 100 }
-    })
-    //add dist column
-    columns.push({
-        field: 'dist',
-        headerName: 'Distance',
-        width: 150,
-    });
     const sortOrder = cfg.default_guide_star_table_columns;
-    const [rowSelectModel, setRowSelectModel] = React.useState<any>([]);
+    const [rowSelectModel, setRowSelectModel] = React.useState<GridRowSelectionModel>([]);
     const apiRef = useGridApiRef();
 
     React.useEffect(() => {
@@ -220,42 +198,48 @@ export default function GuideStarTable(props: Props) {
         return () => cancelAnimationFrame(frame);
     }, [selectedGuideStarName]);
 
-    columns = columns.sort((a, b) => {
-        return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);
-    });
-
-    const visibleColumns = Object.fromEntries(columns.map((col) => {
-        const visible = cfg.default_guide_star_table_columns.includes(col.field)
-        return [col.field, visible]
-    }));
-
     const ActionsCell = (params: GridRowParams<Partial<Target>>) => {
         const { row } = params;
         return [
             <AddGuideStarButton
+                key="add"
                 guidestar={row}
                 science_target_name={science_target_name}
-                setRows={props.setRows}
                 useLaser={props.useLaser}
             />
         ];
     }
 
-    const addColumns: GridColDef[] = [
-        {
-            field: 'actions',
-            type: 'actions',
-            editable: false,
-            headerName: 'Add',
-            width: 50,
-            disableExport: true,
-            cellClassName: 'actions',
-            getActions: ActionsCell,
-        }
-    ];
+    const columns = React.useMemo(() => {
+        let cols = convert_schema_to_columns(target_schema as any) //TODO: fix this
+            .map((col) => ({ ...col, width: col.field === 'target_name' ? 150 : 100 }))
+        //add dist column
+        cols.push({
+            field: 'dist',
+            headerName: 'Distance',
+            width: 150,
+        });
+        cols.sort((a, b) => sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field));
 
-    columns = [...addColumns, ...columns];
+        const addColumns: GridColDef[] = [
+            {
+                field: 'actions',
+                type: 'actions',
+                editable: false,
+                headerName: 'Add',
+                width: 50,
+                disableExport: true,
+                cellClassName: 'actions',
+                getActions: ActionsCell,
+            }
+        ];
+        return [...addColumns, ...cols];
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [sortOrder, science_target_name, props.useLaser]);
 
+    const visibleColumns = React.useMemo(() => Object.fromEntries(columns.map((col) => {
+        return [col.field, sortOrder.includes(col.field)]
+    })), [columns, sortOrder]);
 
     return (
         <Box
@@ -270,31 +254,31 @@ export default function GuideStarTable(props: Props) {
                 },
             }}
         >
-            {Object.keys(visibleColumns).length > 0 && (
-                <DataGrid
-                    apiRef={apiRef}
-                    getRowId={(row: Partial<Target>) => row.target_name ?? row._id ?? randomId()}
-                    rows={guidestars ?? []}
-                    columns={columns}
-                    rowSelectionModel={rowSelectModel}
-                    onRowSelectionModelChange={(newRowSelectionModel) => {
-                        console.log("Row selection model changed:", newRowSelectionModel)
-                        setRowSelectModel(newRowSelectionModel);
-                        setSelectedGuideStarName && setSelectedGuideStarName(newRowSelectionModel[0] as string);
-                    }}
-                    density="compact"
-                    initialState={{
-                        columns: {
-                            columnVisibilityModel:
-                                visibleColumns
-                        },
-                        pagination: {
-                            paginationModel: { pageSize: 100 }
-                        }
-                    }}
-                    pageSizeOptions={[10, 25, 50, 100]}
-                />
-            )}
+            <DataGrid
+                apiRef={apiRef}
+                // Must be stable across renders - a random fallback id would
+                // give the row a new identity every render, breaking selection
+                // and the scroll-to-row effect above.
+                getRowId={(row: Partial<Target>) => row.target_name ?? row._id ?? ''}
+                rows={guidestars ?? []}
+                columns={columns}
+                rowSelectionModel={rowSelectModel}
+                onRowSelectionModelChange={(newRowSelectionModel) => {
+                    setRowSelectModel(newRowSelectionModel);
+                    setSelectedGuideStarName && setSelectedGuideStarName(newRowSelectionModel[0] as string);
+                }}
+                density="compact"
+                initialState={{
+                    columns: {
+                        columnVisibilityModel:
+                            visibleColumns
+                    },
+                    pagination: {
+                        paginationModel: { pageSize: 100 }
+                    }
+                }}
+                pageSizeOptions={[10, 25, 50, 100]}
+            />
         </Box>
     );
 }

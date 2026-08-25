@@ -354,7 +354,7 @@ export function EditToolbar(props: EditToolbarProps) {
         <DeleteDialogButton setRows={setRows} targets={props.selectedTargets} color='primary' />
         <ViewTargetsDialogButton targets={props.selectedTargets} color='primary' />
         <TargetVizButton targets={vizTargets} />
-        <GuideStarButton targets={vizTargets} setRows={setRows} />
+        <GuideStarButton targets={vizTargets} />
         <TargetWizardButton />
         <TagDialogButton targets={props.selectedTargets} />
         <SemidDialogButton targets={props.selectedTargets} />

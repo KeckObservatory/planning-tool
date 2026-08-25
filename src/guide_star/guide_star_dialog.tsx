@@ -48,7 +48,6 @@ export interface CatalogTarget {
 
 interface ButtonProps {
     targets: Target[]
-    setRows: React.Dispatch<React.SetStateAction<Target[]>>
 }
 
 export interface TargetViz extends Target {
@@ -56,14 +55,13 @@ export interface TargetViz extends Target {
 
 interface VizDialogProps {
     open: boolean,
-    setRows: React.Dispatch<React.SetStateAction<Target[]>>
     targets: Target[]
     handleClose: () => void
 }
 
 export const GuideStarButton = (props: ButtonProps) => {
 
-    const { targets, setRows } = props
+    const { targets } = props
     const [open, setOpen] = React.useState(false);
 
     const handleClickOpen = () => {
@@ -86,7 +84,6 @@ export const GuideStarButton = (props: ButtonProps) => {
                     open={open}
                     targets={targets}
                     handleClose={handleClose}
-                    setRows={setRows}
                 />
             }
         </>
@@ -120,7 +117,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     // target must have ra dec and be defined
 
     const context = useStateContext()
-    const { targets, open, setRows } = props
+    const { targets, open } = props
     const [guideStarName, setGuideStarName] = useState<string>('')
     const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
     const init_img_size = instrumentFOV === 'MOSFIRE' ? MOSFIRE_WINDOW_SIZE : DEFAULT_WINDOW_SIZE
@@ -541,7 +538,6 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         selectedGuideStarName={guideStarName}
                         setSelectedGuideStarName={setGuideStarName}
                         guidestars={guidestars}
-                        setRows={setRows}
                         useLaser={useLaser}
                         science_target_name={target.target_name ?? target._id}
                     />
