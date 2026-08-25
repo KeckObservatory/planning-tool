@@ -236,6 +236,7 @@ export default function TargetTable(props: TargetTableProps) {
     delRow && delete_target([delRow._id as string])
     const newRows = rows.filter((row) => row._id !== id)
     setRows(newRows);
+    context.setTargets && context.setTargets((oldTargets) => (oldTargets ?? []).filter((tgt) => tgt._id !== id));
   };
 
   const processRowUpdate = async (newRow: GridRowModel<Target>) => {

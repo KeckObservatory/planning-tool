@@ -156,15 +156,23 @@ function App() {
   const [ semid ] = useQueryParam<string>('semid');
   const [openSnackbar, setOpenSnackbar] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState<SnackbarMessage>({ message: 'default message' })
-  const [state, setState] = useState<State>({config, 
-    semids: [], 
-    is_admin: false, 
+  const [state, setState] = useState<State>({config,
+    semids: [],
+    is_admin: false,
     username:"",
     targets: undefined,
-    setTargets: undefined
   } as unknown as State);
   const theme = handleTheme(darkState)
   // const [targets, setTargets] = useState<Target[] | undefined>(undefined)
+
+  const setTargets: React.Dispatch<React.SetStateAction<Target[] | undefined>> = (action) => {
+    setState((prevState) => ({
+      ...prevState,
+      targets: typeof action === 'function'
+        ? (action as (prev: Target[] | undefined) => Target[] | undefined)(prevState.targets)
+        : action,
+    }))
+  }
 
   useEffect(() => {
 
@@ -210,7 +218,7 @@ function App() {
   return (
     <ThemeProvider theme={theme} >
       <CssBaseline />
-      <StateContext.Provider value={state}>
+      <StateContext.Provider value={{ ...state, setTargets }}>
         <SnackbarContext.Provider value={{
           snackbarOpen: openSnackbar,
           setSnackbarOpen: setOpenSnackbar,

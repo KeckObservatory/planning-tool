@@ -2,7 +2,7 @@ import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import { Target, useSnackbarContext } from './App';
+import { Target, useSnackbarContext, useStateContext } from './App';
 import { DialogComponent } from './dialog_component';
 import { Button, Typography } from '@mui/material';
 import { delete_target, submit_target } from './api/api_root';
@@ -25,6 +25,7 @@ interface Props {
 function DeleteTargets(props: { targets: Target[], setRows: Function }) {
   const { targets, setRows } = props;
   const snackbarContext = useSnackbarContext()
+  const context = useStateContext()
   const [enableUndo, setEnableUndo] = React.useState(false);
   const [deletedTargets, setDeletedTargets] = React.useState<Target[]>([]);
 
@@ -42,6 +43,7 @@ function DeleteTargets(props: { targets: Target[], setRows: Function }) {
       const newRows = oldRows.filter((row: any) => !ids.includes(row._id))
       return newRows
     });
+    context.setTargets && context.setTargets((oldTargets) => (oldTargets ?? []).filter((tgt) => !ids.includes(tgt._id)));
     setEnableUndo(true)
   }
 
@@ -59,6 +61,7 @@ function DeleteTargets(props: { targets: Target[], setRows: Function }) {
     setRows((oldRows: any) => {
       return [...targets, ...oldRows]
     });
+    context.setTargets && context.setTargets((oldTargets) => [...targets, ...(oldTargets ?? [])]);
     setEnableUndo(false)
   }
 
