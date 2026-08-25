@@ -396,6 +396,10 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         onChange={(event) => setRotatorAngle(Number(event.target.value))}
                     />
                 </Tooltip>
+                <DomeSelect
+                    dome={dome}
+                    setDome={setDome}
+                />
                 <FOVSelect
                     fovs={fovs}
                 />
@@ -446,10 +450,6 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     disabled={disableTrickMap}
                     control={<Switch checked={showTrickMap} />}
                     onChange={(_, checked) => setShowTrickMap(checked)}
-                />
-                <DomeSelect
-                    dome={dome}
-                    setDome={setDome}
                 />
                 {
                     dome.includes('Keck 1') && 
