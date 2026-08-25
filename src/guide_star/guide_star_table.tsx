@@ -9,11 +9,39 @@ import {
 import { Target, useSnackbarContext, useStateContext } from '../App.tsx';
 import { v4 as randomId } from 'uuid';
 import { convert_schema_to_columns } from '../target_table.tsx';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import React from 'react';
 import { create_new_target } from '../table_toolbar.tsx';
 import { submit_target } from '../api/api_root.tsx';
 import target_schema from '../target_schema.json';
+
+// Guide stars are considered "the same" as an existing target when their
+// coordinates are within this tolerance (in degrees). This is far tighter
+// than any real dithering between guide star catalogs but loose enough to
+// tolerate floating point / precision differences in ra_deg/dec_deg.
+const COORD_MATCH_TOLERANCE_DEG = 1 / 3600; // ~1 arcsec
+
+const is_guidestar_already_added = (
+    guidestar: Partial<Target>,
+    science_target_name: string | undefined,
+    existingTargets: Target[] | undefined,
+): boolean => {
+    if (!existingTargets || guidestar.ra_deg == null || guidestar.dec_deg == null) {
+        return false;
+    }
+    return existingTargets.some((t) => {
+        if (t.science_target !== science_target_name) {
+            return false;
+        }
+        if (t.ra_deg == null || t.dec_deg == null) {
+            return false;
+        }
+        return (
+            Math.abs(t.ra_deg - guidestar.ra_deg!) < COORD_MATCH_TOLERANCE_DEG &&
+            Math.abs(t.dec_deg - guidestar.dec_deg!) < COORD_MATCH_TOLERANCE_DEG
+        );
+    });
+}
 
 interface AddGuideStarButtonProps {
     guidestar: Partial<Target>;
@@ -26,7 +54,9 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
     const { guidestar, science_target_name, setRows } = props
 
     const context = useStateContext()
-    const snackbarContext = useSnackbarContext() 
+    const snackbarContext = useSnackbarContext()
+
+    const alreadyAdded = is_guidestar_already_added(guidestar, science_target_name, context.targets);
 
     //remove nulls
     let sanitizedGuideStar = Object.fromEntries(Object.entries(guidestar).filter(([_, v]) => v != null));
@@ -72,9 +102,15 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
     }
 
     return (
-        <IconButton color="primary" onClick={handleClick}>
-            <AddIcon />
-        </IconButton>
+        <Tooltip title={alreadyAdded ? 'Already added to target list' : 'Add to target list'}>
+            <IconButton
+                color="primary"
+                onClick={handleClick}
+                sx={alreadyAdded ? { color: 'success.main' } : undefined}
+            >
+                <AddIcon />
+            </IconButton>
+        </Tooltip>
     )
 }
 
