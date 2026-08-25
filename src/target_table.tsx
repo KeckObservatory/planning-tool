@@ -190,6 +190,23 @@ export default function TargetTable(props: TargetTableProps) {
   const leftPin = [...new Set([GRID_CHECKBOX_SELECTION_COL_DEF.field, ...cfg.pinned_table_columns.left])]
   pinnedColumns.left = leftPin
 
+  // context.targets is the app-wide snapshot of all targets (used e.g. by the
+  // guide star table to check what's already been added). It's only ever
+  // populated by an initial fetch, so any local add/edit must be mirrored
+  // into it here - otherwise it silently falls out of sync with `rows`, and
+  // the effect below (which resets `rows` from `targets` on every reference
+  // change) will wipe out local changes that never made it into context.
+  const upsert_context_target = (target: Target) => {
+    context.setTargets && context.setTargets((oldTargets) => {
+      const existing = oldTargets ?? []
+      const index = existing.findIndex((tgt) => tgt._id === target._id)
+      if (index === -1) {
+        return [target, ...existing]
+      }
+      return existing.map((tgt, i) => (i === index ? target : tgt))
+    })
+  }
+
   const submit_one_target = async (target: Target) => {
     const resp = await submit_target([target])
     if (resp.errors.length > 0) {
@@ -201,6 +218,9 @@ export default function TargetTable(props: TargetTableProps) {
       return tgt._id === submittedTarget?._id ?
         submittedTarget : tgt
     }))
+    if (submittedTarget) {
+      upsert_context_target(submittedTarget)
+    }
     return submittedTarget
   }
 
@@ -240,6 +260,7 @@ export default function TargetTable(props: TargetTableProps) {
   const processRowUpdate = async (newRow: GridRowModel<Target>) => {
     //row is sent to DataGrid rows. Used to match row with what was edited.
     setRows((oldRows) => oldRows.map((row) => (row._id === newRow._id ? newRow : row)));
+    upsert_context_target(newRow);
     return newRow;
   };
 

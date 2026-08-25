@@ -106,6 +106,17 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
             console.log("Added guide star for target:", resp.targets[0])
             snackbarContext.setSnackbarOpen(true);
             setJustAdded(true);
+            // Mirror the add into context.targets - TargetTable resets its own
+            // rows from context.targets whenever it changes, so leaving this
+            // out would make an unrelated context.targets update (e.g. from
+            // deleting a different row) silently drop this newly added target.
+            context.setTargets && context.setTargets((oldTargets) => {
+                const existing = oldTargets ?? []
+                if (existing.some((tgt) => tgt._id === resp.targets[0]._id)) {
+                    return existing;
+                }
+                return [resp.targets[0], ...existing];
+            });
             setRows && setRows((oldRows) => {
                 // Guard against inserting a duplicate row if this guide star was
                 // already added (e.g. by a submission that resolved just before this one).
