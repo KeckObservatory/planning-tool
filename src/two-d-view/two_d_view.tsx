@@ -2,7 +2,10 @@ import React from 'react';
 import * as util from './sky_view_util.tsx'
 import NightPicker from '../two-d-view/night_picker'
 import dayjs, { Dayjs } from 'dayjs';
-import { Button, FormControl, FormControlLabel, FormLabel, Grid2, Radio, RadioGroup, Stack, Switch, TextField, Tooltip } from '@mui/material';
+import { Box, Button, FormControl, FormControlLabel, FormLabel, Grid2, IconButton, Radio, RadioGroup, Stack, Switch, TextField, Tooltip } from '@mui/material';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import { useResizeObserver } from 'usehooks-ts';
 import TimeSlider from './time_slider';
 import { Target, useStateContext } from '../App.tsx';
 import { DomeChart } from './dome_chart.tsx';
@@ -66,6 +69,45 @@ export const SkyChartSelect = (props: SkyChartSelectProps) => {
     )
 }
 
+type FullscreenChart = 'sky' | 'dome' | null
+
+interface ChartPanelProps {
+    isFullscreen: boolean
+    onToggleFullscreen: () => void
+    children: (width: number, height: number) => React.ReactNode
+}
+
+// Wraps a Plotly chart with a fullscreen toggle. At normal size the panel is
+// pinned to the chart's usual 500x500, so nothing changes for existing views;
+// in fullscreen it grows to fill most of the dialog and the actual rendered
+// size is measured back out so the chart can be redrawn at that size.
+const ChartPanel = ({ isFullscreen, onToggleFullscreen, children }: ChartPanelProps) => {
+    const containerRef = React.useRef<HTMLDivElement>(null)
+    const { width: panelWidth = 0, height: panelHeight = 0 } = useResizeObserver({ ref: containerRef })
+
+    return (
+        <Box
+            ref={containerRef}
+            sx={{
+                position: 'relative',
+                width: isFullscreen ? '100%' : width,
+                height: isFullscreen ? '70vh' : height,
+            }}
+        >
+            <Tooltip title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}>
+                <IconButton
+                    onClick={onToggleFullscreen}
+                    size="small"
+                    sx={{ position: 'absolute', top: 4, right: 4, zIndex: 1, bgcolor: 'background.paper' }}
+                >
+                    {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                </IconButton>
+            </Tooltip>
+            {panelWidth > 0 && panelHeight > 0 && children(panelWidth, panelHeight)}
+        </Box>
+    )
+}
+
 const TwoDView = ({ targets }: Props) => {
     const context = useStateContext()
     const today = hidate(new Date(), context.config.timezone).toDate()
@@ -89,6 +131,7 @@ const TwoDView = ({ targets }: Props) => {
     const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
     const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
     const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
+    const [fullscreenChart, setFullscreenChart] = React.useState<FullscreenChart>(null)
 
 
 
@@ -199,6 +242,39 @@ const TwoDView = ({ targets }: Props) => {
 
     const moonInfo = SunCalc.getMoonIllumination(time)
 
+    if (fullscreenChart) {
+        return (
+            <ChartPanel isFullscreen onToggleFullscreen={() => setFullscreenChart(null)}>
+                {(panelWidth, panelHeight) => fullscreenChart === 'sky' ? (
+                    <SkyChart
+                        height={panelHeight}
+                        width={panelWidth}
+                        chartType={skyChart}
+                        showLimits={showLimits}
+                        targetView={targetView}
+                        showMoon={showMoon}
+                        showSchedule={showSchedule}
+                        showCurrLoc={showCurrLoc}
+                        times={times}
+                        suncalcTimes={suncalcTimes}
+                        time={time}
+                        dome={dome}
+                    />
+                ) : (
+                    <DomeChart
+                        height={panelHeight}
+                        width={panelWidth}
+                        targetView={targetView}
+                        showMoon={showMoon}
+                        showCurrLoc={showCurrLoc}
+                        times={times}
+                        time={time}
+                        dome={dome}
+                    />
+                )}
+            </ChartPanel>
+        )
+    }
 
     return (
         <Grid2 container spacing={2}>
@@ -295,30 +371,38 @@ const TwoDView = ({ targets }: Props) => {
             </Grid2>
             <Grid2 size={{ xs: 8 }}>
                 <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={1}>
-                    <DomeChart
-                        height={height}
-                        width={width}
-                        targetView={targetView}
-                        showMoon={showMoon}
-                        showCurrLoc={showCurrLoc}
-                        times={times}
-                        time={time}
-                        dome={dome}
-                    />
-                    <SkyChart
-                        height={height}
-                        width={width}
-                        chartType={skyChart}
-                        showLimits={showLimits}
-                        targetView={targetView}
-                        showMoon={showMoon}
-                        showSchedule={showSchedule}
-                        showCurrLoc={showCurrLoc}
-                        times={times}
-                        suncalcTimes={suncalcTimes}
-                        time={time}
-                        dome={dome}
-                    />
+                    <ChartPanel isFullscreen={false} onToggleFullscreen={() => setFullscreenChart('dome')}>
+                        {(panelWidth, panelHeight) => (
+                            <DomeChart
+                                height={panelHeight}
+                                width={panelWidth}
+                                targetView={targetView}
+                                showMoon={showMoon}
+                                showCurrLoc={showCurrLoc}
+                                times={times}
+                                time={time}
+                                dome={dome}
+                            />
+                        )}
+                    </ChartPanel>
+                    <ChartPanel isFullscreen={false} onToggleFullscreen={() => setFullscreenChart('sky')}>
+                        {(panelWidth, panelHeight) => (
+                            <SkyChart
+                                height={panelHeight}
+                                width={panelWidth}
+                                chartType={skyChart}
+                                showLimits={showLimits}
+                                targetView={targetView}
+                                showMoon={showMoon}
+                                showSchedule={showSchedule}
+                                showCurrLoc={showCurrLoc}
+                                times={times}
+                                suncalcTimes={suncalcTimes}
+                                time={time}
+                                dome={dome}
+                            />
+                        )}
+                    </ChartPanel>
                 </Stack>
             </Grid2>
             <Grid2 size={{ xs: 4 }}>
