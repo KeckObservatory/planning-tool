@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 
 import debounce from 'lodash.debounce'
 
@@ -82,6 +82,9 @@ export function useDebounceCallback<T extends (...args: any) => ReturnType<T>>(
   const debouncedFunc = useRef<ReturnType<typeof debounce>>()
 
   useUnmount(() => {
+    // Cancel the instance that calls actually go through (created in the memo
+    // below and tracked here), not a separate one - otherwise a pending
+    // invocation still fires after the component has unmounted.
     if (debouncedFunc.current) {
       debouncedFunc.current.cancel()
     }
@@ -89,6 +92,7 @@ export function useDebounceCallback<T extends (...args: any) => ReturnType<T>>(
 
   const debounced = useMemo(() => {
     const debouncedFuncInstance = debounce(func, delay, options)
+    debouncedFunc.current = debouncedFuncInstance
 
     const wrappedFunc: DebouncedState<T> = (...args: Parameters<T>) => {
       return debouncedFuncInstance(...args)
@@ -99,7 +103,7 @@ export function useDebounceCallback<T extends (...args: any) => ReturnType<T>>(
     }
 
     wrappedFunc.isPending = () => {
-      return !!debouncedFunc.current
+      return debouncedFuncInstance.pending()
     }
 
     wrappedFunc.flush = () => {
@@ -107,11 +111,6 @@ export function useDebounceCallback<T extends (...args: any) => ReturnType<T>>(
     }
 
     return wrappedFunc
-  }, [func, delay, options])
-
-  // Update the debounced function ref whenever func, wait, or options change
-  useEffect(() => {
-    debouncedFunc.current = debounce(func, delay, options)
   }, [func, delay, options])
 
   return debounced

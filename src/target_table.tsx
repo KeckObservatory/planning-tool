@@ -196,14 +196,17 @@ export default function TargetTable(props: TargetTableProps) {
   // into it here - otherwise it silently falls out of sync with `rows`, and
   // the effect below (which resets `rows` from `targets` on every reference
   // change) will wipe out local changes that never made it into context.
-  const upsert_context_target = (target: Target) => {
+  //
+  // This deliberately updates in place only and never inserts: a save can land
+  // after its target was deleted (an edit debounced from a row that has since
+  // been removed), and inserting there would resurrect the deleted row.
+  // Genuine additions insert into context explicitly at the point of the add.
+  const update_context_target = (target: Target) => {
     context.setTargets && context.setTargets((oldTargets) => {
-      const existing = oldTargets ?? []
-      const index = existing.findIndex((tgt) => tgt._id === target._id)
-      if (index === -1) {
-        return [target, ...existing]
+      if (!oldTargets?.some((tgt) => tgt._id === target._id)) {
+        return oldTargets
       }
-      return existing.map((tgt, i) => (i === index ? target : tgt))
+      return oldTargets.map((tgt) => (tgt._id === target._id ? target : tgt))
     })
   }
 
@@ -226,7 +229,7 @@ export default function TargetTable(props: TargetTableProps) {
         submittedTarget : tgt
     }))
     if (submittedTarget) {
-      upsert_context_target(submittedTarget)
+      update_context_target(submittedTarget)
     }
     return submittedTarget
   }
@@ -236,15 +239,6 @@ export default function TargetTable(props: TargetTableProps) {
     const resp = await submit_one_target(target)
     return resp
   }
-
-  React.useEffect(() => {
-    const ids = rows.map((row) => row._id)
-    const missing = ids.filter((id) => !id).length
-    const dupes = ids.filter((id, i) => id && ids.indexOf(id) !== i)
-    if (missing || dupes.length) {
-      console.error('[row id diagnostic] rows with no _id:', missing, 'duplicate _ids:', dupes, 'all ids:', ids)
-    }
-  }, [rows])
 
   React.useEffect(() => {
     const duplicates = check_for_duplicates(rows)
@@ -284,7 +278,7 @@ export default function TargetTable(props: TargetTableProps) {
   const processRowUpdate = async (newRow: GridRowModel<Target>) => {
     //row is sent to DataGrid rows. Used to match row with what was edited.
     setRows((oldRows) => oldRows.map((row) => (row._id === newRow._id ? newRow : row)));
-    upsert_context_target(newRow);
+    update_context_target(newRow);
     return newRow;
   };
 

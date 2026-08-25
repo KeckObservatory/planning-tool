@@ -15,7 +15,7 @@ import {
 import { v4 as randomId } from 'uuid';
 import MenuItem from '@mui/material/MenuItem';
 import Button, { ButtonProps } from '@mui/material/Button';
-import { Target, useSnackbarContext, ViewMode } from './App.tsx';
+import { Target, useSnackbarContext, useStateContext, ViewMode } from './App.tsx';
 import { Stack, Autocomplete, TextField, Switch, FormControlLabel, Tooltip } from '@mui/material';
 import { useQueryParam, withDefault } from 'use-query-params';
 import { ViewParam } from './target_table.tsx';
@@ -283,6 +283,7 @@ export function EditToolbar(props: EditToolbarProps) {
   const [viewMode, setViewMode] = useQueryParam<ViewMode>('view_mode', withDefault(ViewParam, 'non_ao' as ViewMode))
 
   const snackbarContext = useSnackbarContext()
+  const stateContext = useStateContext()
 
   // Guards against a double-click submitting two new targets before the
   // first request resolves, which would race on inserting into rows.
@@ -317,6 +318,16 @@ export function EditToolbar(props: EditToolbarProps) {
           return oldRows
         }
         return [submittedTarget, ...oldRows];
+      });
+      // Mirror the add into context.targets. TargetTable's per-target sync is
+      // update-only (so a late save can't resurrect a deleted row), so a
+      // genuine addition has to be inserted here.
+      stateContext.setTargets && stateContext.setTargets((oldTargets) => {
+        const existing = oldTargets ?? []
+        if (existing.some((tgt) => tgt._id === submittedTarget._id)) {
+          return existing
+        }
+        return [submittedTarget, ...existing]
       });
     } finally {
       isAddingTargetRef.current = false;
