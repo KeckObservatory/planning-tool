@@ -65,59 +65,84 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
     const [justAdded, setJustAdded] = React.useState(false);
     const alreadyAdded = justAdded || is_guidestar_already_added(guidestar, science_target_name, context.targets);
 
+    // Guards against a double-click submitting the same guide star twice before
+    // the first request resolves, which would insert two rows into the table.
+    // A ref is used (rather than relying on isSubmitting state) because state
+    // updates aren't visible synchronously within the same click.
+    const isSubmittingRef = React.useRef(false);
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
+
     //remove nulls
     let sanitizedGuideStar = Object.fromEntries(Object.entries(guidestar).filter(([_, v]) => v != null));
     sanitizedGuideStar.target_name = String(sanitizedGuideStar.target_name).slice(0, 15) ?? randomId();
 
 
     const handleClick = async () => {
-        const id = randomId();
-        let newTarget = create_new_target(id, context.obsid, guidestar.target_name)
-        newTarget = {
-            ...newTarget,
-            ...sanitizedGuideStar, 
-            equinox: String(guidestar.equinox) ?? '2000',
-            science_target: science_target_name,
+        if (isSubmittingRef.current) {
+            return;
         }
-        if (props.useLaser) {
-            newTarget.lgs = '1'
-        }
-        const resp = await submit_target([newTarget])
-        if (resp.errors.length > 0) {
-            console.error('error submitting target')
-            snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error adding target' })
+        isSubmittingRef.current = true;
+        setIsSubmitting(true);
+        try {
+            const id = randomId();
+            let newTarget = create_new_target(id, context.obsid, guidestar.target_name)
+            newTarget = {
+                ...newTarget,
+                ...sanitizedGuideStar,
+                equinox: String(guidestar.equinox) ?? '2000',
+                science_target: science_target_name,
+            }
+            if (props.useLaser) {
+                newTarget.lgs = '1'
+            }
+            const resp = await submit_target([newTarget])
+            if (resp.errors.length > 0) {
+                console.error('error submitting target')
+                snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error adding target' })
+                snackbarContext.setSnackbarOpen(true);
+                return
+            }
+            snackbarContext.setSnackbarMessage({ severity: 'success', message: 'Guide star added successfully' })
+            console.log("Added guide star for target:", resp.targets[0])
             snackbarContext.setSnackbarOpen(true);
-            return
-        }
-        snackbarContext.setSnackbarMessage({ severity: 'success', message: 'Guide star added successfully' })
-        console.log("Added guide star for target:", resp.targets[0])
-        snackbarContext.setSnackbarOpen(true);
-        setJustAdded(true);
-        setRows && setRows((oldRows) => {
-            //find index of target with same name as science target and insert the new guide star underneath it,
-            //  if it exists. Otherwise add the guide star to the top of the table.
-            const index = oldRows.findIndex(row => row.target_name === science_target_name);
-            let newRows = [...oldRows];
-            if (index !== -1) {
-                newRows.splice(index + 1, 0, resp.targets[0]);
+            setJustAdded(true);
+            setRows && setRows((oldRows) => {
+                // Guard against inserting a duplicate row if this guide star was
+                // already added (e.g. by a submission that resolved just before this one).
+                if (oldRows.some(row => row._id === resp.targets[0]._id)) {
+                    return oldRows;
+                }
+                //find index of target with same name as science target and insert the new guide star underneath it,
+                //  if it exists. Otherwise add the guide star to the top of the table.
+                const index = oldRows.findIndex(row => row.target_name === science_target_name);
+                let newRows = [...oldRows];
+                if (index !== -1) {
+                    newRows.splice(index + 1, 0, resp.targets[0]);
+                    return newRows;
+                }
+                else {
+                    newRows.unshift(resp.targets[0]);
+                }
                 return newRows;
-            }
-            else {
-                newRows.unshift(resp.targets[0]);
-            }
-            return newRows;
-        });
+            });
+        } finally {
+            isSubmittingRef.current = false;
+            setIsSubmitting(false);
+        }
     }
 
     return (
         <Tooltip title={alreadyAdded ? 'Already added to target list' : 'Add to target list'}>
-            <IconButton
-                color="primary"
-                onClick={handleClick}
-                sx={alreadyAdded ? { color: 'success.main' } : undefined}
-            >
-                <AddIcon />
-            </IconButton>
+            <span>
+                <IconButton
+                    color="primary"
+                    onClick={handleClick}
+                    disabled={isSubmitting}
+                    sx={alreadyAdded ? { color: 'success.main' } : undefined}
+                >
+                    <AddIcon />
+                </IconButton>
+            </span>
         </Tooltip>
     )
 }

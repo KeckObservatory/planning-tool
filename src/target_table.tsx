@@ -196,12 +196,11 @@ export default function TargetTable(props: TargetTableProps) {
       throw new Error('error updating target')
     }
     const submittedTarget = resp.targets.at(0)
-    //update target in rows 
-    const newTargets = rows.map((tgt) => {
+    //update target in rows
+    setRows((oldRows) => oldRows.map((tgt) => {
       return tgt._id === submittedTarget?._id ?
         submittedTarget : tgt
-    })
-    setRows(newTargets)
+    }))
     return submittedTarget
   }
 
@@ -234,15 +233,13 @@ export default function TargetTable(props: TargetTableProps) {
     const delRow = rows.find((row) => row._id === id);
     console.log('deleting', id, delRow)
     delRow && delete_target([delRow._id as string])
-    const newRows = rows.filter((row) => row._id !== id)
-    setRows(newRows);
+    setRows((oldRows) => oldRows.filter((row) => row._id !== id));
     context.setTargets && context.setTargets((oldTargets) => (oldTargets ?? []).filter((tgt) => tgt._id !== id));
   };
 
   const processRowUpdate = async (newRow: GridRowModel<Target>) => {
     //row is sent to DataGrid rows. Used to match row with what was edited.
-    const newRows = rows.map((row) => (row._id === newRow._id ? newRow : row))
-    setRows(newRows);
+    setRows((oldRows) => oldRows.map((row) => (row._id === newRow._id ? newRow : row)));
     return newRow;
   };
 

@@ -279,21 +279,36 @@ export function EditToolbar(props: EditToolbarProps) {
 
   const snackbarContext = useSnackbarContext()
 
+  // Guards against a double-click submitting two new targets before the
+  // first request resolves, which would race on inserting into rows.
+  const isAddingTargetRef = React.useRef(false);
+  const [isAddingTarget, setIsAddingTarget] = React.useState(false);
+
   const handleAddTarget = async () => {
-    const id = randomId();
-    const newTarget = create_new_target(id, props.obsid)
-    const submittedTarget = await submit_one_target(newTarget)
-    if (!submittedTarget) {
-      console.error('error submitting target')
-      snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error adding target' })
-      snackbarContext.setSnackbarOpen(true);
-      return
+    if (isAddingTargetRef.current) {
+      return;
     }
-    processRowUpdate(submittedTarget)
-    setRows((oldRows) => {
-      const newRows = [submittedTarget, ...oldRows];
-      return newRows
-    });
+    isAddingTargetRef.current = true;
+    setIsAddingTarget(true);
+    try {
+      const id = randomId();
+      const newTarget = create_new_target(id, props.obsid)
+      const submittedTarget = await submit_one_target(newTarget)
+      if (!submittedTarget) {
+        console.error('error submitting target')
+        snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error adding target' })
+        snackbarContext.setSnackbarOpen(true);
+        return
+      }
+      processRowUpdate(submittedTarget)
+      setRows((oldRows) => {
+        const newRows = [submittedTarget, ...oldRows];
+        return newRows
+      });
+    } finally {
+      isAddingTargetRef.current = false;
+      setIsAddingTarget(false);
+    }
   };
 
   const vizTargets = selectedTargets.length > 0 ?
@@ -309,7 +324,7 @@ export function EditToolbar(props: EditToolbarProps) {
     // <GridToolbarContainer sx={{ justifyContent: 'center' }}>
     <GridToolbarContainer sx={{ justifyContent: 'space-between', p: 1 }}>
       <Stack justifyContent={'left'} direction="row" spacing={1}>
-        <Button color="primary" startIcon={<AddIcon />} onClick={handleAddTarget}>
+        <Button color="primary" startIcon={<AddIcon />} onClick={handleAddTarget} disabled={isAddingTarget}>
           Add Target
         </Button>
         <DeleteDialogButton setRows={setRows} targets={props.selectedTargets} color='primary' />
