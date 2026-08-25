@@ -9,6 +9,7 @@ export const config = {
         "v_mag",
         "r_mag",
         "j_mag",
+        "k_mag",
         "dist",
     ],
     "default_table_columns": {
@@ -84,6 +85,7 @@ export const config = {
         "rmag": "r_mag",
         "vmag": "v_mag",
         "hmag": "h_mag",
+        "kmag": "k_mag",
     },
     "table_column_width": 140,
     "help_msg_filename": "helpMsg.md",
