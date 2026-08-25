@@ -213,6 +213,13 @@ export default function TargetTable(props: TargetTableProps) {
       throw new Error('error updating target')
     }
     const submittedTarget = resp.targets.at(0)
+    // The grid is keyed solely on _id, so a target that comes back without one
+    // would share an `undefined` key with every other such row - deleting any
+    // one of them would then remove all of them. Fall back to the id we sent.
+    if (submittedTarget && !submittedTarget._id) {
+      console.error('submit_target returned a target with no _id; falling back to the submitted id', { sent: target, received: submittedTarget })
+      submittedTarget._id = target._id
+    }
     //update target in rows
     setRows((oldRows) => oldRows.map((tgt) => {
       return tgt._id === submittedTarget?._id ?
@@ -229,6 +236,15 @@ export default function TargetTable(props: TargetTableProps) {
     const resp = await submit_one_target(target)
     return resp
   }
+
+  React.useEffect(() => {
+    const ids = rows.map((row) => row._id)
+    const missing = ids.filter((id) => !id).length
+    const dupes = ids.filter((id, i) => id && ids.indexOf(id) !== i)
+    if (missing || dupes.length) {
+      console.error('[row id diagnostic] rows with no _id:', missing, 'duplicate _ids:', dupes, 'all ids:', ids)
+    }
+  }, [rows])
 
   React.useEffect(() => {
     const duplicates = check_for_duplicates(rows)
@@ -250,6 +266,14 @@ export default function TargetTable(props: TargetTableProps) {
   };
 
   const handleDeleteClick = async (id: GridRowId) => {
+    // Deleting by a null/undefined id would match every row that is also
+    // missing an _id, removing all of them instead of just this one.
+    if (id === undefined || id === null || id === '') {
+      console.error('refusing to delete: row has no _id', { id, rows })
+      sbcontext.setSnackbarMessage({ severity: 'error', message: 'Cannot delete target: it has no id' })
+      sbcontext.setSnackbarOpen(true)
+      return
+    }
     const delRow = rows.find((row) => row._id === id);
     console.log('deleting', id, delRow)
     delRow && delete_target([delRow._id as string])
