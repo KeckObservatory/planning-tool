@@ -17,6 +17,7 @@ import { LaserContours, POPointFeature, POPointingOriginCollection, POSelect } f
 import { LazyFallback } from '../lazy_fallback';
 // import AladinViewer from '../aladin/aladin';
 import { MagRangeSlider } from './mag_range_slider';
+import { DEFAULT_MAG_FILTER, MAG_KEYS, MagFilter, MagFilterSelect } from './mag_filter_select.tsx';
 import { MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE, DEFAULT_RA, DEFAULT_DEC, AO_INSTRUMENTS, TRICK_INSTRUMENTS } from '../two-d-view/constants';
 import { MuiChipsInput } from 'mui-chips-input';
 import AGTimeToLimit from './asterism_generator.tsx';
@@ -134,6 +135,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [showCatalog, setShowCatalog] = useQueryParam('show_catalog', withDefault(BooleanParam, true))
     const [showTrickMap, setShowTrickMap] = useQueryParam('show_trick_map', withDefault(BooleanParam, false))
     const [enableMagRange, setEnableMagRange] = React.useState<boolean>(false)
+    const [filterByMag, setFilterByMag] = React.useState<MagFilter>(DEFAULT_MAG_FILTER)
     const [disableLaser, setDisableLaser] = React.useState<boolean>(
         is_ao_instrument(instrumentFOV) ? false : true
     )
@@ -334,6 +336,23 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const centerRa = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
     const centerDec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
 
+    // Client-side refinement on top of whatever the backend already filtered by:
+    // keep a guide star only if every magnitude column the user checked falls
+    // within magRange. No columns checked ("None") means no extra filtering.
+    const activeMagKeys = MAG_KEYS.filter((key) => filterByMag[key])
+    const filteredGuideStars = React.useMemo(() => {
+        if (activeMagKeys.length === 0 || !Array.isArray(magRange) || magRange.length < 2) {
+            return guidestars
+        }
+        const min = Number(magRange[0])
+        const max = Number(magRange[1])
+        return guidestars.filter((star) => activeMagKeys.every((key) => {
+            const val = star[key]
+            return typeof val === 'number' && val >= min && val <= max
+        }))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [guidestars, filterByMag, magRange])
+
     const dialogContent = (
         <Stack
             sx={{
@@ -454,6 +473,13 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 }
                 <Box sx={{ flexGrow: 1 }} />
                 <div style={{ marginRight: "16px" }}>
+                <MagFilterSelect
+                    filterByMag={filterByMag}
+                    setFilterByMag={setFilterByMag}
+                    disabled={!enableMagRange}
+                />
+                </div>
+                <div style={{ marginRight: "16px" }}>
                     <MagRangeSlider
                         range={magRange as [string, string]}
                         setRange={setMagRange}
@@ -491,7 +517,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     <React.Suspense fallback={<LazyFallback height={600} />}>
                         < GSViewer
                             imgUrl={image ?? ''}
-                            guideStars={guidestars as Target[]}
+                            guideStars={filteredGuideStars as Target[]}
                             height={600}
                             width={600}
                             size={imgSize} // in degrees
@@ -537,7 +563,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     <GuideStarTable
                         selectedGuideStarName={guideStarName}
                         setSelectedGuideStarName={setGuideStarName}
-                        guidestars={guidestars}
+                        guidestars={filteredGuideStars}
                         useLaser={useLaser}
                         science_target_name={target.target_name ?? target._id}
                     />
