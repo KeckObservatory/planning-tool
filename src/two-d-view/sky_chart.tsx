@@ -79,6 +79,9 @@ export const make_trace = (data: Datum[], target_name: string, lineColor?: strin
     }
 
     const showlegend = data.at(0) ? data[0].opacity === DEFAULT_OPACITY : false
+    // Each segment is already split at opacity boundaries (see split_into_segments), so
+    // a segment is uniformly observable or not - dot the line wherever it's translucent.
+    const dash: Plotly.Dash = data.at(0)?.opacity === DEFAULT_OPACITY ? 'solid' : 'dot'
     const trace: Plotly.Data = {
         x: data.map((datum: Datum) => datum.x),
         y: data.map((datum: Datum) => datum.y),
@@ -92,6 +95,7 @@ export const make_trace = (data: Datum[], target_name: string, lineColor?: strin
         line: {
             width: 5,
             color: lineColor,
+            dash,
         },
         textposition: 'top left',
         type: 'scatter',
