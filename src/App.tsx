@@ -11,7 +11,7 @@ import TargetTable from './target_table.tsx';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import Skeleton from '@mui/material/Skeleton';
-import { get_targets, get_userinfo } from './api/api_root.tsx';
+import { get_targets, get_userinfo, setLocalMode } from './api/api_root.tsx';
 import { SimbadTargetData } from './catalog_button.tsx';
 import { config } from './config.tsx';
 
@@ -153,6 +153,7 @@ export const useStateContext = () => React.useContext(StateContext)
 
 function App() {
   const [darkState, setDarkState] = useQueryParam('darkState', withDefault(BooleanParam, true));
+  const [localMode, setLocalModeParam] = useQueryParam('localMode', withDefault(BooleanParam, false));
   const [ semid ] = useQueryParam<string>('semid');
   const [openSnackbar, setOpenSnackbar] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState<SnackbarMessage>({ message: 'default message' })
@@ -174,6 +175,7 @@ function App() {
   }
 
   useEffect(() => {
+    setLocalMode(localMode)
 
     const fetch_targets = async () => {
       if (semid) {
@@ -186,11 +188,12 @@ function App() {
       }
     }
     fetch_targets()
-  }, [semid])
+  }, [semid, localMode])
 
   useEffect(() => {
 
     const fetch_data = async () => {
+      setLocalMode(localMode)
       var userinfo = await get_userinfo();
       var username = `${userinfo.FirstName} ${userinfo.LastName}`;
       var init_state: any = {
@@ -214,6 +217,10 @@ function App() {
     setDarkState(!darkState)
   }
 
+  const handleLocalModeChange = () => {
+    setLocalModeParam(!localMode)
+  }
+
   return (
     <ThemeProvider theme={theme} >
       <CssBaseline />
@@ -223,7 +230,13 @@ function App() {
           setSnackbarOpen: setOpenSnackbar,
           snackbarMessage, setSnackbarMessage
         }}>
-          <TopBar darkState={darkState} handleThemeChange={handleThemeChange} username={state.username} />
+          <TopBar
+            darkState={darkState}
+            handleThemeChange={handleThemeChange}
+            username={state.username}
+            localMode={localMode}
+            handleLocalModeChange={handleLocalModeChange}
+          />
           <Snackbar
             anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             autoHideDuration={3000}

@@ -1,10 +1,12 @@
 import AppBar from '@mui/material/AppBar';
 import HelpIcon from '@mui/icons-material/Help';
 import Switch from "@mui/material/Switch"
+import FormControlLabel from "@mui/material/FormControlLabel"
 import Tooltip from '@mui/material/Tooltip';
 import Button from '@mui/material/Button';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography'
+import Chip from '@mui/material/Chip'
 import DoorFrontIcon from '@mui/icons-material/DoorFront';
 import LogoutIcon from '@mui/icons-material/Logout';
 import IconButton from '@mui/material/IconButton';
@@ -17,6 +19,8 @@ interface Props {
   username?: string,
   darkState: boolean,
   handleThemeChange: () => void
+  localMode: boolean,
+  handleLocalModeChange: () => void
 }
 
 export function TopBar(props: Props) {
@@ -55,6 +59,7 @@ export function TopBar(props: Props) {
   return (
     <AppBar
       position='sticky'
+      sx={props.localMode ? { bgcolor: '#16263e' } : undefined}
     >
       <Toolbar
         sx={{
@@ -62,7 +67,17 @@ export function TopBar(props: Props) {
           paddingLeft: '20px'
         }}
       >
-
+        <Tooltip title="Local Mode: work from a loaded file, stored in this browser, instead of the database">
+          <FormControlLabel
+            sx={{ color: 'inherit' }}
+            control={
+              <Switch
+                checked={props.localMode}
+                onChange={props.handleLocalModeChange} />
+            }
+            label="Local Mode"
+          />
+        </Tooltip>
         <Typography
           component="h1"
           variant="h6"
@@ -75,6 +90,19 @@ export function TopBar(props: Props) {
         >
           Planning Tool
         </Typography>
+        {props.localMode && (
+          <Chip
+            label="LOCAL MODE ON"
+            size="small"
+            sx={{
+              bgcolor: '#ffd600',
+              color: '#000',
+              fontWeight: 700,
+              letterSpacing: 1,
+              marginRight: '12px'
+            }}
+          />
+        )}
         <Typography
           component="h3"
           variant="h6"

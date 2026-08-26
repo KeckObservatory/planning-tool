@@ -4,6 +4,13 @@ import { handleResponse, handleError, intResponse, intError } from './response.t
 import { Target } from '../App.tsx';
 import { CatalogTarget } from '../guide_star/guide_star_dialog.tsx';
 import dayjs from 'dayjs';
+import { delete_local_targets, load_local_targets, upsert_local_targets } from './local_targets_store.tsx';
+
+// Local Mode: when enabled, get_targets/submit_target/delete_target read and write
+// browser localStorage instead of the backend. Every other API function (SIMBAD/Gaia,
+// guide-star catalogs, schedule, starlist submission, auth) is unaffected.
+let localMode = false
+export const setLocalMode = (enabled: boolean) => { localMode = enabled }
 const SIMBAD_ADDR = "https://simbad.u-strasbg.fr/simbad/sim-id?NbIdent=1&submit=submit+id&output.format=ASCII&obj.bibsel=off&Ident="
 const BASE_URL = "/api/planning_tool"
 const SCHEDULE_URL = "/api/schedule"
@@ -151,6 +158,7 @@ export interface DeleteResponse {
 }
 
 export const delete_target = (target_ids: string[]): Promise<DeleteResponse> => {
+    if (localMode) return Promise.resolve(delete_local_targets(target_ids))
     const url = BASE_URL + "/deletePlanningToolTarget"
     return axiosInstance.put(url, { target_ids })
         .then(handleResponse)
@@ -165,6 +173,8 @@ export const observer_logout = (): Promise<string> => {
 }
 
 export const get_targets = (obsid?: number, target_id?: string, semid?: string): Promise<Target[]> => {
+    // Local Mode has exactly one working set - obsid/target_id/semid filters don't apply.
+    if (localMode) return Promise.resolve(load_local_targets())
     let url = BASE_URL + "/getPlanningToolTarget?"
     url += obsid ? "obsid=" + obsid : ""
     url += target_id ? "&target_id=" + target_id : ""
@@ -214,6 +224,7 @@ export interface SubmitTargetResponse {
 }
 
 export const submit_target = (targets: Target[]): Promise<SubmitTargetResponse> => {
+    if (localMode) return Promise.resolve(upsert_local_targets(targets))
     const url = BASE_URL + "/submitPlanningToolTarget"
     return axiosInstance.post(url, { targets })
         .then(handleResponse)
