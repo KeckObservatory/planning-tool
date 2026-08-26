@@ -24,28 +24,42 @@ const computeColorStretch = (
   return { brightness, contrast };
 };
 
+// Ray-casting point-in-polygon test, operating in pixel coordinates.
+const point_within_polygon = (point: [number, number], polygon: [number, number][]): boolean => {
+  const [x, y] = point;
+  let inside = false; //start with odd
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const [xi, yi] = polygon[i];
+    const [xj, yj] = polygon[j];
+    const intersects = ((yi > y) !== (yj > y)) &&
+      (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+    if (intersects) inside = !inside; //change parity (even -> odd or odd-> even)
+  }
+  return inside; //if even, then point is inside polygon
+};
+
 interface Props {
-    imgUrl: string
-    guideStars: Target[]
-    height: number // in pixels
-    width: number // in pixels
-    size: number // in degrees
-    centerRA: number // in degrees
-    centerDec: number // in degrees
-    guideStarName?: string
-    setGuideStarName?: (name: string) => void
-    setImageLoading: (loading: boolean) => void
-    instrumentFOV?: string
-    fovAngle?: number
-    positionAngle?: number
-    selPO?: POPointFeature
-    pointingOrigins?: Feature<Point, { name?: string }>[]
-    invertImage?: boolean
-    showLaser?: boolean
-    showCatalog?: boolean
-    contours?: TelescopeContours// LaserContours
-    showTrickMap?: boolean
-    trickMap?: any // trick_map FeatureCollection
+  imgUrl: string
+  guideStars: Target[]
+  height: number // in pixels
+  width: number // in pixels
+  size: number // in degrees
+  centerRA: number // in degrees
+  centerDec: number // in degrees
+  guideStarName?: string
+  setGuideStarName?: (name: string) => void
+  setImageLoading: (loading: boolean) => void
+  instrumentFOV?: string
+  fovAngle?: number
+  positionAngle?: number
+  selPO?: POPointFeature
+  pointingOrigins?: Feature<Point, { name?: string }>[]
+  invertImage?: boolean
+  showLaser?: boolean
+  showCatalog?: boolean
+  contours?: TelescopeContours// LaserContours
+  showTrickMap?: boolean
+  trickMap?: any // trick_map FeatureCollection
 }
 export const GSViewer = (props: Props) => {
 
@@ -62,8 +76,8 @@ export const GSViewer = (props: Props) => {
   const [contrast, setContrast] = React.useState<number>(100);
   const degPerPixel = (props.size / props.width) / zoom // degrees per pixel, adjusted for zoom
   const [fov, setFOV] = React.useState<any>(null)
-  const [laserContours, setLaserContours] = React.useState<Array<{name: string; color: string; lines: Array<Array<[number, number]>>}>>([]);
-  const [trickMapContours, setTrickMapContours] = React.useState<Array<{name: string; color: string; lines: Array<Array<[number, number]>>}>>([]);
+  const [laserContours, setLaserContours] = React.useState<Array<{ name: string; color: string; lines: Array<Array<[number, number]>> }>>([]);
+  const [trickMapContours, setTrickMapContours] = React.useState<Array<{ name: string; color: string; lines: Array<Array<[number, number]>> }>>([]);
 
   const get_offset_ra_dec = () => {
     let ra = props.centerRA;
@@ -126,7 +140,7 @@ export const GSViewer = (props: Props) => {
 
   // Convert laser contours to pixel coordinates
   React.useMemo(() => {
-    
+
     if (!props.showLaser || !props.contours) {
       setLaserContours([]);
       return;
@@ -162,7 +176,7 @@ export const GSViewer = (props: Props) => {
 
   // Convert trick map to pixel coordinates
   React.useMemo(() => {
-    
+
     if (!props.showTrickMap || !props.trickMap) {
       setTrickMapContours([]);
       return;
@@ -199,7 +213,7 @@ export const GSViewer = (props: Props) => {
 
   // Draw laser contours on SVG
   React.useEffect(() => {
-    
+
     // We'll add the contours to the FOV SVG layer
     const fovSvg = fovSvgRef.current;
     if (!fovSvg) {
@@ -208,7 +222,7 @@ export const GSViewer = (props: Props) => {
 
     // Remove previous contour lines (always clear first)
     d3.select(fovSvg).selectAll('line.laser-contour').remove();
-    
+
     if (!laserContours || laserContours.length === 0) {
       return;
     }
@@ -219,7 +233,7 @@ export const GSViewer = (props: Props) => {
       contour.lines.forEach((line) => {
         const [x1, y1] = line[0];
         const [x2, y2] = line[1];
-        
+
         d3.select(fovSvg).append('line')
           .attr('x1', x1)
           .attr('y1', y1)
@@ -235,7 +249,7 @@ export const GSViewer = (props: Props) => {
 
   // Draw trick map contours on SVG
   React.useEffect(() => {
-    
+
     // We'll add the contours to the FOV SVG layer
     const fovSvg = fovSvgRef.current;
     if (!fovSvg) {
@@ -244,7 +258,7 @@ export const GSViewer = (props: Props) => {
 
     // Remove previous trick map lines (always clear first)
     d3.select(fovSvg).selectAll('line.trick-map-contour').remove();
-    
+
     if (!trickMapContours || trickMapContours.length === 0) {
       return;
     }
@@ -254,7 +268,7 @@ export const GSViewer = (props: Props) => {
       contour.lines.forEach((line) => {
         const [x1, y1] = line[0];
         const [x2, y2] = line[1];
-        
+
         d3.select(fovSvg).append('line')
           .attr('x1', x1)
           .attr('y1', y1)
@@ -295,12 +309,32 @@ export const GSViewer = (props: Props) => {
     };
   }, [props.imgUrl, props.guideStars]); // Redraw if image URL or objects change
 
+  // Rings of the largest FOV feature (the first index of the fetched FOV features, e.g.
+  // the science FOV vs. a guider FOV also present at that instrument), in the same
+  // rotated pixel space the FOV outline is actually drawn in. Catalog markers outside
+  // every ring are drawn as an 'x' instead of a circle.
+  const fovPolygons = React.useMemo((): [number, number][][] => {
+    if (!fov) return [];
+    const toPixel = (coord: [number, number]): [number, number] => {
+      const [dra, ddec] = coord; // arcseconds offset from center
+      const x = (dra / (3600 * degPerPixel)) + props.width / 2;
+      const y = (ddec / (3600 * degPerPixel)) + props.height / 2;
+      return rotateAboutCenter(x, y, overlayRotation);
+    };
+    if (fov.geometry.type === 'MultiPolygon') {
+      return fov.geometry.coordinates.map((ring: [number, number][]) => ring.map(toPixel));
+    } else if (fov.geometry.type === 'Polygon') {
+      return [fov.geometry.coordinates[0].map(toPixel)];
+    }
+    return [];
+  }, [fov, props.width, props.height, degPerPixel, overlayRotation]);
+
   React.useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
 
-    // Clear previous circles
-    d3.select(svg).selectAll('circle').remove();
+    // Clear previous markers (circles for in-FOV catalog targets, x's for out-of-FOV)
+    d3.select(svg).selectAll('circle, path.gs-marker-x').remove();
 
     //if show catalog is off, do not draw icons
     if (!props.showCatalog) {
@@ -315,39 +349,44 @@ export const GSViewer = (props: Props) => {
       }
     };
 
-    // Bind guide stars to circles and add click handlers
-    d3.select(svg)
-      .selectAll('circle')
-      .data(props.guideStars, (d: any) => d.ra_deg + ',' + d.dec_deg)
-      .enter()
-      .append('circle')
-      .attr('cx', (d: Target) => {
-        // RA degrees must be scaled by cos(dec) to get true angular separation on the sky.
-        const cosDec = Math.cos(props.centerDec * Math.PI / 180);
-        const x = (props.centerRA - (d.ra_deg || 0)) * cosDec / degPerPixel + props.width / 2;
-        return x;
-      })
-      .attr('cy', (d: Target) => {
-        const y = (props.centerDec - (d.dec_deg || 0)) / degPerPixel + props.height / 2;
-        return y;
-      })
-      .attr('r', () => {
-        return 5;
-      })
-      .attr('fill', (d: Target) => {
-        // Yellow fill if selected, transparent otherwise
-        const starName = d.target_name;
-        return starName === props.guideStarName ? 'rgba(255, 255, 0, 0.0)' : 'rgba(255, 0, 0, 0.0)';
-      })
-      .attr('stroke', (d: Target) => {
-        // Yellow stroke if selected, red otherwise
-        const starName = d.target_name;
-        return starName === props.guideStarName ? 'yellow' : 'red';
-      })
-      .attr('stroke-width', 2)
-      .attr('cursor', 'pointer')
-      .on('click', handleStarClick);
-  }, [props.guideStars, props.centerRA, props.showCatalog, props.centerDec, props.width, props.height, degPerPixel, props.guideStarName, zoom, props.fovAngle]);
+    // RA degrees must be scaled by cos(dec) to get true angular separation on the sky.
+    const cosDec = Math.cos(props.centerDec * Math.PI / 180);
+    const markerRadius = 5;
+
+    props.guideStars.forEach((d: Target) => {
+      const cx = (props.centerRA - (d.ra_deg || 0)) * cosDec / degPerPixel + props.width / 2;
+      const cy = (props.centerDec - (d.dec_deg || 0)) / degPerPixel + props.height / 2;
+      const selected = d.target_name === props.guideStarName;
+      // Yellow if selected, red otherwise; transparent fill either way.
+      const fill = selected ? 'rgba(255, 255, 0, 0.0)' : 'rgba(255, 0, 0, 0.0)';
+      const stroke = selected ? 'yellow' : 'red';
+      // No FOV loaded yet means we can't test membership - show everything as a circle.
+      const inFov = fovPolygons.length === 0 ||
+        fovPolygons.some((poly) => point_within_polygon([cx, cy], poly));
+
+      if (inFov) {
+        d3.select(svg).append('circle')
+          .attr('cx', cx)
+          .attr('cy', cy)
+          .attr('r', markerRadius)
+          .attr('fill', fill)
+          .attr('stroke', stroke)
+          .attr('stroke-width', 2)
+          .attr('cursor', 'pointer')
+          .on('click', (event: MouseEvent) => handleStarClick(event, d));
+      } else {
+        d3.select(svg).append('path')
+          .attr('class', 'gs-marker-x')
+          .attr('d', `M${cx - markerRadius},${cy - markerRadius} L${cx + markerRadius},${cy + markerRadius} `
+            + `M${cx - markerRadius},${cy + markerRadius} L${cx + markerRadius},${cy - markerRadius}`)
+          .attr('stroke', stroke)
+          .attr('stroke-width', 2)
+          .attr('fill', 'none')
+          .attr('cursor', 'pointer')
+          .on('click', (event: MouseEvent) => handleStarClick(event, d));
+      }
+    });
+  }, [props.guideStars, props.centerRA, props.showCatalog, props.centerDec, props.width, props.height, degPerPixel, props.guideStarName, zoom, props.fovAngle, fovPolygons]);
 
   // Fetch and update FOV shapes
   React.useEffect(() => {
@@ -379,9 +418,9 @@ export const GSViewer = (props: Props) => {
     const feature = fov;
     if (feature.geometry.type === 'MultiPolygon') {
       const polygons = feature.geometry.coordinates; // array of polygons
-      
+
       polygons.forEach((coordinates: [number, number][]) => {
-        
+
         // Transform world coordinates to pixel coordinates
         const points = coordinates.map((coord: [number, number]) => {
           const dra = coord[0]; // arcseconds offset from center
@@ -406,7 +445,7 @@ export const GSViewer = (props: Props) => {
       });
     } else if (feature.geometry.type === 'Polygon') {
       const coordinates = feature.geometry.coordinates[0]; // exterior ring
-      
+
       // Transform world coordinates to pixel coordinates
       const points = coordinates.map((coord: [number, number]) => {
         const dra = coord[0]; // arcseconds offset from center
@@ -438,9 +477,9 @@ export const GSViewer = (props: Props) => {
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
-      
+
       const delta = -e.deltaY * ZOOM_SPEED;
-      
+
       setZoom((prevZoom) => {
         const newZoom = prevZoom * (1 + delta);
         // Clamp zoom between zoomMin and zoomMax
@@ -449,7 +488,7 @@ export const GSViewer = (props: Props) => {
     };
 
     container.addEventListener('wheel', handleWheel, { passive: false });
-    
+
     return () => {
       container.removeEventListener('wheel', handleWheel);
     };
@@ -468,7 +507,7 @@ export const GSViewer = (props: Props) => {
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging) return;
-      
+
       setPanOffset({
         x: e.clientX - dragStart.x,
         y: e.clientY - dragStart.y
@@ -536,22 +575,22 @@ export const GSViewer = (props: Props) => {
   }, [isStretching]);
 
   return (
-    <div 
-      ref={containerRef} 
-      style={{ 
-        position: 'relative', 
-        width: props.width, 
-        height: props.height, 
+    <div
+      ref={containerRef}
+      style={{
+        position: 'relative',
+        width: props.width,
+        height: props.height,
         overflow: 'hidden',
         cursor: isStretching ? 'crosshair' : (isDragging ? 'grabbing' : 'grab')
       }}
     >
       {/* DSS Image Layer */}
-      <canvas 
-        ref={canvasRef} 
-        style={{ 
-          position: 'absolute', 
-          top: 0, 
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: 'absolute',
+          top: 0,
           left: 0,
           transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
           transformOrigin: 'center center',
@@ -564,10 +603,10 @@ export const GSViewer = (props: Props) => {
         ref={svgRef}
         width={props.width}
         height={props.height}
-        style={{ 
-          position: 'absolute', 
-          top: 0, 
-          left: 0, 
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
           transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
           transformOrigin: 'center center'
         }}
@@ -577,10 +616,10 @@ export const GSViewer = (props: Props) => {
         ref={fovSvgRef}
         width={props.width}
         height={props.height}
-        style={{ 
-          position: 'absolute', 
-          top: 0, 
-          left: 0, 
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
           transform: `translate(${panOffset.x}px, ${panOffset.y}px) rotate(${overlayRotation}deg)`,
           transformOrigin: 'center center',
           pointerEvents: 'none'
@@ -588,9 +627,9 @@ export const GSViewer = (props: Props) => {
       />
       {/* Render pointing origin markers with labels */}
       {pointingOriginMarkers.length > 0 && (
-        <div style={{ 
-          position: 'absolute', 
-          top: 0, 
+        <div style={{
+          position: 'absolute',
+          top: 0,
           left: 0,
           width: '100%',
           height: '100%',
