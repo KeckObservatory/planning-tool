@@ -6,11 +6,10 @@ import { CatalogTarget } from '../guide_star/guide_star_dialog.tsx';
 import dayjs from 'dayjs';
 import { delete_local_targets, load_local_targets, upsert_local_targets } from './local_targets_store.tsx';
 
-// Local Mode: when enabled, get_targets/submit_target/delete_target read and write
-// browser localStorage instead of the backend. Every other API function (SIMBAD/Gaia,
-// guide-star catalogs, schedule, starlist submission, auth) is unaffected.
+// use browser localStorage instead of the backend data store
 let localMode = false
 export const setLocalMode = (enabled: boolean) => { localMode = enabled }
+
 const SIMBAD_ADDR = "https://simbad.u-strasbg.fr/simbad/sim-id?NbIdent=1&submit=submit+id&output.format=ASCII&obj.bibsel=off&Ident="
 const BASE_URL = "/api/planning_tool"
 const SCHEDULE_URL = "/api/schedule"
@@ -184,15 +183,18 @@ export const get_targets = (obsid?: number, target_id?: string, semid?: string):
         .catch(handleError)
 }
 
+// used for api. When ra/dec is an integer, the catalog image and targets api will fail
+const ensure_decimal = (n: number): string => Number.isInteger(n) ? n.toFixed(1) : `${n}`
+
 export const get_catalog_image = (dss_name: string, ra: number, dec: number, window_size: number): string => {
     const ws = JSON.stringify({ "size": window_size, "units": "degrees" })
-    let url = location.origin + CATALOG_URL + `/image/?position={"ra":${ra},"dec":${dec}}&window-size=${ws}&catalog=${dss_name}&external=1&format=png`
+    let url = location.origin + CATALOG_URL + `/image/?position={"ra":${ensure_decimal(ra)},"dec":${ensure_decimal(dec)}}&window-size=${ws}&catalog=${dss_name}&external=1&format=png`
     console.log(url)
     return url
 }
 
 export const get_catalog_targets = (catalog_name: string, ra: number, dec: number, radius: number, magRange?: [string, string]): Promise<CatalogTarget[]> => {
-    let url = location.origin + CATALOG_URL + `/sources/?position=%7B%22ra%22:${ra},%22dec%22:${dec}%7D&radius=${radius}&window-size=%7B%22size%22:${radius},%22units%22:%22degrees%22%7D&catalog=${catalog_name}&external=1&no-limit=1`
+    let url = location.origin + CATALOG_URL + `/sources/?position=%7B%22ra%22:${ensure_decimal(ra)},%22dec%22:${ensure_decimal(dec)}%7D&radius=${radius}&window-size=%7B%22size%22:${radius},%22units%22:%22degrees%22%7D&catalog=${catalog_name}&external=1&no-limit=1`
     if (magRange) {
         url += `&mag-min=${magRange[0]}&mag-max=${magRange[1]}`
     }
