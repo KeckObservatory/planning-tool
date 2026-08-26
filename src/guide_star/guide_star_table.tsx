@@ -214,11 +214,13 @@ export default function GuideStarTable(props: Props) {
     const columns = React.useMemo(() => {
         let cols = convert_schema_to_columns(target_schema as unknown as JSONSchemaType<Target>)
             .map((col) => ({ ...col, width: col.field === 'target_name' ? 150 : 100 }))
-        //add dist column
+        //add dist column - API returns degrees, display in arcseconds
         cols.push({
             field: 'dist',
-            headerName: 'Distance',
+            headerName: 'Separation (arcsec)',
             width: 150,
+            type: 'number',
+            valueFormatter: (value: number) => typeof value === 'number' ? (value * 3600).toFixed(2) : value,
         });
         cols.sort((a, b) => sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field));
 
