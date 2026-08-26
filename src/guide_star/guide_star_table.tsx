@@ -15,6 +15,7 @@ import React from 'react';
 import { create_new_target } from '../table_toolbar.tsx';
 import { submit_target } from '../api/api_root.tsx';
 import target_schema from '../target_schema.json';
+import { JSONSchemaType } from 'ajv/dist/2019';
 
 // Guide stars are considered "the same" as an existing target when their
 // coordinates are within this tolerance (in degrees). This is far tighter
@@ -211,7 +212,7 @@ export default function GuideStarTable(props: Props) {
     }
 
     const columns = React.useMemo(() => {
-        let cols = convert_schema_to_columns(target_schema as any) //TODO: fix this
+        let cols = convert_schema_to_columns(target_schema as unknown as JSONSchemaType<Target>)
             .map((col) => ({ ...col, width: col.field === 'target_name' ? 150 : 100 }))
         //add dist column
         cols.push({

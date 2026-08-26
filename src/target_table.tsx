@@ -31,12 +31,12 @@ import TargetEditDialogButton, { format_string_array, format_edit_entry, Propert
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import { delete_target, submit_target } from './api/api_root.tsx';
 import { format_target_property } from './upload_targets_dialog.tsx';
+import { ra_dec_to_deg } from './two-d-view/sky_view_util.tsx';
 import { Tooltip } from '@mui/material';
-import { CatalogTarget } from './guide_star/guide_star_dialog.tsx';
 import { createEnumParam, useQueryParam, withDefault } from 'use-query-params';
 
 
-export const convert_schema_to_columns = (schema: JSONSchemaType<Target | CatalogTarget>) => {
+export const convert_schema_to_columns = (schema: JSONSchemaType<Target>) => {
   const columns: GridColDef[] = []
   Object.entries(schema.properties).forEach(([key, valueProps]: [string, any]) => {
     // format value for display
@@ -53,12 +53,16 @@ export const convert_schema_to_columns = (schema: JSONSchemaType<Target | Catalo
       return value
     }
 
-    //TODO: use to update other values when this value is changed (e.g. ra/dec change -> degRa/degDec update)
     const valueSetter: GridValueSetter<Target> = (value: unknown, tgt: Target) => {
       if (valueProps.type === 'array' && value) {
         value = Array.isArray(value) ? (value as string[]).join(',') : value as string
       }
       tgt = { ...tgt, [key]: value }
+      if (key === 'ra') {
+        tgt = { ...tgt, ra_deg: value ? ra_dec_to_deg(String(value)) : undefined }
+      } else if (key === 'dec') {
+        tgt = { ...tgt, dec_deg: value ? ra_dec_to_deg(String(value), true) : undefined }
+      }
       return tgt
     }
 
@@ -166,7 +170,7 @@ export default function TargetTable(props: TargetTableProps) {
   const cfg = context.config
 
   const [viewMode, _] = useQueryParam<ViewMode>('view_mode', withDefault(ViewParam, 'non_ao' as ViewMode))
-  let columns = convert_schema_to_columns(target_schema as any); //TODO: fix type issue
+  let columns = convert_schema_to_columns(target_schema as unknown as JSONSchemaType<Target>);
   const leftPinnedFields = cfg.pinned_table_columns.left.filter((field) => field !== 'selected')
   const rightPinnedFields = cfg.pinned_table_columns.right
   const defaultFields = cfg.default_table_columns[viewMode].filter((field) => !leftPinnedFields.includes(field))
@@ -332,13 +336,25 @@ export default function TargetTable(props: TargetTableProps) {
 
     const handleRowChange = React.useCallback(async (override = false) => {
       if (countRef.current > 0 || override) {
-        let newTgt: Target | undefined = undefined
         const isEdited = editTargetRef.current.status?.includes('EDITED')
-        if (isEdited) newTgt = await edit_target(editTargetRef.current)
-        processRowUpdate(editTargetRef.current) //TODO: May want to wait till save is successful
-        if (newTgt) {
-          newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
-          debounced_edit_click(id)
+        if (!isEdited) {
+          processRowUpdate(editTargetRef.current)
+          return
+        }
+        try {
+          const newTgt = await edit_target(editTargetRef.current)
+          processRowUpdate(editTargetRef.current)
+          if (newTgt) {
+            newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
+            debounced_edit_click(id)
+          }
+        } catch (err) {
+          console.error('Failed to save target edit', err)
+          sbcontext.setSnackbarMessage({
+            severity: 'error',
+            message: `Failed to save changes to ${editTargetRef.current.target_name || 'target'}`
+          })
+          sbcontext.setSnackbarOpen(true)
         }
       }
     }, [id])
@@ -469,7 +485,7 @@ export default function TargetTable(props: TargetTableProps) {
                 setRows,
                 processRowUpdate,
                 setRowModesModel,
-                obsid: context.obsid, //TODO: allow admin to edit obsid
+                obsid: context.obsid,
                 submit_one_target,
                 selectedTargets,
                 uniqueTags,
