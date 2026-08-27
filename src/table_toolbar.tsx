@@ -27,7 +27,6 @@ import SemidDialogButton from './semid_dialog.tsx';
 import { SemidSelect } from './semid_select.tsx';
 import { GuideStarButton } from './guide_star/guide_star_dialog.tsx';
 import { TARGET_LENGTH, TARGET_NAME_LENGTH_PADDED } from './two-d-view/constants.tsx';
-import { send_to_starlist_submission } from './api/api_root.tsx';
 import { StarlistSubmissionDialog } from './starlist_submission/starlist_submission_dialog.tsx';
 
 

@@ -259,11 +259,3 @@ const submit_form_in_new_tab = (url: string, params: Record<string, string>): bo
     document.body.removeChild(form);
     return true;
 }
-
-export const send_to_starlist_submission = async (starlist: string): Promise<boolean> => {
-    const url = 'https://www2.keck.hawaii.edu/software/findChartV2/submitStarList.php';
-    return submit_form_in_new_tab(url, { sslist: starlist });
-}
-
-
-
