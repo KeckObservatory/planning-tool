@@ -102,25 +102,6 @@ const exportBlob = (blob: Blob, filename: string) => {
   });
 };
 
-function SendToStarlistSubmissionMenu(props: ExportProps) {
-  const send_to_starlist_submission_tool = async () => {
-
-    const starList = getStarlist(props.exportTargets, false)
-    const ok = await send_to_starlist_submission(starList)
-    if (!ok) {
-      console.warn('did not open submission tab')
-    }
-  }
-  return (
-    <MenuItem
-      onClick={() => {
-        send_to_starlist_submission_tool();
-      }}
-    >
-      Export to Old Starlist Submission Tool
-    </MenuItem>)
-}
-
 function StarlistSubmissionMenu(props: ExportProps) {
 
   const [open, setOpen] = React.useState(false)
@@ -233,7 +214,6 @@ function CustomExportButton(props: ExportButtonProps) {
       <JsonExportMenuItem exportTargets={props.exportTargets} />
       <StarListExportMenu exportTargets={props.exportTargets} />
       <StarListExportDirMenu exportTargets={props.exportTargets} />
-      <SendToStarlistSubmissionMenu exportTargets={props.exportTargets} />
       <StarlistSubmissionMenu exportTargets={props.exportTargets} />
     </GridToolbarExportContainer>
   );
