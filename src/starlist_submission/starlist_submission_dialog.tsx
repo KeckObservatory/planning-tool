@@ -33,7 +33,6 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     const [piName, setPiName] = useState<string>("")
     const [date, setDate] = useState<Dayjs | null>(dayjs())
     const [comments, setComments] = useState<string>("")
-    const [isLgs, setIsLgs] = useState(false)
     const [schedule, setSchedule] = useState<Schedule[]>([])
     const [selectedSchedId, setSelectedSchedId] = useState<number | undefined>(undefined)
     const context = useStateContext()
@@ -92,8 +91,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
             telescope: dome.slice(dome.length - 1),
             hstDate: date ? date.format('YYYY-MM-DD') : "",
             piname: piName,
-            comments: comments,
-            lgsMode: isLgs,
+            comments: comments ?? "",
             slist: (starListStrings ?? []).join('\n'),
         }
         const submit_status = await submit_starlist(form)
@@ -136,12 +134,6 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
                 schedule={schedule}
                 onRowSelect={onScheduleRowSelect}
                 selectedSchedId={selectedSchedId}
-            />
-            <FormControlLabel
-                label="Is LGS"
-                value={isLgs}
-                control={<Switch checked={isLgs} />}
-                onChange={(_, checked) => setIsLgs(checked)}
             />
             <DomeSelect
                 dome={dome}

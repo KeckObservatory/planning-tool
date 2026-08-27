@@ -141,7 +141,6 @@ export interface SubmittedStarList {
     hstDate: string,
     piname: string,
     comments: string,
-    lgsMode: boolean,
     slist: string,
 }
 
