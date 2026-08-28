@@ -231,31 +231,3 @@ export const submit_target = (targets: Target[]): Promise<SubmitTargetResponse> 
         .then(handleResponse)
         .catch(handleError)
 }
-
-// Opens a new tab and navigates it directly to `url` via a POST form submission,
-// so the browser renders the server's real response instead of us fetching and injecting it.
-const submit_form_in_new_tab = (url: string, params: Record<string, string>): boolean => {
-    const windowName = `submission-${Date.now()}`;
-    const newTab = window.open('', windowName);
-    if (!newTab) {
-        return false;
-    }
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = url;
-    form.target = windowName;
-
-    Object.entries(params).forEach(([key, value]) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = value;
-        form.appendChild(input);
-    });
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-    return true;
-}
