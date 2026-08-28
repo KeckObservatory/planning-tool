@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { Stack, Switch, FormControlLabel, TextField, List, Typography, Button } from '@mui/material';
+import { Stack, TextField, List, Typography, Button } from '@mui/material';
 import { DialogComponent } from '../dialog_component';
 import { Dome, DomeParam, DomeSelect } from '../two-d-view/two_d_view_common.tsx';
 import { useQueryParam, withDefault } from 'use-query-params';
