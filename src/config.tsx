@@ -89,6 +89,10 @@ export const config = {
         "kmag": "k_mag",
     },
     "table_column_width": 140,
+    // A night's targets are shared across telescopes/programs; these are the hard caps.
+    "full_night_target_limit": 378,
+    "half_night_target_limit": 188,
+    "duplicate_radec_tolerance_deg": 0.0001,
     "help_msg_filename": "helpMsg.md",
     "pi_logout_url": "https://www2.keck.hawaii.edu/inst/PILogin/homepage.php",
     "pi_portal_url": "https://www3.keck.hawaii.edu/observers/ObserverPortal/rel/index.html",

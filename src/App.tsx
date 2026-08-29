@@ -247,7 +247,7 @@ function App() {
               onClose={() => setOpenSnackbar(false)}
               severity={snackbarMessage.severity}
               variant="filled"
-              sx={{ width: '100%' }}
+              sx={{ width: '100%', whiteSpace: 'pre-line' }}
             >
               {snackbarMessage.message}
             </Alert>

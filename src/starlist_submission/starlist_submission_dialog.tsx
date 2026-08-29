@@ -14,6 +14,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import dayjs, { Dayjs } from 'dayjs';
+import { Target } from '../App';
+import { config } from '../config.tsx';
 
 interface StarlistSubmissionDialogProps extends ExportProps {
     open: boolean,
@@ -25,6 +27,49 @@ const moveItem = (rows: string[], from: number, to: number): string[] => {
     const [row] = newRows.splice(from, 1)
     newRows.splice(to, 0, row)
     return newRows
+}
+
+// Flags problems with individual targets in the export list: missing names, and
+// targets that are duplicated - either sharing a name, or whose ra_deg/dec_deg fall
+// within tolerance of another target's. Returns one warning message per problem found.
+const find_malformed_targets = (targets: Target[]): string[] => {
+    const warnings: string[] = []
+
+    const unnamedCount = targets.filter((tgt) => !tgt.target_name).length
+    if (unnamedCount > 0) {
+        warnings.push(`${unnamedCount} target(s) are missing a name.`)
+    }
+
+    const duplicates = new Set<string>()
+
+    const nameCounts = new Map<string, number>()
+    targets.forEach((tgt) => {
+        if (!tgt.target_name) return
+        nameCounts.set(tgt.target_name, (nameCounts.get(tgt.target_name) ?? 0) + 1)
+    })
+    nameCounts.forEach((count, name) => {
+        if (count > 1) duplicates.add(name)
+    })
+
+    for (let i = 0; i < targets.length; i++) {
+        const a = targets[i]
+        if (a.ra_deg == null || a.dec_deg == null) continue
+        for (let j = i + 1; j < targets.length; j++) {
+            const b = targets[j]
+            if (b.ra_deg == null || b.dec_deg == null) continue
+            if (Math.abs(a.ra_deg - b.ra_deg) < config.duplicate_radec_tolerance_deg &&
+                Math.abs(a.dec_deg - b.dec_deg) < config.duplicate_radec_tolerance_deg) {
+                a.target_name && duplicates.add(a.target_name)
+                b.target_name && duplicates.add(b.target_name)
+            }
+        }
+    }
+
+    if (duplicates.size > 0) {
+        warnings.push(`Duplicate targets found (name or RA/Dec): ${[...duplicates].join(', ')}`)
+    }
+
+    return warnings
 }
 
 export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) => {
@@ -56,10 +101,37 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     const starListInit = starListTextInit.split('\n').filter( row => row.length > 0)
 
     React.useEffect(() => {
-        //check if there are any lgs targets
-        const anyLgs = starListInit.some(lst => lst.includes('lgs=1'))
-        if (!anyLgs && props.open) {
-            snackbarContext.setSnackbarMessage({severity: "warning", message: "There are no LGS targets being submitted!"})
+        if (!props.open) return
+
+        // The app's global snackbar only holds one message at a time, so every
+        // warning found is combined into a single message rather than firing
+        // setSnackbarMessage repeatedly (which would just have the last call win).
+        const warnings: string[] = []
+
+        const anyLgs = props.exportTargets.some(tgt => tgt.lgs === '1')
+        if (!anyLgs) {
+            warnings.push("There are no LGS targets being submitted!")
+        }
+
+        const pmTargetNames = props.exportTargets
+            .filter(tgt => tgt.pm_ra || tgt.pm_dec)
+            .map(tgt => tgt.target_name)
+            .filter((name): name is string => !!name)
+        if (pmTargetNames.length > 0) {
+            warnings.push(`Targets should not have proper motion: ${pmTargetNames.join(', ')}`)
+        }
+
+        warnings.push(...find_malformed_targets(props.exportTargets))
+
+        if (props.exportTargets.length > config.full_night_target_limit) {
+            warnings.push(
+                `${props.exportTargets.length} targets submitted - only ${config.full_night_target_limit} `
+                + `are allowed for a full night (${config.half_night_target_limit} for a half night).`
+            )
+        }
+
+        if (warnings.length > 0) {
+            snackbarContext.setSnackbarMessage({ severity: 'warning', message: warnings.join('\n') })
             snackbarContext.setSnackbarOpen(true)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -86,10 +158,25 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
         )
     })
 
+    // A cleared/partially-typed picker leaves a non-null but invalid Dayjs, not null,
+    // so `date ? ... : ""` alone let an unformattable date slip through to the backend.
+    const isDateValid = date != null && date.isValid()
+    const isPiNameValid = piName.trim().length > 0
+
     const submit_starlist_to_database = async () => {
+        if (!isDateValid) {
+            snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Please select a valid HST date before submitting.' })
+            snackbarContext.setSnackbarOpen(true)
+            return
+        }
+        if (!isPiNameValid) {
+            snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Please enter a PI name before submitting.' })
+            snackbarContext.setSnackbarOpen(true)
+            return
+        }
         const form: SubmittedStarList = {
             telescope: dome.slice(dome.length - 1),
-            hstDate: date ? date.format('YYYY-MM-DD') : "",
+            hstDate: date.format('YYYY-MM-DD'),
             piname: piName,
             comments: comments ?? "",
             slist: (starListStrings ?? []).join('\n'),
@@ -114,6 +201,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
         <Button
             variant="contained"
             color="primary"
+            disabled={!isDateValid || !isPiNameValid}
             onClick={submit_starlist_to_database}
         >
             Submit
@@ -146,6 +234,12 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
                     label="HST Date"
                     value={date}
                     onChange={(newDate) => setDate(newDate)}
+                    slotProps={{
+                        textField: {
+                            error: !isDateValid,
+                            helperText: isDateValid ? undefined : 'Required',
+                        },
+                    }}
                 />
             </LocalizationProvider>
             <TextField
@@ -153,6 +247,9 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
                 value={piName}
                 focused={piName ? true : false}
                 onChange={(e) => setPiName(e.target.value)}
+                required
+                error={!isPiNameValid}
+                helperText={isPiNameValid ? undefined : 'Required'}
                 sx={{ width: '25%' }}
             />
             <TextField
