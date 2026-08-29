@@ -113,7 +113,7 @@ const TwoDView = ({ targets }: Props) => {
     const today = hidate(new Date(), context.config.timezone).toDate()
     const [obsdate, setObsdate] = React.useState<Date>(today)
     const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'Keck 2' as Dome))
-    const [skyChart, setSkyChart] = React.useState<SkyChart>("Airmass")
+    const [skyChart, setSkyChart] = React.useState<SkyChart>("Elevation")
     const [showMoon, setShowMoon] = React.useState(true)
     const [showSchedule, setShowSchedule] = React.useState(false)
     const [showCurrLoc, setShowCurrLoc] = React.useState(true)

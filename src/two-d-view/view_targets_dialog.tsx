@@ -1,5 +1,5 @@
 import * as React from 'react';
-import MultilineChartIcon from '@mui/icons-material/MultilineChart';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { Target } from '../App';
@@ -60,9 +60,9 @@ export default function ViewTargetsDialogButton(props: Props) {
 
   return (
     <>
-      <Tooltip title="Display charts of selected target(s)">
+      <Tooltip title="Display visibility charts of selected target(s)">
         <IconButton aria-label="help" color={props.color ?? 'default'} onClick={handleClickOpen}>
-          <MultilineChartIcon />
+          <VisibilityIcon />
         </IconButton>
       </Tooltip>
       <ViewTargetsDialog

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import MultilineChartIcon from '@mui/icons-material/MultilineChart';
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import { DomeSelect, Dome, DomeParam } from "./two_d_view_common.tsx";
@@ -128,9 +128,9 @@ export const TargetVizButton = (props: ButtonProps) => {
 
     return (
         <>
-            <Tooltip title={`Click to view target visibility for ${target.target_name ?? target._id}`}>
+            <Tooltip title={`Click to view semester visibility for ${target.target_name ?? target._id}`}>
                 <IconButton color="primary" onClick={handleClickOpen}>
-                    <VisibilityIcon />
+                    <MultilineChartIcon/>
                 </IconButton>
             </Tooltip>
             {open &&
