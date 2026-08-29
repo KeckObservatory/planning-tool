@@ -1,6 +1,7 @@
-import { Target } from "../App"
+import { Target, useStateContext } from "../App"
 import React from "react"
 import * as d3 from "d3"
+import { useTheme } from "@mui/material/styles"
 import { get_shapes } from "../two-d-view/two_d_view_common.tsx"
 import { POPointFeature, TelescopeContours } from "../two-d-view/pointing_origin_select"
 import { Feature, Point } from "geojson"
@@ -8,6 +9,7 @@ import { PointingOriginMarkers, PointingOriginMarker } from "../aladin/pointing_
 import { ScaleBar } from "./scale_bar"
 import { CompassRose } from "./compass_rose"
 import { ZOOM_SPEED, ZOOM_MIN, ZOOM_MAX } from "../two-d-view/constants"
+import { is_guidestar_already_added } from "./guide_star_table.tsx"
 
 // Compute brightness/contrast percentages from a pointer position within the viewer bounds.
 // Contrast is driven by the y-axis: top of the viewer = 100%, bottom = 0%.
@@ -60,9 +62,12 @@ interface Props {
   contours?: TelescopeContours// LaserContours
   showTrickMap?: boolean
   trickMap?: any // trick_map FeatureCollection
+  scienceTargetName?: string
 }
 export const GSViewer = (props: Props) => {
 
+  const theme = useTheme();
+  const context = useStateContext();
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const svgRef = React.useRef<SVGSVGElement | null>(null);
   const fovSvgRef = React.useRef<SVGSVGElement | null>(null);
@@ -357,9 +362,11 @@ export const GSViewer = (props: Props) => {
       const cx = (props.centerRA - (d.ra_deg || 0)) * cosDec / degPerPixel + props.width / 2;
       const cy = (props.centerDec - (d.dec_deg || 0)) / degPerPixel + props.height / 2;
       const selected = d.target_name === props.guideStarName;
-      // Yellow if selected, red otherwise; transparent fill either way.
+      const alreadyAdded = is_guidestar_already_added(d, props.scienceTargetName, context.targets);
+      // Yellow if selected, green if already added to the target list, red otherwise;
+      // transparent fill either way.
       const fill = selected ? 'rgba(255, 255, 0, 0.0)' : 'rgba(255, 0, 0, 0.0)';
-      const stroke = selected ? 'yellow' : 'red';
+      const stroke = selected ? 'yellow' : (alreadyAdded ? theme.palette.success.main : 'red');
       // No FOV loaded yet means we can't test membership - show everything as a circle.
       const inFov = fovPolygons.length === 0 ||
         fovPolygons.some((poly) => point_within_polygon([cx, cy], poly));
@@ -386,7 +393,7 @@ export const GSViewer = (props: Props) => {
           .on('click', (event: MouseEvent) => handleStarClick(event, d));
       }
     });
-  }, [props.guideStars, props.centerRA, props.showCatalog, props.centerDec, props.width, props.height, degPerPixel, props.guideStarName, zoom, props.fovAngle, fovPolygons]);
+  }, [props.guideStars, props.centerRA, props.showCatalog, props.centerDec, props.width, props.height, degPerPixel, props.guideStarName, zoom, props.fovAngle, fovPolygons, props.scienceTargetName, context.targets, theme]);
 
   // Fetch and update FOV shapes
   React.useEffect(() => {

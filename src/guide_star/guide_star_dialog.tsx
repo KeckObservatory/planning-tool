@@ -537,6 +537,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             contours={telContours}
                             showTrickMap={showTrickMap}
                             trickMap={trickMap}
+                            scienceTargetName={target.target_name ?? target._id}
                         />
                     </React.Suspense>
                 </Stack>

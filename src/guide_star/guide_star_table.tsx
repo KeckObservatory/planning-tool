@@ -23,7 +23,7 @@ import { JSONSchemaType } from 'ajv/dist/2019';
 // tolerate floating point / precision differences in ra_deg/dec_deg.
 const COORD_MATCH_TOLERANCE_DEG = 1 / 3600; // ~1 arcsec
 
-const is_guidestar_already_added = (
+export const is_guidestar_already_added = (
     guidestar: Partial<Target>,
     science_target_name: string | undefined,
     existingTargets: Target[] | undefined,
@@ -57,6 +57,28 @@ interface AddGuideStarButtonProps {
     useLaser?: boolean;
 }
 
+const sanitize_guide_star = (guidestar: Partial<Target>) => {
+    //remove nulls
+    const sanitizedGuideStar = Object.fromEntries(Object.entries(guidestar).filter(([_, v]) => v != null));
+    // target_name is capped at 15 chars per the schema.
+    if (guidestar.target_name != null) {
+        sanitizedGuideStar.target_name = String(guidestar.target_name).slice(0, 15)
+    } else {
+        delete sanitizedGuideStar.target_name
+    }
+
+    // Catalogs signal "no measurement" for a band with a magnitude >= 99.9 -
+    // drop any such n_mag key rather than submitting a bogus magnitude.
+    Object.entries(sanitizedGuideStar).forEach(([key, value]) => {
+        if (/^._mag$/.test(key) && typeof value === 'number' && value >= 99.9) {
+            delete sanitizedGuideStar[key]
+        }
+    })
+
+
+    return sanitizedGuideStar
+}
+
 const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
     const { guidestar, science_target_name } = props
 
@@ -80,16 +102,7 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
         setIsSubmitting(true);
         try {
             const id = randomId();
-            //remove nulls
-            const sanitizedGuideStar = Object.fromEntries(Object.entries(guidestar).filter(([_, v]) => v != null));
-            // target_name is capped at 15 chars by the schema. Only override the
-            // name create_new_target picked if the guide star actually has one -
-            // String(undefined) would otherwise name the target "undefined".
-            if (guidestar.target_name != null) {
-                sanitizedGuideStar.target_name = String(guidestar.target_name).slice(0, 15)
-            } else {
-                delete sanitizedGuideStar.target_name
-            }
+            const sanitizedGuideStar = sanitize_guide_star(guidestar)
 
             let newTarget = create_new_target(id, context.obsid, guidestar.target_name)
             newTarget = {
@@ -97,9 +110,6 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
                 ...sanitizedGuideStar,
                 equinox: String(guidestar.equinox ?? '2000'),
                 science_target: science_target_name,
-            }
-            if (props.useLaser) {
-                newTarget.lgs = '1'
             }
             const resp = await submit_target([newTarget])
             if (resp.errors.length > 0) {
