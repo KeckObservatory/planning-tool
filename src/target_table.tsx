@@ -87,7 +87,10 @@ export const convert_schema_to_columns = (schema: JSONSchemaType<Target>) => {
       valueSetter,
       valueFormatter,
       description: valueProps.description,
-      type: valueProps.type === 'array' ? 'string' : valueProps.type, //array cells are cast as string
+      // enum-constrained fields (lgs, rotator_mode, telescope_wrap, ...) get a
+      // dropdown editor instead of a free-text cell, same options as the edit dialog.
+      type: valueProps.enum ? 'singleSelect' : (valueProps.type === 'array' ? 'string' : valueProps.type), //array cells are cast as string
+      valueOptions: valueProps.enum,
       headerName: valueProps.short_description ?? valueProps.description,
       editable,
       width
@@ -369,10 +372,15 @@ export default function TargetTable(props: TargetTableProps) {
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
     const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
+        // Read the latest edit target via the ref, not the `editTarget` closed over
+        // when this handler was attached: several cells can be edited within this
+        // 300ms window, and basing the diff on a stale snapshot here would have each
+        // edit overwrite the ones that landed in between instead of building on them.
+        const currentTarget = editTargetRef.current
         let value = apiRef.current.getCellValue(id, params.field);
         let type = (target_schema.properties as TargetProps)[params.field as keyof PropertyProps].type
         // convert type to string if array
-        const changeDetected = editTarget[params.field as keyof Target] !== value
+        const changeDetected = currentTarget[params.field as keyof Target] !== value
         if (changeDetected) {
           const isNumber = type.includes('number') || type.includes('integer')
           if (type === 'array') {
@@ -381,7 +389,7 @@ export default function TargetTable(props: TargetTableProps) {
           else {
             value = format_edit_entry(params.field, value, isNumber)
           }
-          const newTgt = rowSetter(editTarget, params.field, value)
+          const newTgt = rowSetter(currentTarget, params.field, value)
           setEditTarget(newTgt)
         }
       }, 300)
