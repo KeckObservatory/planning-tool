@@ -331,20 +331,15 @@ export function EditToolbar(props: EditToolbarProps) {
           Add Target
         </Button>
         <DeleteDialogButton setRows={setRows} targets={props.selectedTargets} color='primary' />
+        <TagDialogButton targets={props.selectedTargets} />
+        <SemidDialogButton targets={props.selectedTargets} />
+        <CustomExportButton exportTargets={exportTargets} />
+        <TargetWizardButton />
+      </Stack>
+      <Stack justifyContent={'center'} direction="row" spacing={1}>
         <ViewTargetsDialogButton targets={props.selectedTargets} color='primary' />
         <TargetVizButton targets={vizTargets} />
         <GuideStarButton targets={vizTargets} />
-        <TargetWizardButton />
-        <TagDialogButton targets={props.selectedTargets} />
-        <SemidDialogButton targets={props.selectedTargets} />
-        <Autocomplete
-          disablePortal
-          options={uniqueTags}
-          value={selectedTagFilter}
-          onChange={(_, value) => setSelectedTagFilter(value)}
-          sx={{ width: 200 }}
-          renderInput={(params) => <TextField {...params} label="Filter by Tag" />}
-        />
       </Stack>
       <Stack justifyContent={'right'} direction="row" spacing={1}>
         <Tooltip title="Toggle On to show AO relavent columns">
@@ -354,8 +349,15 @@ export function EditToolbar(props: EditToolbarProps) {
             onChange={(_, checked) => setViewMode(checked ? 'ao' : 'non_ao')}
           />
         </Tooltip>
+        <Autocomplete
+          disablePortal
+          options={uniqueTags}
+          value={selectedTagFilter}
+          onChange={(_, value) => setSelectedTagFilter(value)}
+          sx={{ width: 200 }}
+          renderInput={(params) => <TextField {...params} label="Filter by Tag" />}
+        />
         <SemidSelect />
-        <CustomExportButton exportTargets={exportTargets} />
         <GridToolbar
           printOptions={{ disableToolbarButton: true }}
           csvOptions={{ disableToolbarButton: true }}
