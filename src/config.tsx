@@ -15,6 +15,7 @@ export const config = {
     "default_table_columns": {
         "non_ao": [
             "actions",
+            "priority",
             "target_name",
             "ra",
             "dec",
@@ -30,6 +31,7 @@ export const config = {
         ],
         "ao": [
             "actions",
+            "priority",
             "target_name",
             "ra",
             "dec",
@@ -66,6 +68,7 @@ export const config = {
         "left": [
             "selected",
             "actions",
+            "priority",
             "target_name",
             "ra",
             "dec",

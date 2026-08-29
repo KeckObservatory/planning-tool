@@ -18,7 +18,7 @@ import Button, { ButtonProps } from '@mui/material/Button';
 import { Target, useSnackbarContext, useStateContext, ViewMode } from './App.tsx';
 import { Stack, Autocomplete, TextField, Switch, FormControlLabel, Tooltip } from '@mui/material';
 import { useQueryParam, withDefault } from 'use-query-params';
-import { ViewParam } from './target_table.tsx';
+import { sort_by_priority, ViewParam } from './target_table.tsx';
 import ViewTargetsDialogButton from './two-d-view/view_targets_dialog.tsx';
 import DeleteDialogButton from './delete_rows_dialog.tsx';
 import { ExportTargetsNameDialog, StarListExportDirMenu } from './starlist_export_to_dir.tsx';
@@ -314,14 +314,17 @@ export function EditToolbar(props: EditToolbarProps) {
     }
   };
 
-  const vizTargets = selectedTargets.length > 0 ?
+  // Sorted so the arrangement made via the table's Priority column is what actually
+  // gets exported/submitted - `rows` is the raw state array, not the grid's
+  // displayed (sorted) order.
+  const vizTargets = sort_by_priority(selectedTargets.length > 0 ?
     get_targets_from_selected_targets(selectedTargets, rows)
     :
-    rows.filter((target) => target.ra && target.dec)
+    rows.filter((target) => target.ra && target.dec))
 
-  const exportTargets = props.selectedTargets.length > 0 ?
+  const exportTargets = sort_by_priority(props.selectedTargets.length > 0 ?
     get_targets_from_selected_targets(selectedTargets, rows)
-    : rows
+    : rows)
 
   return (
     // <GridToolbarContainer sx={{ justifyContent: 'center' }}>
@@ -333,8 +336,8 @@ export function EditToolbar(props: EditToolbarProps) {
         <DeleteDialogButton setRows={setRows} targets={props.selectedTargets} color='primary' />
         <TagDialogButton targets={props.selectedTargets} />
         <SemidDialogButton targets={props.selectedTargets} />
-        <CustomExportButton exportTargets={exportTargets} />
         <TargetWizardButton />
+        <CustomExportButton exportTargets={exportTargets} />
       </Stack>
       <Stack justifyContent={'center'} direction="row" spacing={1}>
         <ViewTargetsDialogButton targets={props.selectedTargets} color='primary' />

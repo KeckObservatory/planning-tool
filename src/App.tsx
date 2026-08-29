@@ -47,6 +47,7 @@ export interface Target extends SimbadTargetData {
   tags?: string[],
   science_target?: string,
   semids?: string[];
+  priority?: number | string, //user-set priority for the target list. see sort_by_priority.
   status?: Status //used to track row/form edits and updates them accordingly.
 }
 
@@ -258,7 +259,7 @@ function App() {
                 marginTop: '12px',
                 padding: '6px',
                 maxWidth: '2000px',
-                minWidth: '1500px',
+                minWidth: '1600px',
                 flexDirection: 'column',
               }}
             >

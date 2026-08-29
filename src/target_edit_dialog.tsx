@@ -272,6 +272,16 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 onChange={(event) => handleTextChange('target_name', event.target.value)}
                             />
                         </Tooltip>
+                        <Tooltip title={input_label('priority', true)}>
+                            <TextField
+                                label={input_label('priority')}
+                                focused={target.priority? true : false}
+                                id="priority"
+                                value={target.priority}
+                                sx={{ width: 100 }}
+                                onChange={(event) => handleTextChange('priority', event.target.value)}
+                            />
+                        </Tooltip>
                     </Stack>
                     <Stack sx={{ marginBottom: '24px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
                         <Tooltip title={input_label('ra', true)}>

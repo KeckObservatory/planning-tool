@@ -11,6 +11,12 @@
             "short_description": "Target Name",
             "description": "Target Name. Alpha-numeric, hyphen, underscore, and space characters only"
         },
+        "priority": {
+            "type": ["number", "string"],
+            "short_description": "Priority",
+            "description": "Priority for the target list. Higher numbers come first. Targets with no priority are set to 0.",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+        },
         "semids": {
             "type": "array",
             "short_description": "Semids",

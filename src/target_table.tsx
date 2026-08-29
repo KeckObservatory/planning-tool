@@ -21,6 +21,7 @@ import {
   GridCellEditStopParams,
   GridRowModel,
   GridValueFormatter,
+  GridSortModel,
 } from '@mui/x-data-grid';
 import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
@@ -96,10 +97,38 @@ export const convert_schema_to_columns = (schema: JSONSchemaType<Target>) => {
       width
     } as GridColDef
 
+    // priority is typed number|string, so the grid would otherwise sort it as text
+    // and put "10" ahead of "2". Compare the coerced numbers instead.
+    // The comparator stays ascending - the grid negates it itself for 'desc' - but
+    // the click order is flipped so the header toggles highest-first before lowest.
+    if (key === 'priority') {
+      col.sortComparator = (a, b) => priority_value({ priority: a } as Target) - priority_value({ priority: b } as Target)
+      col.sortingOrder = ['desc', 'asc', null]
+    }
+
     columns.push(col)
   });
 
   return columns;
+}
+
+// `priority` is typed number|string in the schema, and cell edits always arrive as
+// strings (format_edit_entry stringifies), so coerce rather than type-check -
+// a `typeof === 'number'` test would read every edited value as unset.
+// Anything unset/blank/non-numeric counts as 0, per the schema's description.
+export const priority_value = (tgt: Target): number => {
+  const priority = Number(tgt.priority)
+  return Number.isFinite(priority) ? priority : 0
+}
+
+// The `priority` column is how targets get reordered: type a number into it and the
+// table sorts by it, highest first. Exports/viz read from the raw `rows` array rather
+// than the grid's displayed order, so they have to apply the same sort explicitly or
+// the arrangement made in the table wouldn't carry into the submitted starlist.
+// Array.sort is stable, so targets sharing a priority (e.g. an untouched list where
+// everything is 0) keep their existing relative position.
+export const sort_by_priority = (targets: Target[]): Target[] => {
+  return [...targets].sort((a, b) => priority_value(b) - priority_value(a))
 }
 
 interface Duplicate {
@@ -169,6 +198,10 @@ export default function TargetTable(props: TargetTableProps) {
   const [rows, setRows] = React.useState(targets as Target[]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
+  // Controlled rather than initialState: initialState only applies at mount and is
+  // permanently discarded once a header is clicked, so the highest-priority-first
+  // default wasn't reliably in effect.
+  const [sortModel, setSortModel] = React.useState<GridSortModel>([{ field: 'priority', sort: 'desc' }]);
   const [selectedTagFilter, setSelectedTagFilter] = React.useState<string | null>(null);
   const cfg = context.config
 
@@ -473,6 +506,8 @@ export default function TargetTable(props: TargetTableProps) {
             checkboxSelection
             rows={filteredRows ?? []}
             columns={columns}
+            sortModel={sortModel}
+            onSortModelChange={setSortModel}
             rowModesModel={rowModesModel}
             onRowModesModelChange={handleRowModesModelChange}
             slots={{
