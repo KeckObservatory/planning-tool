@@ -59,7 +59,7 @@ export function TopBar(props: Props) {
   return (
     <AppBar
       position='sticky'
-      sx={props.localMode ? { bgcolor: '#16263e' } : undefined}
+      sx={props.localMode ? { bgcolor: '#678db0' } : undefined}
     >
       <Toolbar
         sx={{
@@ -90,18 +90,34 @@ export function TopBar(props: Props) {
         >
           Planning Tool
         </Typography>
-        {props.localMode && (
-          <Chip
-            label="LOCAL MODE ON"
-            size="small"
-            sx={{
-              bgcolor: '#ffd600',
-              color: '#000',
-              fontWeight: 700,
-              letterSpacing: 1,
-              marginRight: '12px'
-            }}
-          />
+        {props.localMode ? (
+          <Tooltip title="Local Mode stores targets on the browser.">
+            <Chip
+              label="LOCAL MODE ON"
+              size="small"
+              sx={{
+                bgcolor: '#ffd600',
+                color: '#000',
+                fontWeight: 700,
+                letterSpacing: 1,
+                marginRight: '12px'
+              }}
+            />
+          </Tooltip>
+        ) : (
+          <Tooltip title="Database mode stores targets at Keck.">
+            <Chip
+              label="DATABASE MODE ON"
+              size="small"
+              sx={{
+                bgcolor: '#ffd600',
+                color: '#000',
+                fontWeight: 700,
+                letterSpacing: 1,
+                marginRight: '12px'
+              }}
+            />
+          </Tooltip>
         )}
         <Typography
           component="h3"
