@@ -35,9 +35,32 @@ const colors = {
     'Above Tracking Limits': '#d95f02'
 }
 
+const OBSERVABLE_COLOR = '#1b9e77'
+
 export const reason_to_color_mapping = (reasons: string[]) => {
     const cols = reasons.map((reason: string) => colors[reason as keyof typeof colors])
-    return cols.length ? cols[0] : '#1b9e77'
+    return cols.length ? cols[0] : OBSERVABLE_COLOR
+}
+
+// The per-point marker colors above are categorical, not a continuous scale, so a
+// legend (built from zero-data "swatch" traces, one per color/reason) explains them
+// better than a Plotly colorbar - each trace exists only to add one legend entry.
+const create_color_legend_traces = (): Partial<Plotly.PlotData>[] => {
+    const entries: [string, string][] = [['Observable', OBSERVABLE_COLOR], ...Object.entries(colors)]
+    return entries.map(([label, color]) => ({
+        x: [null],
+        y: [null],
+        mode: 'markers',
+        type: 'scatter',
+        marker: {
+            color,
+            size: MARKER_SIZE,
+            symbol: 'square',
+        },
+        name: label,
+        showlegend: true,
+        hoverinfo: 'skip',
+    }))
 }
 
 const create_dawn_dusk_text = (date: Date, date_time_format: string) => {
@@ -259,8 +282,9 @@ export const TargetVizChart = (props: Props) => {
     })
 
     const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.PlotData[]
+    const legendTraces = create_color_legend_traces()
     //@ts-ignore
-    traces = [...traces, ...lightTraces]
+    traces = [...traces, ...lightTraces, ...legendTraces]
     let titleText = targetViz.target_name ?? 'Target' 
     titleText += ' Visibility'
     titleText = `<b>${titleText}</b>`
@@ -270,6 +294,14 @@ export const TargetVizChart = (props: Props) => {
         height: 400,
         title: { text: titleText },
         plot_bgcolor: 'black',
+        // Sits just outside the plot area (Plotly's own default position is close to
+        // this already) but nudged up so it clears the plot instead of overlapping it.
+        legend: {
+            x: 1.02,
+            y: 1.2,
+            xanchor: 'left',
+            yanchor: 'top',
+        },
         yaxis2: {
             title: { text: 'Time [UT]' },
             type: 'date',
