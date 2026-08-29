@@ -100,6 +100,12 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     const starListTextInit = getStarlist(props.exportTargets, false)
     const starListInit = starListTextInit.split('\n').filter( row => row.length > 0)
 
+    const malformedTargetWarnings = React.useMemo(
+        () => find_malformed_targets(props.exportTargets),
+        [props.exportTargets]
+    )
+    const hasMalformedTargets = malformedTargetWarnings.length > 0
+
     React.useEffect(() => {
         if (!props.open) return
 
@@ -121,7 +127,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
             warnings.push(`Targets should not have proper motion: ${pmTargetNames.join(', ')}`)
         }
 
-        warnings.push(...find_malformed_targets(props.exportTargets))
+        warnings.push(...malformedTargetWarnings)
 
         if (props.exportTargets.length > config.full_night_target_limit) {
             warnings.push(
@@ -174,6 +180,11 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
             snackbarContext.setSnackbarOpen(true)
             return
         }
+        if (hasMalformedTargets) {
+            snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Please fix the malformed targets before submitting.' })
+            snackbarContext.setSnackbarOpen(true)
+            return
+        }
         const form: SubmittedStarList = {
             telescope: dome.slice(dome.length - 1),
             hstDate: date.format('YYYY-MM-DD'),
@@ -201,7 +212,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
         <Button
             variant="contained"
             color="primary"
-            disabled={!isDateValid || !isPiNameValid}
+            disabled={!isDateValid || !isPiNameValid || hasMalformedTargets}
             onClick={submit_starlist_to_database}
         >
             Submit
