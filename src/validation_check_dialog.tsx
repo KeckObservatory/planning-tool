@@ -32,6 +32,28 @@ let ts = target_schema as any
 delete ts["$schema"]
 export const validate = ajv.compile(ts)
 
+const schema_properties: Record<string, any> = ts.properties
+
+// e.g. ['None', '1', '0'] -> "None, 1, or 0"
+const format_allowed_values = (values: unknown[]): string => {
+  const strs = values.map(String)
+  if (strs.length <= 1) return strs.join('')
+  if (strs.length === 2) return `${strs[0]} or ${strs[1]}`
+  return `${strs.slice(0, -1).join(', ')}, or ${strs[strs.length - 1]}`
+}
+
+// Plain-English explanations for the schema's regex patterns, keyed by the exact
+// pattern string ajv reports in err.params.pattern - a raw regex means nothing to
+// most users. Falls back to a still-regex-free message for any pattern not listed.
+const PATTERN_DESCRIPTIONS: Record<string, string> = {
+  '^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$': 'Must be a number',
+  '^\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$': 'Must be a number',
+  '^\\w?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$': 'Must be a number',
+  '^([\\-\\+]?\\d{2}:\\d{2}:\\d{2}\\.?\\d*)$': 'Must be in HH:MM:SS.SS format',
+  '[\\w\\-\\s]+': 'Must contain only letters, numbers, spaces, and hyphens',
+  '^[^,]+$': 'Must not contain a comma',
+}
+
 function ValidationDialog(props: SimpleDialogProps) {
   const { open, handleClose } = props;
   return (
@@ -44,8 +66,18 @@ function ValidationDialog(props: SimpleDialogProps) {
             if (err.keyword === 'required') {
               msg = `${err.params.missingProperty}: ${err.message}`
             }
-            if (err.keyword === 'type' || err.keyword === 'pattern') {
+            if (err.keyword === 'type') {
               msg = `${err.instancePath.substring(1)}: ${err.message}`
+            }
+            if (err.keyword === 'pattern') {
+              const friendly = PATTERN_DESCRIPTIONS[err.params.pattern as string] ?? 'is not formatted correctly'
+              msg = `${err.instancePath.substring(1)}: ${friendly}`
+            }
+            if (err.keyword === 'enum') {
+              const key = err.instancePath.substring(1)
+              const label = schema_properties[key]?.short_description ?? key
+              const allowedValues = format_allowed_values(err.params.allowedValues)
+              msg = `${label} error: allowed values are: ${allowedValues}`
             }
             return (
               <Typography key={msg} gutterBottom>
