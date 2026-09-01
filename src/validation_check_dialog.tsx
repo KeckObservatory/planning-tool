@@ -17,11 +17,14 @@ export interface SimpleDialogProps {
   open: boolean;
   handleClose: Function;
   errors: ErrorObject<string, Record<string, any>, unknown>[];
+  isDuplicate?: boolean;
+  targetName?: string;
 }
 
 export interface Props {
   errors : ErrorObject<string, Record<string, any>, unknown>[];
   target : Target
+  isDuplicate?: boolean;
 }
 
 const ajv = new AJV2019({allErrors:true, allowUnionTypes: true})
@@ -60,6 +63,12 @@ function ValidationDialog(props: SimpleDialogProps) {
     <Dialog maxWidth="lg" onClose={() => handleClose()} open={open}>
       <DialogTitle>Target Validation Errors</DialogTitle>
       <DialogContent dividers>
+        {props.isDuplicate && (
+          <Typography gutterBottom>
+            {`Duplicate target found: ${props.targetName ?? ''}. `}
+            No two targets can share a name, nor the same ra/dec within 1 arcsecond
+          </Typography>
+        )}
         {
           props.errors.map((err) => {
             let msg = err.message
@@ -95,18 +104,22 @@ export default function ValidationDialogButton(props: Props) {
   const [open, setOpen] = React.useState(false);
   const [icon, setIcon] = React.useState(<ApprovalIcon />)
 
+  // A duplicate is as much a problem as a schema error, so it drives the same
+  // flame icon and opens the same dialog.
+  const hasProblems = props.errors.length > 0 || !!props.isDuplicate
+
   React.useEffect(() => {
-    if (props.errors.length > 0) {
+    if (hasProblems) {
       setIcon(<LocalFireDepartmentIcon color="warning" />)
     }
     else {
       setIcon(<VerifiedIcon color="success" />)
     }
-  }, [props.target, props.errors])
+  }, [props.target, props.errors, hasProblems])
 
 
   const handleClickOpen = () => {
-    if (props.errors.length > 0) {
+    if (hasProblems) {
       setOpen(true);
     }
   };
@@ -126,6 +139,8 @@ export default function ValidationDialogButton(props: Props) {
         open={open}
         handleClose={handleClose}
         errors={props.errors}
+        isDuplicate={props.isDuplicate}
+        targetName={props.target?.target_name}
       />
     </>
   );

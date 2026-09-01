@@ -131,35 +131,30 @@ export const sort_by_priority = (targets: Target[]): Target[] => {
   return [...targets].sort((a, b) => priority_value(b) - priority_value(a))
 }
 
-interface Duplicate {
-  target_name: string,
-  reason: string
-}
+export const DUPLICATE_COORD_TOLERANCE_DEG = 1 / 3600 // 1 arcsecond
 
-const check_for_duplicates = (targets: Target[]) => {
-  const duplicates: Duplicate[] = []
-  for (let index = 0; index < targets.length; index++) {
-    const target = targets[index]
-    const duplicateNames = targets.some((t, idx) => {
-      return t.target_name === target.target_name && idx !== index
-    })
-    const duplcateRADEC = targets.some((t, idx) => {
-      return t.ra === target.ra && t.dec === target.dec && idx !== index
-    })
-    const alreadyInList = duplicates.some((dup) => dup.target_name === target.target_name)
-    if (
-      target.target_name //only check for duplicates if target has a name
-      && (duplicateNames && duplcateRADEC) // duplicate if both name and ra/dec are the same
-      && !alreadyInList
-    ) {
-      const duplicate: Duplicate = {
-        target_name: target.target_name as string,
-        reason: duplicateNames ? 'duplicate name' : 'duplicate ra/dec'
+// Two targets are duplicates if they share a name, or sit within an arcsecond of
+// each other. Returns the name of every target involved, so each row's validation
+// button can flag itself. This replaces a snackbar that fired on every change to
+// `rows`, which popped up far too often to be useful.
+export const find_duplicate_target_names = (targets: Target[]): Set<string> => {
+  const duplicateNames = new Set<string>()
+  for (let i = 0; i < targets.length; i++) {
+    const a = targets[i]
+    for (let j = i + 1; j < targets.length; j++) {
+      const b = targets[j]
+      const sameName = !!a.target_name && a.target_name === b.target_name
+      const sameCoords = a.ra_deg != null && a.dec_deg != null
+        && b.ra_deg != null && b.dec_deg != null
+        && Math.abs(a.ra_deg - b.ra_deg) < DUPLICATE_COORD_TOLERANCE_DEG
+        && Math.abs(a.dec_deg - b.dec_deg) < DUPLICATE_COORD_TOLERANCE_DEG
+      if (sameName || sameCoords) {
+        a.target_name && duplicateNames.add(a.target_name)
+        b.target_name && duplicateNames.add(b.target_name)
       }
-      duplicates.push(duplicate)
     }
   }
-  return duplicates
+  return duplicateNames
 }
 
 export interface RowsContext {
@@ -280,16 +275,7 @@ export default function TargetTable(props: TargetTableProps) {
     return resp
   }
 
-  React.useEffect(() => {
-    const duplicates = check_for_duplicates(rows)
-    if (duplicates.length > 0) {
-      sbcontext.setSnackbarMessage({
-        message: `Duplicate targets found: ${duplicates.map(dup => `${dup.target_name} (${dup.reason})`).join('\n')}`,
-        severity: 'error'
-      })
-      sbcontext.setSnackbarOpen(true)
-    }
-  }, [rows])
+  const duplicateNames = React.useMemo(() => find_duplicate_target_names(rows), [rows])
 
   React.useEffect(() => { // when semid is changed
     setRows(targets)
@@ -440,7 +426,11 @@ export default function TargetTable(props: TargetTableProps) {
     return [
       <CatalogButton hasCatalog={hasCatalog} target={editTarget} setTarget={catalogSetTarget} />,
       <ViewTargetsDialogButton targets={[editTarget]} />,
-      <ValidationDialogButton errors={errors} target={editTarget} />,
+      <ValidationDialogButton
+        errors={errors}
+        target={editTarget}
+        isDuplicate={!!editTarget.target_name && duplicateNames.has(editTarget.target_name)}
+      />,
       <TargetEditDialogButton
         target={editTarget}
         setTarget={setEditTarget}
