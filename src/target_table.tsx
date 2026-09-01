@@ -35,6 +35,7 @@ import { format_target_property } from './upload_targets_dialog.tsx';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util.tsx';
 import { Tooltip } from '@mui/material';
 import { createEnumParam, useQueryParam, withDefault } from 'use-query-params';
+import { DUPLICATE_COORD_TOLERANCE_DEG } from './two-d-view/constants.tsx';
 
 
 export const convert_schema_to_columns = (schema: JSONSchemaType<Target>) => {
@@ -98,9 +99,6 @@ export const convert_schema_to_columns = (schema: JSONSchemaType<Target>) => {
     } as GridColDef
 
     // priority is typed number|string, so the grid would otherwise sort it as text
-    // and put "10" ahead of "2". Compare the coerced numbers instead.
-    // The comparator stays ascending - the grid negates it itself for 'desc' - but
-    // the click order is flipped so the header toggles highest-first before lowest.
     if (key === 'priority') {
       col.sortComparator = (a, b) => priority_value({ priority: a } as Target) - priority_value({ priority: b } as Target)
       col.sortingOrder = ['desc', 'asc', null]
@@ -112,31 +110,18 @@ export const convert_schema_to_columns = (schema: JSONSchemaType<Target>) => {
   return columns;
 }
 
-// `priority` is typed number|string in the schema, and cell edits always arrive as
-// strings (format_edit_entry stringifies), so coerce rather than type-check -
-// a `typeof === 'number'` test would read every edited value as unset.
-// Anything unset/blank/non-numeric counts as 0, per the schema's description.
 export const priority_value = (tgt: Target): number => {
   const priority = Number(tgt.priority)
   return Number.isFinite(priority) ? priority : 0
 }
 
-// The `priority` column is how targets get reordered: type a number into it and the
-// table sorts by it, highest first. Exports/viz read from the raw `rows` array rather
-// than the grid's displayed order, so they have to apply the same sort explicitly or
-// the arrangement made in the table wouldn't carry into the submitted starlist.
-// Array.sort is stable, so targets sharing a priority (e.g. an untouched list where
-// everything is 0) keep their existing relative position.
 export const sort_by_priority = (targets: Target[]): Target[] => {
   return [...targets].sort((a, b) => priority_value(b) - priority_value(a))
 }
 
-export const DUPLICATE_COORD_TOLERANCE_DEG = 1 / 3600 // 1 arcsecond
 
 // Two targets are duplicates if they share a name, or sit within an arcsecond of
-// each other. Returns the name of every target involved, so each row's validation
-// button can flag itself. This replaces a snackbar that fired on every change to
-// `rows`, which popped up far too often to be useful.
+// each other.
 export const find_duplicate_target_names = (targets: Target[]): Set<string> => {
   const duplicateNames = new Set<string>()
   for (let i = 0; i < targets.length; i++) {
@@ -225,17 +210,6 @@ export default function TargetTable(props: TargetTableProps) {
   const leftPin = [...new Set([GRID_CHECKBOX_SELECTION_COL_DEF.field, ...cfg.pinned_table_columns.left])]
   pinnedColumns.left = leftPin
 
-  // context.targets is the app-wide snapshot of all targets (used e.g. by the
-  // guide star table to check what's already been added). It's only ever
-  // populated by an initial fetch, so any local add/edit must be mirrored
-  // into it here - otherwise it silently falls out of sync with `rows`, and
-  // the effect below (which resets `rows` from `targets` on every reference
-  // change) will wipe out local changes that never made it into context.
-  //
-  // This deliberately updates in place only and never inserts: a save can land
-  // after its target was deleted (an edit debounced from a row that has since
-  // been removed), and inserting there would resurrect the deleted row.
-  // Genuine additions insert into context explicitly at the point of the add.
   const update_context_target = (target: Target) => {
     context.setTargets && context.setTargets((oldTargets) => {
       if (!oldTargets?.some((tgt) => tgt._id === target._id)) {
@@ -391,10 +365,7 @@ export default function TargetTable(props: TargetTableProps) {
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
     const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
       setTimeout(() => { //wait for cell to update before setting editTarget
-        // Read the latest edit target via the ref, not the `editTarget` closed over
-        // when this handler was attached: several cells can be edited within this
-        // 300ms window, and basing the diff on a stale snapshot here would have each
-        // edit overwrite the ones that landed in between instead of building on them.
+        // Beware of race conditions here. The cellEditStop event fires before the cell's value is actually updated in the grid.
         const currentTarget = editTargetRef.current
         let value = apiRef.current.getCellValue(id, params.field);
         let type = (target_schema.properties as TargetProps)[params.field as keyof PropertyProps].type

@@ -76,3 +76,5 @@ export const DARK_ZENITH_SKY_BRIGHTNESS = 21.1 // mag/arcsec^2
 export const AGR_LIMIT_DEG = 140;
 // Default agrInfo.rotationOffset from InstrumentInfo.inc.
 export const DEFAULT_AGR_OFFSET_DEG = 13;
+
+export const DUPLICATE_COORD_TOLERANCE_DEG = 1 / 3600 // 1 arcsecond

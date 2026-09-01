@@ -16,12 +16,7 @@ import { create_new_target } from '../table_toolbar.tsx';
 import { submit_target } from '../api/api_root.tsx';
 import target_schema from '../target_schema.json';
 import { JSONSchemaType } from 'ajv/dist/2019';
-
-// Guide stars are considered "the same" as an existing target when their
-// coordinates are within this tolerance (in degrees). This is far tighter
-// than any real dithering between guide star catalogs but loose enough to
-// tolerate floating point / precision differences in ra_deg/dec_deg.
-const COORD_MATCH_TOLERANCE_DEG = 1 / 3600; // ~1 arcsec
+import { DUPLICATE_COORD_TOLERANCE_DEG } from '../two-d-view/constants.tsx';
 
 export const is_guidestar_already_added = (
     guidestar: Partial<Target>,
@@ -45,8 +40,8 @@ export const is_guidestar_already_added = (
             return false;
         }
         return (
-            Math.abs(t.ra_deg - guidestar.ra_deg) < COORD_MATCH_TOLERANCE_DEG &&
-            Math.abs(t.dec_deg - guidestar.dec_deg) < COORD_MATCH_TOLERANCE_DEG
+            Math.abs(t.ra_deg - guidestar.ra_deg) < DUPLICATE_COORD_TOLERANCE_DEG &&
+            Math.abs(t.dec_deg - guidestar.dec_deg) < DUPLICATE_COORD_TOLERANCE_DEG 
         );
     });
 }
