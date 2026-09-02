@@ -28,21 +28,21 @@ export interface Target extends SimbadTargetData {
   state?: string,
   target_name?: string,
   lgs?: Lgs,
-  v_mag?: number,
-  h_mag?: number,
-  k_mag?: number,
-  b_mag?: number,
-  r_mag?: number,
-  b_m_v_mag?: number,
-  b_m_r_mag?: number,
-  ra_offset?: number,
-  dec_offset?: number,
+  v_mag?: number | string,
+  h_mag?: number | string,
+  k_mag?: number | string,
+  b_mag?: number | string,
+  r_mag?: number | string,
+  b_m_v_mag?: number | string,
+  b_m_r_mag?: number | string,
+  ra_offset?: number | string,
+  dec_offset?: number | string,
   rotator_mode?: RotatorMode,
   rotator_pa?: number | string,
   telescope_wrap?: TelescopeWrap
-  d_ra?: number,
-  d_dec?: number,
-  t_eff?: number,
+  d_ra?: number | string,
+  d_dec?: number | string,
+  t_eff?: number | string,
   comment?: string,
   tags?: string[],
   science_target?: string,
@@ -95,20 +95,7 @@ export interface LngLatEl {
 
 export type ViewMode = "ao" | "non_ao"
 
-interface ConfigFile {
-  default_guide_star_table_columns: string[];
-  default_table_columns: {[key in ViewMode]: string[]};
-  catalog_to_target_map: { [key: string]: string };
-  csv_order: string[];
-  pinned_table_columns: { 'left': string[], 'right': string[] };
-  table_column_width: number,
-  timezone: string,
-  time_format: string,
-  date_time_format: string,
-  tel_geometry: { [key: string]: GeoModel }
-  tel_lat_lng_el: { [key: string]: LngLatEl }
-}
-
+export type ConfigFile = typeof config
 export interface State {
   username: string;
   obsid: number;
@@ -197,7 +184,7 @@ function App() {
       setLocalMode(localMode)
       var userinfo = await get_userinfo();
       var username = `${userinfo.FirstName} ${userinfo.LastName}`;
-      var init_state: any = {
+      var init_state: State = {
         config,
         username,
         obsid: userinfo.Id,

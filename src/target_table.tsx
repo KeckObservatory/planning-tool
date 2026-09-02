@@ -5,7 +5,6 @@ import { ErrorObject, JSONSchemaType } from 'ajv/dist/2019'
 import { EditToolbarProps, EditToolbar } from './table_toolbar.tsx';
 import {
   GridRowModesModel,
-  GridRowModes,
   DataGrid,
   GridColDef,
   GridActionsCellItem,
@@ -14,7 +13,6 @@ import {
   useGridApiContext,
   useGridApiEventHandler,
   GridRowParams,
-  GRID_CHECKBOX_SELECTION_COL_DEF,
   GridRowSelectionModel,
   GridValueParser,
   GridValueSetter,
@@ -40,7 +38,8 @@ import { DUPLICATE_COORD_TOLERANCE_DEG } from './two-d-view/constants.tsx';
 
 export const convert_schema_to_columns = (schema: JSONSchemaType<Target>) => {
   const columns: GridColDef[] = []
-  Object.entries(schema.properties).forEach(([key, valueProps]: [string, any]) => {
+  const properties = schema.properties as Record<string, PropertyProps>
+  Object.entries(properties).forEach(([key, valueProps]) => {
     // format value for display
     const valueParser: GridValueParser = (value: unknown) => {
       value = format_target_property(key as keyof Target, value, valueProps)
@@ -76,9 +75,7 @@ export const convert_schema_to_columns = (schema: JSONSchemaType<Target>) => {
       return value
     }
 
-    let type = valueProps.type === 'array' ? 'string' : valueProps.type
-    type = type.includes('string') ? 'string' : type //multiple typed fields are cast as string and formatted later on
-    const editable = valueProps.type === 'array' ? false : valueProps.editable ?? true
+    const editable = valueProps.type === 'array' ? false : !valueProps.not_editable_by_user
     let width = undefined
     if (key === 'ra' || key === 'dec') width = 150
     if (key === 'target_name') width = 200
@@ -185,7 +182,7 @@ export default function TargetTable(props: TargetTableProps) {
   const [selectedTagFilter, setSelectedTagFilter] = React.useState<string | null>(null);
   const cfg = context.config
 
-  const [viewMode, _] = useQueryParam<ViewMode>('view_mode', withDefault(ViewParam, 'non_ao' as ViewMode))
+  const [viewMode] = useQueryParam<ViewMode>('view_mode', withDefault(ViewParam, 'non_ao' as ViewMode))
   let columns = convert_schema_to_columns(target_schema as unknown as JSONSchemaType<Target>);
   const leftPinnedFields = cfg.pinned_table_columns.left.filter((field) => field !== 'selected')
   const rightPinnedFields = cfg.pinned_table_columns.right
@@ -206,10 +203,6 @@ export default function TargetTable(props: TargetTableProps) {
     setColumnVisibilityModel(visibleColumns)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode])
-  let pinnedColumns = cfg.pinned_table_columns
-  const leftPin = [...new Set([GRID_CHECKBOX_SELECTION_COL_DEF.field, ...cfg.pinned_table_columns.left])]
-  pinnedColumns.left = leftPin
-
   const update_context_target = (target: Target) => {
     context.setTargets && context.setTargets((oldTargets) => {
       if (!oldTargets?.some((tgt) => tgt._id === target._id)) {
@@ -254,10 +247,6 @@ export default function TargetTable(props: TargetTableProps) {
   React.useEffect(() => { // when semid is changed
     setRows(targets)
   }, [targets])
-
-  const handleEditClick = (id: GridRowId) => () => {
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
-  };
 
   const handleDeleteClick = async (id: GridRowId) => {
     // Deleting by a null/undefined id would match every row that is also
@@ -308,58 +297,74 @@ export default function TargetTable(props: TargetTableProps) {
     expand: false
   }
 
-  const debounced_edit_click = useDebounceCallback(handleEditClick, 500)
-
   const ActionsCell = (params: GridRowParams<Target>) => {
     const { id, row } = params;
     const [editTarget, setEditTarget] = React.useState<Target>(row);
-    const [count, setCount] = React.useState(0); //prevents scroll update from triggering save
     const [hasCatalog, setHasCatalog] = React.useState(row.tic_id || row.gaia_id ? true : false);
     const editTargetRef = React.useRef<Target>(editTarget);
-    const countRef = React.useRef<number>(count);
-    
+
     const errors = React.useMemo<ErrorObject<string, Record<string, any>, unknown>[]>(() => {
-      return validate_sanitized_target(editTargetRef.current);
-    }, [editTarget, count])
+      return validate_sanitized_target(editTarget);
+    }, [editTarget])
 
     const apiRef = useGridApiContext();
 
-    // Update refs when state changes
+    // Keeps the ref current for the deferred readers (the debounced save and the
+    // cellEditStop timeout), which would otherwise close over a stale editTarget.
     React.useEffect(() => {
       editTargetRef.current = editTarget;
-      countRef.current = count;
-    }, [editTarget, count]);
+    }, [editTarget]);
 
-    const handleRowChange = React.useCallback(async (override = false) => {
-      if (countRef.current > 0 || override) {
-        const isEdited = editTargetRef.current.status?.includes('EDITED')
-        if (!isEdited) {
-          processRowUpdate(editTargetRef.current)
-          return
+    const handleRowChange = React.useCallback(async (target?: Target) => {
+      const tgt = target ?? editTargetRef.current
+      const isEdited = tgt.status?.includes('EDITED')
+      if (!isEdited) {
+        processRowUpdate(tgt)
+        return
+      }
+      try {
+        const newTgt = await edit_target(tgt)
+        processRowUpdate(tgt)
+        if (newTgt) {
+          (newTgt.tic_id || newTgt.gaia_id) && setHasCatalog(true)
         }
-        try {
-          const newTgt = await edit_target(editTargetRef.current)
-          processRowUpdate(editTargetRef.current)
-          if (newTgt) {
-            newTgt.tic_id || newTgt.gaia_id && setHasCatalog(true)
-            debounced_edit_click(id)
-          }
-        } catch (err) {
-          console.error('Failed to save target edit', err)
-          sbcontext.setSnackbarMessage({
-            severity: 'error',
-            message: `Failed to save changes to ${editTargetRef.current.target_name || 'target'}`
-          })
-          sbcontext.setSnackbarOpen(true)
-        }
+      } catch (err) {
+        console.error('Failed to save target edit', err)
+        sbcontext.setSnackbarMessage({
+          severity: 'error',
+          message: `Failed to save changes to ${tgt.target_name || 'target'}`
+        })
+        sbcontext.setSnackbarOpen(true)
       }
     }, [id])
 
     const debouncedHandleRowChange = useDebounceCallback(handleRowChange, 2000)
 
+    const externalSyncRef = React.useRef(false)
+
+    React.useEffect(() => {
+      // `row` is the authoritative copy in `rows`. Re-sync when it changes 
+      if (row === editTargetRef.current || debouncedHandleRowChange.isPending()) {
+        return
+      }
+      externalSyncRef.current = true
+      setEditTarget(row)
+    }, [row])
+
+    const hasMountedRef = React.useRef(false)
+
     React.useEffect(() => { // when targed is edited in target edit dialog or catalog dialog
+      // Skip the mount pass. 
+      // every remaining call to the debounced save is now a genuine edit.
+      if (!hasMountedRef.current) {
+        hasMountedRef.current = true
+        return
+      }
+      if (externalSyncRef.current) { // not a user edit - nothing to save back
+        externalSyncRef.current = false
+        return
+      }
       debouncedHandleRowChange()
-      setCount((prev: number) => prev + 1)
     }, [editTarget])
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
@@ -368,7 +373,9 @@ export default function TargetTable(props: TargetTableProps) {
         // Beware of race conditions here. The cellEditStop event fires before the cell's value is actually updated in the grid.
         const currentTarget = editTargetRef.current
         let value = apiRef.current.getCellValue(id, params.field);
-        let type = (target_schema.properties as TargetProps)[params.field as keyof PropertyProps].type
+        const fieldProps = (target_schema.properties as TargetProps)[params.field]
+        if (!fieldProps) return
+        const type = fieldProps.type
         // convert type to string if array
         const changeDetected = currentTarget[params.field as keyof Target] !== value
         if (changeDetected) {
@@ -385,28 +392,30 @@ export default function TargetTable(props: TargetTableProps) {
       }, 300)
     }
 
-    const catalogSetTarget = async (newTgt: Target) => {
-      await setEditTarget(newTgt)
-      handleRowChange(true) //override save
+    const catalogSetTarget = (newTgt: Target) => {
+      setEditTarget(newTgt)
+      handleRowChange(newTgt) //save immediately
       setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
-      setCount((prev: number) => prev + 1)
     }
 
     useGridApiEventHandler(apiRef, 'cellEditStop', handleEvent)
 
     return [
-      <CatalogButton hasCatalog={hasCatalog} target={editTarget} setTarget={catalogSetTarget} />,
-      <ViewTargetsDialogButton targets={[editTarget]} />,
+      <CatalogButton key="catalog" hasCatalog={hasCatalog} target={editTarget} setTarget={catalogSetTarget} />,
+      <ViewTargetsDialogButton key="view" targets={[editTarget]} />,
       <ValidationDialogButton
+        key="validation"
         errors={errors}
         target={editTarget}
         isDuplicate={!!editTarget.target_name && duplicateNames.has(editTarget.target_name)}
       />,
       <TargetEditDialogButton
+        key="edit"
         target={editTarget}
         setTarget={setEditTarget}
       />,
       <GridActionsCellItem
+        key="delete"
         icon={
           <Tooltip title="Delete target from database">
             <DeleteIcon />

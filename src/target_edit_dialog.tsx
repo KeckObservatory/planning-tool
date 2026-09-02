@@ -20,7 +20,7 @@ import { TARGET_LENGTH } from './two-d-view/constants';
 
 interface Props {
     target: Target
-    setTarget: Function
+    setTarget: React.Dispatch<React.SetStateAction<Target>> 
 }
 
 interface TargetEditProps extends Props {
@@ -397,7 +397,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 focused={target.k_mag ? true : false}
                                 value={target.k_mag}
                                 sx={{ width: 125 }}
-                                onChange={(event) => handleTextChange('k._mag', event.target.value, true)}
+                                onChange={(event) => handleTextChange('k_mag', event.target.value, true)}
                             />
                         </Tooltip>
                     </Stack>
@@ -516,8 +516,8 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('tic_id')}
                                 id="tic"
-                                focused={target.tic ? true : false}
-                                value={target.tic}
+                                focused={target.tic_id ? true : false}
+                                value={target.tic_id}
                                 onChange={(event) => handleTextChange('tic_id', event.target.value)}
                             />
                         </Tooltip>
