@@ -8,7 +8,10 @@ import { Feature, Point } from "geojson"
 import { PointingOriginMarkers, PointingOriginMarker } from "../aladin/pointing_origin_markers"
 import { ScaleBar } from "./scale_bar"
 import { CompassRose } from "./compass_rose"
-import { ZOOM_SPEED, ZOOM_MIN, ZOOM_MAX } from "../two-d-view/constants"
+import { ZOOM_SPEED, ZOOM_MIN, ZOOM_MAX, ZOOM_DEFAULT } from "../two-d-view/constants"
+import IconButton from "@mui/material/IconButton"
+import Tooltip from "@mui/material/Tooltip"
+import DownloadIcon from '@mui/icons-material/Download'
 import { is_guidestar_already_added } from "./guide_star_table.tsx"
 
 // Compute brightness/contrast percentages from a pointer position within the viewer bounds.
@@ -25,6 +28,11 @@ const computeColorStretch = (
   const contrast = (1 - relY) * 100;
   return { brightness, contrast };
 };
+
+// Marks on-screen controls that live inside the viewer but must stay out of a
+// saved image. Anything rendered under this class is skipped when composing the
+// export - add it to any future overlay UI.
+const VIEWER_CHROME_CLASS = 'gs-viewer-chrome'
 
 // Ray-casting point-in-polygon test, operating in pixel coordinates.
 const point_within_polygon = (point: [number, number], polygon: [number, number][]): boolean => {
@@ -72,7 +80,7 @@ export const GSViewer = (props: Props) => {
   const svgRef = React.useRef<SVGSVGElement | null>(null);
   const fovSvgRef = React.useRef<SVGSVGElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const [zoom, setZoom] = React.useState<number>(1); // zoom level, 1 = no zoom
+  const [zoom, setZoom] = React.useState<number>(ZOOM_DEFAULT); // 1 = no zoom
   const [panOffset, setPanOffset] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = React.useState<boolean>(false);
   const [dragStart, setDragStart] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -477,6 +485,120 @@ export const GSViewer = (props: Props) => {
     }
   }, [fov, props.centerRA, props.centerDec, props.width, props.height, degPerPixel, props.selPO, zoom, props.fovAngle]);
 
+  const colorStretchFilter = `${props.invertImage !== false ? 'invert(1) ' : ''}brightness(${brightness}%) contrast(${contrast}%)`
+
+  // Applies the same colour stretch the viewer shows, for browsers without
+  // Canvas2D `filter` (Safari < 17). Mirrors the CSS order: invert, then
+  // brightness (linear multiply), then contrast (scale about mid-grey).
+  const apply_color_stretch = (ctx: CanvasRenderingContext2D) => {
+    const image = ctx.getImageData(0, 0, props.width, props.height)
+    const data = image.data
+    const invert = props.invertImage !== false
+    const brightnessScale = brightness / 100
+    const contrastScale = contrast / 100
+    for (let i = 0; i < data.length; i += 4) {
+      for (let channel = 0; channel < 3; channel++) {
+        let v = data[i + channel]
+        if (invert) v = 255 - v
+        v = v * brightnessScale
+        v = (v - 127.5) * contrastScale + 127.5
+        data[i + channel] = Math.max(0, Math.min(255, v))
+      }
+    }
+    ctx.putImageData(image, 0, 0)
+  }
+
+  // Rasterises one overlay layer. Every overlay is an <svg> sized to the viewer,
+  // so it can be serialised and drawn at the origin under whatever transform its
+  // CSS carries (pan for most, pan + rotation for the FOV layer).
+  const draw_svg_layer = (
+    ctx: CanvasRenderingContext2D,
+    svg: SVGSVGElement,
+    transform: (ctx: CanvasRenderingContext2D) => void
+  ) => {
+    const clone = svg.cloneNode(true) as SVGSVGElement
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    clone.setAttribute('width', String(props.width))
+    clone.setAttribute('height', String(props.height))
+    const markup = new XMLSerializer().serializeToString(clone)
+    const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(markup)
+    return new Promise<void>((resolve) => {
+      const img = new Image()
+      img.onload = () => {
+        ctx.save()
+        transform(ctx)
+        ctx.drawImage(img, 0, 0)
+        ctx.restore()
+        resolve()
+      }
+      // A layer that fails to rasterise shouldn't abort the whole export.
+      img.onerror = () => {
+        console.error('failed to rasterise overlay layer for export')
+        resolve()
+      }
+      img.src = url
+    })
+  }
+
+  const save_image = async () => {
+    const container = containerRef.current
+    const sourceCanvas = canvasRef.current
+    if (!container || !sourceCanvas) return
+
+    const out = document.createElement('canvas')
+    out.width = props.width
+    out.height = props.height
+    const ctx = out.getContext('2d')
+    if (!ctx) return
+
+    const pan = (c: CanvasRenderingContext2D) => c.translate(panOffset.x, panOffset.y)
+    // CSS uses transform-origin: center center, so rotate/scale about the middle.
+    const aboutCenter = (c: CanvasRenderingContext2D, apply: () => void) => {
+      c.translate(props.width / 2, props.height / 2)
+      apply()
+      c.translate(-props.width / 2, -props.height / 2)
+    }
+
+    // Image layer: same pan/zoom and colour stretch as the on-screen canvas.
+    const supportsCtxFilter = 'filter' in ctx
+    ctx.save()
+    if (supportsCtxFilter) ctx.filter = colorStretchFilter
+    pan(ctx)
+    aboutCenter(ctx, () => ctx.scale(zoom, zoom))
+    ctx.drawImage(sourceCanvas, 0, 0)
+    ctx.restore()
+    if (!supportsCtxFilter) apply_color_stretch(ctx)
+
+    // Overlay layers, in the same paint order as the DOM.
+    if (svgRef.current) {
+      await draw_svg_layer(ctx, svgRef.current, pan)
+    }
+    if (fovSvgRef.current) {
+      await draw_svg_layer(ctx, fovSvgRef.current, (c) => {
+        pan(c)
+        aboutCenter(c, () => c.rotate((overlayRotation * Math.PI) / 180))
+      })
+    }
+    // The remaining layers (pointing origins, scale bar, compass rose) have no
+    // refs. Pointing origins sit in a panned wrapper; the other two are static.
+    // On-screen controls are skipped via VIEWER_CHROME_CLASS - MUI icons are
+    // themselves <svg>, so the download button would otherwise be rasterised
+    // into the export, blown up to the full viewer size.
+    const remaining = Array.from(container.querySelectorAll('svg'))
+      .filter((svg) => svg !== svgRef.current
+        && svg !== fovSvgRef.current
+        && !svg.closest(`.${VIEWER_CHROME_CLASS}`))
+    for (const svg of remaining) {
+      const panned = !!svg.closest('.pointing-origin-markers')
+      await draw_svg_layer(ctx, svg, panned ? pan : () => { })
+    }
+
+    const link = document.createElement('a')
+    link.download = `guide-star-${props.instrumentFOV ?? 'view'}.png`
+    link.href = out.toDataURL('image/png')
+    link.click()
+  }
+
   // Handle mouse wheel zoom
   React.useEffect(() => {
     const container = containerRef.current;
@@ -602,7 +724,7 @@ export const GSViewer = (props: Props) => {
           transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
           transformOrigin: 'center center',
           pointerEvents: 'none',
-          filter: `${props.invertImage !== false ? 'invert(1) ' : ''}brightness(${brightness}%) contrast(${contrast}%)`
+          filter: colorStretchFilter
         }}
       />
       {/* Targets SVG Layer */}
@@ -659,6 +781,23 @@ export const GSViewer = (props: Props) => {
       <ScaleBar width={props.width} height={props.height} degPerPixel={degPerPixel} invertImage={props.invertImage} />
       {/* The image no longer rotates, so sky north is fixed and the rose stays put */}
       <CompassRose width={props.width} height={props.height} invertImage={props.invertImage} />
+      <Tooltip title="Save this view as a PNG, with overlays and colour stretch">
+        <IconButton
+          onClick={save_image}
+          size="small"
+          className={VIEWER_CHROME_CLASS}
+          sx={{
+            position: 'absolute',
+            top: 4,
+            right: 4,
+            zIndex: 2,
+            bgcolor: 'background.paper',
+            '&:hover': { bgcolor: 'background.paper' },
+          }}
+        >
+          <DownloadIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
     </div>
   );
 };
