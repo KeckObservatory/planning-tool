@@ -92,21 +92,18 @@ export const GSViewer = (props: Props) => {
   const [laserContours, setLaserContours] = React.useState<Array<{ name: string; color: string; lines: Array<Array<[number, number]>> }>>([]);
   const [trickMapContours, setTrickMapContours] = React.useState<Array<{ name: string; color: string; lines: Array<Array<[number, number]>> }>>([]);
 
-  const get_offset_ra_dec = () => {
-    let ra = props.centerRA;
-    let dec = props.centerDec;
-    if (props.selPO) { // this offsets the center of the view to the selected pointing origin 
-      const [dra, ddec] = props.selPO.geometry.coordinates; // arcseconds offset
-      ra = ra - dra / 3600;
-      dec = dec - ddec / 3600;
-    }
-    return [ra, dec];
-  }
+  // A pointing origin is where the telescope puts the target in the instrument's
+  // focal plane, so selecting one re-points the telescope: the whole instrument
+  // frame - FOV outline, laser and trick contours, and the pointing origin markers -
+  // slides against the sky image, which stays fixed on the target. Measuring every
+  // instrument-frame offset from the selected origin puts that origin at the centre,
+  // which is where the target is.
+  const [selPODra, selPODdec] = props.selPO?.geometry.coordinates ?? [0, 0];
 
-  // Convert arcseconds offset to pixel coordinates
+  // Convert an instrument-frame arcseconds offset to pixel coordinates
   const arcsecToPixel = (dra: number, ddec: number): [number, number] => {
-    const x = (dra / (3600 * degPerPixel)) + props.width / 2;
-    const y = (ddec / (3600 * degPerPixel)) + props.height / 2;
+    const x = ((dra - selPODra) / (3600 * degPerPixel)) + props.width / 2;
+    const y = ((ddec - selPODdec) / (3600 * degPerPixel)) + props.height / 2;
     return [x, y];
   }
 
@@ -133,13 +130,10 @@ export const GSViewer = (props: Props) => {
     if (!props.pointingOrigins) {
       return [];
     }
-    const [offsetRa, offsetDec] = get_offset_ra_dec();
 
     return props.pointingOrigins.map((feature) => {
       const [dra, ddec] = feature.geometry.coordinates; // arcseconds offset
-      const pora = offsetRa + dra / 3600; // convert to degrees
-      const podec = offsetDec + ddec / 3600;
-      const [px, py] = arcsecToPixel((pora - props.centerRA) * 3600, (podec - props.centerDec) * 3600);
+      const [px, py] = arcsecToPixel(dra, ddec);
       // Rotate the marker position rather than the whole layer, so the labels stay upright.
       const position = rotateAboutCenter(px, py, overlayRotation);
       const name = feature.properties?.name ?? 'Unknown';
@@ -185,7 +179,7 @@ export const GSViewer = (props: Props) => {
     });
 
     setLaserContours(convertedContours);
-  }, [props.contours, props.showLaser, props.width, props.height, degPerPixel, zoom]);
+  }, [props.contours, props.showLaser, props.width, props.height, degPerPixel, zoom, props.selPO]);
 
   // Convert trick map to pixel coordinates
   React.useMemo(() => {
@@ -222,7 +216,7 @@ export const GSViewer = (props: Props) => {
     });
 
     setTrickMapContours(convertedTrickMap);
-  }, [props.trickMap, props.showTrickMap, props.width, props.height, degPerPixel, zoom]);
+  }, [props.trickMap, props.showTrickMap, props.width, props.height, degPerPixel, zoom, props.selPO]);
 
   // Draw laser contours on SVG
   React.useEffect(() => {
@@ -329,9 +323,8 @@ export const GSViewer = (props: Props) => {
   const fovPolygons = React.useMemo((): [number, number][][] => {
     if (!fov) return [];
     const toPixel = (coord: [number, number]): [number, number] => {
-      const [dra, ddec] = coord; // arcseconds offset from center
-      const x = (dra / (3600 * degPerPixel)) + props.width / 2;
-      const y = (ddec / (3600 * degPerPixel)) + props.height / 2;
+      const [dra, ddec] = coord; // arcseconds offset from the instrument origin
+      const [x, y] = arcsecToPixel(dra, ddec);
       return rotateAboutCenter(x, y, overlayRotation);
     };
     if (fov.geometry.type === 'MultiPolygon') {
@@ -340,7 +333,7 @@ export const GSViewer = (props: Props) => {
       return [fov.geometry.coordinates[0].map(toPixel)];
     }
     return [];
-  }, [fov, props.width, props.height, degPerPixel, overlayRotation]);
+  }, [fov, props.width, props.height, degPerPixel, overlayRotation, props.selPO]);
 
   React.useEffect(() => {
     const svg = svgRef.current;
@@ -438,11 +431,9 @@ export const GSViewer = (props: Props) => {
 
         // Transform world coordinates to pixel coordinates
         const points = coordinates.map((coord: [number, number]) => {
-          const dra = coord[0]; // arcseconds offset from center
-          const ddec = coord[1]; // arcseconds offset from center
-          const x = (dra / (3600 * degPerPixel)) + props.width / 2;
-          const y = (ddec / (3600 * degPerPixel)) + props.height / 2;
-          return [x, y];
+          const dra = coord[0]; // arcseconds offset from the instrument origin
+          const ddec = coord[1]; // arcseconds offset from the instrument origin
+          return arcsecToPixel(dra, ddec);
         });
 
         // Draw polygon
@@ -463,11 +454,9 @@ export const GSViewer = (props: Props) => {
 
       // Transform world coordinates to pixel coordinates
       const points = coordinates.map((coord: [number, number]) => {
-        const dra = coord[0]; // arcseconds offset from center
-        const ddec = coord[1]; // arcseconds offset from center
-        const x = (dra / (3600 * degPerPixel)) + props.width / 2;
-        const y = (ddec / (3600 * degPerPixel)) + props.height / 2;
-        return [x, y];
+        const dra = coord[0]; // arcseconds offset from the instrument origin
+        const ddec = coord[1]; // arcseconds offset from the instrument origin
+        return arcsecToPixel(dra, ddec);
       });
 
       // Draw polygon
