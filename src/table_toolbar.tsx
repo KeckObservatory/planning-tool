@@ -32,9 +32,9 @@ import { StarlistSubmissionDialog } from './starlist_submission/starlist_submiss
 
 const convert_target_to_targetlist_row = (target: Target, includeComments = true) => {
   //required params
-  const name = target.target_name?.slice(0, TARGET_LENGTH).padEnd(TARGET_NAME_LENGTH_PADDED, " ") //columns 1-16 are text last column is a space
-  const ra = target.ra?.replaceAll(':', ' ')
-  const dec = target.dec?.replaceAll(':', ' ')
+  const name = (target.target_name ?? '').slice(0, TARGET_LENGTH).padEnd(TARGET_NAME_LENGTH_PADDED, " ") //columns 1-16 are text last column is a space
+  const ra = target.ra?.replaceAll(':', ' ') ?? ''
+  const dec = target.dec?.replaceAll(':', ' ') ?? ''
   const equinox = target.equinox ?? '2000'
   let row = `${name} ${ra} ${dec} ${equinox}`
   const valid = target.target_name && target.ra && target.dec && equinox
@@ -49,15 +49,15 @@ const convert_target_to_targetlist_row = (target: Target, includeComments = true
   row = target.k_mag ? row + ` kmag=${target.k_mag}` : row
   row = target.b_m_v_mag ? row + ` b-v=${target.b_m_v_mag}` : row
   row = target.b_m_r_mag ? row + ` b-r=${target.b_m_r_mag}` : row
-  row = target.ra_offset ? row + ` raoffset=${target.ra_offset}` : row
-  row = target.dec_offset ? row + ` decoffset=${target.dec_offset}` : row
+  row = target.ra_offset != null && target.ra_offset !== '' ? row + ` raoffset=${target.ra_offset}` : row
+  row = target.dec_offset != null && target.dec_offset !== '' ? row + ` decoffset=${target.dec_offset}` : row
   row = target.rotator_mode ? row + ` rotmode=${target.rotator_mode}` : row
-  row = target.rotator_pa ? row + ` rotdest=${target.rotator_pa}` : row
+  row = target.rotator_pa != null && target.rotator_pa !== '' ? row + ` rotdest=${target.rotator_pa}` : row
   row = target.telescope_wrap ? row + ` wrap=${target.telescope_wrap}` : row
-  row = target.d_dec ? row + ` ddec=${target.d_dec}` : row
-  row = target.d_ra ? row + ` dra=${target.d_ra}` : row
-  row = target.pm_ra ? row + ` pmra=${target.pm_ra}` : row
-  row = target.pm_dec ? row + ` pmdec=${target.pm_dec}` : row
+  row = target.d_dec != null && target.d_dec !== '' ? row + ` ddec=${target.d_dec}` : row
+  row = target.d_ra != null && target.d_ra !== '' ? row + ` dra=${target.d_ra}` : row
+  row = target.pm_ra != null ? row + ` pmra=${target.pm_ra}` : row
+  row = target.pm_dec != null ? row + ` pmdec=${target.pm_dec}` : row
   row = target.science_target ? row + ` target=${target.science_target}` : row
   if (target.lgs === '1') {
     row = row + ` lgs=1`
