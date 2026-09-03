@@ -10,7 +10,7 @@ import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import target_schema from './target_schema.json'
 import AJV2019, { ErrorObject } from 'ajv/dist/2019'
 import { Target } from './App';
-import { IconButton } from '@mui/material';
+import { Button, IconButton } from '@mui/material';
 
 
 export interface SimpleDialogProps {
@@ -19,12 +19,14 @@ export interface SimpleDialogProps {
   errors: ErrorObject<string, Record<string, any>, unknown>[];
   isDuplicate?: boolean;
   targetName?: string;
+  onMerge?: () => void | Promise<void>;
 }
 
 export interface Props {
   errors : ErrorObject<string, Record<string, any>, unknown>[];
   target : Target
   isDuplicate?: boolean;
+  onMerge?: () => void | Promise<void>;
 }
 
 const ajv = new AJV2019({allErrors:true, allowUnionTypes: true})
@@ -58,7 +60,20 @@ const PATTERN_DESCRIPTIONS: Record<string, string> = {
 }
 
 function ValidationDialog(props: SimpleDialogProps) {
-  const { open, handleClose } = props;
+  const { open, handleClose, onMerge } = props;
+  const [isMerging, setIsMerging] = React.useState(false);
+
+  const handleMerge = async () => {
+    if (!onMerge || isMerging) return
+    setIsMerging(true)
+    try {
+      await onMerge()
+      handleClose()
+    } finally {
+      setIsMerging(false)
+    }
+  }
+
   return (
     <Dialog maxWidth="lg" onClose={() => handleClose()} open={open}>
       <DialogTitle>Target Validation Errors</DialogTitle>
@@ -68,6 +83,22 @@ function ValidationDialog(props: SimpleDialogProps) {
             {`Duplicate target found: ${props.targetName ?? ''}. `}
             No two targets can share a name, nor the same ra/dec within 1 arcsecond
           </Typography>
+        )}
+        {props.isDuplicate && onMerge && (
+          <Tooltip title="Fill this target's blank fields from its duplicate(s), then delete the duplicate(s). Values this target already has are kept.">
+            <span>
+              <Button
+                size="small"
+                variant="outlined"
+                color="warning"
+                onClick={handleMerge}
+                disabled={isMerging}
+                sx={{ mb: 1, textTransform: 'none' }}
+              >
+                Merge with duplicate(s)
+              </Button>
+            </span>
+          </Tooltip>
         )}
         {
           props.errors.map((err) => {
@@ -141,6 +172,7 @@ export default function ValidationDialogButton(props: Props) {
         errors={props.errors}
         isDuplicate={props.isDuplicate}
         targetName={props.target?.target_name}
+        onMerge={props.onMerge}
       />
     </>
   );

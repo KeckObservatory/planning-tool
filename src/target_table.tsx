@@ -119,24 +119,51 @@ export const sort_by_priority = (targets: Target[]): Target[] => {
 
 // Two targets are duplicates if they share a name, or sit within an arcsecond of
 // each other.
+export const is_duplicate_target = (a: Target, b: Target): boolean => {
+  const sameName = !!a.target_name && a.target_name === b.target_name
+  const sameCoords = a.ra_deg != null && a.dec_deg != null
+    && b.ra_deg != null && b.dec_deg != null
+    && Math.abs(a.ra_deg - b.ra_deg) < DUPLICATE_COORD_TOLERANCE_DEG
+    && Math.abs(a.dec_deg - b.dec_deg) < DUPLICATE_COORD_TOLERANCE_DEG
+  return sameName || sameCoords
+}
+
 export const find_duplicate_target_names = (targets: Target[]): Set<string> => {
   const duplicateNames = new Set<string>()
   for (let i = 0; i < targets.length; i++) {
     const a = targets[i]
     for (let j = i + 1; j < targets.length; j++) {
       const b = targets[j]
-      const sameName = !!a.target_name && a.target_name === b.target_name
-      const sameCoords = a.ra_deg != null && a.dec_deg != null
-        && b.ra_deg != null && b.dec_deg != null
-        && Math.abs(a.ra_deg - b.ra_deg) < DUPLICATE_COORD_TOLERANCE_DEG
-        && Math.abs(a.dec_deg - b.dec_deg) < DUPLICATE_COORD_TOLERANCE_DEG
-      if (sameName || sameCoords) {
+      if (is_duplicate_target(a, b)) {
         a.target_name && duplicateNames.add(a.target_name)
         b.target_name && duplicateNames.add(b.target_name)
       }
     }
   }
   return duplicateNames
+}
+
+const is_blank = (value: unknown): boolean => {
+  return value === undefined || value === null || value === ''
+    || (Array.isArray(value) && value.length === 0)
+}
+
+const UNMERGEABLE_KEYS: string[] = ['_id', 'status']
+
+// Left-hand merge
+export const merge_targets = (target: Target, duplicates: Target[]): { merged: Target, filledKeys: string[] } => {
+  let merged = { ...target }
+  const filledKeys: string[] = []
+  duplicates.forEach((duplicate) => {
+    Object.entries(duplicate).forEach(([key, value]) => {
+      if (UNMERGEABLE_KEYS.includes(key)) return
+      if (is_blank(value)) return
+      if (!is_blank(merged[key as keyof Target])) return
+      merged = { ...merged, [key]: value }
+      filledKeys.push(key)
+    })
+  })
+  return { merged, filledKeys }
 }
 
 export interface RowsContext {
@@ -240,6 +267,52 @@ export default function TargetTable(props: TargetTableProps) {
   const edit_target = async (target: Target) => {
     const resp = await submit_one_target(target)
     return resp
+  }
+
+  const merge_duplicates = async (target: Target) => {
+    const duplicates = rows.filter((row) => row._id !== target._id && is_duplicate_target(target, row))
+    if (duplicates.length === 0) {
+      sbcontext.setSnackbarMessage({ severity: 'info', message: 'No duplicates left to merge' })
+      sbcontext.setSnackbarOpen(true)
+      return
+    }
+    const { merged, filledKeys } = merge_targets(target, duplicates)
+    const duplicateIds = duplicates.map((tgt) => tgt._id).filter((id) => !!id)
+    try {
+      if (filledKeys.length > 0) {
+        await edit_target({ ...merged, status: 'EDITED' })
+      }
+      const resp = await delete_target(duplicateIds)
+      if (resp.status !== 'SUCCESS') {
+        // The rows stay put: dropping them locally after a failed delete is what
+        // makes a target reappear on the next refresh.
+        console.error('error deleting duplicate targets', resp)
+        sbcontext.setSnackbarMessage({
+          severity: 'error',
+          message: 'Merged the target, but its duplicate(s) could not be deleted'
+        })
+        sbcontext.setSnackbarOpen(true)
+        return
+      }
+      setRows((oldRows) => oldRows.filter((row) => !duplicateIds.includes(row._id)))
+      context.setTargets && context.setTargets((oldTargets) => {
+        const remaining = (oldTargets ?? []).filter((tgt) => !duplicateIds.includes(tgt._id))
+        return remaining.length === (oldTargets?.length ?? 0) ? oldTargets : remaining
+      })
+      const mergedFields = filledKeys.length > 0 ? `Merged ${filledKeys.join(', ')} and deleted` : 'Deleted'
+      sbcontext.setSnackbarMessage({
+        severity: 'success',
+        message: `${mergedFields} ${duplicateIds.length} duplicate target(s)`
+      })
+      sbcontext.setSnackbarOpen(true)
+    } catch (err) {
+      console.error('Failed to merge duplicate targets', err)
+      sbcontext.setSnackbarMessage({
+        severity: 'error',
+        message: `Failed to merge ${target.target_name || 'target'} with its duplicate(s)`
+      })
+      sbcontext.setSnackbarOpen(true)
+    }
   }
 
   const duplicateNames = React.useMemo(() => find_duplicate_target_names(rows), [rows])
@@ -376,6 +449,7 @@ export default function TargetTable(props: TargetTableProps) {
 
     //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
     const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
+      const previousValue = (params.row as Target)[params.field as keyof Target]
       setTimeout(() => { //wait for cell to update before setting editTarget
         // Beware of race conditions here. The cellEditStop event fires before the cell's value is actually updated in the grid.
         const currentTarget = editTargetRef.current
@@ -384,7 +458,7 @@ export default function TargetTable(props: TargetTableProps) {
         if (!fieldProps) return
         const type = fieldProps.type
         // convert type to string if array
-        const changeDetected = currentTarget[params.field as keyof Target] !== value
+        const changeDetected = previousValue !== value
         if (changeDetected) {
           const isNumber = type.includes('number') || type.includes('integer')
           if (type === 'array') {
@@ -415,6 +489,7 @@ export default function TargetTable(props: TargetTableProps) {
         errors={errors}
         target={editTarget}
         isDuplicate={!!editTarget.target_name && duplicateNames.has(editTarget.target_name)}
+        onMerge={() => merge_duplicates(editTargetRef.current)}
       />,
       <TargetEditDialogButton
         key="edit"
