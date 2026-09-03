@@ -154,7 +154,7 @@ export default function CatalogButton(props: Props) {
     const handleClick = async () => {
         if (targetName) {
             const catalogTargetInfo = await get_simbad_and_gaia_target_info(targetName, gaia_id)
-            setTarget({ ...target, ...catalogTargetInfo, "state": 'ROW_EDITED' })
+            setTarget({ ...target, ...catalogTargetInfo, "state": 'ROW_EDITED', status: 'EDITED' })
         }
     }
 
