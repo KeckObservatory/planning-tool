@@ -88,7 +88,7 @@ export const format_targets = (tgts: UploadedTarget[], targetProps: TargetProps)
 
 const parse_json = (filename: string, contents: string) => {
     let tgts = JSON.parse(contents)
-    const filename_tag = `filename: ${filename}`
+    const filename_tag = `${filename}`
     tgts = tgts.map( (tgt: Target) => {
         tgt.tags = tgt.tags ? [filename_tag, ...tgt.tags ] : [filename_tag]
         tgt.tags = [...new Set(tgt.tags)] //unique tags
