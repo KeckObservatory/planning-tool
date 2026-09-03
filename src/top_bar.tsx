@@ -1,20 +1,26 @@
 import AppBar from '@mui/material/AppBar';
 import HelpIcon from '@mui/icons-material/Help';
 import Switch from "@mui/material/Switch"
+import FormControlLabel from "@mui/material/FormControlLabel"
 import Tooltip from '@mui/material/Tooltip';
 import Button from '@mui/material/Button';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography'
+import Chip from '@mui/material/Chip'
 import DoorFrontIcon from '@mui/icons-material/DoorFront';
+import LogoutIcon from '@mui/icons-material/Logout';
 import IconButton from '@mui/material/IconButton';
 import MarkdownDialogButton from './markdown_dialog.tsx';
 import React from 'react';
 import { config } from './config.tsx';
+import { observer_logout } from './api/api_root.tsx';
 
 interface Props {
   username?: string,
   darkState: boolean,
   handleThemeChange: () => void
+  localMode: boolean,
+  handleLocalModeChange: () => void
 }
 
 export function TopBar(props: Props) {
@@ -33,13 +39,10 @@ export function TopBar(props: Props) {
     init_msgs()
   }, [])
 
-  //TODO: Implement logout when observer portal is ready
-  // const handleLogout = async () => {
-  //   console.log('logging out')
-  //   const resp = await observer_logout()
-  //   console.log('resp', resp)
-  //   window.location.reload()
-  // }
+  const handleLogout = async () => {
+    await observer_logout()
+    window.open(piPortal, "_self")
+  }
 
   const handlePortalClick = () => {
     window.open(piPortal, "_self")
@@ -56,6 +59,7 @@ export function TopBar(props: Props) {
   return (
     <AppBar
       position='sticky'
+      sx={props.localMode ? { bgcolor: '#678db0' } : undefined}
     >
       <Toolbar
         sx={{
@@ -63,7 +67,17 @@ export function TopBar(props: Props) {
           paddingLeft: '20px'
         }}
       >
-
+        <Tooltip title="Local Mode: work from a loaded file, stored in this browser, instead of the database">
+          <FormControlLabel
+            sx={{ color: 'inherit' }}
+            control={
+              <Switch
+                checked={props.localMode}
+                onChange={props.handleLocalModeChange} />
+            }
+            label="Local Mode"
+          />
+        </Tooltip>
         <Typography
           component="h1"
           variant="h6"
@@ -76,6 +90,35 @@ export function TopBar(props: Props) {
         >
           Planning Tool
         </Typography>
+        {props.localMode ? (
+          <Tooltip title="Local Mode stores targets on the browser.">
+            <Chip
+              label="LOCAL MODE ON"
+              size="small"
+              sx={{
+                bgcolor: '#ffd600',
+                color: '#000',
+                fontWeight: 700,
+                letterSpacing: 1,
+                marginRight: '12px'
+              }}
+            />
+          </Tooltip>
+        ) : (
+          <Tooltip title="Database mode stores targets at Keck.">
+            <Chip
+              label="DATABASE MODE ON"
+              size="small"
+              sx={{
+                bgcolor: '#ffd600',
+                color: '#000',
+                fontWeight: 700,
+                letterSpacing: 1,
+                marginRight: '12px'
+              }}
+            />
+          </Tooltip>
+        )}
         <Typography
           component="h3"
           variant="h6"
@@ -88,11 +131,6 @@ export function TopBar(props: Props) {
         >
           Welcome {props.username}
         </Typography>
-        {/* <Tooltip title="Select to logout via observer portal">
-          <IconButton color={color} onClick={handleLogout} aria-label="logout">
-            <LogoutIcon />
-          </IconButton>
-        </Tooltip> */}
         <Button
           variant='contained'
           onClick={handleSurveyClick}>
@@ -116,6 +154,11 @@ export function TopBar(props: Props) {
           <Switch
             checked={props.darkState}
             onChange={props.handleThemeChange} />
+        </Tooltip>
+        <Tooltip title="Logout and return to the Observer Portal">
+          <IconButton color={color} onClick={handleLogout} aria-label="logout">
+            <LogoutIcon />
+          </IconButton>
         </Tooltip>
       </Toolbar>
     </AppBar>

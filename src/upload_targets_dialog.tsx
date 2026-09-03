@@ -86,8 +86,15 @@ export const format_targets = (tgts: UploadedTarget[], targetProps: TargetProps)
     return fmtTgts
 }
 
-const parse_json = (contents: string) => {
-    const tgts = JSON.parse(contents)
+const parse_json = (filename: string, contents: string) => {
+    let tgts = JSON.parse(contents)
+    const filename_tag = `filename: ${filename}`
+    tgts = tgts.map( (tgt: Target) => {
+        tgt.tags = tgt.tags ? [filename_tag, ...tgt.tags ] : [filename_tag]
+        tgt.tags = [...new Set(tgt.tags)] //unique tags
+        return tgt
+    })
+
     return tgts
 }
 
@@ -154,7 +161,7 @@ const csv_to_array = (text: string) => {
     return a;
 };
 
-const parse_csv = (contents: string) => {
+const parse_csv = (filename: string, contents: string) => {
     let [headerStr, ...lines] = contents.split('\n')
         .map(s => s.replace('\r', ''))
 
@@ -165,6 +172,7 @@ const parse_csv = (contents: string) => {
     }
 
     const tgtValues = lines.map(line => csv_to_array(line)).filter((item) => item !== null) as string[][]
+    const filename_tag = `filename: ${filename}`
     const tgts = tgtValues.map(line => {
         if (line.length !== header.length) {
             console.warn('invalid csv line', line)
@@ -177,8 +185,13 @@ const parse_csv = (contents: string) => {
             //@ts-ignore
             key && (tgt[key] = value)
         });
+
+        tgt.tags = tgt.tags ? [filename_tag, ...(tgt.tags as string[]) ] : [filename_tag]
+        tgt.tags = [...new Set(tgt.tags)] //unique tags
+
         return tgt;
     }).filter((item) => item !== undefined) as UploadedTarget[];
+
     return tgts
 }
 
@@ -243,7 +256,7 @@ const parse_comments = (lines: string[]) => {
 }
 
 
-const parse_txt = (contents: string, obsid: number) => {
+const parse_txt = (filename: string, contents: string, obsid: number) => {
     let tgts = [] as UploadedTarget[]
     let commentLines: string[] = []
     contents.split(/\r\n|\n/).forEach((row) => {
@@ -283,6 +296,7 @@ const parse_txt = (contents: string, obsid: number) => {
             dec_deg: ra_dec_to_deg(dec, true),
             dec,
             equinox,
+            tags: [`filename: ${filename}`]
         };
         const { semids, tags, comments } = parse_comments(commentLines)
 
@@ -293,8 +307,10 @@ const parse_txt = (contents: string, obsid: number) => {
             tgt.semids = semids
         }
         if (tags.length > 0) {
-            tgt.tags = tags
+            tgt.tags = [...(tgt.tags as string[]), ...tags]
         }
+
+        tgt.tags = [...new Set(tgt.tags as string[])] //unique tags
 
         //reset comment lines after adding them to the target so they don't get added to the next target
         commentLines = []
@@ -367,21 +383,21 @@ export function UploadComponent(props: UploadProps) {
         let uploadedTargets: UploadedTarget[] = []
         switch (ext) {
             case 'json':
-                uploadedTargets = parse_json(contents)
+                uploadedTargets = parse_json(filename, contents)
                 break;
             case 'csv':
-                uploadedTargets = parse_csv(contents)
+                uploadedTargets = parse_csv(filename, contents)
                 break;
             case 'starlisttxt':
             case 'txt':
                 console.log('txt', contents, context.obsid)
-                uploadedTargets = parse_txt(contents, context.obsid)
+                uploadedTargets = parse_txt(filename, contents, context.obsid)
                 break;
             default:
                 snackbarContext.setSnackbarMessage({ severity: 'warning', message: 'File type may not supported. Attempting to parse as .txt' })
                 snackbarContext.setSnackbarOpen(true);
                 try {
-                    uploadedTargets = parse_txt(contents, context.obsid)
+                    uploadedTargets = parse_txt(filename, contents, context.obsid)
                 }
                 catch (e) {
                     console.error('file type not supported', e)

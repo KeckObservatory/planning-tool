@@ -11,6 +11,12 @@
             "short_description": "Target Name",
             "description": "Target Name. Alpha-numeric, hyphen, underscore, and space characters only"
         },
+        "priority": {
+            "type": ["number", "string"],
+            "short_description": "Priority",
+            "description": "Priority for the target list. Higher numbers come first. Targets with no priority are set to 0.",
+            "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
+        },
         "semids": {
             "type": "array",
             "short_description": "Semids",
@@ -31,6 +37,15 @@
                 "type": "string",
                 "pattern": "^[^,]+$"
             }
+        },
+        "science_target": {
+            "type": "string",
+            "description": "This is the name of the science target this guide star is for.",
+            "short_description": "Science Target",
+            "minLength": 1,
+            "maxLength": 15,
+            "pattern": "[\\w\\-\\s]+",
+            "starlist_key": "target"
         },
         "rotator_mode": {
             "type": "string",

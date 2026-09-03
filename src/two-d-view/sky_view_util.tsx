@@ -12,8 +12,8 @@ import {
 import { AMATEUR_TWILIGHT_SHADE, ASTRONOMICAL_TWILIGHT_SHADE, TWILIGHT_SHADE } from "./constants.tsx";
 import { GeoModel, LngLatEl } from '../App'
 import { SkyChart } from './sky_chart';
-import { alt_az_observable } from './target_viz_chart.tsx';
-import { hidate, TargetView } from './two_d_view.tsx';
+import { alt_az_observable } from './two_d_view_common.tsx';
+import { hidate, TargetView } from './two_d_view_common.tsx';
 import { get_schedule } from '../api/api_root.tsx';
 
 export const colors = [

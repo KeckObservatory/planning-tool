@@ -14,7 +14,7 @@ interface ETProps {
     setFileName: Function;
 }
 
-function ExportTargetsNameDialog(props: ETProps) {
+export function ExportTargetsNameDialog(props: ETProps) {
     const { open, handleClose, fileName, setFileName, handleSubmit } = props;
 
     const dialogTitle = (

@@ -4,22 +4,27 @@ import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 
 import { Target, useStateContext } from '../App';
-import { Autocomplete, Stack, TextField, Switch, FormControlLabel, Typography } from '@mui/material';
+import { Autocomplete, Box, Stack, TextField, Switch, FormControlLabel, Typography } from '@mui/material';
 import { DialogComponent } from '../dialog_component';
 import GuideStarTable from './guide_star_table';
 import { ra_dec_to_deg } from '../catalog_button';
 import { FOVSelect } from '../two-d-view/fov_select';
-import { Dome, DomeParam, DomeSelect, get_shapes } from '../two-d-view/two_d_view';
+import { Dome, DomeParam, DomeSelect, get_shapes } from '../two-d-view/two_d_view_common.tsx';
 import { ArrayParam, BooleanParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
 import { get_catalog_targets, get_catalogs, get_image_catalogs, get_catalog_image } from '../api/api_root';
 import UploadDialog from '../upload_targets_dialog';
 import { LaserContours, POPointFeature, POPointingOriginCollection, POSelect } from '../two-d-view/pointing_origin_select';
-import { mock_catalog_targets } from './mock_catalog_targets';
-import { NGSViewer } from './NGSViewer';
+import { LazyFallback } from '../lazy_fallback';
 // import AladinViewer from '../aladin/aladin';
 import { MagRangeSlider } from './mag_range_slider';
-import { MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE } from '../two-d-view/constants';
+import { DEFAULT_MAG_FILTER, MAG_KEYS, MagFilter, MagFilterSelect } from './mag_filter_select.tsx';
+import { MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE, DEFAULT_RA, DEFAULT_DEC, AO_INSTRUMENTS, TRICK_INSTRUMENTS } from '../two-d-view/constants';
 import { MuiChipsInput } from 'mui-chips-input';
+import AGTimeToLimit from './asterism_generator.tsx';
+
+// d3 + the aladin marker helpers live behind this import. Keep it lazy so they
+// load when the guide star dialog is first opened, not at app startup.
+const GSViewer = React.lazy(() => import('./guide_star_viewer').then(m => ({ default: m.GSViewer })))
 
 export interface CatalogTarget {
     name: string;
@@ -44,7 +49,6 @@ export interface CatalogTarget {
 
 interface ButtonProps {
     targets: Target[]
-    setRows: React.Dispatch<React.SetStateAction<Target[]>>
 }
 
 export interface TargetViz extends Target {
@@ -52,14 +56,13 @@ export interface TargetViz extends Target {
 
 interface VizDialogProps {
     open: boolean,
-    setRows: React.Dispatch<React.SetStateAction<Target[]>>
     targets: Target[]
     handleClose: () => void
 }
 
 export const GuideStarButton = (props: ButtonProps) => {
 
-    const { targets, setRows } = props
+    const { targets } = props
     const [open, setOpen] = React.useState(false);
 
     const handleClickOpen = () => {
@@ -82,7 +85,6 @@ export const GuideStarButton = (props: ButtonProps) => {
                     open={open}
                     targets={targets}
                     handleClose={handleClose}
-                    setRows={setRows}
                 />
             }
         </>
@@ -105,15 +107,21 @@ export const guidestar_to_target = (guidestar: CatalogTarget, mapping: object): 
     return tgt;
 }
 
+const is_ao_instrument = (instrument: string) => {
+    return AO_INSTRUMENTS.some(aoinst => instrument.includes(aoinst))
+}
+const is_trick_instrument = (instrument: string) => {
+    return TRICK_INSTRUMENTS.some(trickinst => instrument.includes(trickinst))
+}
 
 export const GuideStarDialog = (props: VizDialogProps) => {
     // target must have ra dec and be defined
 
     const context = useStateContext()
-    const { targets, open, setRows } = props
+    const { targets, open } = props
     const [guideStarName, setGuideStarName] = useState<string>('')
     const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
-    const init_img_size = instrumentFOV === 'MOSFIRE' ? MOSFIRE_WINDOW_SIZE : DEFAULT_WINDOW_SIZE 
+    const init_img_size = instrumentFOV === 'MOSFIRE' ? MOSFIRE_WINDOW_SIZE : DEFAULT_WINDOW_SIZE
     const [imgSize, setImgSize] = useState<number>(init_img_size)
     const [magRange, setMagRange] = useQueryParam('mag_range', withDefault(ArrayParam, undefined)) //set to undefined to prevent unwanted rerenders on initial load
     const [fovs, setFOVs] = React.useState<string[]>([])
@@ -122,8 +130,18 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [trickMap, setTrickMap] = React.useState<any>(undefined)
     const [selPointingOrigins, setSelPointingOrigins] = React.useState<POPointFeature[]>([])
     const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
+
     const [useLaser, setUseLaser] = useQueryParam('show_laser', withDefault(BooleanParam, true))
+    const [showCatalog, setShowCatalog] = useQueryParam('show_catalog', withDefault(BooleanParam, true))
     const [showTrickMap, setShowTrickMap] = useQueryParam('show_trick_map', withDefault(BooleanParam, false))
+    const [enableMagRange, setEnableMagRange] = React.useState<boolean>(false)
+    const [filterByMag, setFilterByMag] = React.useState<MagFilter>(DEFAULT_MAG_FILTER)
+    const [disableLaser, setDisableLaser] = React.useState<boolean>(
+        is_ao_instrument(instrumentFOV) ? false : true
+    )
+
+    const [disableTrickMap, setDisableTrickMap] = React.useState<boolean>(is_trick_instrument(instrumentFOV) ? false : true)
+
     const [invertImage, setInvertImage] = useQueryParam('invert_image', withDefault(BooleanParam, false))
     const [rotatorAngle, setRotatorAngle] = React.useState(0)
 
@@ -185,7 +203,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     useEffect(() => {  //refetch image when fov changes
         setImgSize(instrumentFOV === 'MOSFIRE' ? MOSFIRE_WINDOW_SIZE : DEFAULT_WINDOW_SIZE)
-     }, [instrumentFOV])
+    }, [instrumentFOV])
 
     useEffect(() => {
         const fetch_and_set_laser_contours = async () => {
@@ -221,13 +239,21 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     }, [dome])
 
     useEffect(() => {
+        setDisableLaser(!is_ao_instrument(instrumentFOV))
+        setUseLaser(is_ao_instrument(instrumentFOV) ? useLaser : false)
+        setDisableTrickMap(!is_trick_instrument(instrumentFOV))
+        setShowTrickMap(is_trick_instrument(instrumentFOV) ? showTrickMap : false)
+    }, [instrumentFOV])
+
+    useEffect(() => {
         const fun = async () => {
-            const ra = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
-            const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
+            const ra = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? DEFAULT_RA))
+            const dec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? DEFAULT_DEC), true)
             if (catalog) {
                 setCatalogLoading(true)
-                const mr = Array.isArray(magRange) && magRange.length >= 2 ?
+                let mr = Array.isArray(magRange) && magRange.length >= 2 ?
                     [String(magRange[0]), String(magRange[1])] as [string, string] : undefined
+                mr = enableMagRange ? mr : undefined
                 const gs = await get_catalog_targets(
                     catalog,
                     ra,
@@ -235,7 +261,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     imgSize,
                     mr
                 )
-                if (gs) {
+                if (Array.isArray(gs)) {
                     const gsTgts = gs.map((star: CatalogTarget) => {
                         const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
                         return tgt
@@ -253,7 +279,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
         }
         fun()
-    }, [catalog, target, imageCatalog, imgSize])
+    }, [catalog, target, imageCatalog, imgSize, enableMagRange])
 
     useEffect(() => {
         const fun = async () => {
@@ -270,7 +296,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     imgSize,
                     mr
                 )
-                if (gs) {
+                if (Array.isArray(gs)) {
                     const gsTgts = gs.map((star: CatalogTarget) => {
                         const tgt = guidestar_to_target(star, context.config.catalog_to_target_map)
                         return tgt
@@ -309,6 +335,23 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const telContours = contours?.find((feature) => feature.properties.telescope === dome)
     const centerRa = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
     const centerDec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
+
+    // Client-side refinement on top of whatever the backend already filtered by:
+    // keep a guide star only if every magnitude column the user checked falls
+    // within magRange. No columns checked ("None") means no extra filtering.
+    const activeMagKeys = MAG_KEYS.filter((key) => filterByMag[key])
+    const filteredGuideStars = React.useMemo(() => {
+        if (activeMagKeys.length === 0 || !Array.isArray(magRange) || magRange.length < 2) {
+            return guidestars
+        }
+        const min = Number(magRange[0])
+        const max = Number(magRange[1])
+        return guidestars.filter((star) => activeMagKeys.every((key) => {
+            const val = star[key]
+            return typeof val === 'number' && val >= min && val <= max
+        }))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [guidestars, filterByMag, magRange])
 
     const dialogContent = (
         <Stack
@@ -369,6 +412,10 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         onChange={(event) => setRotatorAngle(Number(event.target.value))}
                     />
                 </Tooltip>
+                <DomeSelect
+                    dome={dome}
+                    setDome={setDome}
+                />
                 <FOVSelect
                     fovs={fovs}
                 />
@@ -403,22 +450,47 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 <FormControlLabel
                     label="Show Laser"
                     value={useLaser}
+                    disabled={disableLaser}
                     control={<Switch checked={useLaser} />}
                     onChange={(_, checked) => setUseLaser(checked)}
                 />
                 <FormControlLabel
+                    label="Show Catalog Icons"
+                    value={showCatalog}
+                    control={<Switch checked={showCatalog} />}
+                    onChange={(_, checked) => setShowCatalog(checked)}
+                />
+                <FormControlLabel
                     label="Show Trick Map"
                     value={showTrickMap}
+                    disabled={disableTrickMap}
                     control={<Switch checked={showTrickMap} />}
                     onChange={(_, checked) => setShowTrickMap(checked)}
                 />
-                <DomeSelect
-                    dome={dome}
-                    setDome={setDome}
+                {
+                    dome.includes('Keck 1') && 
+                    <AGTimeToLimit target={target} rotatorAngle={rotatorAngle}/>
+                }
+                <Box sx={{ flexGrow: 1 }} />
+                <div style={{ marginRight: "16px" }}>
+                <MagFilterSelect
+                    filterByMag={filterByMag}
+                    setFilterByMag={setFilterByMag}
+                    disabled={!enableMagRange}
                 />
-                <MagRangeSlider
-                    range={magRange as [string, string]}
-                    setRange={setMagRange}
+                </div>
+                <div style={{ marginRight: "16px" }}>
+                    <MagRangeSlider
+                        range={magRange as [string, string]}
+                        setRange={setMagRange}
+                        disabled={!enableMagRange}
+                    />
+                </div>
+                <FormControlLabel
+                    label="Enable Mag Range"
+                    value={enableMagRange}
+                    control={<Switch checked={enableMagRange} />}
+                    onChange={(_, checked) => setEnableMagRange(checked)}
                 />
             </Stack>
             <Stack direction='row' justifyContent={'center'} spacing={2} sx={{ marginTop: '16px' }}>
@@ -442,10 +514,10 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             Loading...
                         </Typography>
                     )}
-                    {
-                        < NGSViewer
+                    <React.Suspense fallback={<LazyFallback height={600} />}>
+                        < GSViewer
                             imgUrl={image ?? ''}
-                            guideStars={guidestars as Target[]}
+                            guideStars={filteredGuideStars as Target[]}
                             height={600}
                             width={600}
                             size={imgSize} // in degrees
@@ -461,29 +533,13 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             pointingOrigins={selPointingOrigins}
                             invertImage={invertImage}
                             showLaser={true}
+                            showCatalog={showCatalog}
                             contours={telContours}
                             showTrickMap={showTrickMap}
                             trickMap={trickMap}
+                            scienceTargetName={target.target_name ?? target._id}
                         />
-                    }
-                    {/* {
-                        guidestars.length > 0 &&
-                        (<AladinViewer
-                            targets={[target]}
-                            guideStars={guidestars}
-                            positionAngle={target.rotator_pa ? Number(target.rotator_pa) : 0}
-                            pointingOrigins={selPointingOrigins}
-                            fovAngle={rotatorAngle}
-                            selPO={selPO}
-                            setSelPO={setSelPO}
-                            instrumentFOV={instrumentFOV}
-                            height={500}
-                            width={500}
-                            selectCallback={onGuideStarNameSelect}
-                            selectedGuideStarName={guideStarName}
-                            contours={telContours}
-                        />)
-                    } */}
+                    </React.Suspense>
                 </Stack>
                 <Stack direction='column' justifyContent='center' sx={{ position: 'relative', display: 'inline-block' }}>
                     {catalogLoading && (
@@ -508,8 +564,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     <GuideStarTable
                         selectedGuideStarName={guideStarName}
                         setSelectedGuideStarName={setGuideStarName}
-                        guidestars={guidestars}
-                        setRows={setRows}
+                        guidestars={filteredGuideStars}
                         useLaser={useLaser}
                         science_target_name={target.target_name ?? target._id}
                     />
