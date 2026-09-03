@@ -354,18 +354,12 @@ export default function TargetTable(props: TargetTableProps) {
     return newRow;
   };
 
-  // cellEditStop fires just before the grid commits, so this records which field the
-  // commit below is about - processRowUpdate hands over the whole row, not the field.
   const editedFieldRef = React.useRef<string | undefined>(undefined)
 
   const handleCellEditStop: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
     editedFieldRef.current = params.field
   }
 
-  // The grid's commit handler, and the only thing that saves a cell edit. It lives on
-  // the table rather than on the row's action cell because committing an edit can
-  // unmount that cell: editing the sorted column (priority) re-sorts immediately, and
-  // a row that moves out of the virtualised window takes any pending save with it.
   const handleProcessRowUpdate = async (newRow: GridRowModel<Target>, oldRow: GridRowModel<Target>) => {
     const field = editedFieldRef.current
     editedFieldRef.current = undefined
@@ -375,9 +369,6 @@ export default function TargetTable(props: TargetTableProps) {
       return newRow
     }
 
-    // The column's valueParser has already run, but only ra/dec get format_edit_entry
-    // from it. Re-applying it here is what sanitizes numbers and truncates names, and
-    // rowSetter fills in the derived pair (ra <-> ra_deg) and marks the row EDITED.
     const fieldProps = (target_schema.properties as TargetProps)[field]
     let value: unknown = newRow[field as keyof Target]
     if (fieldProps) {
@@ -499,10 +490,7 @@ export default function TargetTable(props: TargetTableProps) {
       debouncedHandleRowChange()
     }, [editTarget])
 
-    // Cell edits are saved by handleProcessRowUpdate on the table, not from here:
-    // this cell can be unmounted by the very edit it would be saving. What is left
-    // here are the row's own controls (catalog, edit dialog, merge, delete), whose
-    // edits reach editTarget directly.
+    // Cell edits are saved by handleProcessRowUpdate on the table
     const catalogSetTarget = (newTgt: Target) => {
       setEditTarget(newTgt)
       handleRowChange(newTgt) //save immediately
@@ -538,11 +526,6 @@ export default function TargetTable(props: TargetTableProps) {
     ];
   }
 
-  // ActionsCell closes over rows and the duplicate set, so the cell has to call the
-  // current one on every render - but `columns` has to keep a stable identity (see
-  // baseColumns). The column therefore holds a wrapper that never changes identity
-  // and delegates to the latest implementation. The wrapper adds no hooks of its
-  // own, so ActionsCell's hook order is untouched.
   const actionsCellRef = React.useRef(ActionsCell)
   actionsCellRef.current = ActionsCell
 
