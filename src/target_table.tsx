@@ -261,7 +261,14 @@ export default function TargetTable(props: TargetTableProps) {
     console.log('deleting', id, delRow)
     delRow && delete_target([delRow._id as string])
     setRows((oldRows) => oldRows.filter((row) => row._id !== id));
-    context.setTargets && context.setTargets((oldTargets) => (oldTargets ?? []).filter((tgt) => tgt._id !== id));
+    context.setTargets && context.setTargets((oldTargets) => {
+      // Returning the same array when nothing matched matters: filter() allocates a
+      // new one unconditionally, and a fresh reference re-fires the [targets] effect
+      // below, which resets rows from context.targets and drops any row that only
+      // lives in rows.
+      const remaining = (oldTargets ?? []).filter((tgt) => tgt._id !== id)
+      return remaining.length === (oldTargets?.length ?? 0) ? oldTargets : remaining
+    });
   };
 
   const processRowUpdate = async (newRow: GridRowModel<Target>) => {

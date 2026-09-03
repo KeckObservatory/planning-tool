@@ -43,7 +43,10 @@ function DeleteTargets(props: { targets: Target[], setRows: Function }) {
       const newRows = oldRows.filter((row: any) => !ids.includes(row._id))
       return newRows
     });
-    context.setTargets && context.setTargets((oldTargets) => (oldTargets ?? []).filter((tgt) => !ids.includes(tgt._id)));
+    context.setTargets && context.setTargets((oldTargets) => {
+      const remaining = (oldTargets ?? []).filter((tgt) => !ids.includes(tgt._id))
+      return remaining.length === (oldTargets?.length ?? 0) ? oldTargets : remaining
+    });
     setEnableUndo(true)
   }
 
