@@ -8,7 +8,7 @@ import { Target } from './App';
 
 export interface Props {
     target: Target
-    setTarget: Function
+    setTarget: (updater: (prev: Target) => Target) => void //avoids clobbering edits when running get_simbad_and_gaia_target_info, which returns a partial target object
     hasCatalog: boolean
     label?: boolean
 }
@@ -154,7 +154,7 @@ export default function CatalogButton(props: Props) {
     const handleClick = async () => {
         if (targetName) {
             const catalogTargetInfo = await get_simbad_and_gaia_target_info(targetName, gaia_id)
-            setTarget({ ...target, ...catalogTargetInfo, "state": 'ROW_EDITED', status: 'EDITED' })
+            setTarget((prev) => ({ ...prev, ...catalogTargetInfo, "state": 'ROW_EDITED', status: 'EDITED' }))
         }
     }
 

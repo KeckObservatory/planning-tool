@@ -490,8 +490,9 @@ export default function TargetTable(props: TargetTableProps) {
       debouncedHandleRowChange()
     }, [editTarget])
 
-    // Cell edits are saved by handleProcessRowUpdate on the table
-    const catalogSetTarget = (newTgt: Target) => {
+    // Cell edits are saved by handleProcessRowUpdate on the table.
+    const catalogSetTarget = (updater: (prev: Target) => Target) => {
+      const newTgt = updater(editTargetRef.current)
       setEditTarget(newTgt)
       handleRowChange(newTgt) //save immediately
       setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)

@@ -215,13 +215,8 @@ export const TargetEditDialog = (props: TargetEditProps) => {
             targetProps[param].short_description ?? targetProps[param].description
     }
 
-    const handleCatalogChange = (tgt: Target) => {
-        setTarget((prev: Target) => {
-            tgt = { ...prev, ...tgt, status: 'EDITED' }
-            return tgt
-        })
-        setHasCatalog(tgt.tic_id || tgt.gaia_id ? true : false)
-        handleTextChange('ra', tgt.ra)
+    const handleCatalogChange = (updater: (prev: Target) => Target) => {
+        setTarget(updater)
     }
 
 
