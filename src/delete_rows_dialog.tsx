@@ -61,10 +61,24 @@ function DeleteTargets(props: { targets: Target[], setRows: Function }) {
     }
     snackbarContext.setSnackbarMessage({ severity: 'info', message: 'Resubmitted deleted targets' })
     snackbarContext.setSnackbarOpen(true)
-    setRows((oldRows: any) => {
-      return [...targets, ...oldRows]
+    // Restore from deletedTargets, not the `targets` prop: that prop is the table's
+    // selected rows, and onDeleteClick already removed these from rows, so the
+    // selection resolves to nothing by the time undo runs. Prefer the copies the
+    // backend echoed back - their _ids are what deletes and edits key on next.
+    const restoredTargets = deletedTargets.map((tgt, idx) => {
+      const saved = resp.targets?.at(idx)
+      return saved?._id ? saved : tgt
+    })
+    setRows((oldRows: Target[]) => {
+      const missing = restoredTargets.filter((tgt) => !oldRows.some((row) => row._id === tgt._id))
+      return missing.length > 0 ? [...missing, ...oldRows] : oldRows
     });
-    context.setTargets && context.setTargets((oldTargets) => [...targets, ...(oldTargets ?? [])]);
+    context.setTargets && context.setTargets((oldTargets) => {
+      const existing = oldTargets ?? []
+      const missing = restoredTargets.filter((tgt) => !existing.some((old) => old._id === tgt._id))
+      return missing.length > 0 ? [...missing, ...existing] : existing
+    });
+    setDeletedTargets([])
     setEnableUndo(false)
   }
 
