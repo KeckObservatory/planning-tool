@@ -10,8 +10,6 @@ import {
   GridActionsCellItem,
   GridEventListener,
   GridRowId,
-  useGridApiContext,
-  useGridApiEventHandler,
   GridRowParams,
   GridRowSelectionModel,
   GridValueParser,
@@ -20,6 +18,7 @@ import {
   GridRowModel,
   GridValueFormatter,
   GridSortModel,
+  GridColumnVisibilityModel,
 } from '@mui/x-data-grid';
 import target_schema from './target_schema.json';
 import ValidationDialogButton, { validate } from './validation_check_dialog';
@@ -210,26 +209,30 @@ export default function TargetTable(props: TargetTableProps) {
   const cfg = context.config
 
   const [viewMode] = useQueryParam<ViewMode>('view_mode', withDefault(ViewParam, 'non_ao' as ViewMode))
-  let columns = convert_schema_to_columns(target_schema as unknown as JSONSchemaType<Target>);
-  const leftPinnedFields = cfg.pinned_table_columns.left.filter((field) => field !== 'selected')
-  const rightPinnedFields = cfg.pinned_table_columns.right
-  const defaultFields = cfg.default_table_columns[viewMode].filter((field) => !leftPinnedFields.includes(field))
-  const remainingFields = columns
-    .map((col) => col.field)
-    .filter((field) => ![...leftPinnedFields, ...defaultFields, ...rightPinnedFields].includes(field))
-  const sortOrder = [...leftPinnedFields, ...remainingFields, ...defaultFields, ...rightPinnedFields]
-  columns = columns.sort((a, b) => {
-    return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);
-  });
-  const visibleColumns = Object.fromEntries(columns.map((col) => {
+  const baseColumns = React.useMemo(() => {
+    const columns = convert_schema_to_columns(target_schema as unknown as JSONSchemaType<Target>);
+    const leftPinnedFields = cfg.pinned_table_columns.left.filter((field) => field !== 'selected')
+    const rightPinnedFields = cfg.pinned_table_columns.right
+    const defaultFields = cfg.default_table_columns[viewMode].filter((field) => !leftPinnedFields.includes(field))
+    const remainingFields = columns
+      .map((col) => col.field)
+      .filter((field) => ![...leftPinnedFields, ...defaultFields, ...rightPinnedFields].includes(field))
+    const sortOrder = [...leftPinnedFields, ...remainingFields, ...defaultFields, ...rightPinnedFields]
+    return columns.sort((a, b) => {
+      return sortOrder.indexOf(a.field) - sortOrder.indexOf(b.field);
+    });
+  }, [viewMode, cfg])
+
+  const visibleColumns = React.useMemo(() => Object.fromEntries(baseColumns.map((col) => {
     const visible = cfg.default_table_columns[viewMode].includes(col.field)
     return [col.field, visible]
-  }));
-  const [columnVisibilityModel, setColumnVisibilityModel] = React.useState(visibleColumns)
-  React.useEffect(() => {
-    setColumnVisibilityModel(visibleColumns)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewMode])
+  })), [baseColumns, viewMode, cfg]);
+  const [visibilityOverrides, setVisibilityOverrides] = React.useState<Partial<Record<ViewMode, GridColumnVisibilityModel>>>({})
+  const columnVisibilityModel = visibilityOverrides[viewMode] ?? visibleColumns
+
+  const handleColumnVisibilityModelChange = (newModel: GridColumnVisibilityModel) => {
+    setVisibilityOverrides((prev) => ({ ...prev, [viewMode]: newModel }))
+  }
   const update_context_target = (target: Target) => {
     context.setTargets && context.setTargets((oldTargets) => {
       if (!oldTargets?.some((tgt) => tgt._id === target._id)) {
@@ -351,6 +354,57 @@ export default function TargetTable(props: TargetTableProps) {
     return newRow;
   };
 
+  // cellEditStop fires just before the grid commits, so this records which field the
+  // commit below is about - processRowUpdate hands over the whole row, not the field.
+  const editedFieldRef = React.useRef<string | undefined>(undefined)
+
+  const handleCellEditStop: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
+    editedFieldRef.current = params.field
+  }
+
+  // The grid's commit handler, and the only thing that saves a cell edit. It lives on
+  // the table rather than on the row's action cell because committing an edit can
+  // unmount that cell: editing the sorted column (priority) re-sorts immediately, and
+  // a row that moves out of the virtualised window takes any pending save with it.
+  const handleProcessRowUpdate = async (newRow: GridRowModel<Target>, oldRow: GridRowModel<Target>) => {
+    const field = editedFieldRef.current
+    editedFieldRef.current = undefined
+    const changed = !!field && newRow[field as keyof Target] !== oldRow[field as keyof Target]
+    if (!changed) { // focus moved without an edit, or the edit was cancelled
+      processRowUpdate(newRow)
+      return newRow
+    }
+
+    // The column's valueParser has already run, but only ra/dec get format_edit_entry
+    // from it. Re-applying it here is what sanitizes numbers and truncates names, and
+    // rowSetter fills in the derived pair (ra <-> ra_deg) and marks the row EDITED.
+    const fieldProps = (target_schema.properties as TargetProps)[field]
+    let value: unknown = newRow[field as keyof Target]
+    if (fieldProps) {
+      const type = fieldProps.type
+      if (type === 'array') {
+        value = format_string_array(Array.isArray(value) ? value.flat(Infinity) : String(value).split(','))
+      } else {
+        const isNumber = type.includes('number') || type.includes('integer')
+        value = format_edit_entry(field, value as string | number, isNumber)
+      }
+    }
+    const editedRow = rowSetter(newRow as Target, field, value as string | number | string[])
+
+    processRowUpdate(editedRow)
+    try {
+      await edit_target(editedRow)
+    } catch (err) {
+      console.error('Failed to save target edit', err)
+      sbcontext.setSnackbarMessage({
+        severity: 'error',
+        message: `Failed to save changes to ${editedRow.target_name || 'target'}`
+      })
+      sbcontext.setSnackbarOpen(true)
+    }
+    return editedRow;
+  };
+
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
   };
@@ -387,10 +441,8 @@ export default function TargetTable(props: TargetTableProps) {
       return validate_sanitized_target(editTarget);
     }, [editTarget])
 
-    const apiRef = useGridApiContext();
-
     // Keeps the ref current for the deferred readers (the debounced save and the
-    // cellEditStop timeout), which would otherwise close over a stale editTarget.
+    // merge handler), which would otherwise close over a stale editTarget.
     React.useEffect(() => {
       editTargetRef.current = editTarget;
     }, [editTarget]);
@@ -447,39 +499,15 @@ export default function TargetTable(props: TargetTableProps) {
       debouncedHandleRowChange()
     }, [editTarget])
 
-    //NOTE: cellEditStop is fired when a cell is edited and focus is lost. but all cells are updated.
-    const handleEvent: GridEventListener<'cellEditStop'> = (params: GridCellEditStopParams) => {
-      const previousValue = (params.row as Target)[params.field as keyof Target]
-      setTimeout(() => { //wait for cell to update before setting editTarget
-        // Beware of race conditions here. The cellEditStop event fires before the cell's value is actually updated in the grid.
-        const currentTarget = editTargetRef.current
-        let value = apiRef.current.getCellValue(id, params.field);
-        const fieldProps = (target_schema.properties as TargetProps)[params.field]
-        if (!fieldProps) return
-        const type = fieldProps.type
-        // convert type to string if array
-        const changeDetected = previousValue !== value
-        if (changeDetected) {
-          const isNumber = type.includes('number') || type.includes('integer')
-          if (type === 'array') {
-            value = format_string_array(Array.isArray(value) ? value.flat(Infinity) : value.split(','))
-          }
-          else {
-            value = format_edit_entry(params.field, value, isNumber)
-          }
-          const newTgt = rowSetter(currentTarget, params.field, value)
-          setEditTarget(newTgt)
-        }
-      }, 300)
-    }
-
+    // Cell edits are saved by handleProcessRowUpdate on the table, not from here:
+    // this cell can be unmounted by the very edit it would be saving. What is left
+    // here are the row's own controls (catalog, edit dialog, merge, delete), whose
+    // edits reach editTarget directly.
     const catalogSetTarget = (newTgt: Target) => {
       setEditTarget(newTgt)
       handleRowChange(newTgt) //save immediately
       setHasCatalog(newTgt.tic_id || newTgt.gaia_id ? true : false)
     }
-
-    useGridApiEventHandler(apiRef, 'cellEditStop', handleEvent)
 
     return [
       <CatalogButton key="catalog" hasCatalog={hasCatalog} target={editTarget} setTarget={catalogSetTarget} />,
@@ -510,7 +538,15 @@ export default function TargetTable(props: TargetTableProps) {
     ];
   }
 
-  const addColumns: GridColDef[] = [
+  // ActionsCell closes over rows and the duplicate set, so the cell has to call the
+  // current one on every render - but `columns` has to keep a stable identity (see
+  // baseColumns). The column therefore holds a wrapper that never changes identity
+  // and delegates to the latest implementation. The wrapper adds no hooks of its
+  // own, so ActionsCell's hook order is untouched.
+  const actionsCellRef = React.useRef(ActionsCell)
+  actionsCellRef.current = ActionsCell
+
+  const columns = React.useMemo((): GridColDef[] => [
     {
       field: 'actions',
       type: 'actions',
@@ -519,11 +555,10 @@ export default function TargetTable(props: TargetTableProps) {
       width: 250,
       disableExport: true,
       cellClassName: 'actions',
-      getActions: ActionsCell,
-    }
-  ];
-
-  columns = [...addColumns, ...columns];
+      getActions: (params: GridRowParams<Target>) => actionsCellRef.current(params),
+    },
+    ...baseColumns
+  ], [baseColumns]);
 
   const selectedTargets = rowSelectionModel.map((id) => {
     return rows.find((tgt) => tgt._id === id)
@@ -553,7 +588,8 @@ export default function TargetTable(props: TargetTableProps) {
           <DataGrid
             getRowId={(row: Target) => row._id}
             //disableRowSelectionOnClick // turned off for now to allow row edit
-            processRowUpdate={processRowUpdate}
+            processRowUpdate={handleProcessRowUpdate}
+            onCellEditStop={handleCellEditStop}
             autosizeOptions={autosizeOptions}
             checkboxSelection
             rows={filteredRows ?? []}
@@ -572,7 +608,7 @@ export default function TargetTable(props: TargetTableProps) {
             }}
             rowSelectionModel={rowSelectionModel}
             columnVisibilityModel={columnVisibilityModel}
-            onColumnVisibilityModelChange={(newModel) => setColumnVisibilityModel(newModel)}
+            onColumnVisibilityModelChange={handleColumnVisibilityModelChange}
             slotProps={{
               // @ts-ignore
               toolbar: {
