@@ -19,7 +19,6 @@ import { LazyFallback } from '../lazy_fallback';
 import { MagRangeSlider } from './mag_range_slider';
 import { DEFAULT_MAG_FILTER, MAG_KEYS, MagFilter, MagFilterSelect } from './mag_filter_select.tsx';
 import { MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE, DEFAULT_RA, DEFAULT_DEC, AO_INSTRUMENTS, TRICK_INSTRUMENTS } from '../two-d-view/constants';
-import { MuiChipsInput } from 'mui-chips-input';
 import AGTimeToLimit from './asterism_generator.tsx';
 
 // d3 + the aladin marker helpers live behind this import. Keep it lazy so they
@@ -148,8 +147,6 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'Keck 2' as Dome))
 
     let initTarget = targets.at(0) ?? {} as Target
-    const initTags = initTarget.tags ? [...initTarget.tags, initTarget.target_name, ''] : []
-    const [tags, setTags] = React.useState<string[]>(initTags.filter((tag): tag is string => typeof tag === 'string'))
     const [target, setTarget] = useState<Target>(initTarget)
     const [guidestars, setGuideStars] = useState<Partial<Target>[]>([])
 
@@ -233,7 +230,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             })
             const newFovs = domeFovFeatures.map((feature: any) => feature['properties'].instrument) as string[]
             setFOVs(newFovs)
-            setInstrumentFOV(newFovs.at(0) ?? '')
+            !newFovs.includes(instrumentFOV) && setInstrumentFOV(newFovs.at(0) ?? '')
         }
         handle_dome_change()
     }, [dome])
@@ -429,13 +426,6 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         setSelPO={setSelPO}
                     />
                 )}
-                <MuiChipsInput
-                    sx={{ width: '500px', paddingTop: '9px', margin: '6px' }}
-                    value={tags}
-                    onChange={(value) => setTags(value)}
-                    label={tags.length === 0 ? "Add Tags" : "Edit Tags"}
-                    id="tags"
-                />
             </Stack>
             <Stack direction='row' spacing={0}>
                 <UploadDialog
@@ -532,7 +522,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                             selPO={selPO}
                             pointingOrigins={selPointingOrigins}
                             invertImage={invertImage}
-                            showLaser={true}
+                            showLaser={useLaser}
                             showCatalog={showCatalog}
                             contours={telContours}
                             showTrickMap={showTrickMap}

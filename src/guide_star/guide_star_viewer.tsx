@@ -146,7 +146,7 @@ export const GSViewer = (props: Props) => {
   }, [props.pointingOrigins, props.centerRA, props.centerDec, props.width, props.height, degPerPixel, props.selPO, zoom, props.fovAngle]);
 
   // Convert laser contours to pixel coordinates
-  React.useMemo(() => {
+  React.useEffect(() => {
 
     if (!props.showLaser || !props.contours) {
       setLaserContours([]);
@@ -182,7 +182,7 @@ export const GSViewer = (props: Props) => {
   }, [props.contours, props.showLaser, props.width, props.height, degPerPixel, zoom, props.selPO]);
 
   // Convert trick map to pixel coordinates
-  React.useMemo(() => {
+  React.useEffect(() => {
 
     if (!props.showTrickMap || !props.trickMap) {
       setTrickMapContours([]);
@@ -316,10 +316,6 @@ export const GSViewer = (props: Props) => {
     };
   }, [props.imgUrl, props.guideStars]); // Redraw if image URL or objects change
 
-  // Rings of the largest FOV feature (the first index of the fetched FOV features, e.g.
-  // the science FOV vs. a guider FOV also present at that instrument), in the same
-  // rotated pixel space the FOV outline is actually drawn in. Catalog markers outside
-  // every ring are drawn as an 'x' instead of a circle.
   const fovPolygons = React.useMemo((): [number, number][][] => {
     if (!fov) return [];
     const toPixel = (coord: [number, number]): [number, number] => {

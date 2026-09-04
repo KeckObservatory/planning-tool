@@ -201,10 +201,7 @@ export default function TargetTable(props: TargetTableProps) {
   const [rows, setRows] = React.useState(targets as Target[]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
   const [rowSelectionModel, setRowSelectionModel] = React.useState<GridRowSelectionModel>([]);
-  // Controlled rather than initialState: initialState only applies at mount and is
-  // permanently discarded once a header is clicked, so the highest-priority-first
-  // default wasn't reliably in effect.
-  const [sortModel, setSortModel] = React.useState<GridSortModel>([{ field: 'priority', sort: 'desc' }]);
+  const [sortModel, setSortModel] = React.useState<GridSortModel>([]);
   const [selectedTagFilter, setSelectedTagFilter] = React.useState<string | null>(null);
   const cfg = context.config
 
