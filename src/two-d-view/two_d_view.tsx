@@ -77,10 +77,6 @@ interface ChartPanelProps {
     children: (width: number, height: number) => React.ReactNode
 }
 
-// Wraps a Plotly chart with a fullscreen toggle. At normal size the panel is
-// pinned to the chart's usual 500x500, so nothing changes for existing views;
-// in fullscreen it grows to fill most of the dialog and the actual rendered
-// size is measured back out so the chart can be redrawn at that size.
 const ChartPanel = ({ isFullscreen, onToggleFullscreen, children }: ChartPanelProps) => {
     const containerRef = React.useRef<HTMLDivElement>(null)
     const { width: panelWidth = 0, height: panelHeight = 0 } = useResizeObserver({ ref: containerRef })
@@ -137,13 +133,7 @@ const TwoDView = ({ targets }: Props) => {
 
     React.useEffect(() => {
         const fun = async () => {
-            const featureCollection = await get_shapes('fov')
             const pos = await get_shapes('pointing_origins') as POPointingOriginCollection
-            const features = featureCollection['features'].filter((feature: any) => {
-                return feature['properties'].type === 'FOV'
-            })
-            const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
-            setFOVs(newFovs)
             console.log('pointing origins', pos)
             setPointingOrigins(pos)
         }
