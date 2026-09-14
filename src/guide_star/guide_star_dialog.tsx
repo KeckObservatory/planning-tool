@@ -8,6 +8,7 @@ import { Autocomplete, Box, Stack, TextField, Switch, FormControlLabel, Typograp
 import { DialogComponent } from '../dialog_component';
 import GuideStarTable from './guide_star_table';
 import { ra_dec_to_deg } from '../catalog_button';
+import { deg_to_hms, deg_to_dms } from '../two-d-view/sky_view_util.tsx';
 import { FOVSelect } from '../two-d-view/fov_select';
 import { Dome, DomeParam, DomeSelect, get_shapes } from '../two-d-view/two_d_view_common.tsx';
 import { ArrayParam, BooleanParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
@@ -238,40 +239,6 @@ export const GuideStarButton = (props: ButtonProps) => {
     );
 }
 
-const pad = (n: number) => String(n).padStart(2, '0')
-
-// Only the whole-seconds part is padded - padding the formatted number would
-// leave "0.024" a single digit wide and fail the schema pattern.
-const pad_seconds = (seconds: number) => {
-    const [, frac] = String(Number(seconds.toFixed(3))).split('.')
-    const whole = pad(Math.floor(seconds))
-    return frac ? `${whole}.${frac}` : whole
-}
-
-/**
- * Panstarrs reports coordinates in degrees only, so the sexagesimal strings the
- * table shows - and that target_schema's ra/dec pattern requires on submit -
- * have to be derived. Both round to whole milli-units first and decompose
- * after, so rounding can never carry a field to 60, and both zero-pad to the
- * two digits the schema pattern demands.
- */
-const deg_to_hms = (deg: number): string => {
-    const wrapped = ((deg % 360) + 360) % 360
-    // Rounding can land a hair under 360 deg on 24:00:00, which is 00:00:00.
-    const totalSec = Math.round((wrapped / 15) * 3600 * 1000) / 1000 % 86400
-    const h = Math.floor(totalSec / 3600)
-    const m = Math.floor((totalSec - h * 3600) / 60)
-    return `${pad(h)}:${pad(m)}:${pad_seconds(totalSec - h * 3600 - m * 60)}`
-}
-
-const deg_to_dms = (deg: number): string => {
-    const sign = deg < 0 ? '-' : '+'
-    const totalArcsec = Math.round(Math.abs(deg) * 3600 * 1000) / 1000
-    const d = Math.floor(totalArcsec / 3600)
-    const m = Math.floor((totalArcsec - d * 3600) / 60)
-    return `${sign}${pad(d)}:${pad(m)}:${pad_seconds(totalArcsec - d * 3600 - m * 60)}`
-}
-
 // Catalogs signal "no measurement in this band" with an out-of-range magnitude
 // rather than a null - 99.9 for most of them, 999.9 for GAIA.
 export const MAG_SENTINEL = 99.9
@@ -339,11 +306,14 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const context = useStateContext()
     const { targets, open } = props
     const [guideStarName, setGuideStarName] = useState<string>('')
-    const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'OSIRIS'))
+    const [instrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'OSIRIS'))
     const init_img_size = instrumentFOV === 'MOSFIRE' ? MOSFIRE_WINDOW_SIZE : DEFAULT_WINDOW_SIZE
     const [imgSize, setImgSize] = useState<number>(init_img_size)
     const [magRange, setMagRange] = useQueryParam('mag_range', withDefault(ArrayParam, undefined)) //set to undefined to prevent unwanted rerenders on initial load
     const [fovs, setFOVs] = React.useState<string[]>([])
+    // Instrument -> dome, from FEATURES.json (each instrument lives on exactly one
+    // telescope) - drives the dome-follows-instrument effect below.
+    const [instrumentDomes, setInstrumentDomes] = React.useState<Record<string, Dome>>({})
     const [pointingOrigins, setPointingOrigins] = React.useState<POPointingOriginCollection | undefined>(undefined)
     const [contours, setContours] = React.useState<LaserContours>([])
     const [trickMap, setTrickMap] = React.useState<any>(undefined)
@@ -401,15 +371,21 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const pos = await get_shapes('pointing_origins') as POPointingOriginCollection
             const cntrs = useLaser ? await get_shapes('laser_contours') : await get_shapes('fsm')
             const trkMap = showTrickMap ? await get_shapes('trick_map') : undefined
-            const domeFovFeatures = featureCollection['features'].filter((feature: any) => {
+            // One dropdown across both domes - each instrument only ever lives on one
+            // telescope, so picking it (below) is what sets dome now, not the reverse.
+            const fovFeatures = featureCollection['features'].filter((feature: any) => {
                 return feature['properties'].type === 'FOV'
             }).filter((feature: any) => {
-                return feature['properties'].dome === dome
+                const inst = feature['properties'].instrument as string
+                return is_ao_instrument(inst) || is_trick_instrument(inst)
             })
-            let newFovs = domeFovFeatures.map((feature: any) => feature['properties'].instrument) as string[]
-            // filter out non-ao instruments
-            newFovs = newFovs.filter((inst) => is_ao_instrument(inst) || is_trick_instrument(inst))
+            const newFovs = fovFeatures.map((feature: any) => feature['properties'].instrument) as string[]
+            const newInstrumentDomes: Record<string, Dome> = {}
+            fovFeatures.forEach((feature: any) => {
+                newInstrumentDomes[feature['properties'].instrument] = feature['properties'].dome
+            })
             setFOVs(newFovs)
+            setInstrumentDomes(newInstrumentDomes)
             setPointingOrigins(pos)
             setContours(cntrs as unknown as LaserContours)
             setTrickMap(trkMap)
@@ -441,22 +417,14 @@ export const GuideStarDialog = (props: VizDialogProps) => {
         }
     }, [targets])
 
+    // Dome is view only - it's derived from whichever instrument is selected
+    // (each instrument lives on exactly one telescope), rather than chosen directly.
     useEffect(() => {
-        const handle_dome_change = async () => {
-            if (dome === 'Keck 1') {
-                setShowTrickMap(false)
-            }
-            const featureCollection = await get_shapes('fov')
-            const domeFovFeatures = featureCollection['features'].filter((feature: any) => {
-                return feature['properties'].type === 'FOV' && feature['properties'].dome === dome
-            })
-            let newFovs = domeFovFeatures.map((feature: any) => feature['properties'].instrument) as string[]
-            newFovs = newFovs.filter((inst) => is_ao_instrument(inst) || is_trick_instrument(inst))
-            setFOVs(newFovs)
-            !newFovs.includes(instrumentFOV) && setInstrumentFOV(newFovs.at(0) ?? '')
+        const instrumentDome = instrumentDomes[instrumentFOV]
+        if (instrumentDome && instrumentDome !== dome) {
+            setDome(instrumentDome)
         }
-        handle_dome_change()
-    }, [dome])
+    }, [instrumentFOV, instrumentDomes])
 
     useEffect(() => {
         setDisableLaser(!is_ao_instrument(instrumentFOV))
@@ -636,6 +604,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 <DomeSelect
                     dome={dome}
                     setDome={setDome}
+                    readOnly
                 />
                 <FOVSelect
                     fovs={fovs}

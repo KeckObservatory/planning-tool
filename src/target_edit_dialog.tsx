@@ -15,7 +15,7 @@ import CatalogButton from './catalog_button';
 import target_schema from './target_schema.json'
 import { Status, Target } from './App';
 import { MuiChipsInput } from 'mui-chips-input';
-import { ra_dec_to_deg } from './two-d-view/sky_view_util';
+import { ra_dec_to_deg, deg_to_hms, deg_to_dms } from './two-d-view/sky_view_util';
 import { TARGET_LENGTH } from './two-d-view/constants';
 
 interface Props {
@@ -75,25 +75,6 @@ export const raDecFormat = (input: string) => {
         input = input.substring(0, 2) + ':' + input.substring(2, 4) + ':' + input.substring(4, 6) + '.' + input.substring(6, 10);
     }
     return sign + input;
-}
-
-function deg_to_dms(degrees: number) {
-    const sign = degrees < 0 ? "-" : ""
-    const absDeg = Math.abs(degrees)
-    let deg = Math.floor(absDeg)
-    deg = deg % 360
-    const min = Math.floor((absDeg - deg) * 60)
-    const sec = Math.floor((absDeg - deg - min / 60) * 3600)
-    return `${sign}${deg}:${min}:${sec}`
-}
-
-function deg_to_hms(deg: number) {
-    while (deg < 0) deg += 360 //convert to positive degrees
-    deg = Math.abs(deg % 360)
-    const hours = Math.floor(deg / 15)
-    const minutes = Math.floor((deg % 15) * 4)
-    const seconds = ((deg % 15) * 4 - minutes) * 60
-    return `${hours}:${minutes}:${seconds}`
 }
 
 export const rowSetter = (tgt: Target, key: string, value?: string | number | boolean | string[]) => {

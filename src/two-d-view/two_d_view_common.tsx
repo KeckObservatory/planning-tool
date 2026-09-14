@@ -30,10 +30,13 @@ export interface TargetView extends Target {
 interface DomeSelectProps {
     dome: Dome
     setDome: (dome: Dome) => void
+    // e.g. the starlist submission dialog, where dome is set by picking a schedule
+    // row rather than chosen directly.
+    readOnly?: boolean
 }
 
 export const DomeSelect = (props: DomeSelectProps) => {
-    const { dome, setDome } = props
+    const { dome, setDome, readOnly } = props
 
     const handleDomeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setDome(event.target.value as Dome)
@@ -49,8 +52,8 @@ export const DomeSelect = (props: DomeSelectProps) => {
                 value={dome}
                 onChange={handleDomeChange}
             >
-                <FormControlLabel value="Keck 1" control={<Radio />} label="Keck 1" />
-                <FormControlLabel value="Keck 2" control={<Radio />} label="Keck 2" />
+                <FormControlLabel value="Keck 1" control={<Radio />} label="Keck 1" disabled={readOnly} />
+                <FormControlLabel value="Keck 2" control={<Radio />} label="Keck 2" disabled={readOnly} />
             </RadioGroup>
         </FormControl>
     )

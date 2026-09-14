@@ -69,6 +69,33 @@ export const ra_dec_to_deg = (time: string, dec = false) => {
     return deg
 }
 
+const pad = (n: number) => String(n).padStart(2, '0')
+
+// Only the whole-seconds part is padded - padding the formatted number would
+// leave "0.024" a single digit wide and fail the schema pattern.
+const pad_seconds = (seconds: number) => {
+    const [, frac] = String(Number(seconds.toFixed(3))).split('.')
+    const whole = pad(Math.floor(seconds))
+    return frac ? `${whole}.${frac}` : whole
+}
+
+export const deg_to_hms = (deg: number): string => {
+    const wrapped = ((deg % 360) + 360) % 360
+    // Rounding can land a hair under 360 deg on 24:00:00, which is 00:00:00.
+    const totalSec = Math.round((wrapped / 15) * 3600 * 1000) / 1000 % 86400
+    const h = Math.floor(totalSec / 3600)
+    const m = Math.floor((totalSec - h * 3600) / 60)
+    return `${pad(h)}:${pad(m)}:${pad_seconds(totalSec - h * 3600 - m * 60)}`
+}
+
+export const deg_to_dms = (deg: number): string => {
+    const sign = deg < 0 ? '-' : '+'
+    const totalArcsec = Math.round(Math.abs(deg) * 3600 * 1000) / 1000
+    const d = Math.floor(totalArcsec / 3600)
+    const m = Math.floor((totalArcsec - d * 3600) / 60)
+    return `${sign}${pad(d)}:${pad(m)}:${pad_seconds(totalArcsec - d * 3600 - m * 60)}`
+}
+
 export const d2r = (deg: number) => {
     return deg * Math.PI / 180
 }
