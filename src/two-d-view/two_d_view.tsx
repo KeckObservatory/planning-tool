@@ -249,6 +249,7 @@ const TwoDView = ({ targets }: Props) => {
                         times={times}
                         suncalcTimes={suncalcTimes}
                         time={time}
+                        obsdate={obsdate}
                         dome={dome}
                     />
                 ) : (
@@ -391,6 +392,7 @@ const TwoDView = ({ targets }: Props) => {
                                 times={times}
                                 suncalcTimes={suncalcTimes}
                                 time={time}
+                                obsdate={obsdate}
                                 dome={dome}
                             />
                         )}

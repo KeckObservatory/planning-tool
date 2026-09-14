@@ -26,6 +26,7 @@ interface Props {
     showLimits: boolean
     times: Date[]
     time: Date
+    obsdate: Date
     dome: Dome
     width: number
     height: number
@@ -230,7 +231,7 @@ interface State {
 }
 
 export const SkyChart = (props: Props) => {
-    const { targetView, chartType, time, showCurrLoc, showLimits, width, height, dome, suncalcTimes, showSchedule } = props
+    const { targetView, chartType, time, obsdate, showCurrLoc, showLimits, width, height, dome, suncalcTimes, showSchedule } = props
 
     const context = useStateContext()
     const plotRef = useRef<any>(null);
@@ -251,7 +252,7 @@ export const SkyChart = (props: Props) => {
             let schedShapes: Plotly.Shape[] = []
             if (showSchedule) {
                 const telNr = Number(dome.at(dome.length - 1));
-                schedShapes = await util.get_schedule_shapes(dayjs(time).format('YYYY-MM-DD'), telNr)
+                schedShapes = await util.get_schedule_shapes(dayjs(obsdate).tz(context.config.timezone).format('YYYY-MM-DD'), telNr)
             }
             let shapes = util.get_shapes(suncalcTimes,
                 chartType,
@@ -267,7 +268,7 @@ export const SkyChart = (props: Props) => {
         }
 
     fun();
-    }, [chartType, dome, targetView, time, showLimits, suncalcTimes, showSchedule, width, height])
+    }, [chartType, dome, targetView, time, obsdate, showLimits, suncalcTimes, showSchedule, width, height])
 
     // useEffect(() => {
     //     debounced_elevation_axis_draw();

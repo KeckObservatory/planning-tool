@@ -1,4 +1,6 @@
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import * as SunCalc from 'suncalc'
 import { DayViz, VizRow } from './viz_dialog'
 import {
@@ -16,6 +18,9 @@ import { SkyChart } from './sky_chart';
 import { alt_az_observable } from './two_d_view_common.tsx';
 import { hidate, TargetView } from './two_d_view_common.tsx';
 import { get_schedule } from '../api/api_root.tsx';
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 export const colors = [
     '#1f77b4',  // muted blue
@@ -428,11 +433,9 @@ export const get_schedule_shapes = async (date: string, dome: number) => {
     const schedule_data = await get_schedule(date, dome)
     const shapes = schedule_data.map((sched) => {
 
-        const startTimeUT = dayjs(sched.Date + 'T' + sched.StartTime).toDate().getTime()
-        // const endTimeUT = dayjs(sched.Date + 'T' + sched.EndTime).toDate().getTime()
-
-        const startTime = startTimeUT - 10 * 3600000 //HT to UT
-        // const endTime = endTimeUT + 0 * 10 * 3600000 //HT to UT
+        // sched.Date is the HST "night of" label; StartTime is UT time-of-day, which always
+        // falls on the following UT calendar day for an HST evening-to-morning observing night.
+        const startTime = dayjs.utc(sched.Date + 'T' + sched.StartTime).add(1, 'day').toDate().getTime()
         const text = `${sched.ProjCode}`
         return {
             type: 'rect',
