@@ -1,6 +1,6 @@
 import { cosd, sind, r2d } from '../two-d-view/sky_view_util.tsx'
 import { Feature, FeatureCollection, MultiPolygon, Polygon, Position } from 'geojson'
-import { get_shapes } from "../two-d-view/two_d_view.tsx"
+import { get_shapes } from "../two-d-view/two_d_view_common.tsx"
 
 export const rotate_point = (point: Position[], angle: number, pnt=[0,0]) => {
         let [x, y] = point as unknown as [number, number]
@@ -46,11 +46,15 @@ const get_angle = (aladin: any) => {
 
 export const get_compass = async (aladin: any, height: number, width: number, positionAngle: number) => {
     console.log('Getting compass for aladin', aladin, 'with height', height, 'and width', width, 'and positionAngle', positionAngle)
+    // get_shapes caches and returns the same FeatureCollection instance on every call,
+    // so features here must not be mutated - doing so would bake this call's absolute
+    // screen offset/rotation into the shared shape, compounding further on every
+    // subsequent pan/zoom-triggered recompute until the compass drifts off-screen.
     const fc = await get_shapes('compass_rose') as FeatureCollection<Polygon>
     const angle = 90 + get_angle(aladin) // rotate to match compass
     const aladinAngle = aladin.getViewCenter2NorthPoleAngle()
     // const wcs = aladin.getViewWCS()
-    fc['features'].forEach((f) => {
+    const features = fc['features'].map((f) => {
         let polygon = f.geometry.coordinates
         const offsetx = f.properties?.offsetx
         const offsety = f.properties?.offsety
@@ -63,13 +67,12 @@ export const get_compass = async (aladin: any, height: number, width: number, po
         const rotPnt = [width - margin, height - margin ]
         const compassAngle = -1 * (angle + positionAngle + aladinAngle)
         polygon = rotate_multipolygon([polygon], compassAngle, rotPnt)[0]
-        f.geometry.coordinates = polygon
+        return { ...f, geometry: { ...f.geometry, coordinates: polygon } }
     })
-    return fc
+    return { ...fc, features } as FeatureCollection<Polygon>
 }
 
 export const get_fovz = async (ra: number, dec: number, aladin: any, instrumentFOV: string, angle: number, offset: [number, number]) => {
-    console.log('Getting FOV for instrument', instrumentFOV, 'with angle', angle, 'and offset', offset)
     const fc = await get_shapes('fov')
     const features = fc['features'].filter((f: any) => f['properties'].type === 'FOV')
     const feature = features.find((f: any) => f['properties'].instrument === instrumentFOV)

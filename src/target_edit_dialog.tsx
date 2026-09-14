@@ -15,12 +15,12 @@ import CatalogButton from './catalog_button';
 import target_schema from './target_schema.json'
 import { Status, Target } from './App';
 import { MuiChipsInput } from 'mui-chips-input';
-import { ra_dec_to_deg } from './two-d-view/sky_view_util';
+import { ra_dec_to_deg, deg_to_hms, deg_to_dms } from './two-d-view/sky_view_util';
 import { TARGET_LENGTH } from './two-d-view/constants';
 
 interface Props {
     target: Target
-    setTarget: Function
+    setTarget: React.Dispatch<React.SetStateAction<Target>> 
 }
 
 interface TargetEditProps extends Props {
@@ -77,45 +77,7 @@ export const raDecFormat = (input: string) => {
     return sign + input;
 }
 
-function deg_to_dms(degrees: number) {
-    const sign = degrees < 0 ? "-" : ""
-    const absDeg = Math.abs(degrees)
-    let deg = Math.floor(absDeg)
-    deg = deg % 360
-    const min = Math.floor((absDeg - deg) * 60)
-    const sec = Math.floor((absDeg - deg - min / 60) * 3600)
-    return `${sign}${deg}:${min}:${sec}`
-}
-
-function deg_to_hms(deg: number) {
-    while (deg < 0) deg += 360 //convert to positive degrees
-    deg = Math.abs(deg % 360)
-    const hours = Math.floor(deg / 15)
-    const minutes = Math.floor((deg % 15) * 4)
-    const seconds = ((deg % 15) * 4 - minutes) * 60
-    return `${hours}:${minutes}:${seconds}`
-}
-
 export const rowSetter = (tgt: Target, key: string, value?: string | number | boolean | string[]) => {
-
-    //TODO: handle custom magnitude array
-    // if (key.includes('.') && idx!==undefined) { //used for custom magnitude array
-    //     const [parent, child] = key.split('.') as [keyof Target, keyof Magnitude]
-    //     if (Object.keys(tgt).includes(parent)) {
-    //         const elem = (tgt[parent] as Array<Magnitude>)?.at(idx) as Magnitude
-    //         //@ts-ignore
-    //         elem && (tgt[parent][idx] = { ...elem, [child]: value})
-    //         //@ts-ignore
-    //         !elem && (tgt[parent][0] = { 'mag': undefined, 'band': undefined, [child]: value})
-    //     }
-    //     else {
-    //         //@ts-ignore
-    //         tgt[parent] = [{ 'mag': undefined, 'band': undefined, [child]: value}]
-    //     }
-    //     const newTgt = { ...tgt, 'status': 'EDITED' as Status}
-    //     console.log('newTgt', newTgt)
-    //     return newTgt 
-    // }
 
     let newTgt = { ...tgt, 'status': 'EDITED' as Status, [key]: value }
     switch (key) {
@@ -175,6 +137,10 @@ export const format_edit_entry = (key: string, value?: string | number, isNumber
         value = String(value).replace(/[^\w^\-^\s]+/g, '').replaceAll('^', '') //remove non alphanumeric characters
         value = value.slice(0, TARGET_LENGTH) //truncate to 15 characters
     }
+    if (value && key === 'science_target') {
+        value = String(value).replace(/[^\w^\-^\s]+/g, '').replaceAll('^', '') //remove non alphanumeric characters
+        value = value.slice(0, TARGET_LENGTH) //truncate to 15 characters
+    }
 
     value = String(value).replace(/\t/, '') //remove tabs
     return value
@@ -230,13 +196,8 @@ export const TargetEditDialog = (props: TargetEditProps) => {
             targetProps[param].short_description ?? targetProps[param].description
     }
 
-    const handleCatalogChange = (tgt: Target) => {
-        setTarget((prev: Target) => {
-            tgt = { ...prev, ...tgt, status: 'EDITED' }
-            return tgt
-        })
-        setHasCatalog(tgt.tic_id || tgt.gaia_id ? true : false)
-        handleTextChange('ra', tgt.ra)
+    const handleCatalogChange = (updater: (prev: Target) => Target) => {
+        setTarget(updater)
     }
 
 
@@ -285,6 +246,16 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 value={target.target_name}
                                 sx={{ width: 200 }}
                                 onChange={(event) => handleTextChange('target_name', event.target.value)}
+                            />
+                        </Tooltip>
+                        <Tooltip title={input_label('priority', true)}>
+                            <TextField
+                                label={input_label('priority')}
+                                focused={target.priority? true : false}
+                                id="priority"
+                                value={target.priority}
+                                sx={{ width: 100 }}
+                                onChange={(event) => handleTextChange('priority', event.target.value)}
                             />
                         </Tooltip>
                     </Stack>
@@ -402,7 +373,7 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 focused={target.k_mag ? true : false}
                                 value={target.k_mag}
                                 sx={{ width: 125 }}
-                                onChange={(event) => handleTextChange('k._mag', event.target.value, true)}
+                                onChange={(event) => handleTextChange('k_mag', event.target.value, true)}
                             />
                         </Tooltip>
                     </Stack>
@@ -425,16 +396,6 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 value={target.b_m_r_mag}
                                 sx={{ width: 125 }}
                                 onChange={(event) => handleTextChange('b_m_r_mag', event.target.value, true)}
-                            />
-                        </Tooltip>
-                        <Tooltip title={input_label('b_mag', true)}>
-                            <TextField
-                                label={input_label('b_mag')}
-                                id="b-magnitude"
-                                focused={target.b_mag ? true : false}
-                                value={target.b_mag}
-                                sx={{ width: 125 }}
-                                onChange={(event) => handleTextChange('b_mag', event.target.value, true)}
                             />
                         </Tooltip>
                     </Stack>
@@ -531,8 +492,8 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                             <TextField
                                 label={input_label('tic_id')}
                                 id="tic"
-                                focused={target.tic ? true : false}
-                                value={target.tic}
+                                focused={target.tic_id ? true : false}
+                                value={target.tic_id}
                                 onChange={(event) => handleTextChange('tic_id', event.target.value)}
                             />
                         </Tooltip>
@@ -577,6 +538,26 @@ export const TargetEditDialog = (props: TargetEditProps) => {
                                 options={lgsOptions ?? []}
                                 sx={{ width: 125 }}
                                 renderInput={(params) => <TextField {...params} label={input_label('lgs')} />}
+                            />
+                        </Tooltip>
+                        <Tooltip title={input_label('separation', true)}>
+                            <TextField
+                                label={input_label('separation')}
+                                focused={target.separation ? true : false}
+                                id="separation"
+                                value={target.separation}
+                                sx={{ width: 200 }}
+                                onChange={(event) => handleTextChange('separation', event.target.value, true)}
+                            />
+                        </Tooltip>
+                        <Tooltip title={input_label('science_target', true)}>
+                            <TextField
+                                label={input_label('science_target')}
+                                focused={target.science_target ? true : false}
+                                id="target-name"
+                                value={target.science_target}
+                                sx={{ width: 200 }}
+                                onChange={(event) => handleTextChange('science_target', event.target.value)}
                             />
                         </Tooltip>
                     </Stack>

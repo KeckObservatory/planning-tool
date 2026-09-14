@@ -1,4 +1,6 @@
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import * as SunCalc from 'suncalc'
 import { DayViz, VizRow } from './viz_dialog'
 import {
@@ -7,14 +9,18 @@ import {
     ROUND_MINUTES,
     STEP_SIZE,
     TIMES_START,
-    TIMES_END
+    TIMES_END,
+    LASER_LIMIT
 } from './constants'
-import { AMATEUR_TWILIGHT_SHADE, ASTRONOMICAL_TWILIGHT_SHADE, TWILIGHT_SHADE } from "./constants.tsx";
+import { AMATEUR_TWILIGHT_SHADE, ASTRONOMICAL_TWILIGHT_SHADE, TWILIGHT_SHADE, CROSSING_TOLERANCE_MS } from "./constants.tsx";
 import { GeoModel, LngLatEl } from '../App'
 import { SkyChart } from './sky_chart';
-import { alt_az_observable } from './target_viz_chart.tsx';
-import { hidate, TargetView } from './two_d_view.tsx';
+import { alt_az_observable } from './two_d_view_common.tsx';
+import { hidate, TargetView } from './two_d_view_common.tsx';
 import { get_schedule } from '../api/api_root.tsx';
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 export const colors = [
     '#1f77b4',  // muted blue
@@ -55,17 +61,44 @@ export const ra_dec_to_deg = (time: string, dec = false) => {
             hours = hours.substring(1);
             sign = -1;
         }
-        deg = sign * (parseInt(hours, 10) // dec is already in degrees
-            + parseInt(min, 10) / 60
-            + parseInt(sec, 10) / 60 ** 2)
+        deg = sign * (parseFloat(hours) // dec is already in degrees
+            + parseFloat(min) / 60
+            + parseFloat(sec) / 60 ** 2)
     }
 
     else {
-        deg = 15 * parseInt(hours, 10) // convert hours to deg
-            + 15 * parseInt(min, 10) / 60
-            + 15 * parseInt(sec, 10) / 60 ** 2
+        deg = 15 * parseFloat(hours) // convert hours to deg
+            + 15 * parseFloat(min) / 60
+            + 15 * parseFloat(sec) / 60 ** 2
     }
     return deg
+}
+
+const pad = (n: number) => String(n).padStart(2, '0')
+
+// Only the whole-seconds part is padded - padding the formatted number would
+// leave "0.024" a single digit wide and fail the schema pattern.
+const pad_seconds = (seconds: number) => {
+    const [, frac] = String(Number(seconds.toFixed(3))).split('.')
+    const whole = pad(Math.floor(seconds))
+    return frac ? `${whole}.${frac}` : whole
+}
+
+export const deg_to_hms = (deg: number): string => {
+    const wrapped = ((deg % 360) + 360) % 360
+    // Rounding can land a hair under 360 deg on 24:00:00, which is 00:00:00.
+    const totalSec = Math.round((wrapped / 15) * 3600 * 1000) / 1000 % 86400
+    const h = Math.floor(totalSec / 3600)
+    const m = Math.floor((totalSec - h * 3600) / 60)
+    return `${pad(h)}:${pad(m)}:${pad_seconds(totalSec - h * 3600 - m * 60)}`
+}
+
+export const deg_to_dms = (deg: number): string => {
+    const sign = deg < 0 ? '-' : '+'
+    const totalArcsec = Math.round(Math.abs(deg) * 3600 * 1000) / 1000
+    const d = Math.floor(totalArcsec / 3600)
+    const m = Math.floor((totalArcsec - d * 3600) / 60)
+    return `${sign}${pad(d)}:${pad(m)}:${pad_seconds(totalArcsec - d * 3600 - m * 60)}`
 }
 
 export const d2r = (deg: number) => {
@@ -274,15 +307,135 @@ export const lunar_angle = (ra: number,
     return angle
 }
 
+
+export const make_viz_row = (
+    ra: number,
+    dec: number,
+    datetime: Date,
+    lngLatEl: LngLatEl,
+    geoModel: GeoModel): VizRow => {
+    const [az, alt] = ra_dec_to_az_alt(ra, dec, datetime, lngLatEl)
+    return {
+        az,
+        alt,
+        ...alt_az_observable(alt, az, geoModel),
+        datetime,
+        air_mass: air_mass(alt, lngLatEl.el),
+        moon_illumination: SunCalc.getMoonIllumination(datetime),
+        moon_position: get_moon_position(datetime, lngLatEl)
+    }
+}
+
+// Compute when the ra/dec crosses the nasmyth/shutter.
+// Given two times, bisect until the crossing is found within
+// a tolerance. 
+const bisect_alt_crossing = (
+    ra: number,
+    dec: number,
+    limit: number,
+    aboveTime: Date,
+    belowTime: Date,
+    lngLatEl: LngLatEl): Date => {
+    let above = aboveTime.getTime()
+    let below = belowTime.getTime()
+    while (Math.abs(above - below) > CROSSING_TOLERANCE_MS) {
+        const mid = Math.round((above + below) / 2)
+        const [, alt] = ra_dec_to_az_alt(ra, dec, new Date(mid), lngLatEl)
+        if (alt >= limit) above = mid
+        else below = mid
+    }
+    return new Date(above)
+}
+
+interface AltCrossing {
+    row: VizRow
+    rising: boolean
+}
+
+const find_alt_crossing = (
+    ra: number,
+    dec: number,
+    limit: number,
+    prev: VizRow,
+    curr: VizRow,
+    lngLatEl: LngLatEl,
+    geoModel: GeoModel): AltCrossing | undefined => {
+    const prevAbove = prev.alt >= limit
+    const currAbove = curr.alt >= limit
+    if (prevAbove === currAbove) return undefined //no crossing in this step
+    const [aboveTime, belowTime] = prevAbove
+        ? [prev.datetime, curr.datetime]
+        : [curr.datetime, prev.datetime]
+    const datetime = bisect_alt_crossing(ra, dec, limit, aboveTime, belowTime, lngLatEl)
+    return { row: make_viz_row(ra, dec, datetime, lngLatEl, geoModel), rising: currAbove }
+}
+
+export const add_limit_crossings = (
+    ra: number,
+    dec: number,
+    visibility: VizRow[],
+    lngLatEl: LngLatEl,
+    geoModel: GeoModel): VizRow[] => {
+    if (visibility.length < 2) return visibility
+
+    const crossings: VizRow[] = []
+    let firstRise: Date | undefined
+    let lastSet: Date | undefined
+
+    for (let idx = 1; idx < visibility.length; idx++) {
+        const prev = visibility[idx - 1]
+        const curr = visibility[idx]
+
+        const shutter = find_alt_crossing(ra, dec, geoModel.r1, prev, curr, lngLatEl, geoModel)
+        if (shutter) {
+            crossings.push(shutter.row)
+            if (shutter.rising && !firstRise) firstRise = shutter.row.datetime
+            if (!shutter.rising) lastSet = shutter.row.datetime
+        }
+
+        const nasmyth = find_alt_crossing(ra, dec, geoModel.r3, prev, curr, lngLatEl, geoModel)
+        if (nasmyth && nasmyth.row.az >= geoModel.t2 && nasmyth.row.az <= geoModel.t3) {
+            crossings.push(nasmyth.row)
+        }
+    }
+
+    if (crossings.length === 0) return visibility
+
+    const merged = [...visibility, ...crossings]
+        .sort((a, b) => a.datetime.getTime() - b.datetime.getTime())
+
+    // Only trim a side that actually starts (or ends) below the shutter - a target already up
+    // at dusk, or still up at dawn, keeps the full window on that side.
+    const startsBelow = visibility[0].alt < geoModel.r1
+    const endsBelow = visibility[visibility.length - 1].alt < geoModel.r1
+    const start = startsBelow && firstRise ? firstRise.getTime() : -Infinity
+    const end = endsBelow && lastSet ? lastSet.getTime() : Infinity
+    return merged.filter((viz) => {
+        const t = viz.datetime.getTime()
+        return t >= start && t <= end
+    })
+}
+
+export const sum_observable_hours = (visibility: VizRow[]): number => {
+    let hours = 0
+    for (let idx = 1; idx < visibility.length; idx++) {
+        const prev = visibility[idx - 1]
+        const curr = visibility[idx]
+        const observableEnds = (prev.observable ? 1 : 0) + (curr.observable ? 1 : 0)
+        if (observableEnds === 0) continue
+        const gap = (curr.datetime.getTime() - prev.datetime.getTime()) / 3600000
+        hours += gap * observableEnds / 2
+    }
+    return hours
+}
+
 export const get_schedule_shapes = async (date: string, dome: number) => {
     const schedule_data = await get_schedule(date, dome)
     const shapes = schedule_data.map((sched) => {
 
-        const startTimeUT = dayjs(sched.Date + 'T' + sched.StartTime).toDate().getTime()
-        // const endTimeUT = dayjs(sched.Date + 'T' + sched.EndTime).toDate().getTime()
-
-        const startTime = startTimeUT - 10 * 3600000 //HT to UT
-        // const endTime = endTimeUT + 0 * 10 * 3600000 //HT to UT
+        // sched.Date is the HST "night of" label; StartTime is UT time-of-day, which always
+        // falls on the following UT calendar day for an HST evening-to-morning observing night.
+        const startTime = dayjs.utc(sched.Date + 'T' + sched.StartTime).add(1, 'day').toDate().getTime()
         const text = `${sched.ProjCode}`
         return {
             type: 'rect',
@@ -414,6 +567,26 @@ export const get_shapes = (suncalcTimes: DayViz,
         },
     ]
 
+    const laser_shapes: Partial<Plotly.Shape>[] = [{
+        type: 'rect',
+        xref: 'paper',
+        yref: 'y',
+        x0: 0,
+        label: {
+            text: 'Laser Limit',
+            textposition: 'top center',
+        },
+        y0: LASER_LIMIT,
+        x1: 1,
+        y1: LASER_LIMIT,
+        fillcolor: '#eeeeee',
+        layer: 'above',
+        opacity: 0.5,
+        line: {
+            width: 1
+        }
+    }]
+
     const nasdeck_shapes: Partial<Plotly.Shape>[] = [{
         type: 'rect',
         xref: 'paper',
@@ -483,6 +656,7 @@ export const get_shapes = (suncalcTimes: DayViz,
         if (deckBlocking) {
             shapes.push(...nasdeck_shapes)
         }
+        shapes.push(...laser_shapes)
     }
     return shapes
 }
