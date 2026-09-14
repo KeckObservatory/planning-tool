@@ -240,7 +240,16 @@ function App() {
               {snackbarMessage.message}
             </Alert>
           </Snackbar>
-          <Stack sx={{ marginBottom: '4px', marginTop: '12px' }} width="100%" direction="row" justifyContent='center' spacing={2}>
+          {/*
+
+          */}
+          <Stack
+            sx={{ marginBottom: '4px', marginTop: '12px', overflowX: 'auto' }}
+            width="100%"
+            direction="row"
+            justifyContent='safe center'
+            spacing={2}
+          >
             <Paper
               sx={{
                 marginTop: '12px',
