@@ -316,7 +316,9 @@ const TwoDView = ({ targets }: Props) => {
                             <MoonMarker
                                 moonInfo={moonInfo}
                                 lngLatEl={lngLatEl}
-                                datetime={time} width={width} height={height}
+                                obsdate={obsdate}
+                                width={width} 
+                                height={height}
                             />
                         </Stack>
                     </Stack>

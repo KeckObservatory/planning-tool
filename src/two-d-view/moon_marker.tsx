@@ -8,15 +8,13 @@ import Stack from "@mui/material/Stack";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import Typography from "@mui/material/Typography";
-import { LngLatEl } from "../App";
+import { LngLatEl, useStateContext } from "../App";
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-const HST = 'Pacific/Honolulu'
-
 interface Props {
-    datetime: Date,
+    obsdate: Date,
     moonInfo: SunCalc.GetMoonIlluminationResult
     lngLatEl: LngLatEl
     width: number
@@ -82,10 +80,11 @@ export const MoonMarker = (props: Props) => {
         transform: 'rotateY(180deg)',
     }
 
-    // Moon rise/set for the Hawaii-local calendar day containing props.datetime.
-    const hstMidnight = dayjs(props.datetime).tz(HST).startOf('day').toDate()
-    const moonTimes = SunCalc.getMoonTimes(hstMidnight, props.lngLatEl.lat, props.lngLatEl.lng, true)
-    const formatHST = (date?: Date) => date ? dayjs(date).tz(HST).format('HH:mm') : '--:--'
+    const context = useStateContext()
+
+    const moonSearchAnchor = dayjs(props.obsdate).tz(context.config.timezone).startOf('day').add(1, 'day').toDate()
+    const moonTimes = SunCalc.getMoonTimes(moonSearchAnchor, props.lngLatEl.lat, props.lngLatEl.lng, true)
+    const formatHST = (date?: Date) => date ? dayjs(date).tz(context.config.timezone).format('HH:mm') : '--:--'
     const riseLabel = moonTimes.alwaysUp ? 'Always up' : formatHST(moonTimes.rise)
     const setLabel = moonTimes.alwaysDown ? 'Always down' : formatHST(moonTimes.set)
 
@@ -98,10 +97,10 @@ export const MoonMarker = (props: Props) => {
             </FormControl>
             <Stack direction='row' spacing={1} alignItems='center'>
                 <div style={sphereStyle}>
-                    <div id={deg > 180 ? 'light-hemisphere' : 'dark-hemisphere'}
-                        style={deg > 180 ? lightStyle : darkStyle}></div>
                     <div id={deg > 180 ? 'dark-hemisphere' : 'light-hemisphere'}
                         style={deg > 180 ? darkStyle : lightStyle}></div>
+                    <div id={deg > 180 ? 'light-hemisphere' : 'dark-hemisphere'}
+                        style={deg > 180 ? lightStyle : darkStyle}></div>
                     <div style={dividerStyle}>
                         <div style={dividerAfterStyle}></div>
                     </div>
