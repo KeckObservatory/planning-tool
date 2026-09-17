@@ -267,6 +267,7 @@ export interface EditToolbarProps extends Partial<GridToolbarProps & ToolbarProp
   uniqueTags: string[];
   selectedTagFilter: string | null;
   setSelectedTagFilter: React.Dispatch<React.SetStateAction<string | null>>;
+  setRowSelectionModel: React.Dispatch<React.SetStateAction<GridRowId[]>>;
   apiRef: React.RefObject<GridApi>;
 }
 
@@ -351,7 +352,7 @@ export function EditToolbar(props: EditToolbarProps) {
         <Button color="primary" startIcon={<AddIcon />} onClick={handleAddTarget} disabled={isAddingTarget}>
           Add Target
         </Button>
-        <DeleteDialogButton setRows={setRows} targets={props.selectedTargets} color='primary' />
+        <DeleteDialogButton setRows={setRows} setRowSelectionModel={props.setRowSelectionModel} targets={props.selectedTargets} color='primary' />
         <TagDialogButton targets={props.selectedTargets} />
         <SemidDialogButton targets={props.selectedTargets} />
         <TargetWizardButton />

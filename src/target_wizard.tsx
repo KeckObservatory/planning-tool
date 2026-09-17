@@ -79,8 +79,11 @@ function TargetSubmitter(props: LinearProgressProps &
             snackbarContext.setSnackbarOpen(true);
         }
 
-        const savedTgts = tgts.map((tgt, idx) => {
-            const saved = resp.targets?.at(idx)
+        // Match each saved target back to what was submitted by the id we sent,
+        // not by array position - the response isn't guaranteed to preserve order.
+        const savedById = new Map((resp.targets ?? []).map((saved) => [saved._id, saved]))
+        const savedTgts = tgts.map((tgt) => {
+            const saved = savedById.get(tgt._id as string)
             return saved?._id ? saved : tgt
         })
 

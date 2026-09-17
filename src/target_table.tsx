@@ -154,9 +154,15 @@ export const group_science_targets = (
   const orderedTopLevel = topLevelComparator ? [...topLevel].sort(topLevelComparator) : topLevel
 
   const grouped: Target[] = []
+  const placedParentNames = new Set<string>()
   orderedTopLevel.forEach((tgt) => {
     grouped.push(tgt)
-    if (tgt.target_name) {
+    // Two top-level rows can share a target_name (e.g. duplicate targets).
+    // Only nest the children under the first one - otherwise the same child
+    // row gets pushed twice, and DataGrid selects both copies together since
+    // they're literally the same row/id.
+    if (tgt.target_name && !placedParentNames.has(tgt.target_name)) {
+      placedParentNames.add(tgt.target_name)
       grouped.push(...(childrenByParent.get(tgt.target_name) ?? []))
     }
   })
@@ -405,9 +411,24 @@ export default function TargetTable(props: TargetTableProps) {
       return
     }
     const delRow = rows.find((row) => row._id === id);
-    console.log('deleting', id, delRow)
-    delRow && delete_target([delRow._id as string])
+    if (!delRow) {
+      console.error('refusing to delete: no row found for id', { id, rows })
+      return
+    }
+    const resp = await delete_target([delRow._id as string])
+    if (resp.status !== 'SUCCESS') {
+      // The row stays put: dropping it locally after a failed delete is what
+      // makes a target reappear on the next refresh.
+      console.error('error deleting target', resp)
+      sbcontext.setSnackbarMessage({ severity: 'error', message: `Failed to delete ${delRow.target_name || 'target'}` })
+      sbcontext.setSnackbarOpen(true)
+      return
+    }
     setRows((oldRows) => oldRows.filter((row) => row._id !== id));
+    // A deleted row can still be sitting in the (controlled) selection model
+    // if it was checked - leaving it there makes DataGrid look up an id that
+    // no longer exists in `rows` and throw "No row with id ... found".
+    setRowSelectionModel((oldModel) => oldModel.filter((selectedId) => selectedId !== id));
     context.setTargets && context.setTargets((oldTargets) => {
       // Returning the same array when nothing matched matters: filter() allocates a
       // new one unconditionally, and a fresh reference re-fires the [targets] effect
@@ -689,6 +710,7 @@ export default function TargetTable(props: TargetTableProps) {
                 uniqueTags,
                 selectedTagFilter,
                 setSelectedTagFilter,
+                setRowSelectionModel,
                 apiRef
               } as EditToolbarProps,
             }}
