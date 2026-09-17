@@ -4,7 +4,6 @@ export const config = {
         "target_name",
         "ra",
         "dec",
-        "equinox",
         "r_mag",
         "v_mag",
         "j_mag",
