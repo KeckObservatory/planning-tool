@@ -32,25 +32,41 @@ import { TARGET_LENGTH, TARGET_NAME_LENGTH_PADDED } from './two-d-view/constants
 import { StarlistSubmissionDialog } from './starlist_submission/starlist_submission_dialog.tsx';
 
 
+// Rounds the seconds field of an "HH:MM:SS.SSS" ra/dec string to 3 decimal
+// places, padding with zeros so the seconds field is always 2 digits before
+// the point.
+const round_ra_dec_seconds = (value: string): string => {
+  const parts = value.split(':')
+  if (parts.length !== 3 || !Number.isFinite(Number(parts[2]))) return value
+  const [h, m, s] = parts
+  const seconds = Number(s).toFixed(3).padStart(6, '0')
+  return `${h}:${m}:${seconds}`
+}
+
+const round_mag = (value?: number | string): number | string | undefined => {
+  if (value === undefined || value === null || value === '' || !Number.isFinite(Number(value))) return value
+  return Number(value).toFixed(2)
+}
+
 const convert_target_to_targetlist_row = (target: Target, includeComments = true) => {
   //required params
   const name = (target.target_name ?? '').slice(0, TARGET_LENGTH).padEnd(TARGET_NAME_LENGTH_PADDED, " ") //columns 1-16 are text last column is a space
-  const ra = target.ra?.replaceAll(':', ' ') ?? ''
-  const dec = target.dec?.replaceAll(':', ' ') ?? ''
+  const ra = target.ra ? round_ra_dec_seconds(target.ra).replaceAll(':', ' ') : ''
+  const dec = target.dec ? round_ra_dec_seconds(target.dec).replaceAll(':', ' ') : ''
   const equinox = target.equinox ?? '2000'
   let row = `${name} ${ra} ${dec} ${equinox}`
   const valid = target.target_name && target.ra && target.dec && equinox
   row = valid ? row : '# INVALID row: ' + row
   //optional params
-  row = target.v_mag ? row + ` vmag=${target.v_mag}` : row
-  row = target.j_mag ? row + ` jmag=${target.j_mag}` : row
-  row = target.g_mag ? row + ` gmag=${target.g_mag}` : row
-  row = target.r_mag ? row + ` rmag=${target.r_mag}` : row
-  row = target.b_mag ? row + ` bmag=${target.b_mag}` : row
-  row = target.h_mag ? row + ` hmag=${target.h_mag}` : row
-  row = target.k_mag ? row + ` kmag=${target.k_mag}` : row
-  row = target.b_m_v_mag ? row + ` b-v=${target.b_m_v_mag}` : row
-  row = target.b_m_r_mag ? row + ` b-r=${target.b_m_r_mag}` : row
+  row = target.v_mag ? row + ` vmag=${round_mag(target.v_mag)}` : row
+  row = target.j_mag ? row + ` jmag=${round_mag(target.j_mag)}` : row
+  row = target.g_mag ? row + ` gmag=${round_mag(target.g_mag)}` : row
+  row = target.r_mag ? row + ` rmag=${round_mag(target.r_mag)}` : row
+  row = target.b_mag ? row + ` bmag=${round_mag(target.b_mag)}` : row
+  row = target.h_mag ? row + ` hmag=${round_mag(target.h_mag)}` : row
+  row = target.k_mag ? row + ` kmag=${round_mag(target.k_mag)}` : row
+  row = target.b_m_v_mag ? row + ` b-v=${round_mag(target.b_m_v_mag)}` : row
+  row = target.b_m_r_mag ? row + ` b-r=${round_mag(target.b_m_r_mag)}` : row
   row = target.ra_offset != null && target.ra_offset !== '' ? row + ` raoffset=${target.ra_offset}` : row
   row = target.dec_offset != null && target.dec_offset !== '' ? row + ` decoffset=${target.dec_offset}` : row
   row = target.rotator_mode ? row + ` rotmode=${target.rotator_mode}` : row
