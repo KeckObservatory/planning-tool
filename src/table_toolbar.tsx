@@ -40,12 +40,12 @@ const round_ra_dec_seconds = (value: string): string => {
   if (parts.length !== 3 || !Number.isFinite(Number(parts[2]))) return value
   const [h, m, s] = parts
   const seconds = Number(s).toFixed(3).padStart(6, '0')
-  return `${h}:${m}:${seconds}`
+  return `${h.replace('+', '').padStart(2, '0')}:${m}:${seconds}`
 }
 
-const round_mag = (value?: number | string): number | string | undefined => {
+const round_decimal = (value?: number | string, n = 2): number | string | undefined => {
   if (value === undefined || value === null || value === '' || !Number.isFinite(Number(value))) return value
-  return Number(value).toFixed(2)
+  return Number(value).toFixed(n)
 }
 
 const convert_target_to_targetlist_row = (target: Target, includeComments = true) => {
@@ -58,15 +58,15 @@ const convert_target_to_targetlist_row = (target: Target, includeComments = true
   const valid = target.target_name && target.ra && target.dec && equinox
   row = valid ? row : '# INVALID row: ' + row
   //optional params
-  row = target.v_mag ? row + ` vmag=${round_mag(target.v_mag)}` : row
-  row = target.j_mag ? row + ` jmag=${round_mag(target.j_mag)}` : row
-  row = target.g_mag ? row + ` gmag=${round_mag(target.g_mag)}` : row
-  row = target.r_mag ? row + ` rmag=${round_mag(target.r_mag)}` : row
-  row = target.b_mag ? row + ` bmag=${round_mag(target.b_mag)}` : row
-  row = target.h_mag ? row + ` hmag=${round_mag(target.h_mag)}` : row
-  row = target.k_mag ? row + ` kmag=${round_mag(target.k_mag)}` : row
-  row = target.b_m_v_mag ? row + ` b-v=${round_mag(target.b_m_v_mag)}` : row
-  row = target.b_m_r_mag ? row + ` b-r=${round_mag(target.b_m_r_mag)}` : row
+  row = target.v_mag ? row + ` vmag=${round_decimal(target.v_mag)}` : row
+  row = target.j_mag ? row + ` jmag=${round_decimal(target.j_mag)}` : row
+  row = target.g_mag ? row + ` gmag=${round_decimal(target.g_mag)}` : row
+  row = target.r_mag ? row + ` rmag=${round_decimal(target.r_mag)}` : row
+  row = target.b_mag ? row + ` bmag=${round_decimal(target.b_mag)}` : row
+  row = target.h_mag ? row + ` hmag=${round_decimal(target.h_mag)}` : row
+  row = target.k_mag ? row + ` kmag=${round_decimal(target.k_mag)}` : row
+  row = target.b_m_v_mag ? row + ` b-v=${round_decimal(target.b_m_v_mag)}` : row
+  row = target.b_m_r_mag ? row + ` b-r=${round_decimal(target.b_m_r_mag)}` : row
   row = target.ra_offset != null && target.ra_offset !== '' ? row + ` raoffset=${target.ra_offset}` : row
   row = target.dec_offset != null && target.dec_offset !== '' ? row + ` decoffset=${target.dec_offset}` : row
   row = target.rotator_mode ? row + ` rotmode=${target.rotator_mode}` : row
@@ -74,8 +74,8 @@ const convert_target_to_targetlist_row = (target: Target, includeComments = true
   row = target.telescope_wrap ? row + ` wrap=${target.telescope_wrap}` : row
   row = target.d_dec != null && target.d_dec !== '' ? row + ` ddec=${target.d_dec}` : row
   row = target.d_ra != null && target.d_ra !== '' ? row + ` dra=${target.d_ra}` : row
-  row = target.pm_ra != null ? row + ` pmra=${target.pm_ra}` : row
-  row = target.pm_dec != null ? row + ` pmdec=${target.pm_dec}` : row
+  row = target.pm_ra != null ? row + ` pmra=${round_decimal(target.pm_ra, 4)}` : row
+  row = target.pm_dec != null ? row + ` pmdec=${round_decimal(target.pm_dec, 4)}` : row
   row = target.science_target ? row + ` target=${target.science_target}` : row
   row = target.separation != null ? row + ` sep=${target.separation}` : row
   if (target.lgs === '1') {
