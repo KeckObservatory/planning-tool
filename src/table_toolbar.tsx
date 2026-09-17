@@ -230,17 +230,6 @@ export const get_targets_from_selected_targets = (selectedTargets: Target[], tar
   return targets.filter((target) => selectedTargetIds.has(target._id) && target.ra && target.dec)
 }
 
-// Reorders `rows` to match whatever the grid is currently sorted by (any column the user
-// clicked, or the table's natural row order when unsorted) - not a fixed priority sort - so
-// Submit/Export reflect the arrangement the user actually sees on screen. `sortedIds` only
-// covers rows currently passing the tag filter, so anything filtered out of view is appended
-// afterward in its original order rather than being dropped from the export.
-//
-// Takes the sorted id list as a value rather than pulling it from apiRef itself: the grid
-// applies a new sort model inside its own layout effect, one render after the one that changed
-// it, so a component that reads apiRef.current.getSortedRowIds() during its own render is
-// always one sort behind and never catches up on its own. The caller is expected to keep
-// `sortedIds` current via the grid's 'sortedRowsSet' event - see EditToolbar.
 export const get_targets_in_table_order = (rows: Target[], sortedIds: GridRowId[]): Target[] => {
   if (sortedIds.length === 0) return rows
   const rowsById = new Map(rows.map((row) => [row._id, row]))
@@ -257,10 +246,6 @@ export const create_new_target = (id?: string, obsid?: number, target_name?: str
   Object.entries(target_schema.properties).forEach(([key, value]: [string, any]) => {
     newTarget[key as keyof Target] = value.default
   })
-  // Fall back to a name derived from the (unique) id rather than the literal
-  // string "undefined" - otherwise every blank new target submitted without
-  // an explicit name shares the same target_name, which both trips the
-  // client-side duplicate check and can collide server-side.
   const fallbackName = id ? `NEW_${id.slice(0, 8)}` : `NEW_${randomId().slice(0, 8)}`
   newTarget = {
     ...newTarget,
@@ -294,10 +279,6 @@ export function EditToolbar(props: EditToolbarProps) {
   const snackbarContext = useSnackbarContext()
   const stateContext = useStateContext()
 
-  // Kept in sync via the grid's own 'sortedRowsSet' event, fired every time it finishes
-  // (re)sorting - reading apiRef.current.getSortedRowIds() directly during render would return
-  // whatever was sorted before the user's last click, since the grid applies a new sort model
-  // in its own layout effect and nothing else causes this toolbar to re-render afterward.
   const [sortedRowIds, setSortedRowIds] = React.useState<GridRowId[]>([])
   React.useEffect(() => {
     const api = props.apiRef?.current
@@ -308,8 +289,6 @@ export function EditToolbar(props: EditToolbarProps) {
     })
   }, [props.apiRef])
 
-  // Guards against a double-click submitting two new targets before the
-  // first request resolves, which would race on inserting into rows.
   const isAddingTargetRef = React.useRef(false);
   const [isAddingTarget, setIsAddingTarget] = React.useState(false);
 
@@ -330,10 +309,6 @@ export function EditToolbar(props: EditToolbarProps) {
         return
       }
       setRows((oldRows) => {
-        // The server is expected to return a fresh, unique _id for a newly
-        // created target. If it instead reuses an _id already in the table,
-        // inserting another row under that same id would make later deletes
-        // of either row remove both (they'd share a getRowId key).
         if (oldRows.some((row) => row._id === submittedTarget._id)) {
           console.error('New target was returned with an _id that already exists in the table', submittedTarget)
           snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error adding target: server returned a duplicate id' })
@@ -342,9 +317,6 @@ export function EditToolbar(props: EditToolbarProps) {
         }
         return [submittedTarget, ...oldRows];
       });
-      // Mirror the add into context.targets. TargetTable's per-target sync is
-      // update-only (so a late save can't resurrect a deleted row), so a
-      // genuine addition has to be inserted here.
       stateContext.setTargets && stateContext.setTargets((oldTargets) => {
         const existing = oldTargets ?? []
         if (existing.some((tgt) => tgt._id === submittedTarget._id)) {

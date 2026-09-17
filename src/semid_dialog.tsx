@@ -24,6 +24,12 @@ function SemidDialog(props: SemidDialogProps) {
     const { open, handleClose, targets } = props;
     const [semids, setSemids] = React.useState<string[]>([]);
 
+    React.useEffect(() => {
+        if (open) {
+            setSemids([])
+        }
+    }, [open])
+
     const RowsContext = useRowsContext()
     const snackbarContext = useSnackbarContext()
 

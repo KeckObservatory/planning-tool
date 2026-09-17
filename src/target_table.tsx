@@ -278,6 +278,7 @@ export default function TargetTable(props: TargetTableProps) {
 
   const [viewMode] = useQueryParam<ViewMode>('view_mode', withDefault(ViewParam, 'non_ao' as ViewMode))
   const [groupScienceTargets] = useQueryParam('group_science_targets', withDefault(BooleanParam, false))
+  const [semid] = useQueryParam<string>('semid')
 
   const baseColumns = React.useMemo(() => {
     const columns = convert_schema_to_columns(target_schema as unknown as JSONSchemaType<Target>);
@@ -620,9 +621,13 @@ export default function TargetTable(props: TargetTableProps) {
 
   const uniqueTags = get_unique_tags(rows);
 
-  const tagFilteredRows = selectedTagFilter
-    ? rows.filter(row => row.tags && row.tags.includes(selectedTagFilter))
+  const semidFilteredRows = semid
+    ? rows.filter(row => row.semids && row.semids.includes(semid))
     : rows;
+
+  const tagFilteredRows = selectedTagFilter
+    ? semidFilteredRows.filter(row => row.tags && row.tags.includes(selectedTagFilter))
+    : semidFilteredRows;
 
   // Grouping needs to survive a column sort, so we sort the groups
   // ourselves.
