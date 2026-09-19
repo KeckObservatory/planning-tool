@@ -117,7 +117,7 @@ export const StarListExportDirMenu = (props: ExportProps) => {
                     setOpen(true);
                 }}
             >
-                Write to Starlist Directory
+                Write to Starlist Directory at Keck
             </MenuItem >
             <ExportTargetsNameDialog
                 open={open}

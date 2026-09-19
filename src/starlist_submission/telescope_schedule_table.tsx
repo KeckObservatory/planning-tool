@@ -1,6 +1,6 @@
 import React from "react"
 import { Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
-import { Dayjs } from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { get_telescope_schedule, TelSchedule } from "../api/api_root"
 import { is_ao_instrument, is_trick_instrument } from "../guide_star/guide_star_dialog"
 
@@ -47,6 +47,8 @@ export const TelescopeScheduleTable = (props: Props) => {
         }
     }, [dateStr])
 
+    const utDate = (entry: TelSchedule) => dayjs.utc(entry.Date).add(1, 'day')
+
     return (
         <Stack direction='column' spacing={1}>
             {schedule.length === 0 ? (
@@ -64,6 +66,8 @@ export const TelescopeScheduleTable = (props: Props) => {
                             <TableRow>
                                 <TableCell>Instrument</TableCell>
                                 <TableCell>HST Date</TableCell>
+                                <TableCell>UT Date</TableCell>
+                                <TableCell>Day of Year</TableCell>
                                 <TableCell>Telescope</TableCell>
                                 <TableCell>Fraction of Night</TableCell>
                                 <TableCell>PI</TableCell>
@@ -82,6 +86,8 @@ export const TelescopeScheduleTable = (props: Props) => {
                                 >
                                     <TableCell>{entry.Instrument}</TableCell>
                                     <TableCell>{entry.Date}</TableCell>
+                                    <TableCell>{utDate(entry).format('YYYY-MM-DD')}</TableCell>
+                                    <TableCell>{utDate(entry).dayOfYear()}</TableCell>
                                     <TableCell>{entry.TelNr}</TableCell>
                                     <TableCell>{entry.FractionOfNight}</TableCell>
                                     <TableCell>{entry.PiLastName}</TableCell>

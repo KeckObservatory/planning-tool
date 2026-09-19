@@ -1,9 +1,11 @@
 
 import Tooltip from '@mui/material/Tooltip';
 import { IconButton } from '@mui/material';
+import { useState } from 'react';
 import { GaiaParams, get_gaia, get_simbad } from './api/api_root';
 import ModeStandbyIcon from '@mui/icons-material/ModeStandby';
 import { Target } from './App';
+import CatalogDialog from './catalog_dialog';
 
 
 export interface Props {
@@ -157,19 +159,32 @@ export default function CatalogButton(props: Props) {
     const { target, setTarget } = props
     const targetName = target.target_name
     const gaia_id = target.gaia_id
+    const [dialogOpen, setDialogOpen] = useState(false)
 
-    const handleClick = async () => {
+    const handleClick = () => {
         if (targetName) {
-            const catalogTargetInfo = await get_simbad_and_gaia_target_info(targetName, gaia_id)
-            setTarget((prev) => ({ ...prev, ...catalogTargetInfo, "state": 'ROW_EDITED', status: 'EDITED' }))
+            setDialogOpen(true)
         }
     }
 
+    const handleConfirm = async (magnitudeOnly: boolean) => {
+        if (!targetName) return
+        const catalogTargetInfo = await get_simbad_and_gaia_target_info(targetName, gaia_id)
+        const updateInfo = magnitudeOnly
+            ? Object.fromEntries(Object.entries(catalogTargetInfo).filter(([key]) => /_mag$/i.test(key)))
+            : catalogTargetInfo
+        setTarget((prev) => ({ ...prev, ...updateInfo, "state": 'ROW_EDITED', status: 'EDITED' }))
+    }
+
     return (
-        <Tooltip title={`Click to add Simbad and Gaia info to target ${targetName}`}>
-            <IconButton onClick={handleClick}>
-                <ModeStandbyIcon color={props.hasCatalog ? 'success' : 'inherit'} />
-            </IconButton>
-        </Tooltip>
+        <>
+            <Tooltip title={`Click to add Simbad and Gaia info to target ${targetName}`}>
+                <IconButton onClick={handleClick}>
+                    <ModeStandbyIcon color={props.hasCatalog ? 'success' : 'inherit'} />
+                </IconButton>
+            </Tooltip>
+            <CatalogDialog open={dialogOpen} handleClose={() => setDialogOpen(false)}
+                targetName={targetName} onConfirm={handleConfirm} />
+        </>
     );
 }

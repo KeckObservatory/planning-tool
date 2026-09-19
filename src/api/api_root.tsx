@@ -175,6 +175,7 @@ export interface SubmittedStarList {
     telescope: string,
     hstDate: string,
     piname: string,
+    semid: string,
     comments: string,
     slist: string,
 }

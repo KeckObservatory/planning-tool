@@ -81,7 +81,7 @@
         "lgs": {
             "type":  "string",
             "starlist_key": "lgs",
-            "description": "LGS=1, LGS=0 for NGS, select None if neither.",
+            "description": "LGS=1 for LGS, LGS=0 for NGS, select None if neither.",
             "short_description": "LGS",
             "enum": [
                 "None",

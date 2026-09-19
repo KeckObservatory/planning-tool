@@ -163,7 +163,7 @@ function StarListExportMenu(props: ExportProps) {
           setOpen(true);
         }}
       >
-        Export Starlist Text File
+        Download as local Starlist text file
       </MenuItem>
       <ExportTargetsNameDialog
         open={open}
@@ -206,7 +206,7 @@ function JsonExportMenuItem(props: ExportProps) {
           setOpen(true);
         }}
       >
-        Export JSON
+        Download as local JSON file
       </MenuItem>
       <ExportTargetsNameDialog
         open={open}

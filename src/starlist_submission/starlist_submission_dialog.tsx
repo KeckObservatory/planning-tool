@@ -92,6 +92,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     // target must have ra dec and be defined
     const [dome, setDome] = useQueryParam<Dome>('dome', withDefault(DomeParam, 'Keck 2' as Dome))
     const [piName, setPiName] = useState<string>("")
+    const [semid, setSemid] = useState<string>("")
     const [date, setDate] = useState<Dayjs | null>(dayjs())
     const [comments, setComments] = useState<string>("")
     const [schedule, setSchedule] = useState<ObserverSchedule[]>([])
@@ -104,6 +105,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
         setSelectedSchedId(entry.SchedId)
         setPiName(entry.PiLastName)
         setDate(dayjs(entry.Date))
+        setSemid(`${entry.Semester}_${entry.ProjCode}`)
     }
 
     // Same as above, but a telescope-schedule row also names which telescope the night is
@@ -230,6 +232,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
             hstDate: date.format('YYYY-MM-DD'),
             piname: piName,
             comments: comments ?? "",
+            semid: semid ?? "",
             slist: (starListStrings ?? []).join('\n'),
         }
         const submit_status = await submit_starlist(form)
