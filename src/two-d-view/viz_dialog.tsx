@@ -12,7 +12,7 @@ import utc from 'dayjs/plugin/utc'
 import * as SunCalc from 'suncalc'
 import timezone from 'dayjs/plugin/timezone'
 import { GetTimesResult, GetMoonIlluminationResult, GetMoonPositionResult } from "suncalc";
-import { air_mass, get_day_times, get_moon_position, get_suncalc_times, ra_dec_to_az_alt } from './sky_view_util';
+import { air_mass, get_day_times, get_moon_position, get_suncalc_times, lunar_angle, ra_dec_to_az_alt } from './sky_view_util';
 import { ROUND_MINUTES, SEMESTER_RANGES } from './constants';
 import { DialogComponent } from '../dialog_component';
 import { VizChart, VizSelectMenu } from '../viz_select_menu';
@@ -58,6 +58,7 @@ export interface VizRow {
     reasons: BlockReason[]
     moon_illumination: GetMoonIlluminationResult
     moon_position: GetMoonPositionResult
+    lunar_angle: number
 }
 
 export const dayjs_range = (start: Dayjs, end: Dayjs, unit: ManipulateType = 'day') => {
@@ -214,7 +215,8 @@ export const VizDialog = (props: VizDialogProps) => {
                     datetime: time,
                     air_mass: air_mass_val,
                     moon_illumination,
-                    moon_position
+                    moon_position,
+                    lunar_angle: lunar_angle(target.ra_deg as number, target.dec_deg as number, time, lngLatEl, moon_position)
                 }
                 return vis
             })

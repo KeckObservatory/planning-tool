@@ -315,6 +315,7 @@ export const make_viz_row = (
     lngLatEl: LngLatEl,
     geoModel: GeoModel): VizRow => {
     const [az, alt] = ra_dec_to_az_alt(ra, dec, datetime, lngLatEl)
+    const moon_position = get_moon_position(datetime, lngLatEl)
     return {
         az,
         alt,
@@ -322,7 +323,8 @@ export const make_viz_row = (
         datetime,
         air_mass: air_mass(alt, lngLatEl.el),
         moon_illumination: SunCalc.getMoonIllumination(datetime),
-        moon_position: get_moon_position(datetime, lngLatEl)
+        moon_position,
+        lunar_angle: lunar_angle(ra, dec, datetime, lngLatEl, moon_position)
     }
 }
 
@@ -677,7 +679,7 @@ export const get_chart_datum = (ra: number, dec: number, viz: VizRow, chartType:
             break;
         }
         case 'Lunar Angle': {
-            val = lunar_angle(ra, dec, viz.datetime, lngLatEl, viz.moon_position)
+            val = viz.lunar_angle
             break;
         }
         case 'Azimuth': {
@@ -716,7 +718,8 @@ export const get_curr_loc_trace = (targetView: TargetView[],
             moon_position,
             observable,
             reasons,
-            air_mass: air_mass(azEl[1], lngLatEl.el)
+            air_mass: air_mass(azEl[1], lngLatEl.el),
+            lunar_angle: lunar_angle(ra, dec, time, lngLatEl, moon_position)
         }
         const datum = get_chart_datum(ra, dec, viz, chartType, lngLatEl)
         const currTime = hidate(time, timezone)

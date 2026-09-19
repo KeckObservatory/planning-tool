@@ -10,7 +10,7 @@ import { FormControl, FormControlLabel, FormLabel, Radio, RadioGroup } from '@mu
 import { createEnumParam } from 'use-query-params';
 import dayjs from 'dayjs';
 import { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
-import { FOVlink } from './constants.tsx';
+import { FOVlink, MOON_WARNING_HEAVY_DEG, MOON_WARNING_LIGHT_DEG } from './constants.tsx';
 import type { GeoModel, Target } from '../App.tsx';
 import type { BlockReason, VizRow } from './viz_dialog.tsx';
 
@@ -112,4 +112,29 @@ export const alt_az_observable = (alt: number, az: number, geoModel: GeoModel) =
 
     const observable = !deckBlocking && !targetBelowHorizon && !targetAboveTrackingLimits
     return { observable, reasons }
+}
+
+export interface MoonWarning {
+    target_name: string
+    lunar_angle: number
+    level: 'light' | 'heavy'
+}
+
+// Closest lunar approach for each target, while it's actually observable that night.
+export const get_moon_warnings = (targetView: TargetView[]): MoonWarning[] => {
+    const warnings: MoonWarning[] = []
+    targetView.forEach((tgtv) => {
+        const observableRows = tgtv.visibility.filter((viz) => viz.observable)
+        if (observableRows.length === 0) return
+
+        const closest = observableRows.reduce((min, viz) => viz.lunar_angle < min.lunar_angle ? viz : min)
+        if (closest.lunar_angle >= MOON_WARNING_LIGHT_DEG) return
+
+        warnings.push({
+            target_name: tgtv.target_name ?? 'Target',
+            lunar_angle: closest.lunar_angle,
+            level: closest.lunar_angle < MOON_WARNING_HEAVY_DEG ? 'heavy' : 'light'
+        })
+    })
+    return warnings
 }

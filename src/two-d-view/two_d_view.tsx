@@ -2,7 +2,7 @@ import React from 'react';
 import * as util from './sky_view_util.tsx'
 import NightPicker from '../two-d-view/night_picker'
 import dayjs, { Dayjs } from 'dayjs';
-import { Box, Button, FormControl, FormControlLabel, FormLabel, Grid2, IconButton, Radio, RadioGroup, Stack, Switch, TextField, Tooltip } from '@mui/material';
+import { Box, Button, FormControl, FormControlLabel, FormLabel, Grid2, IconButton, Radio, RadioGroup, Stack, Switch, TextField, Tooltip, Typography } from '@mui/material';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import { useResizeObserver } from 'usehooks-ts';
@@ -17,7 +17,7 @@ import AladinViewer from '../aladin/aladin.tsx';
 import { MoonMarker } from './moon_marker.tsx';
 import * as SunCalc from "suncalc";
 import { StringParam, useQueryParam, withDefault } from 'use-query-params';
-import { alt_az_observable, Dome, DomeParam, DomeSelect, get_shapes, hidate, TargetView } from './two_d_view_common.tsx';
+import { alt_az_observable, Dome, DomeParam, DomeSelect, get_moon_warnings, get_shapes, hidate, TargetView } from './two_d_view_common.tsx';
 import html2canvas from 'html2canvas';
 import { SkyChartDataSummary } from './sky_chart_data_summary.tsx';
 import { FOVSelect } from './fov_select.tsx';
@@ -164,7 +164,8 @@ const TwoDView = ({ targets }: Props) => {
                         datetime,
                         air_mass: air_mass_val,
                         moon_illumination,
-                        moon_position
+                        moon_position,
+                        lunar_angle: util.lunar_angle(ra_deg, dec_deg, datetime, lngLatEl, moon_position)
                     }
                     azEl.push([az, alt])
                     visibility.push(vis)
@@ -232,6 +233,7 @@ const TwoDView = ({ targets }: Props) => {
     }
 
     const moonInfo = SunCalc.getMoonIllumination(time)
+    const moonWarnings = React.useMemo(() => get_moon_warnings(targetView), [targetView])
 
     if (fullscreenChart) {
         return (
@@ -365,6 +367,20 @@ const TwoDView = ({ targets }: Props) => {
                 </Stack>
             </Grid2>
             <Grid2 size={{ xs: 8 }}>
+                <Stack width="100%" spacing={0.5} sx={{ marginBottom: '4px' }}>
+                    {moonWarnings.map((warning) => (
+                        <Typography
+                            key={warning.target_name}
+                            variant="body2"
+                            sx={{
+                                color: warning.level === 'heavy' ? 'error.main' : 'warning.main',
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            Target {warning.target_name} passes within {warning.lunar_angle.toFixed(1)} degrees of the moon this night
+                        </Typography>
+                    ))}
+                </Stack>
                 <Stack sx={{}} width="100%" direction="row" justifyContent='center' spacing={1}>
                     <ChartPanel isFullscreen={false} onToggleFullscreen={() => setFullscreenChart('dome')}>
                         {(panelWidth, panelHeight) => (

@@ -82,3 +82,6 @@ export const AGR_LIMIT_DEG = 140;
 export const DEFAULT_AGR_OFFSET_DEG = 13;
 
 export const DUPLICATE_COORD_TOLERANCE_DEG = 1 / (2 * 3600) // 1/2 arcsecond
+
+export const MOON_WARNING_LIGHT_DEG = 30 // lunar angle below which a 'light' moon-proximity warning is shown
+export const MOON_WARNING_HEAVY_DEG = 15 // lunar angle below which a 'heavy' moon-proximity warning is shown
