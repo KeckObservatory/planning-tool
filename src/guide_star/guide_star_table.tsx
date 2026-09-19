@@ -2,6 +2,7 @@ import Box from '@mui/material/Box';
 import AddIcon from '@mui/icons-material/Add';
 import {
     DataGrid,
+    gridExpandedSortedRowIdsSelector,
     GridColDef,
     GridRowParams,
     GridRowSelectionModel,
@@ -168,16 +169,19 @@ export default function GuideStarTable(props: Props) {
     const sortOrder = cfg.default_guide_star_table_columns;
     const [rowSelectModel, setRowSelectModel] = React.useState<GridRowSelectionModel>([]);
     const apiRef = useGridApiRef();
+    const pendingFramesRef = React.useRef<number[]>([]);
 
     React.useEffect(() => {
         setRowSelectModel(selectedGuideStarName ? [selectedGuideStarName] : [])
+
+        pendingFramesRef.current.forEach(cancelAnimationFrame);
+        pendingFramesRef.current = [];
 
         if (!selectedGuideStarName) {
             return;
         }
 
-        // Wait a frame so the grid has rendered/paginated before we measure it.
-        const frame = requestAnimationFrame(() => {
+        const scrollToSelectedRow = () => {
             const api = apiRef.current;
             if (!api) {
                 return;
@@ -196,8 +200,39 @@ export default function GuideStarTable(props: Props) {
             const maxScrollTop = Math.max(0, totalHeight - viewportInnerSize.height);
             const scrollTop = Math.min(Math.max(desiredScrollTop, 0), maxScrollTop);
             api.scroll({ top: scrollTop });
+        }
+
+        // Wait a frame so the grid has rendered before we look for the row.
+        const frame = requestAnimationFrame(() => {
+            const api = apiRef.current;
+            if (!api) {
+                return;
+            }
+
+            // "Visible rows" only covers the current page, so a selected row on
+            // another page won't be found there - jump to its page first, using
+            // the full sorted row order to figure out which page it falls on.
+            const sortedRowIds = gridExpandedSortedRowIdsSelector(apiRef)
+            const fullIndex = sortedRowIds.indexOf(selectedGuideStarName)
+            const { page, pageSize } = api.state.pagination.paginationModel
+            const targetPage = fullIndex >= 0 && pageSize > 0 ? Math.floor(fullIndex / pageSize) : page
+
+            if (fullIndex >= 0 && targetPage !== page) {
+                api.setPage(targetPage)
+                // Wait another frame for the new page's rows to render before measuring.
+                const scrollFrame = requestAnimationFrame(scrollToSelectedRow)
+                pendingFramesRef.current.push(scrollFrame);
+                return
+            }
+
+            scrollToSelectedRow()
         });
-        return () => cancelAnimationFrame(frame);
+        pendingFramesRef.current.push(frame);
+
+        return () => {
+            pendingFramesRef.current.forEach(cancelAnimationFrame);
+            pendingFramesRef.current = [];
+        }
     }, [selectedGuideStarName]);
 
     const ActionsCell = (params: GridRowParams<Partial<Target>>) => {
