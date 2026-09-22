@@ -101,22 +101,14 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     const snackbarContext = useSnackbarContext()
 
     // populates the form from a scheduled night. add new form values here.
-    const onObserverScheduleRowSelect = (entry: ObserverSchedule) => {
-        setSelectedSchedId(entry.SchedId)
-        setPiName(entry.PiLastName)
-        setDate(dayjs(entry.Date))
-        setSemid(`${entry.Semester}_${entry.ProjCode}`)
-    }
-
-    // Same as above, but a telescope-schedule row also names which telescope the night is
-    // on - the observer table cannot, since it only ever lists this observer's own nights.
-    const onTelescopeScheduleRowSelect = (entry: TelSchedule) => {
+    const onScheduleRowSelect = (entry: ObserverSchedule | TelSchedule) => {
         setSelectedSchedId(entry.SchedId)
         setPiName(entry.PiLastName)
         setDate(dayjs(entry.Date))
         if (entry.TelNr === 1 || entry.TelNr === 2) {
             setDome(`Keck ${entry.TelNr}` as Dome)
         }
+        setSemid(`${entry.Semester}_${entry.ProjCode}`)
     }
 
     React.useEffect(() => {
@@ -236,7 +228,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
             slist: (starListStrings ?? []).join('\n'),
         }
         const submit_status = await submit_starlist(form)
-        if (submit_status.includes("File saved sucessfully")) {
+        if (submit_status.includes("success")) {
             snackbarContext.setSnackbarMessage({severity: 'success', message:submit_status})
             snackbarContext.setSnackbarOpen(true)
             props.handleClose()
@@ -274,7 +266,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
             </Typography>
             <ObserverScheduleTable
                 schedule={schedule}
-                onRowSelect={onObserverScheduleRowSelect}
+                onRowSelect={onScheduleRowSelect}
                 selectedSchedId={selectedSchedId}
             />
             <Typography variant="subtitle1">
@@ -296,7 +288,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
                 />
             </LocalizationProvider>
             <TelescopeScheduleTable
-                onRowSelect={onTelescopeScheduleRowSelect}
+                onRowSelect={onScheduleRowSelect}
                 selectedSchedId={selectedSchedId}
                 date={date}
             />
