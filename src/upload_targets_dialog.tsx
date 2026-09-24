@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from '@mui/material/Button';
 import DialogContentText from '@mui/material/DialogContentText';
-import { MenuItem, Menu, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, MenuItem, Menu, Stack, Tooltip, Typography } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
 import { Target, useStateContext, useSnackbarContext } from './App';
 import target_schema from './target_schema.json'
@@ -268,8 +268,9 @@ const parse_comments = (lines: string[]) => {
 
 const parse_txt = (filename: string, contents: string, obsid: number) => {
     let tgts = [] as UploadedTarget[]
+    let skipped = [] as string[]
     let commentLines: string[] = []
-    contents.split(/\r\n|\n/).forEach((row) => {
+    contents.split(/\r\n|\n/).forEach((row, index) => {
         if (row.startsWith('#')) {
             commentLines.push(row)
             return //skip comments
@@ -279,6 +280,7 @@ const parse_txt = (filename: string, contents: string, obsid: number) => {
         const tailParts = tail.trimStart().replace(/\s\s+/g, ' ').split(' ')
         if (tailParts.length < 7) {
             console.warn('invalid starlist row (expected name, ra, dec, equinox)', row)
+            skipped.push(`Row ${index + 1}: expected name, ra, dec, equinox — "${row.trim()}"`)
             commentLines = []
             return
         }
@@ -292,6 +294,7 @@ const parse_txt = (filename: string, contents: string, obsid: number) => {
         const coordValid = ra.match(targetProps.ra.pattern as string) && dec.match(targetProps.dec.pattern as string)
         if (!coordValid) {
             console.warn('ra', ra, 'dec', dec)
+            skipped.push(`Row ${index + 1}: invalid ra/dec ("${ra}", "${dec}") — "${row.trim()}"`)
             commentLines=[]
             return
         }
@@ -357,7 +360,7 @@ const parse_txt = (filename: string, contents: string, obsid: number) => {
         })
         tgts.push(tgt);
     });
-    return tgts
+    return { tgts, skipped }
 }
 
 interface UploadedTarget {
@@ -371,6 +374,7 @@ export function UploadComponent(props: UploadProps) {
 
     const [starlistNames, setStarlistNames] = React.useState<string[]>([])
     const [label, setLabel] = React.useState("Upload Targets");
+    const [skippedRowsList, setSkippedRowsList] = React.useState<string[]>([]);
 
     React.useEffect(() => {
         const fetchStarlistNames = async () => {
@@ -409,6 +413,7 @@ export function UploadComponent(props: UploadProps) {
 
     const handle_contents = (filename: string, contents: string, ext?: string) => {
         let uploadedTargets: UploadedTarget[] = []
+        let skippedRows: string[] = []
         switch (ext) {
             case 'json':
                 uploadedTargets = parse_json(filename, contents)
@@ -419,18 +424,24 @@ export function UploadComponent(props: UploadProps) {
             case 'starlisttxt':
             case 'txt':
                 console.log('txt', contents, context.obsid)
-                uploadedTargets = parse_txt(filename, contents, context.obsid)
+                ;({ tgts: uploadedTargets, skipped: skippedRows } = parse_txt(filename, contents, context.obsid))
                 break;
             default:
                 snackbarContext.setSnackbarMessage({ severity: 'warning', message: 'File type may not supported. Attempting to parse as .txt' })
                 snackbarContext.setSnackbarOpen(true);
                 try {
-                    uploadedTargets = parse_txt(filename, contents, context.obsid)
+                    ;({ tgts: uploadedTargets, skipped: skippedRows } = parse_txt(filename, contents, context.obsid))
                 }
                 catch (e) {
                     console.error('file type not supported', e)
                     return
                 }
+        }
+        setSkippedRowsList(skippedRows)
+        if (skippedRows.length > 0) {
+            const header = skippedRows.length === 1 ? '1 row was skipped:' : `${skippedRows.length} rows were skipped:`
+            snackbarContext.setSnackbarMessage({ severity: 'warning', message: `${header}\n${skippedRows.join('\n')}` })
+            snackbarContext.setSnackbarOpen(true);
         }
         console.log('uploaded tgts', uploadedTargets)
         const fmtTgts = format_targets(uploadedTargets, targetProps)
@@ -501,6 +512,18 @@ export function UploadComponent(props: UploadProps) {
             <Typography variant="body2" color="text.secondary">
                 {label}
             </Typography>
+            {skippedRowsList.length > 0 && (
+                <Box sx={{ maxHeight: 150, overflowY: 'auto', width: '100%' }}>
+                    <Typography variant="body2" color="warning.main">
+                        {skippedRowsList.length === 1 ? '1 row was skipped:' : `${skippedRowsList.length} rows were skipped:`}
+                    </Typography>
+                    {skippedRowsList.map((reason, index) => (
+                        <Typography key={index} variant="caption" component="div" color="warning.main">
+                            {reason}
+                        </Typography>
+                    ))}
+                </Box>
+            )}
         </Stack>
     )
 }
