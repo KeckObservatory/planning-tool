@@ -32,15 +32,14 @@ import { TARGET_LENGTH, TARGET_NAME_LENGTH_PADDED } from './two-d-view/constants
 import { StarlistSubmissionDialog } from './starlist_submission/starlist_submission_dialog.tsx';
 
 
-// Rounds the seconds field of an "HH:MM:SS.SSS" ra/dec string to 3 decimal
-// places, padding with zeros so the seconds field is always 2 digits before
-// the point.
-const round_ra_dec_seconds = (value: string): string => {
+const round_ra_dec_seconds = (value: string, signed = false): string => {
   const parts = value.split(':')
   if (parts.length !== 3 || !Number.isFinite(Number(parts[2]))) return value
   const [h, m, s] = parts
   const seconds = Number(s).toFixed(3).padStart(6, '0')
-  return `${h.replace('+', '').padStart(2, '0')}:${m}:${seconds}`
+  const digits = h.replace(/^[+-]/, '').padStart(2, '0')
+  const degrees = signed ? `${h.startsWith('-') ? '-' : ' '}${digits}` : digits
+  return `${degrees}:${m}:${seconds}`
 }
 
 const round_decimal = (value?: number | string, n = 2): number | string | undefined => {
@@ -52,12 +51,20 @@ const convert_target_to_targetlist_row = (target: Target, includeComments = true
   //required params
   const name = (target.target_name ?? '').slice(0, TARGET_LENGTH).padEnd(TARGET_NAME_LENGTH_PADDED, " ") //columns 1-16 are text last column is a space
   const ra = target.ra ? round_ra_dec_seconds(target.ra).replaceAll(':', ' ') : ''
-  const dec = target.dec ? round_ra_dec_seconds(target.dec).replaceAll(':', ' ') : ''
+  const dec = target.dec ? round_ra_dec_seconds(target.dec, true).replaceAll(':', ' ') : ''
   const equinox = target.equinox ?? '2000'
   let row = `${name} ${ra} ${dec} ${equinox}`
   const valid = target.target_name && target.ra && target.dec && equinox
   row = valid ? row : '# INVALID row: ' + row
   //optional params
+
+  //LGS BEFORE ALL
+  if (target.lgs === '1') {
+    row = row + ` lgs=1`
+  }
+  if (target.lgs === '0') {
+    row = row + ` lgs=0`
+  }
   row = target.v_mag ? row + ` vmag=${round_decimal(target.v_mag)}` : row
   row = target.j_mag ? row + ` jmag=${round_decimal(target.j_mag)}` : row
   row = target.g_mag ? row + ` gmag=${round_decimal(target.g_mag)}` : row
@@ -77,14 +84,7 @@ const convert_target_to_targetlist_row = (target: Target, includeComments = true
   row = target.pm_ra != null ? row + ` pmra=${round_decimal(target.pm_ra, 4)}` : row
   row = target.pm_dec != null ? row + ` pmdec=${round_decimal(target.pm_dec, 4)}` : row
   row = target.science_target ? row + ` target=${target.science_target}` : row
-  row = target.separation != null ? row + ` sep=${target.separation}` : row
-  if (target.lgs === '1') {
-    row = row + ` lgs=1`
-  }
-  else if (target.lgs === '0') {
-    row = row + ` lgs=0`
-  }
-  else { }
+  row = target.separation != null ? row + ` sep=${round_decimal(target.separation, 2)}` : row
   //comment and tags go before the row
   if (includeComments) {
     row = target.comment ? `# ${name} comment: ${target.comment}\n` + row : row
