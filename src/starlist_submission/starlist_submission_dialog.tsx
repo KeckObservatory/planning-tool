@@ -240,7 +240,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     }
 
     const dialogTitle = (
-        <span>LGS List Submission</span>
+        <span>LGS List Submission. Select the schedule row you want to submit.</span>
     )
 
     const dialogActions = (

@@ -35,7 +35,10 @@ export const TelescopeScheduleTable = (props: Props) => {
             resp = Array.isArray(resp) ? resp : []
             resp = resp.filter((entry) => 
                 is_ao_instrument(entry.BaseInstrument ?? '') 
-                || is_trick_instrument(entry.BaseInstrument ?? ''))
+                || is_trick_instrument(entry.BaseInstrument ?? '')
+                //INCLUDE ENG projects for now
+                || (entry.ProjCode==="ENG")
+            )
 
             setSchedule(Array.isArray(resp) ? resp : [])
             setLoading(false)
