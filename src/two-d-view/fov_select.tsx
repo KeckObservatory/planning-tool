@@ -8,7 +8,7 @@ interface FOVSelectProps {
 
 export const FOVSelect = (props: FOVSelectProps) => {
     const { fovs } = props
-    const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'NIRC2'))
+    const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'NIRC2Narrow'))
 
     const onInstrumentFOVChange = (value: string | undefined | null) => {
         if (value) {

@@ -306,7 +306,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const context = useStateContext()
     const { targets, open } = props
     const [guideStarName, setGuideStarName] = useState<string>('')
-    const [instrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'OSIRIS'))
+    const [instrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'NIRC2Narrow'))
     const init_img_size = instrumentFOV === 'MOSFIRE' ? MOSFIRE_WINDOW_SIZE : DEFAULT_WINDOW_SIZE
     const [imgSize, setImgSize] = useState<number>(init_img_size)
     const [magRange, setMagRange] = useQueryParam('mag_range', withDefault(ArrayParam, undefined)) //set to undefined to prevent unwanted rerenders on initial load
