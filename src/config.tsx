@@ -181,7 +181,6 @@ export const config = {
     "half_night_target_limit": 188,
     "duplicate_radec_tolerance_deg": 0.0001,
     "help_msg_filename": "helpMsg.md",
-    "pi_logout_url": "https://www2.keck.hawaii.edu/inst/PILogin/homepage.php",
     "pi_portal_url": "https://www3.keck.hawaii.edu/observers/ObserverPortal/rel/index.html",
     "timezone": "Pacific/Honolulu",
     "time_format": "MM:DD HH:mm",
