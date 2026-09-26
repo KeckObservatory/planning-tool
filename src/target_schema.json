@@ -120,7 +120,7 @@
         "j_mag": {
             "type":  ["number", "string"],
             "starlist_key": "jmag",
-            "description": "G Magnitude usually imported from SIMBAD.",
+            "description": "J Magnitude usually imported from SIMBAD.",
             "short_description": "J mag",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
