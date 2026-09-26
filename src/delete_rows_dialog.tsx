@@ -2,10 +2,11 @@ import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import { Target, useSnackbarContext } from './App';
+import { Target, useSnackbarContext, useStateContext } from './App';
 import { DialogComponent } from './dialog_component';
 import { Button, Typography } from '@mui/material';
 import { delete_target, submit_target } from './api/api_root';
+import { GridRowId } from '@mui/x-data-grid';
 
 
 
@@ -14,17 +15,20 @@ export interface VTDProps {
   handleClose: Function;
   targets: Target[];
   setRows: Function;
+  setRowSelectionModel?: Function;
 }
 
 interface Props {
   targets: Target[];
   setRows: Function;
+  setRowSelectionModel?: Function;
   color?: 'inherit' | 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
 }
 
-function DeleteTargets(props: { targets: Target[], setRows: Function }) {
-  const { targets, setRows } = props;
+function DeleteTargets(props: { targets: Target[], setRows: Function, setRowSelectionModel?: Function }) {
+  const { targets, setRows, setRowSelectionModel } = props;
   const snackbarContext = useSnackbarContext()
+  const context = useStateContext()
   const [enableUndo, setEnableUndo] = React.useState(false);
   const [deletedTargets, setDeletedTargets] = React.useState<Target[]>([]);
 
@@ -42,6 +46,14 @@ function DeleteTargets(props: { targets: Target[], setRows: Function }) {
       const newRows = oldRows.filter((row: any) => !ids.includes(row._id))
       return newRows
     });
+    // Deleted rows can still be sitting in the (controlled) selection model,
+    // which would make DataGrid look up an id that no longer exists in `rows`
+    // and throw "No row with id ... found".
+    setRowSelectionModel && setRowSelectionModel((oldModel: GridRowId[]) => oldModel.filter((selectedId) => !ids.includes(selectedId as string)))
+    context.setTargets && context.setTargets((oldTargets) => {
+      const remaining = (oldTargets ?? []).filter((tgt) => !ids.includes(tgt._id))
+      return remaining.length === (oldTargets?.length ?? 0) ? oldTargets : remaining
+    });
     setEnableUndo(true)
   }
 
@@ -56,9 +68,24 @@ function DeleteTargets(props: { targets: Target[], setRows: Function }) {
     }
     snackbarContext.setSnackbarMessage({ severity: 'info', message: 'Resubmitted deleted targets' })
     snackbarContext.setSnackbarOpen(true)
-    setRows((oldRows: any) => {
-      return [...targets, ...oldRows]
+    // Restore from deletedTargets, not the `targets` prop: that prop is the table's
+    // selected rows, and onDeleteClick already removed these from rows, so the
+    // selection resolves to nothing by the time undo runs. Prefer the copies the
+    // backend echoed back - their _ids are what deletes and edits key on next.
+    const restoredTargets = deletedTargets.map((tgt, idx) => {
+      const saved = resp.targets?.at(idx)
+      return saved?._id ? saved : tgt
+    })
+    setRows((oldRows: Target[]) => {
+      const missing = restoredTargets.filter((tgt) => !oldRows.some((row) => row._id === tgt._id))
+      return missing.length > 0 ? [...missing, ...oldRows] : oldRows
     });
+    context.setTargets && context.setTargets((oldTargets) => {
+      const existing = oldTargets ?? []
+      const missing = restoredTargets.filter((tgt) => !existing.some((old) => old._id === tgt._id))
+      return missing.length > 0 ? [...missing, ...existing] : existing
+    });
+    setDeletedTargets([])
     setEnableUndo(false)
   }
 
@@ -83,14 +110,14 @@ function DeleteTargets(props: { targets: Target[], setRows: Function }) {
 }
 
 function DeleteTargetsDialog(props: VTDProps) {
-  const { open, handleClose, targets, setRows } = props;
+  const { open, handleClose, targets, setRows, setRowSelectionModel } = props;
 
   const dialogTitle = (
     <div>Delete Targets</div>
   );
 
   const dialogContent = (
-    <DeleteTargets targets={targets} setRows={setRows} />
+    <DeleteTargets targets={targets} setRows={setRows} setRowSelectionModel={setRowSelectionModel} />
   )
 
   return (
@@ -125,6 +152,7 @@ export default function DeleteDialogButton(props: Props) {
       <DeleteTargetsDialog
         open={open}
         setRows={props.setRows}
+        setRowSelectionModel={props.setRowSelectionModel}
         targets={props.targets}
         handleClose={handleClose}
       />

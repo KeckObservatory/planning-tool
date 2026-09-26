@@ -1,14 +1,16 @@
 
 import Tooltip from '@mui/material/Tooltip';
 import { IconButton } from '@mui/material';
+import { useState } from 'react';
 import { GaiaParams, get_gaia, get_simbad } from './api/api_root';
 import ModeStandbyIcon from '@mui/icons-material/ModeStandby';
 import { Target } from './App';
+import CatalogDialog from './catalog_dialog';
 
 
 export interface Props {
     target: Target
-    setTarget: Function
+    setTarget: (updater: (prev: Target) => Target) => void //avoids clobbering edits when running get_simbad_and_gaia_target_info, which returns a partial target object
     hasCatalog: boolean
     label?: boolean
 }
@@ -25,13 +27,19 @@ export const ra_dec_to_deg = (time: string | number, dec = false): number => {
     try {
         let [hours, min, sec] = (time as string).split(':')
         const decimal = sec.split('.').at(1) //sometimes decimal is not present in seconds
-        sigfig = decimal ? decimal.length : 3 //if sec has decimal, use its length as sigfig
+        sigfig = (decimal?.length ?? 0) + 5
         if (dec) {
-            const decDeg = Number(hours)
-            let sign = Math.sign(decDeg)
-            deg = decDeg // dec is already in degrees
-                + sign * Number(min) / 60
-                + sign * Number(sec) / 3600
+            let sign = 1
+            let degrees = hours.trim()
+            if (degrees.startsWith('+')) {
+                degrees = degrees.substring(1)
+            } else if (degrees.startsWith('-')) {
+                degrees = degrees.substring(1)
+                sign = -1
+            }
+            deg = sign * (Number(degrees) // dec is already in degrees
+                + Number(min) / 60
+                + Number(sec) / 3600)
         }
 
         else {
@@ -56,8 +64,9 @@ export interface SimbadTargetData {
     epoch?: string,
     parallax?: number,
     tic?: string,
-    j_mag?: number | string,
+    b_mag?: number | string,
     g_mag?: number | string,
+    j_mag?: number | string,
     systemic_velocity?: number
     gaia_id?: string,
     tic_id?: string,
@@ -150,19 +159,32 @@ export default function CatalogButton(props: Props) {
     const { target, setTarget } = props
     const targetName = target.target_name
     const gaia_id = target.gaia_id
+    const [dialogOpen, setDialogOpen] = useState(false)
 
-    const handleClick = async () => {
+    const handleClick = () => {
         if (targetName) {
-            const catalogTargetInfo = await get_simbad_and_gaia_target_info(targetName, gaia_id)
-            setTarget({ ...target, ...catalogTargetInfo, "state": 'ROW_EDITED' })
+            setDialogOpen(true)
         }
     }
 
+    const handleConfirm = async (magnitudeOnly: boolean) => {
+        if (!targetName) return
+        const catalogTargetInfo = await get_simbad_and_gaia_target_info(targetName, gaia_id)
+        const updateInfo = magnitudeOnly
+            ? Object.fromEntries(Object.entries(catalogTargetInfo).filter(([key]) => /_mag$/i.test(key)))
+            : catalogTargetInfo
+        setTarget((prev) => ({ ...prev, ...updateInfo, "state": 'ROW_EDITED', status: 'EDITED' }))
+    }
+
     return (
-        <Tooltip title={`Click to add Simbad and Gaia info to target ${targetName}`}>
-            <IconButton onClick={handleClick}>
-                <ModeStandbyIcon color={props.hasCatalog ? 'success' : 'inherit'} />
-            </IconButton>
-        </Tooltip>
+        <>
+            <Tooltip title={`Click to add Simbad and Gaia info to target ${targetName}`}>
+                <IconButton onClick={handleClick}>
+                    <ModeStandbyIcon color={props.hasCatalog ? 'success' : 'inherit'} />
+                </IconButton>
+            </Tooltip>
+            <CatalogDialog open={dialogOpen} handleClose={() => setDialogOpen(false)}
+                targetName={targetName} onConfirm={handleConfirm} />
+        </>
     );
 }
