@@ -176,7 +176,7 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
 
     let titleText =  targetViz.target_name ?? 'Target'
     titleText += ` ${vizChart}`
-    const trace: Partial<Plotly.PlotData> = {
+    const trace: Partial<Plotly.Data> = {
         x,
         y,
         z,
@@ -194,7 +194,6 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
             },
         },
         hovertemplate: '<b>%{text}</b> <extra></extra>', //disable to show xyz coords
-        textposition: 'top left',
         colorscale: 'Hot',
         reversescale: reverseAxis,
         type: 'contour',
@@ -203,7 +202,7 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
     }
     let traces = [trace]
 
-    const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.PlotData[]
+    const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.Data[]
     //@ts-ignore
     traces = [...traces, ...lightTraces]
     titleText = `<b>${titleText}</b>`

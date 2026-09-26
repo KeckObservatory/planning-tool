@@ -45,7 +45,7 @@ export const reason_to_color_mapping = (reasons: string[]) => {
 // The per-point marker colors above are categorical, not a continuous scale, so a
 // legend (built from zero-data "swatch" traces, one per color/reason) explains them
 // better than a Plotly colorbar - each trace exists only to add one legend entry.
-const create_color_legend_traces = (): Partial<Plotly.PlotData>[] => {
+const create_color_legend_traces = (): Partial<Plotly.Data>[] => {
     const entries: [string, string][] = [['Observable', OBSERVABLE_COLOR], ...Object.entries(colors)]
     return entries.map(([label, color]) => ({
         x: [null],
@@ -258,7 +258,7 @@ export const TargetVizChart = (props: Props) => {
         const ydate = new Date(dayjs(dayViz.date).format('YYYY-MM-DD'))
         const x = Array.from({ length: y.length }, () => ydate)
 
-        const trace: Partial<Plotly.PlotData> = {
+        const trace: Partial<Plotly.Data> = {
             x,
             y,
             text: texts,
@@ -281,7 +281,7 @@ export const TargetVizChart = (props: Props) => {
         return trace
     })
 
-    const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.PlotData[]
+    const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.Data[]
     const legendTraces = create_color_legend_traces()
     //@ts-ignore
     traces = [...traces, ...lightTraces, ...legendTraces]
