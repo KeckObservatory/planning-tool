@@ -1,4 +1,4 @@
-SYSNAM   = PlanningTool
+SYSNAM   = planning-tool
 
 # Is this an official or sandbox build?
 ifeq ($(findstring sandbox, $(CURDIR)),sandbox)

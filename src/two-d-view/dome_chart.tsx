@@ -38,7 +38,7 @@ const make_disk_polar = (r1: number, r2: number, th1: number, th2: number) => {
     const r = [...rr1, ...rr2.reverse(), rr1[0]]
     const theta = [...tt1, ...tt2.reverse(), tt1[0]]
 
-    const pTrace: Partial<Plotly.PlotData | any> = {
+    const pTrace: Partial<Plotly.Data | any> = {
         r: r,
         theta: theta,
         opacity: .5,
