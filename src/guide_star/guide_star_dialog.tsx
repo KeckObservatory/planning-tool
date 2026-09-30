@@ -373,16 +373,14 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const trkMap = showTrickMap ? await get_shapes('trick_map') : undefined
             // One dropdown across both domes - each instrument only ever lives on one
             // telescope, so picking it (below) is what sets dome now, not the reverse.
-            const fovFeatures = featureCollection['features'].filter((feature: any) => {
-                return feature['properties'].type === 'FOV'
-            }).filter((feature: any) => {
-                const inst = feature['properties'].instrument as string
+            const fovCollections = featureCollection.filter((collection) => {
+                const inst = collection.properties.instrument
                 return is_ao_instrument(inst) || is_trick_instrument(inst)
             })
-            const newFovs = fovFeatures.map((feature: any) => feature['properties'].instrument) as string[]
+            const newFovs = [...new Set(fovCollections.map((collection) => collection.properties.instrument))]
             const newInstrumentDomes: Record<string, Dome> = {}
-            fovFeatures.forEach((feature: any) => {
-                newInstrumentDomes[feature['properties'].instrument] = feature['properties'].dome
+            fovCollections.forEach((collection) => {
+                newInstrumentDomes[collection.properties.instrument] = collection.properties.dome as Dome
             })
             setFOVs(newFovs)
             setInstrumentDomes(newInstrumentDomes)

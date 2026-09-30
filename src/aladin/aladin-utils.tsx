@@ -1,6 +1,6 @@
 import { cosd, sind, r2d } from '../two-d-view/sky_view_util.tsx'
-import { Feature, FeatureCollection, MultiPolygon, Polygon, Position } from 'geojson'
-import { get_shapes } from "../two-d-view/two_d_view_common.tsx"
+import { FeatureCollection, Polygon, Position } from 'geojson'
+import { get_fov_shapes, get_shapes } from "../two-d-view/two_d_view_common.tsx"
 
 export const rotate_point = (point: Position[], angle: number, pnt=[0,0]) => {
         let [x, y] = point as unknown as [number, number]
@@ -74,14 +74,14 @@ export const get_compass = async (aladin: any, height: number, width: number, po
 
 export const get_fovz = async (ra: number, dec: number, aladin: any, instrumentFOV: string, angle: number, offset: [number, number]) => {
     const fc = await get_shapes('fov')
-    const features = fc['features'].filter((f: any) => f['properties'].type === 'FOV')
-    const feature = features.find((f: any) => f['properties'].instrument === instrumentFOV)
-    if (!feature) return { fov: [], zoom: 5 } 
-    const multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
+    const collection = fc.find((c) => c.properties.instrument === instrumentFOV)
+    if (!collection) return { fov: [], zoom: 5 }
+    const pointingOrigins = await get_shapes('pointing_origins')
+    // every shape of the instrument is drawn, each already shifted by its own pointing origin
+    const multipolygon = get_fov_shapes(fc, instrumentFOV, pointingOrigins).flatMap((shape) => shape.rings) as unknown as Position[][][]
     const rotPolygon = rotate_multipolygon(multipolygon, angle, offset )
     const polygons = rotPolygon.map((polygon: Position[][]) => {
-        let absPolygon = [...polygon, polygon[0]]
-        absPolygon = absPolygon
+        const absPolygon = polygon // rings are already closed
             .map((point) => {
                 const [x, y] = point as unknown as [number, number]
                 return [x / 3600 + ra, y / 3600 + dec]
@@ -94,7 +94,7 @@ export const get_fovz = async (ra: number, dec: number, aladin: any, instrumentF
         return absPolygon
     })
 
-    const zoom = feature?.properties?.zoom ?? 1
+    const zoom = collection.properties.zoom ?? 1
     const out = { fov: polygons as Position[][][], zoom: zoom as number }
     return out 
 }
