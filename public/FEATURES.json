@@ -377,7 +377,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "guider"
+            "type": "guider",
+            "pointing_origin": "REF-N"
           },
           "geometry": {
             "type": "MultiPolygon",
@@ -385,24 +386,24 @@
               [
                 [
                   [
-                    0.0,
-                    97.0263640872933
+                    -5.077967545284519,
+                    96.89339282742161
                   ],
                   [
-                    -97.0263640872933,
-                    0.0
+                    -96.89339282742161,
+                    -5.077967545284519
                   ],
                   [
-                    0.0,
-                    -97.0263640872933
+                    5.077967545284519,
+                    -96.89339282742161
                   ],
                   [
-                    97.0263640872933,
-                    0.0
+                    96.89339282742161,
+                    5.077967545284519
                   ],
                   [
-                    0.0,
-                    97.0263640872933
+                    -5.077967545284519,
+                    96.89339282742161
                   ]
                 ]
               ]
@@ -420,24 +421,24 @@
               [
                 [
                   [
-                    7.023679636710694,
-                    12.300133065341711
+                    7.003833180013425,
+                    13.05803866911552
                   ],
                   [
-                    -7.457867241989797,
-                    26.781679944042207
+                    -8.215772845763606,
+                    26.761833487344937
                   ],
                   [
-                    -21.939414120690287,
-                    12.300133065341713
+                    -21.919567663993018,
+                    11.542227461567904
                   ],
                   [
-                    -7.457867241989799,
-                    -2.181413813358782
+                    -6.69996163821599,
+                    -2.1615673566615126
                   ],
                   [
-                    7.023679636710694,
-                    12.300133065341711
+                    7.003833180013425,
+                    13.05803866911552
                   ]
                 ]
               ]
@@ -455,24 +456,24 @@
               [
                 [
                   [
-                    10.900178333906398,
-                    -5.036218085826262
+                    11.028732393522706,
+                    -4.870904016219943
                   ],
                   [
-                    11.109551393260016,
-                    -0.24078662223334124
+                    10.986845023130517,
+                    -0.0710867855119166
                   ],
                   [
-                    4.715642775136121,
-                    0.038377456904810536
+                    4.587088715519815,
+                    -0.1269366127015088
                   ],
                   [
-                    4.506269715782507,
-                    -4.757054006688112
+                    4.628976085912007,
+                    -4.9267538434095375
                   ],
                   [
-                    10.900178333906398,
-                    -5.036218085826262
+                    11.028732393522706,
+                    -4.870904016219943
                   ]
                 ]
               ]
@@ -495,7 +496,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "guider"
+            "type": "guider",
+            "pointing_origin": "REF-N"
           },
           "geometry": {
             "type": "MultiPolygon",
@@ -578,7 +580,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "guider"
+            "type": "guider",
+            "pointing_origin": "REF-N"
           },
           "geometry": {
             "type": "MultiPolygon",
@@ -661,7 +664,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "guider"
+            "type": "guider",
+            "pointing_origin": "REF-N"
           },
           "geometry": {
             "type": "MultiPolygon",
@@ -744,7 +748,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "detector"
+            "type": "detector",
+            "pointing_origin": "REF"
           },
           "geometry": {
             "type": "MultiPolygon",
@@ -792,7 +797,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "detector"
+            "type": "detector",
+            "pointing_origin": "REF"
           },
           "geometry": {
             "type": "MultiPolygon",
@@ -840,7 +846,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "detector"
+            "type": "detector",
+            "pointing_origin": "REF"
           },
           "geometry": {
             "type": "MultiPolygon",
@@ -1072,7 +1079,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "detector"
+            "type": "detector",
+            "pointing_origin": "REF"
           },
           "geometry": {
             "type": "MultiPolygon",
@@ -1113,13 +1121,15 @@
         "dome": "Keck 2",
         "po_instrument": "KCWI",
         "zoom": 0.075,
-        "units": "arcsec",
-        "type": "detector large"
+        "units": "arcsec"
       },
       "features": [
         {
           "type": "Feature",
-          "properties": {},
+          "properties": {
+            "type": "detector large",
+            "pointing_origin": "REF"
+          },
           "geometry": {
             "type": "MultiPolygon",
             "coordinates": [
@@ -1149,23 +1159,13 @@
               ]
             ]
           }
-        }
-      ]
-    },
-    {
-      "type": "FeatureCollection",
-      "properties": {
-        "instrument": "KCWI",
-        "dome": "Keck 2",
-        "po_instrument": "KCWI",
-        "zoom": 0.075,
-        "units": "arcsec",
-        "type": "detector medium"
-      },
-      "features": [
+        },
         {
           "type": "Feature",
-          "properties": {},
+          "properties": {
+            "type": "detector medium",
+            "pointing_origin": "REF"
+          },
           "geometry": {
             "type": "MultiPolygon",
             "coordinates": [
@@ -1195,23 +1195,13 @@
               ]
             ]
           }
-        }
-      ]
-    },
-    {
-      "type": "FeatureCollection",
-      "properties": {
-        "instrument": "KCWI",
-        "dome": "Keck 2",
-        "po_instrument": "KCWI",
-        "zoom": 0.075,
-        "units": "arcsec",
-        "type": "detector small"
-      },
-      "features": [
+        },
         {
           "type": "Feature",
-          "properties": {},
+          "properties": {
+            "type": "detector small",
+            "pointing_origin": "REF"
+          },
           "geometry": {
             "type": "MultiPolygon",
             "coordinates": [
@@ -1241,23 +1231,9 @@
               ]
             ]
           }
-        }
-      ]
-    },
-    {
-      "type": "FeatureCollection",
-      "properties": {
-        "instrument": "KCWI",
-        "dome": "Keck 2",
-        "po_instrument": "KCWI",
-        "zoom": 0.075,
-        "units": "arcsec",
-        "type": "annular guider"
-      },
-      "features": [
+        },
         {
           "type": "Feature",
-          "properties": {},
           "geometry": {
             "type": "MultiPolygon",
             "coordinates": [
@@ -2868,6 +2844,9 @@
                 ]
               ]
             ]
+          },
+          "properties": {
+            "type": "annular guider"
           }
         }
       ]
@@ -2886,7 +2865,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "detector"
+            "type": "guider",
+            "pointing_origin": "REF"
           },
           "geometry": {
             "type": "MultiPolygon",
@@ -2934,7 +2914,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "detector"
+            "type": "guider",
+            "pointing_origin": "REFA"
           },
           "geometry": {
             "type": "MultiPolygon",
@@ -2982,7 +2963,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "detector"
+            "type": "guider",
+            "pointing_origin": "REF-N"
           },
           "geometry": {
             "type": "MultiPolygon",
@@ -3030,7 +3012,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "detector"
+            "type": "guider",
+            "pointing_origin": "REF-S"
           },
           "geometry": {
             "type": "MultiPolygon",
