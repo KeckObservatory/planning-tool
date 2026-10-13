@@ -12,6 +12,7 @@ export interface POPointingOriginProperties {
     instrument: string;
     xpos: number;
     ypos: number;
+    original_units: string;
     units: string;
     source_file: string;
 }

@@ -8,7 +8,7 @@ import { Feature, Point } from "geojson"
 import { PointingOriginMarkers, PointingOriginMarker } from "../aladin/pointing_origin_markers"
 import { ScaleBar } from "./scale_bar"
 import { CompassRose } from "./compass_rose"
-import { ZOOM_SPEED, ZOOM_MIN, ZOOM_MAX, MOSFIRE_ZOOM_DEFAULT, ZOOM_DEFAULT } from "../two-d-view/constants"
+import { ZOOM_SPEED, ZOOM_MIN, ZOOM_MAX, MOSFIRE_ZOOM_DEFAULT, ZOOM_DEFAULT, OSIRIS_FSM_TSS_ROTATION, NIRC2_FSM_TSS_PO } from "../two-d-view/constants"
 import IconButton from "@mui/material/IconButton"
 import Tooltip from "@mui/material/Tooltip"
 import DownloadIcon from '@mui/icons-material/Download'
@@ -115,14 +115,29 @@ export const GSViewer = (props: Props) => {
   // the opposite way from how the image used to.
   const overlayRotation = -(props.fovAngle || 0);
 
-  // The laser and FSM contours are defined in the telescope frame, but OSIRIS is physically
-  // mounted 45 degrees off that frame - the same offset already baked into its FOV
-  // and pointing origins in FEATURES.json - so its contours need that same 45 degree
-  // counter-clockwise correction to line up with the instrument.
-  // The FSM outline turns the opposite way from the laser contours (checked against the
-  // OSIRIS FOV), so it takes the opposite sign.
-  const osirisContourRotation = props.showLaser ? -45 : 45;
-  const instrumentContourRotation = props.instrumentFOV === 'OSIRIS' ? osirisContourRotation : 0;
+  const instrumentContourRotation = props.instrumentFOV === 'OSIRIS' ? OSIRIS_FSM_TSS_ROTATION : 0;
+  const instrumentContourPOName = props.instrumentFOV?.includes("NIRC2") ? NIRC2_FSM_TSS_PO : undefined
+
+  // Offset (arcseconds) of the pointing origin the FSM/TSS contours are drawn about,
+  // looked up in FEATURES.json so it doesn't depend on which origins are selected.
+  // The FOV is e.g. 'NIRC2Narrow', but its pointing origins belong to 'NIRC2'.
+  const [instrumentContourOffset, setInstrumentContourOffset] = React.useState<[number, number]>([0, 0]);
+  React.useEffect(() => {
+    if (!instrumentContourPOName || !props.instrumentFOV) {
+      setInstrumentContourOffset([0, 0]);
+      return;
+    }
+    let cancelled = false;
+    get_shapes('pointing_origins')
+      .then((collection: any) => {
+        const po = collection.features.find((f: any) =>
+          f.properties?.instrument === 'NIRC2' && f.properties?.name === instrumentContourPOName);
+        if (!po) console.warn(`NIRC2: FSM/TSS pointing origin '${instrumentContourPOName}' not found`);
+        if (!cancelled) setInstrumentContourOffset(po ? [po.geometry.coordinates[0], po.geometry.coordinates[1]] : [0, 0]);
+      })
+      .catch((error: unknown) => console.error('Failed to fetch FSM/TSS pointing origin:', error));
+    return () => { cancelled = true; };
+  }, [props.instrumentFOV, instrumentContourPOName]);
 
   // Rotate a pixel coordinate about the viewer center. Positive degrees are clockwise
   // on screen, matching the CSS rotate() applied to the FOV layer.
@@ -178,8 +193,8 @@ export const GSViewer = (props: Props) => {
         // Convert from arcseconds to pixel coordinates
         const [dra1, ddec1] = lineseg[0]; // arcseconds
         const [dra2, ddec2] = lineseg[1]; // arcseconds
-        const [x1, y1] = rotateAboutCenter(...arcsecToPixel(dra1, ddec1), instrumentContourRotation);
-        const [x2, y2] = rotateAboutCenter(...arcsecToPixel(dra2, ddec2), instrumentContourRotation);
+        const [x1, y1] = rotateAboutCenter(...arcsecToPixel(dra1 + instrumentContourOffset[0], ddec1 + instrumentContourOffset[1]), instrumentContourRotation);
+        const [x2, y2] = rotateAboutCenter(...arcsecToPixel(dra2 + instrumentContourOffset[0], ddec2 + instrumentContourOffset[1]), instrumentContourRotation);
         return [[x1, y1] as [number, number], [x2, y2] as [number, number]];
       });
       const name = feature.properties?.name ?? 'Unknown';
@@ -192,7 +207,7 @@ export const GSViewer = (props: Props) => {
     });
 
     setContourLines(convertedContours);
-  }, [props.contours, props.width, props.height, degPerPixel, zoom, props.selPO, instrumentContourRotation]);
+  }, [props.contours, props.width, props.height, degPerPixel, zoom, props.selPO, instrumentContourRotation, instrumentContourOffset]);
 
   // Convert trick map to pixel coordinates
   React.useEffect(() => {

@@ -532,7 +532,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "detector"
+            "type": "detector",
+            "pointing_origin": "REF-N"
           },
           "geometry": {
             "type": "MultiPolygon",
@@ -616,7 +617,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "detector"
+            "type": "detector",
+            "pointing_origin": "REF-N"
           },
           "geometry": {
             "type": "MultiPolygon",
@@ -700,7 +702,8 @@
         {
           "type": "Feature",
           "properties": {
-            "type": "detector"
+            "type": "detector",
+            "pointing_origin": "REF-N"
           },
           "geometry": {
             "type": "MultiPolygon",
@@ -3057,15 +3060,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -52.7,
-            196.0
+            -72.6733,
+            270.284
           ]
         },
         "properties": {
           "name": "Slit 0.8",
           "xpos": -52.7,
           "ypos": 196.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "DEIMOS",
           "source_file": "DEIMOSpo10.csave"
         }
@@ -3075,15 +3079,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -88.6,
-            195.9
+            -122.1794,
+            270.1461
           ]
         },
         "properties": {
           "name": "Slit 1.2",
           "xpos": -88.6,
           "ypos": 195.9,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "DEIMOS",
           "source_file": "DEIMOSpo11.csave"
         }
@@ -3093,15 +3098,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -73.25,
-            141.25
+            -101.0118,
+            194.7837
           ]
         },
         "properties": {
           "name": "TVCENTER",
           "xpos": -73.25,
           "ypos": 141.25,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "DEIMOS",
           "source_file": "DEIMOSpo2.csave"
         }
@@ -3111,15 +3117,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -95.2,
-            202.1
+            -131.2808,
+            278.6959
           ]
         },
         "properties": {
           "name": "Image",
           "xpos": -95.2,
           "ypos": 202.1,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "DEIMOS",
           "source_file": "DEIMOSpo3.csave"
         }
@@ -3129,15 +3136,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -94.7,
-            195.8
+            -130.5913,
+            270.0082
           ]
         },
         "properties": {
           "name": "Slit",
           "xpos": -94.7,
           "ypos": 195.8,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "DEIMOS",
           "source_file": "DEIMOSpo4.csave"
         }
@@ -3147,15 +3155,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -2.0,
-            196.0
+            -2.758,
+            270.284
           ]
         },
         "properties": {
           "name": "DEIMOS",
           "xpos": -2.0,
           "ypos": 196.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "DEIMOS",
           "source_file": "DEIMOSpo5.csave"
         }
@@ -3165,15 +3174,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -139.2,
-            201.1
+            -191.9568,
+            277.3169
           ]
         },
         "properties": {
           "name": "Mira",
           "xpos": -139.2,
           "ypos": 201.1,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "DEIMOS",
           "source_file": "DEIMOSpo6.csave"
         }
@@ -3183,15 +3193,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -34.2,
-            196.0
+            -47.1618,
+            270.284
           ]
         },
         "properties": {
           "name": "Slit 0.7",
           "xpos": -34.2,
           "ypos": 196.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "DEIMOS",
           "source_file": "DEIMOSpo7.csave"
         }
@@ -3201,15 +3212,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -70.9,
-            196.2
+            -97.7711,
+            270.5598
           ]
         },
         "properties": {
           "name": "Slit 1.0",
           "xpos": -70.9,
           "ypos": 196.2,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "DEIMOS",
           "source_file": "DEIMOSpo8.csave"
         }
@@ -3219,15 +3231,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -107.0,
-            196.0
+            -147.553,
+            270.284
           ]
         },
         "properties": {
           "name": "Slit 1.5",
           "xpos": -107.0,
           "ypos": 196.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "DEIMOS",
           "source_file": "DEIMOSpo9.csave"
         }
@@ -3237,15 +3250,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            1.53,
-            328.33
+            2.1099,
+            452.7671
           ]
         },
         "properties": {
           "name": "REF",
           "xpos": 1.53,
           "ypos": 328.33,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "ESI",
           "source_file": "ESIpo1.csave"
         }
@@ -3255,15 +3269,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -12.32,
-            214.04
+            -16.9893,
+            295.1612
           ]
         },
         "properties": {
           "name": "ESI",
           "xpos": -12.32,
           "ypos": 214.04,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "ESI",
           "source_file": "ESIpo2.csave"
         }
@@ -3274,14 +3289,15 @@
           "type": "Point",
           "coordinates": [
             0.0,
-            -42.75
+            -58.9522
           ]
         },
         "properties": {
           "name": "dref",
           "xpos": 0.0,
           "ypos": -42.75,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "ESI",
           "source_file": "ESIpo3.csave"
         }
@@ -3291,15 +3307,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            23.96,
-            214.36
+            33.0408,
+            295.6024
           ]
         },
         "properties": {
           "name": "Image",
           "xpos": 23.96,
           "ypos": 214.36,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "ESI",
           "source_file": "ESIpo4.csave"
         }
@@ -3309,15 +3326,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            47.35,
-            -12.21
+            65.2957,
+            -16.8376
           ]
         },
         "properties": {
           "name": "TFS",
           "xpos": 47.35,
           "ypos": -12.21,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "ESI",
           "source_file": "ESIpo5.csave"
         }
@@ -3327,15 +3345,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -4.54,
-            214.21
+            -6.2607,
+            295.3956
           ]
         },
         "properties": {
           "name": "Ellis-R",
           "xpos": -4.54,
           "ypos": 214.21,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "ESI",
           "source_file": "ESIpo6.csave"
         }
@@ -3345,15 +3364,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -11.81,
-            212.44
+            -16.286,
+            292.9548
           ]
         },
         "properties": {
           "name": "TILT",
           "xpos": -11.81,
           "ypos": 212.44,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "ESI",
           "source_file": "ESIpo7.csave"
         }
@@ -3363,15 +3383,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -0.85,
-            207.38
+            -1.1722,
+            285.977
           ]
         },
         "properties": {
           "name": "IFU",
           "xpos": -0.85,
           "ypos": 207.38,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "ESI",
           "source_file": "ESIpo8.csave"
         }
@@ -3389,7 +3410,8 @@
           "name": "REF",
           "xpos": 0.0,
           "ypos": 0.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "HIRES",
           "source_file": "HIRESpo1.csave"
         }
@@ -3399,15 +3421,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -1.34,
-            -0.22
+            -1.8479,
+            -0.3034
           ]
         },
         "properties": {
           "name": "USER",
           "xpos": -1.34,
           "ypos": -0.22,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "HIRES",
           "source_file": "HIRESpo2.csave"
         }
@@ -3417,15 +3440,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            0.22,
-            1.2
+            0.3034,
+            1.6548
           ]
         },
         "properties": {
           "name": "iodine",
           "xpos": 0.22,
           "ypos": 1.2,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "HIRES",
           "source_file": "HIRESpo3.csave"
         }
@@ -3435,7 +3459,7 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            0.11,
+            0.1517,
             0.0
           ]
         },
@@ -3443,7 +3467,8 @@
           "name": "Decker",
           "xpos": 0.11,
           "ypos": 0.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "HIRES",
           "source_file": "HIRESpo4.csave"
         }
@@ -3461,7 +3486,8 @@
           "name": "REF",
           "xpos": 0.0,
           "ypos": 0.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "KCWI",
           "source_file": "KCWIpo1.csave"
         }
@@ -3471,15 +3497,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            0.68,
-            -0.72
+            0.9377,
+            -0.9929
           ]
         },
         "properties": {
           "name": "IFU",
           "xpos": 0.68,
           "ypos": -0.72,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "KCWI",
           "source_file": "KCWIpo2.csave"
         }
@@ -3490,14 +3517,15 @@
           "type": "Point",
           "coordinates": [
             0.0,
-            20.0
+            27.58
           ]
         },
         "properties": {
           "name": "YPLUS",
           "xpos": 0.0,
           "ypos": 20.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "KCWI",
           "source_file": "KCWIpo3.csave"
         }
@@ -3507,15 +3535,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            0.68,
-            -0.72
+            0.9377,
+            -0.9929
           ]
         },
         "properties": {
           "name": "IFU-L",
           "xpos": 0.68,
           "ypos": -0.72,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "KCWI",
           "source_file": "KCWIpo4.csave"
         }
@@ -3525,15 +3554,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            0.97,
-            -0.64
+            1.3376,
+            -0.8826
           ]
         },
         "properties": {
           "name": "IFU-M",
           "xpos": 0.97,
           "ypos": -0.64,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "KCWI",
           "source_file": "KCWIpo5.csave"
         }
@@ -3543,15 +3573,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            0.97,
-            -1.08
+            1.3376,
+            -1.4893
           ]
         },
         "properties": {
           "name": "IFU-S",
           "xpos": 0.97,
           "ypos": -1.08,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "KCWI",
           "source_file": "KCWIpo6.csave"
         }
@@ -3561,15 +3592,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            3.97,
-            -309.82
+            5.4746,
+            -427.2418
           ]
         },
         "properties": {
           "name": "LRIS",
           "xpos": 3.97,
           "ypos": -309.82,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "LRISADC",
           "source_file": "LRISADCpo1.csave"
         }
@@ -3579,15 +3611,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            3.91,
-            -273.12
+            5.3919,
+            -376.6325
           ]
         },
         "properties": {
           "name": "POL",
           "xpos": 3.91,
           "ypos": -273.12,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "LRISADC",
           "source_file": "LRISADCpo10.csave"
         }
@@ -3597,15 +3630,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            10.95,
-            -268.58
+            15.1,
+            -370.3718
           ]
         },
         "properties": {
           "name": "REF",
           "xpos": 10.95,
           "ypos": -268.58,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "LRISADC",
           "source_file": "LRISADCpo2.csave"
         }
@@ -3615,15 +3649,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            32.25,
-            -263.38
+            44.4727,
+            -363.201
           ]
         },
         "properties": {
           "name": "slitC",
           "xpos": 32.25,
           "ypos": -263.38,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "LRISADC",
           "source_file": "LRISADCpo3.csave"
         }
@@ -3633,15 +3668,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            3.67,
-            -300.34
+            5.0609,
+            -414.1689
           ]
         },
         "properties": {
           "name": "MIRA",
           "xpos": 3.67,
           "ypos": -300.34,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "LRISADC",
           "source_file": "LRISADCpo4.csave"
         }
@@ -3651,15 +3687,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -14.41,
-            -263.74
+            -19.8714,
+            -363.6975
           ]
         },
         "properties": {
           "name": "slitb",
           "xpos": -14.41,
           "ypos": -263.74,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "LRISADC",
           "source_file": "LRISADCpo5.csave"
         }
@@ -3669,15 +3706,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -53.11,
-            -320.54
+            -73.2387,
+            -442.0247
           ]
         },
         "properties": {
           "name": "LRISB",
           "xpos": -53.11,
           "ypos": -320.54,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "LRISADC",
           "source_file": "LRISADCpo6.csave"
         }
@@ -3687,15 +3725,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            20.25,
-            -263.68
+            27.9247,
+            -363.6147
           ]
         },
         "properties": {
           "name": "Bedge",
           "xpos": 20.25,
           "ypos": -263.68,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "LRISADC",
           "source_file": "LRISADCpo7.csave"
         }
@@ -3705,15 +3744,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -0.65,
-            -263.68
+            -0.8963,
+            -363.6147
           ]
         },
         "properties": {
           "name": "Tedge",
           "xpos": -0.65,
           "ypos": -263.68,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "LRISADC",
           "source_file": "LRISADCpo8.csave"
         }
@@ -3723,15 +3763,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -84.45,
-            61.99
+            -116.4566,
+            85.4842
           ]
         },
         "properties": {
           "name": "REFO",
           "xpos": -84.45,
           "ypos": 61.99,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "LRISADC",
           "source_file": "LRISADCpo9.csave"
         }
@@ -3741,15 +3782,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -6.5,
-            291.2
+            -8.9635,
+            401.5648
           ]
         },
         "properties": {
           "name": "REF",
           "xpos": -6.5,
           "ypos": 291.2,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "MOSFIRE",
           "source_file": "MOSFIREpo1.csave"
         }
@@ -3759,7 +3801,7 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -2.0,
+            -2.758,
             0.0
           ]
         },
@@ -3767,7 +3809,8 @@
           "name": "MIRA",
           "xpos": -2.0,
           "ypos": 0.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "MOSFIRE",
           "source_file": "MOSFIREpo2.csave"
         }
@@ -3777,15 +3820,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -0.4,
-            2.0
+            -0.5516,
+            2.758
           ]
         },
         "properties": {
           "name": "SLIT",
           "xpos": -0.4,
           "ypos": 2.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "MOSFIRE",
           "source_file": "MOSFIREpo3.csave"
         }
@@ -3795,7 +3839,7 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -2.0,
+            -2.758,
             0.0
           ]
         },
@@ -3803,7 +3847,8 @@
           "name": "MOSFIRE",
           "xpos": -2.0,
           "ypos": 0.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "MOSFIRE",
           "source_file": "MOSFIREpo4.csave"
         }
@@ -3813,15 +3858,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -1.03,
-            -0.83
+            -1.4204,
+            -1.1446
           ]
         },
         "properties": {
           "name": "REF-N",
           "xpos": -1.03,
           "ypos": -0.83,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRC2",
           "source_file": "NIRC2po1.csave"
         }
@@ -3831,15 +3877,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            0.1,
-            8.6
+            0.1379,
+            11.8594
           ]
         },
         "properties": {
           "name": "NIRC2",
           "xpos": 0.1,
           "ypos": 8.6,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRC2",
           "source_file": "NIRC2po2.csave"
         }
@@ -3857,7 +3904,8 @@
           "name": "Opt Axis",
           "xpos": 0.0,
           "ypos": 0.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRC2",
           "source_file": "NIRC2po8.csave"
         }
@@ -3867,7 +3915,7 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            149.68,
+            206.4087,
             0.0
           ]
         },
@@ -3875,7 +3923,8 @@
           "name": "REF",
           "xpos": 149.68,
           "ypos": 0.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRES",
           "source_file": "NIRESpo1.csave"
         }
@@ -3893,7 +3942,8 @@
           "name": "NIRES",
           "xpos": 0.0,
           "ypos": 0.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRES",
           "source_file": "NIRESpo2.csave"
         }
@@ -3903,7 +3953,7 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -149.68,
+            -206.4087,
             0.0
           ]
         },
@@ -3911,7 +3961,8 @@
           "name": "REFN",
           "xpos": -149.68,
           "ypos": 0.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRES",
           "source_file": "NIRESpo3.csave"
         }
@@ -3921,15 +3972,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -35.7,
-            1.46
+            -49.2303,
+            2.0133
           ]
         },
         "properties": {
           "name": "IMAG",
           "xpos": -35.7,
           "ypos": 1.46,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRES",
           "source_file": "NIRESpo4.csave"
         }
@@ -3939,15 +3991,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            1.75,
-            0.77
+            2.4133,
+            1.0618
           ]
         },
         "properties": {
           "name": "REFS",
           "xpos": 1.75,
           "ypos": 0.77,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRES",
           "source_file": "NIRESpo5.csave"
         }
@@ -3957,15 +4010,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            1.75,
-            0.77
+            2.4133,
+            1.0618
           ]
         },
         "properties": {
           "name": "REFS",
           "xpos": 1.75,
           "ypos": 0.77,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRES",
           "source_file": "NIRESpo6.csave"
         }
@@ -3983,7 +4037,8 @@
           "name": "Opt Axis",
           "xpos": 0.0,
           "ypos": 0.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRSPAO",
           "source_file": "NIRSPAOpo1.csave"
         }
@@ -3993,15 +4048,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            0.18,
-            1.11
+            0.2482,
+            1.5307
           ]
         },
         "properties": {
           "name": "AO scam",
           "xpos": 0.18,
           "ypos": 1.11,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRSPAO",
           "source_file": "NIRSPAOpo2.csave"
         }
@@ -4011,15 +4067,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -0.03,
-            -1.98
+            -0.0414,
+            -2.7304
           ]
         },
         "properties": {
           "name": "REF-N",
           "xpos": -0.03,
           "ypos": -1.98,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRSPAO",
           "source_file": "NIRSPAOpo3.csave"
         }
@@ -4029,15 +4086,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            0.12,
-            -1.53
+            0.1655,
+            -2.1099
           ]
         },
         "properties": {
           "name": "REF-L",
           "xpos": 0.12,
           "ypos": -1.53,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRSPAO",
           "source_file": "NIRSPAOpo4.csave"
         }
@@ -4047,15 +4105,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -0.64,
-            1.14
+            -0.8826,
+            1.5721
           ]
         },
         "properties": {
           "name": "USER1",
           "xpos": -0.64,
           "ypos": 1.14,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRSPAO",
           "source_file": "NIRSPAOpo5.csave"
         }
@@ -4065,15 +4124,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            0.44,
-            -1.0
+            0.6068,
+            -1.379
           ]
         },
         "properties": {
           "name": "USER2",
           "xpos": 0.44,
           "ypos": -1.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRSPAO",
           "source_file": "NIRSPAOpo6.csave"
         }
@@ -4083,15 +4143,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            30.9612,
-            1.07132
+            42.6955,
+            1.4774
           ]
         },
         "properties": {
           "name": "TFS",
           "xpos": 30.9612,
           "ypos": 1.07132,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRSPAO",
           "source_file": "NIRSPAOpo7.csave"
         }
@@ -4101,15 +4162,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            -0.3,
-            2.9
+            -0.4137,
+            3.9991
           ]
         },
         "properties": {
           "name": "REF",
           "xpos": -0.3,
           "ypos": 2.9,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRSPEC",
           "source_file": "NIRSPECpo1.csave"
         }
@@ -4119,15 +4181,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            1.63,
-            -0.93
+            2.2478,
+            -1.2825
           ]
         },
         "properties": {
           "name": "SLIT",
           "xpos": 1.63,
           "ypos": -0.93,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRSPEC",
           "source_file": "NIRSPECpo2.csave"
         }
@@ -4138,14 +4201,15 @@
           "type": "Point",
           "coordinates": [
             0.0,
-            52.0
+            71.708
           ]
         },
         "properties": {
           "name": "REFA",
           "xpos": 0.0,
           "ypos": 52.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRSPEC",
           "source_file": "NIRSPECpo3.csave"
         }
@@ -4155,15 +4219,16 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            10.63,
-            -6.43
+            14.6588,
+            -8.867
           ]
         },
         "properties": {
           "name": "MIRA",
           "xpos": 10.63,
           "ypos": -6.43,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "NIRSPEC",
           "source_file": "NIRSPECpo4.csave"
         }
@@ -4181,7 +4246,8 @@
           "name": "Opt Axis",
           "xpos": 0.0,
           "ypos": 0.0,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "OSIRIS",
           "source_file": "OSIRISpo1.csave"
         }
@@ -4199,7 +4265,8 @@
           "name": "osimg",
           "xpos": 2.49,
           "ypos": -10.16,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "OSIRIS",
           "source_file": "OSIRISpo2.csave"
         }
@@ -4217,7 +4284,8 @@
           "name": "ospec",
           "xpos": 2.73,
           "ypos": 5.3,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "OSIRIS",
           "source_file": "OSIRISpo3.csave"
         }
@@ -4235,7 +4303,8 @@
           "name": "REF-N",
           "xpos": -6.84,
           "ypos": -0.02,
-          "units": "mm",
+          "original_units": "mm",
+          "units": "arcsec",
           "instrument": "OSIRIS",
           "source_file": "OSIRISpo4.csave"
         }
