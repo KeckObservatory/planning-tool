@@ -369,6 +369,8 @@
         "instrument": "OSIRIS",
         "dome": "Keck 1",
         "po_instrument": "OSIRIS",
+        "po_default": "REF-N",
+        "po_preferred": "osimg",
         "zoom": 0.075,
         "units": "arcsec",
         "type": "FOV"
@@ -488,6 +490,8 @@
         "instrument": "NIRC2Narrow",
         "dome": "Keck 2",
         "po_instrument": "NIRC2",
+        "po_default": "REF-N",
+        "po_preferred": "nirc2",
         "zoom": 0.075,
         "units": "arcsec",
         "type": "FOV"
@@ -573,6 +577,8 @@
         "instrument": "NIRC2Medium",
         "dome": "Keck 2",
         "po_instrument": "NIRC2",
+        "po_default": "REF-N",
+        "po_preferred": "nirc2",
         "zoom": 0.075,
         "units": "arcsec",
         "type": "FOV"
@@ -658,6 +664,8 @@
         "instrument": "NIRC2Wide",
         "dome": "Keck 2",
         "po_instrument": "NIRC2",
+        "po_default": "REF-N",
+        "po_preferred": "nirc2",
         "zoom": 0.075,
         "units": "arcsec",
         "type": "FOV"
@@ -743,6 +751,8 @@
         "instrument": "HIRES",
         "dome": "Keck 1",
         "po_instrument": "HIRES",
+        "po_default": "REF",
+        "po_preferred": "REF",
         "zoom": 0.075,
         "units": "arcsec",
         "type": "FOV"
@@ -783,6 +793,42 @@
               ]
             ]
           }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "type": "slit detector",
+            "pointing_origin": "REF"
+          },
+          "geometry": {
+            "type": "MultiPolygon",
+            "coordinates": [
+              [
+                [
+                  [
+                    14.018,
+                    0.602
+                  ],
+                  [
+                    -14.018,
+                    0.602
+                  ],
+                  [
+                    -14.018,
+                    -0.602
+                  ],
+                  [
+                    14.018,
+                    -0.602
+                  ],
+                  [
+                    14.018,
+                    0.602
+                  ]
+                ]
+              ]
+            ]
+          }
         }
       ]
     },
@@ -792,6 +838,8 @@
         "instrument": "LRISADC",
         "dome": "Keck 1",
         "po_instrument": "LRISADC",
+        "po_default": "REF",
+        "po_preferred": "REF",
         "zoom": 0.075,
         "units": "arcsec",
         "type": "FOV"
@@ -877,6 +925,8 @@
         "instrument": "MOSFIRE",
         "dome": "Keck 1",
         "po_instrument": "MOSFIRE",
+        "po_default": "MOSFIRE",
+        "po_preferred": "MOSFIRE",
         "zoom": 0.075,
         "units": "arcsec",
         "type": "FOV"
@@ -1110,6 +1160,8 @@
         "instrument": "ESI",
         "dome": "Keck 2",
         "po_instrument": "ESI",
+        "po_default": "REF",
+        "po_preferred": "REF",
         "zoom": 0.075,
         "units": "arcsec",
         "type": "FOV"
@@ -1159,6 +1211,8 @@
         "instrument": "KCWI",
         "dome": "Keck 2",
         "po_instrument": "KCWI",
+        "po_default": "KCWI",
+        "po_preferred": "KCWI",
         "zoom": 0.075,
         "units": "arcsec"
       },
@@ -2896,6 +2950,8 @@
         "instrument": "DEIMOS",
         "dome": "Keck 2",
         "po_instrument": "DEIMOS",
+        "po_default": "REF",
+        "po_preferred": "REF",
         "zoom": 0.075,
         "units": "arcsec",
         "type": "FOV"
@@ -2913,24 +2969,24 @@
               [
                 [
                   [
-                    -103.74119452848032,
-                    -108.18031738631572
+                    -102.49269122471411,
+                    -167.7832426123521
                   ],
                   [
-                    108.18031738631572,
-                    -103.74119452848032
+                    109.42882069008193,
+                    -163.3441197545167
                   ],
                   [
-                    103.74119452848032,
-                    108.18031738631572
+                    104.98969783224652,
+                    48.57739216027933
                   ],
                   [
-                    -108.18031738631572,
-                    103.74119452848032
+                    -106.93181408254952,
+                    44.13826930244393
                   ],
                   [
-                    -103.74119452848032,
-                    -108.18031738631572
+                    -102.49269122471411,
+                    -167.7832426123521
                   ]
                 ]
               ]
@@ -2945,6 +3001,8 @@
         "instrument": "NIRSPEC",
         "dome": "Keck 2",
         "po_instrument": "NIRSPEC",
+        "po_default": "REFA",
+        "po_preferred": "REFA",
         "zoom": 0.075,
         "units": "arcsec",
         "type": "FOV"
@@ -2994,6 +3052,8 @@
         "instrument": "NIRSPAO",
         "dome": "Keck 2",
         "po_instrument": "NIRSPAO",
+        "po_default": "REF-N",
+        "po_preferred": "REF-N",
         "zoom": 0.075,
         "units": "arcsec",
         "type": "FOV"
@@ -3043,6 +3103,8 @@
         "instrument": "NIRES",
         "dome": "Keck 2",
         "po_instrument": "NIRES",
+        "po_default": "REF",
+        "po_preferred": "REF",
         "zoom": 0.075,
         "units": "arcsec",
         "type": "FOV"
@@ -3085,6 +3147,57 @@
           }
         }
       ]
+    },
+    {
+      "type": "FeatureCollection",
+      "properties": {
+        "instrument": "KPF",
+        "dome": "Keck 1",
+        "po_instrument": "KPF",
+        "po_default": "REF",
+        "po_preferred": "REF",
+        "zoom": 0.075,
+        "units": "arcsec",
+        "type": "FOV"
+      },
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {
+            "type": "guider",
+            "pointing_origin": "REF"
+          },
+          "geometry": {
+            "type": "MultiPolygon",
+            "coordinates": [
+              [
+                [
+                  [
+                    -14.336,
+                    17.92
+                  ],
+                  [
+                    -14.336,
+                    -17.92
+                  ],
+                  [
+                    14.336,
+                    -17.92
+                  ],
+                  [
+                    14.336,
+                    17.92
+                  ],
+                  [
+                    -14.336,
+                    17.92
+                  ]
+                ]
+              ]
+            ]
+          }
+        }
+      ]
     }
   ],
   "pointing_origins": {
@@ -3097,7 +3210,7 @@
           "type": "Point",
           "coordinates": [
             -102.2115,
-            137.9
+            -137.9
           ]
         },
         "properties": {
@@ -3116,7 +3229,7 @@
           "type": "Point",
           "coordinates": [
             -101.0118,
-            194.7837
+            -194.7837
           ]
         },
         "properties": {
@@ -3135,7 +3248,7 @@
           "type": "Point",
           "coordinates": [
             -131.2808,
-            278.6959
+            -278.6959
           ]
         },
         "properties": {
@@ -3154,7 +3267,7 @@
           "type": "Point",
           "coordinates": [
             -130.5913,
-            270.0082
+            -270.0082
           ]
         },
         "properties": {
@@ -3173,7 +3286,7 @@
           "type": "Point",
           "coordinates": [
             -2.758,
-            270.284
+            -270.284
           ]
         },
         "properties": {
@@ -3192,7 +3305,7 @@
           "type": "Point",
           "coordinates": [
             -191.9568,
-            277.3169
+            -277.3169
           ]
         },
         "properties": {
@@ -3211,7 +3324,7 @@
           "type": "Point",
           "coordinates": [
             -47.1618,
-            270.284
+            -270.284
           ]
         },
         "properties": {
@@ -3230,7 +3343,7 @@
           "type": "Point",
           "coordinates": [
             -97.7711,
-            270.5598
+            -270.5598
           ]
         },
         "properties": {
@@ -3249,7 +3362,7 @@
           "type": "Point",
           "coordinates": [
             -147.553,
-            270.284
+            -270.284
           ]
         },
         "properties": {
@@ -3268,7 +3381,7 @@
           "type": "Point",
           "coordinates": [
             -72.6733,
-            270.284
+            -270.284
           ]
         },
         "properties": {
@@ -3287,7 +3400,7 @@
           "type": "Point",
           "coordinates": [
             -122.1794,
-            270.1461
+            -270.1461
           ]
         },
         "properties": {
@@ -3325,7 +3438,7 @@
           "type": "Point",
           "coordinates": [
             2.1099,
-            452.7671
+            -452.7671
           ]
         },
         "properties": {
@@ -3344,7 +3457,7 @@
           "type": "Point",
           "coordinates": [
             -16.9893,
-            295.1612
+            -295.1612
           ]
         },
         "properties": {
@@ -3363,7 +3476,7 @@
           "type": "Point",
           "coordinates": [
             0.0,
-            -58.9522
+            58.9522
           ]
         },
         "properties": {
@@ -3382,7 +3495,7 @@
           "type": "Point",
           "coordinates": [
             33.0408,
-            295.6024
+            -295.6024
           ]
         },
         "properties": {
@@ -3401,7 +3514,7 @@
           "type": "Point",
           "coordinates": [
             65.2957,
-            -16.8376
+            16.8376
           ]
         },
         "properties": {
@@ -3420,7 +3533,7 @@
           "type": "Point",
           "coordinates": [
             -6.2607,
-            295.3956
+            -295.3956
           ]
         },
         "properties": {
@@ -3439,7 +3552,7 @@
           "type": "Point",
           "coordinates": [
             -16.286,
-            292.9548
+            -292.9548
           ]
         },
         "properties": {
@@ -3458,7 +3571,7 @@
           "type": "Point",
           "coordinates": [
             -1.1722,
-            285.977
+            -285.977
           ]
         },
         "properties": {
@@ -3469,25 +3582,6 @@
           "units": "arcsec",
           "instrument": "ESI",
           "source_file": "ESIpo8.csave"
-        }
-      },
-      {
-        "type": "Feature",
-        "geometry": {
-          "type": "Point",
-          "coordinates": [
-            2.1099,
-            452.7671
-          ]
-        },
-        "properties": {
-          "name": "REF",
-          "xpos": 1.53,
-          "ypos": 328.33,
-          "original_units": "mm",
-          "units": "arcsec",
-          "instrument": "ESI",
-          "source_file": "ESIpo9.csave"
         }
       },
       {
@@ -3515,7 +3609,7 @@
           "type": "Point",
           "coordinates": [
             -1.8479,
-            -0.3034
+            0.3034
           ]
         },
         "properties": {
@@ -3534,7 +3628,7 @@
           "type": "Point",
           "coordinates": [
             0.3034,
-            1.6548
+            -1.6548
           ]
         },
         "properties": {
@@ -3762,7 +3856,7 @@
           "type": "Point",
           "coordinates": [
             0.5516,
-            -1.1032
+            1.1032
           ]
         },
         "properties": {
@@ -3781,7 +3875,7 @@
           "type": "Point",
           "coordinates": [
             0.5516,
-            -11.032
+            11.032
           ]
         },
         "properties": {
@@ -3819,7 +3913,7 @@
           "type": "Point",
           "coordinates": [
             0.1379,
-            -0.7585
+            0.7585
           ]
         },
         "properties": {
@@ -4180,7 +4274,7 @@
           "type": "Point",
           "coordinates": [
             230.9825,
-            -10.0391
+            10.0391
           ]
         },
         "properties": {
@@ -4199,7 +4293,7 @@
           "type": "Point",
           "coordinates": [
             0.8963,
-            2.2064
+            -2.2064
           ]
         },
         "properties": {
@@ -4218,7 +4312,7 @@
           "type": "Point",
           "coordinates": [
             -29.1852,
-            31.3378
+            -31.3378
           ]
         },
         "properties": {
@@ -4237,7 +4331,7 @@
           "type": "Point",
           "coordinates": [
             -49.2303,
-            2.0133
+            -2.0133
           ]
         },
         "properties": {
@@ -4256,7 +4350,7 @@
           "type": "Point",
           "coordinates": [
             4.5507,
-            1.6548
+            -1.6548
           ]
         },
         "properties": {
@@ -4275,7 +4369,7 @@
           "type": "Point",
           "coordinates": [
             -9.5151,
-            2.2064
+            -2.2064
           ]
         },
         "properties": {
@@ -4294,7 +4388,7 @@
           "type": "Point",
           "coordinates": [
             1.379,
-            0.5792
+            -0.5792
           ]
         },
         "properties": {
@@ -4313,7 +4407,7 @@
           "type": "Point",
           "coordinates": [
             2.4133,
-            1.0618
+            -1.0618
           ]
         },
         "properties": {
@@ -4465,7 +4559,7 @@
           "type": "Point",
           "coordinates": [
             -0.4137,
-            3.9991
+            -3.9991
           ]
         },
         "properties": {
@@ -4484,7 +4578,7 @@
           "type": "Point",
           "coordinates": [
             2.2478,
-            -1.2825
+            1.2825
           ]
         },
         "properties": {
@@ -4503,7 +4597,7 @@
           "type": "Point",
           "coordinates": [
             0.0,
-            71.708
+            -71.708
           ]
         },
         "properties": {
@@ -4522,7 +4616,7 @@
           "type": "Point",
           "coordinates": [
             14.6588,
-            -8.867
+            8.867
           ]
         },
         "properties": {

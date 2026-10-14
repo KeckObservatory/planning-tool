@@ -78,6 +78,8 @@ export interface FovCollectionProperties {
     instrument: string
     dome: string
     po_instrument?: string // instrument the POs are filed under, when it differs from `instrument`
+    po_default?: string // name of the PO selected when this FOV is loaded
+    po_preferred?: string // name of a second PO made available when this FOV is loaded
     zoom: number
     units: string
 }
