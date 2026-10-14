@@ -72,6 +72,15 @@ export const get_compass = async (aladin: any, height: number, width: number, po
     return { ...fc, features } as FeatureCollection<Polygon>
 }
 
+// Moves an instrument-frame offset (arcseconds) from the center of the view to RA/Dec.
+// Both axes are negated (a 180 degree rotation), which draws the shapes the same way
+// around and up as the guide star viewer does.
+export const offset_to_world = (ra: number, dec: number, dx: number, dy: number): [number, number] => {
+    return [ra - dx / 3600, dec - dy / 3600]
+}
+
+// ra/dec is the true center of the view; offset is the selected pointing origin (arcseconds),
+// which sits at the center of the view and is the pivot of the instrument rotation.
 export const get_fovz = async (ra: number, dec: number, aladin: any, instrumentFOV: string, angle: number, offset: [number, number]) => {
     const fc = await get_shapes('fov')
     const collection = fc.find((c) => c.properties.instrument === instrumentFOV)
@@ -79,12 +88,13 @@ export const get_fovz = async (ra: number, dec: number, aladin: any, instrumentF
     const pointingOrigins = await get_shapes('pointing_origins')
     // every shape of the instrument is drawn, each already shifted by its own pointing origin
     const multipolygon = get_fov_shapes(fc, instrumentFOV, pointingOrigins).flatMap((shape) => shape.rings) as unknown as Position[][][]
-    const rotPolygon = rotate_multipolygon(multipolygon, angle, offset )
+    // the guide star viewer turns the instrument frame by -angle
+    const rotPolygon = rotate_multipolygon(multipolygon, -angle, offset )
     const polygons = rotPolygon.map((polygon: Position[][]) => {
         const absPolygon = polygon // rings are already closed
             .map((point) => {
                 const [x, y] = point as unknown as [number, number]
-                return [x / 3600 + ra, y / 3600 + dec]
+                return offset_to_world(ra, dec, x - offset[0], y - offset[1])
             })
             .map((point) => {
                 const [x, y] = point as unknown as [number, number]
