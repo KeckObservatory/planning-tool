@@ -3516,14 +3516,14 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            0.0,
-            27.58
+            1.1032,
+            -0.8826
           ]
         },
         "properties": {
-          "name": "YPLUS",
-          "xpos": 0.0,
-          "ypos": 20.0,
+          "name": "KCWI",
+          "xpos": 0.8,
+          "ypos": -0.64,
           "original_units": "mm",
           "units": "arcsec",
           "instrument": "KCWI",
@@ -3535,14 +3535,14 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            0.9377,
-            -0.9929
+            0.7585,
+            -1.0756
           ]
         },
         "properties": {
-          "name": "IFU-L",
-          "xpos": 0.68,
-          "ypos": -0.72,
+          "name": "Mira",
+          "xpos": 0.55,
+          "ypos": -0.78,
           "original_units": "mm",
           "units": "arcsec",
           "instrument": "KCWI",
@@ -3554,18 +3554,18 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            1.3376,
-            -0.8826
+            0.0,
+            0.0
           ]
         },
         "properties": {
-          "name": "IFU-M",
-          "xpos": 0.97,
-          "ypos": -0.64,
+          "name": "zeropt",
+          "xpos": 0.0,
+          "ypos": 0.0,
           "original_units": "mm",
           "units": "arcsec",
           "instrument": "KCWI",
-          "source_file": "KCWIpo5.csave"
+          "source_file": "KCWIpo6.csave"
         }
       },
       {
@@ -3573,18 +3573,56 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
-            1.3376,
-            -1.4893
+            1.1032,
+            -0.8826
           ]
         },
         "properties": {
-          "name": "IFU-S",
-          "xpos": 0.97,
-          "ypos": -1.08,
+          "name": "KCWI",
+          "xpos": 0.8,
+          "ypos": -0.64,
           "original_units": "mm",
           "units": "arcsec",
           "instrument": "KCWI",
-          "source_file": "KCWIpo6.csave"
+          "source_file": "KCWIpo7.csave"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            0.0,
+            6.895
+          ]
+        },
+        "properties": {
+          "name": "ydr",
+          "xpos": 0.0,
+          "ypos": 5.0,
+          "original_units": "mm",
+          "units": "arcsec",
+          "instrument": "KCWI",
+          "source_file": "KCWIpo8.csave"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            1.9568,
+            -3.6406
+          ]
+        },
+        "properties": {
+          "name": "PO1",
+          "xpos": 1.419,
+          "ypos": -2.64,
+          "original_units": "mm",
+          "units": "arcsec",
+          "instrument": "KCWI",
+          "source_file": "KCWIpo9.csave"
         }
       },
       {

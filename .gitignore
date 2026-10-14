@@ -1,6 +1,7 @@
 doc/
 starlists_to_test/
 fcTool/
+tutorial/
 
 # Logs
 logs
