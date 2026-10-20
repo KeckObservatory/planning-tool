@@ -70,6 +70,14 @@ const sanitize_guide_star = (guidestar: Partial<Target>) => {
         if (/^._mag$/.test(key) && typeof value === 'number' && value >= 99.9) {
             delete sanitizedGuideStar[key]
         }
+
+        if (key.includes('pm_dec')) {
+            delete sanitizedGuideStar[key]
+        }
+
+        if (key.includes('pm_ra')) {
+            delete sanitizedGuideStar[key]
+        }
     })
 
     // Round separation and every *_mag to 2 decimals.

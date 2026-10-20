@@ -48,9 +48,6 @@ export interface CatalogTarget {
     "B-R": number | null
 }
 
-// Each catalog names its columns differently, so each gets its own interface and
-// its own <catalog>_catalog_to_target_map in config. A magnitude of 99.9 is the
-// catalogs' "no measurement" sentinel; sanitize_guide_star drops those on submit.
 
 export interface PanstarrsTarget {
     objID: number
@@ -155,9 +152,6 @@ export interface GAIATarget {
     decDeg: number
     pmra: number | null
     pmdec: number | null
-    // Already Target-side names. Note the "no measurement" sentinel here is
-    // 999.9 rather than the 99.9 the other catalogs use; sanitize_guide_star
-    // drops anything >= 99.9, so both are covered.
     g_mag: number | null
     b_mag: number | null
     r_mag: number | null
