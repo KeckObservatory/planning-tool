@@ -748,6 +748,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         guidestars={filteredGuideStars}
                         useLaser={useLaser}
                         science_target_name={target.target_name ?? target._id}
+                        tags={target.tags ?? []}
                     />
                 </Stack>
             </Stack>
