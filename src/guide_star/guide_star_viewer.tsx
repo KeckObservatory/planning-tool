@@ -48,6 +48,13 @@ const point_within_polygon = (point: [number, number], polygon: [number, number]
   return inside; //if even, then point is inside polygon
 };
 
+interface ContourLines {
+  name: string;
+  color: string;
+  tooltip: string;
+  lines: Array<Array<[number, number]>>
+}
+
 interface Props {
   imgUrl: string
   guideStars: Target[]
@@ -82,6 +89,7 @@ export const GSViewer = (props: Props) => {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const svgRef = React.useRef<SVGSVGElement | null>(null);
   const fovSvgRef = React.useRef<SVGSVGElement | null>(null);
+  const [mapTooltip, setMapTooltip] = React.useState<{ x: number; y: number; text: string } | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [zoom, setZoom] = React.useState<number>(initZoom); // 1 = no zoom
   const [panOffset, setPanOffset] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -92,7 +100,7 @@ export const GSViewer = (props: Props) => {
   const [contrast, setContrast] = React.useState<number>(100);
   const degPerPixel = (props.size / props.width) / zoom // degrees per pixel, adjusted for zoom
   const [fov, setFOV] = React.useState<FovShape[] | null>(null)
-  const [contourLines, setContourLines] = React.useState<Array<{ name: string; color: string; lines: Array<Array<[number, number]>> }>>([]);
+  const [contourLines, setContourLines] = React.useState<Array<ContourLines>>([]);
   const [trickMapContours, setTrickMapContours] = React.useState<Array<{ name: string; color: string; lines: Array<Array<[number, number]>> }>>([]);
 
   // A pointing origin is where the telescope puts the target in the instrument's
@@ -199,10 +207,12 @@ export const GSViewer = (props: Props) => {
       });
       const name = feature.properties?.name ?? 'Unknown';
       const color = feature.properties?.color ?? 'magenta';
+      const tooltip = feature.properties?.tooltip ?? null;
       return {
         name,
         color,
-        lines
+        lines,
+        tooltip
       };
     });
 
@@ -256,7 +266,7 @@ export const GSViewer = (props: Props) => {
     }
 
     // Remove previous contour lines (always clear first)
-    d3.select(fovSvg).selectAll('line.instrument-contour').remove();
+    d3.select(fovSvg).selectAll('line.fsm-tss-contour').remove();
 
     if (!contourLines || contourLines.length === 0) {
       return;
@@ -277,7 +287,24 @@ export const GSViewer = (props: Props) => {
           .attr('stroke', contour.color)
           .attr('stroke-width', 1.5)
           .attr('opacity', 0.7)
-          .attr('class', 'instrument-contour');
+          .attr('class', 'fsm-tss-contour');
+
+        // The visible line is only 1.5px wide, so hover is caught by a wider invisible copy.
+        d3.select(fovSvg).append('line')
+          .attr('x1', x1)
+          .attr('y1', y1)
+          .attr('x2', x2)
+          .attr('y2', y2)
+          .attr('stroke', 'transparent')
+          .attr('stroke-width', 10)
+          .attr('class', 'fsm-tss-contour')
+          .style('pointer-events', 'stroke')
+          .on('mouseenter mousemove', (event: MouseEvent) => {
+            const rect = containerRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            setMapTooltip({ x: event.clientX - rect.left, y: event.clientY - rect.top, text: contour.tooltip ?? contour.name });
+          })
+          .on('mouseleave', () => setMapTooltip(null));
       });
     });
   }, [contourLines, panOffset, zoom]);
@@ -310,9 +337,26 @@ export const GSViewer = (props: Props) => {
           .attr('x2', x2)
           .attr('y2', y2)
           .attr('stroke', contour.color)
-          .attr('stroke-width', 1.0)
+          .attr('stroke-width', 1.5)
           .attr('opacity', 0.5)
           .attr('class', 'trick-map-contour');
+
+        // The visible line is only 2px wide, so hover is caught by a wider invisible copy.
+        d3.select(fovSvg).append('line')
+          .attr('x1', x1)
+          .attr('y1', y1)
+          .attr('x2', x2)
+          .attr('y2', y2)
+          .attr('stroke', 'transparent')
+          .attr('stroke-width', 10)
+          .attr('class', 'trick-map-contour')
+          .style('pointer-events', 'stroke')
+          .on('mouseenter mousemove', (event: MouseEvent) => {
+            const rect = containerRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            setMapTooltip({ x: event.clientX - rect.left, y: event.clientY - rect.top, text: 'Trick map' });
+          })
+          .on('mouseleave', () => setMapTooltip(null));
       });
     });
   }, [trickMapContours, panOffset, zoom]);
@@ -464,6 +508,22 @@ export const GSViewer = (props: Props) => {
           .attr('stroke', 'cyan')
           .attr('stroke-width', 2)
           .attr('opacity', 0.7)
+
+        // The visible outline is only 2px wide, so hover is caught by a wider invisible copy.
+        if (shape.tooltip) {
+          d3.select(fovSvg).append('path')
+            .attr('d', points.map((p, i) => (i === 0 ? 'M' : 'L') + p[0] + ',' + p[1]).join(' ') + 'Z')
+            .attr('fill', 'none')
+            .attr('stroke', 'transparent')
+            .attr('stroke-width', 10)
+            .style('pointer-events', 'stroke')
+            .on('mouseenter mousemove', (event: MouseEvent) => {
+              const rect = containerRef.current?.getBoundingClientRect();
+              if (!rect) return;
+              setMapTooltip({ x: event.clientX - rect.left, y: event.clientY - rect.top, text: shape.tooltip! });
+            })
+            .on('mouseleave', () => setMapTooltip(null));
+        }
       });
     });
   }, [fov, props.centerRA, props.centerDec, props.width, props.height, degPerPixel, props.selPO, zoom, props.fovAngle]);
@@ -759,6 +819,25 @@ export const GSViewer = (props: Props) => {
             textColor="#FFFFFF"   // White text
             markerColor="#FFFF00" // Yellow markers
           />
+        </div>
+      )}
+      {mapTooltip && (
+        <div
+          style={{
+            position: 'absolute',
+            left: mapTooltip.x + 12,
+            top: mapTooltip.y + 12,
+            padding: '2px 8px',
+            background: 'rgba(30,30,30,0.9)',
+            color: '#fff',
+            fontSize: 12,
+            borderRadius: 4,
+            pointerEvents: 'none',
+            zIndex: 3,
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {mapTooltip.text}
         </div>
       )}
       <ScaleBar width={props.width} height={props.height} degPerPixel={degPerPixel} invertImage={props.invertImage} />

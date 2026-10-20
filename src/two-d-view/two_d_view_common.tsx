@@ -72,6 +72,7 @@ export interface FovFeatureProperties {
     type?: string // free-form label distinguishing the shapes, e.g. 'guider'
     pointing_origin?: string // name of the pointing origin this shape is offset by; none means no offset
     ignore_in_fov?: boolean // when true, catalog stars are not tested against this shape (default false)
+    tooltip?: string // text shown when hovering the shape's outline
 }
 
 export interface FovCollectionProperties {
@@ -113,6 +114,7 @@ export const get_shapes = async <K extends ShapeCatagory>(fcType: K): Promise<Sh
 
 export interface FovShape {
     type?: string
+    tooltip?: string
     ignoreInFov: boolean
     rings: [number, number][][] // arcsec, PO offset already applied
 }
@@ -126,7 +128,7 @@ export const get_fov_shapes = (
     return collections.filter((c) => c.properties.instrument === instrument).flatMap((collection) => {
         const poInstrument = collection.properties.po_instrument ?? instrument
         return collection.features.map((feature) => {
-            const { pointing_origin: poName, ignore_in_fov, type } = feature.properties ?? {}
+            const { pointing_origin: poName, ignore_in_fov, type, tooltip } = feature.properties ?? {}
             const po = poName
                 ? pointingOrigins.features.find((p) => p.properties?.instrument === poInstrument && p.properties?.name === poName)
                 : undefined
@@ -135,7 +137,7 @@ export const get_fov_shapes = (
             const rings = feature.geometry.coordinates.flatMap((polygon) =>
                 polygon.map((ring) => ring.map(([x, y]) => [x + dx, y + dy] as [number, number]))
             )
-            return { type, ignoreInFov: ignore_in_fov ?? false, rings }
+            return { type, tooltip, ignoreInFov: ignore_in_fov ?? false, rings }
         })
     })
 }
