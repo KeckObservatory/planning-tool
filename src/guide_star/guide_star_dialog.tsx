@@ -404,8 +404,12 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     useEffect(() => {
         if (targets.length > 0) {
-            const target = targets.at(0) ?? {} as Target
-            setTarget(target)
+            // targets changes whenever one is added or edited (e.g. adding a guide star),
+            // so only fall back to the first target when the selected one is gone.
+            setTarget((current) => {
+                const stillThere = current._id && targets.some((t) => t._id === current._id)
+                return stillThere ? current : (targets.at(0) ?? {} as Target)
+            })
         }
     }, [targets])
 
