@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 
@@ -19,8 +20,9 @@ import { LazyFallback } from '../lazy_fallback';
 // import AladinViewer from '../aladin/aladin';
 import { MagRangeSlider } from './mag_range_slider';
 import { DEFAULT_MAG_FILTER, MAG_KEYS, MagFilter, MagFilterSelect } from './mag_filter_select.tsx';
-import { MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE, DEFAULT_RA, DEFAULT_DEC, AO_INSTRUMENTS, TRICK_INSTRUMENTS } from '../two-d-view/constants';
+import { GUIDESTAR_TUTORIAL_URL, MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE, DEFAULT_RA, DEFAULT_DEC, AO_INSTRUMENTS, TRICK_INSTRUMENTS } from '../two-d-view/constants';
 import AGTimeToLimit from './asterism_generator.tsx';
+
 
 // d3 + the aladin marker helpers live behind this import. Keep it lazy so they
 // load when the guide star dialog is first opened, not at app startup.
@@ -514,7 +516,22 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     // }
 
     const dialogTitle = (
-        <span>Guide Star Selection</span>
+        <Stack direction='row' alignItems='center' spacing={1}>
+            <span>Guide Star Selection</span>
+            <Tooltip title={'Click to learn the basics of this tool in this tutorial'}>
+                <IconButton
+                    size='small'
+                    color='primary'
+                    component='a'
+                    href={GUIDESTAR_TUTORIAL_URL}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    aria-label='Guide star tool tutorial'
+                >
+                    <HelpOutlineIcon fontSize='small' />
+                </IconButton>
+            </Tooltip>
+        </Stack>
     )
 
     const telContours = contours?.find((feature) => feature.properties.telescope === dome)
