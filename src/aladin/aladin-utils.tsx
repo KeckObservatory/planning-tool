@@ -28,9 +28,6 @@ const rotate_multipolygon = (coords: Position[][][], angle: number, pnt=[0,0]) =
 }
 
 const get_angle = (aladin: any) => {
-    //Compass rose is a euclidian object put onto a non-euclidian projection, 
-    //so we need to calculate the angle of two vectors that are small enough to be approximately euclidian
-    //usually 5 arcminutes is good enough
     const [ra, dec] = aladin.getRaDec() as [number, number]
     const dra = 5 / (24 * 60) //hours 5 minutes is probably good
     const ddec = 90 //deg
@@ -46,10 +43,6 @@ const get_angle = (aladin: any) => {
 
 export const get_compass = async (aladin: any, height: number, width: number, positionAngle: number) => {
     console.log('Getting compass for aladin', aladin, 'with height', height, 'and width', width, 'and positionAngle', positionAngle)
-    // get_shapes caches and returns the same FeatureCollection instance on every call,
-    // so features here must not be mutated - doing so would bake this call's absolute
-    // screen offset/rotation into the shared shape, compounding further on every
-    // subsequent pan/zoom-triggered recompute until the compass drifts off-screen.
     const fc = await get_shapes('compass_rose') as FeatureCollection<Polygon>
     const angle = 90 + get_angle(aladin) // rotate to match compass
     const aladinAngle = aladin.getViewCenter2NorthPoleAngle()
@@ -72,15 +65,10 @@ export const get_compass = async (aladin: any, height: number, width: number, po
     return { ...fc, features } as FeatureCollection<Polygon>
 }
 
-// Moves an instrument-frame offset (arcseconds) from the center of the view to RA/Dec.
-// Both axes are negated (a 180 degree rotation), which draws the shapes the same way
-// around and up as the guide star viewer does.
 export const offset_to_world = (ra: number, dec: number, dx: number, dy: number): [number, number] => {
     return [ra - dx / 3600, dec - dy / 3600]
 }
 
-// ra/dec is the true center of the view; offset is the selected pointing origin (arcseconds),
-// which sits at the center of the view and is the pivot of the instrument rotation.
 export const get_fovz = async (ra: number, dec: number, aladin: any, instrumentFOV: string, angle: number, offset: [number, number]) => {
     const fc = await get_shapes('fov')
     const collection = fc.find((c) => c.properties.instrument === instrumentFOV)
