@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 
@@ -19,8 +20,9 @@ import { LazyFallback } from '../lazy_fallback';
 // import AladinViewer from '../aladin/aladin';
 import { MagRangeSlider } from './mag_range_slider';
 import { DEFAULT_MAG_FILTER, MAG_KEYS, MagFilter, MagFilterSelect } from './mag_filter_select.tsx';
-import { MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE, DEFAULT_RA, DEFAULT_DEC, AO_INSTRUMENTS, TRICK_INSTRUMENTS } from '../two-d-view/constants';
+import { GUIDESTAR_TUTORIAL_URL, MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE, DEFAULT_RA, DEFAULT_DEC, AO_INSTRUMENTS, TRICK_INSTRUMENTS } from '../two-d-view/constants';
 import AGTimeToLimit from './asterism_generator.tsx';
+
 
 // d3 + the aladin marker helpers live behind this import. Keep it lazy so they
 // load when the guide star dialog is first opened, not at app startup.
@@ -48,9 +50,6 @@ export interface CatalogTarget {
     "B-R": number | null
 }
 
-// Each catalog names its columns differently, so each gets its own interface and
-// its own <catalog>_catalog_to_target_map in config. A magnitude of 99.9 is the
-// catalogs' "no measurement" sentinel; sanitize_guide_star drops those on submit.
 
 export interface PanstarrsTarget {
     objID: number
@@ -155,9 +154,6 @@ export interface GAIATarget {
     decDeg: number
     pmra: number | null
     pmdec: number | null
-    // Already Target-side names. Note the "no measurement" sentinel here is
-    // 999.9 rather than the 99.9 the other catalogs use; sanitize_guide_star
-    // drops anything >= 99.9, so both are covered.
     g_mag: number | null
     b_mag: number | null
     r_mag: number | null
@@ -373,16 +369,14 @@ export const GuideStarDialog = (props: VizDialogProps) => {
             const trkMap = showTrickMap ? await get_shapes('trick_map') : undefined
             // One dropdown across both domes - each instrument only ever lives on one
             // telescope, so picking it (below) is what sets dome now, not the reverse.
-            const fovFeatures = featureCollection['features'].filter((feature: any) => {
-                return feature['properties'].type === 'FOV'
-            }).filter((feature: any) => {
-                const inst = feature['properties'].instrument as string
+            const fovCollections = featureCollection.filter((collection) => {
+                const inst = collection.properties.instrument
                 return is_ao_instrument(inst) || is_trick_instrument(inst)
             })
-            const newFovs = fovFeatures.map((feature: any) => feature['properties'].instrument) as string[]
+            const newFovs = [...new Set(fovCollections.map((collection) => collection.properties.instrument))]
             const newInstrumentDomes: Record<string, Dome> = {}
-            fovFeatures.forEach((feature: any) => {
-                newInstrumentDomes[feature['properties'].instrument] = feature['properties'].dome
+            fovCollections.forEach((collection) => {
+                newInstrumentDomes[collection.properties.instrument] = collection.properties.dome as Dome
             })
             setFOVs(newFovs)
             setInstrumentDomes(newInstrumentDomes)
@@ -412,8 +406,12 @@ export const GuideStarDialog = (props: VizDialogProps) => {
 
     useEffect(() => {
         if (targets.length > 0) {
-            const target = targets.at(0) ?? {} as Target
-            setTarget(target)
+            // targets changes whenever one is added or edited (e.g. adding a guide star),
+            // so only fall back to the first target when the selected one is gone.
+            setTarget((current) => {
+                const stillThere = current._id && targets.some((t) => t._id === current._id)
+                return stillThere ? current : (targets.at(0) ?? {} as Target)
+            })
         }
     }, [targets])
 
@@ -518,7 +516,22 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     // }
 
     const dialogTitle = (
-        <span>Guide Star Selection</span>
+        <Stack direction='row' alignItems='center' spacing={1}>
+            <span>Guide Star Selection</span>
+            <Tooltip title={'Click to learn the basics of this tool in this tutorial'}>
+                <IconButton
+                    size='small'
+                    color='primary'
+                    component='a'
+                    href={GUIDESTAR_TUTORIAL_URL}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    aria-label='Guide star tool tutorial'
+                >
+                    <HelpOutlineIcon fontSize='small' />
+                </IconButton>
+            </Tooltip>
+        </Stack>
     )
 
     const telContours = contours?.find((feature) => feature.properties.telescope === dome)
@@ -750,6 +763,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                         guidestars={filteredGuideStars}
                         useLaser={useLaser}
                         science_target_name={target.target_name ?? target._id}
+                        tags={target.tags ?? []}
                     />
                 </Stack>
             </Stack>

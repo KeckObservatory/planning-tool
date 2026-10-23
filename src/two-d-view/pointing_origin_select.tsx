@@ -3,6 +3,7 @@ import React from "react"
 import { useEffect } from "react"
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import { FovCollection, get_shapes } from "./two_d_view_common";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -12,6 +13,7 @@ export interface POPointingOriginProperties {
     instrument: string;
     xpos: number;
     ypos: number;
+    original_units: string;
     units: string;
     source_file: string;
 }
@@ -75,7 +77,22 @@ export const POSelect = (props: POSelectProps) => {
             .filter((feature) => instrument.includes(feature.properties?.instrument))
 
         setSelPointingOrigins([]) //reset to empty when instrument changes
+        setSelPO(undefined)
         setOptions([undefined, 'SELECT_ALL', ...instFeatures])
+
+        // The FOV names a default and a preferred PO: make both available and select the default.
+        let cancelled = false
+        get_shapes('fov').then((collections: FovCollection[]) => {
+            if (cancelled) return
+            const fovProps = collections.find((c) => c.properties.instrument === instrument)?.properties
+            const findPO = (name?: string) => name ? instFeatures.find((f) => f.properties?.name === name) : undefined
+            const defaultPO = findPO(fovProps?.po_default)
+            const preferredPO = findPO(fovProps?.po_preferred)
+            const available = [defaultPO, preferredPO].filter((po, i, arr): po is POPointFeature => !!po && arr.indexOf(po) === i)
+            setSelPointingOrigins(available)
+            setSelPO(defaultPO)
+        })
+        return () => { cancelled = true }
     }, [pointing_origins, instrument])
 
     return (
@@ -148,8 +165,8 @@ export const POSelect = (props: POSelectProps) => {
                 <Autocomplete
                     disablePortal
                     id="pointing-origin-selection"
-                    value={selPO}
-                    onChange={(_, value) => value !== null && setSelPO(value)}
+                    value={selPO ?? null} // MUI fixes controlled/uncontrolled at mount, so undefined would never update the input
+                    onChange={(_, value) => setSelPO(value ?? undefined)}
                     options={[undefined, ...selPointingOrigins]}
                     getOptionLabel={(option) => {
                         return option?.properties?.name || 'None';

@@ -191,10 +191,10 @@ const TwoDView = ({ targets }: Props) => {
 
         const fun = async () => {
             const featureCollection = await get_shapes('fov')
-            const features = featureCollection['features'].filter((feature: any) => {
-                return feature['properties'].type === 'FOV' && feature['properties'].dome === dome
-            })
-            const newFovs = features.map((feature: any) => feature['properties'].instrument) as string[]
+            // an instrument has one collection per shape, so dedupe
+            const newFovs = [...new Set(featureCollection
+                .filter((collection) => collection.properties.dome === dome)
+                .map((collection) => collection.properties.instrument))]
             console.log('dome', dome, 'obsdate', obsdate, 'skychart', skyChart)
             !newFovs.includes(instrumentFOV) && setInstrumentFOV(newFovs[0])
             setFOVs(newFovs)

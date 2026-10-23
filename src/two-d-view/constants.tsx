@@ -46,7 +46,7 @@ export const DEFAULT_WINDOW_SIZE = 600 / 3600 // degrees, size of window to quer
 export const MOSFIRE_WINDOW_SIZE = 1200 / 3600 // degrees, size of window to query for guide stars
 export const DEFAULT_RA = "12:48:45.8623" //NGC4711
 export const DEFAULT_DEC = "+35:19:57.8810"  //NGC4711
-export const AO_INSTRUMENTS: string[] = ['OSIRIS', 'NIRC2', 'NIRSPAO'] //instruments that can use AO guide stars
+export const AO_INSTRUMENTS: string[] = [ 'OSIRISImg', 'OSIRISSpec', 'NIRC2' ] //instruments that can use AO guide stars
 export const TRICK_INSTRUMENTS: string[] = ['OSIRIS']
 //img catalog constants
 export const ZOOM_SPEED = 0.001;
@@ -54,6 +54,8 @@ export const ZOOM_MIN = 0.5;
 export const ZOOM_MAX = 20;
 export const ZOOM_DEFAULT = 3; //For the guide star viewer
 export const MOSFIRE_ZOOM_DEFAULT = 1.5; //For the guide star viewer
+export const OSIRIS_FSM_TSS_ROTATION = 48 // Osiris is rotated 48 degrees by default
+export const NIRC2_FSM_TSS_PO = 'NIRC2'
 
 export const TARGET_LENGTH = 15 // 15 characters for target name
 export const TARGET_NAME_LENGTH_PADDED = TARGET_LENGTH + 1 // 15 characters for target name, one space at the end
@@ -85,3 +87,6 @@ export const DUPLICATE_COORD_TOLERANCE_DEG = 1 / (2 * 3600) // 1/2 arcsecond
 
 export const MOON_WARNING_LIGHT_DEG = 30 // lunar angle below which a 'light' moon-proximity warning is shown
 export const MOON_WARNING_HEAVY_DEG = 15 // lunar angle below which a 'heavy' moon-proximity warning is shown
+
+// Guidestar video tutorial page
+export const GUIDESTAR_TUTORIAL_URL = 'https://vimeo.com/1230037595/7aaf805372?share=copy&fl=sv&fe=ci'
