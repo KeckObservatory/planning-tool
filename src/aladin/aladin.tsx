@@ -4,7 +4,7 @@ import { Target } from "../App.tsx"
 import A from 'aladin-lite'
 import { useDebounceCallback } from "../use_debounce_callback.tsx"
 import { PointingOriginMarkers, PointingOriginMarker } from "./pointing_origin_markers.tsx"
-import { get_compass, get_fovz, rotate_point } from "./aladin-utils.tsx"
+import { get_compass, get_fovz, offset_to_world, rotate_point } from "./aladin-utils.tsx"
 import { POPointFeature, TelescopeContours } from "../two-d-view/pointing_origin_select.tsx"
 import { Feature, Point, Position, Polygon, FeatureCollection } from "geojson"
 // import { color } from "html2canvas/dist/types/css/types/color"
@@ -70,14 +70,12 @@ export default function AladinViewer(props: Props) {
     const [aladin, setAladin] = React.useState<null | any>(null)
     const [zoom, setZoom] = React.useState(5)
 
-    const get_offset_ra_dec = () => {
-        let [ra, dec] = aladin?.getRaDec() as [number, number] ?? [0, 0]; //sometimes aladin is null
-        if (props.selPO) { // this offsets the center of the view to the selected pointing origin 
-            const [dra, ddec] = props.selPO.geometry.coordinates; // arcseconds offset
-            ra = ra - dra / 3600;
-            dec = dec - ddec / 3600;
-        }
-        return [ra, dec]
+    // The center of the view is where the selected pointing origin sits, so every instrument-frame
+    // offset is measured from it (see arcsecToPixel in guide_star_viewer.tsx).
+    const selPOOffset = (): [number, number] => props.selPO?.geometry.coordinates as [number, number] ?? [0, 0]
+
+    const get_center_ra_dec = (): [number, number] => {
+        return aladin?.getRaDec() as [number, number] ?? [0, 0]; //sometimes aladin is null
     }
 
     // Convert pointing origins to pixel coordinates for SVG markers
@@ -85,13 +83,15 @@ export default function AladinViewer(props: Props) {
         if (!aladin || !props.pointingOrigins) {
             return [];
         }
-        const [ra, dec] = get_offset_ra_dec();
+        const [ra, dec] = get_center_ra_dec();
+        const [sdra, sddec] = selPOOffset();
 
         return props.pointingOrigins.map((feature) => {
             const [dra, ddec] = feature.geometry.coordinates; // arcseconds offset
-            const [pora, podec] = [ra + dra / 3600, dec + ddec / 3600]; // convert to degrees
-            const [x, y] = aladin.world2pix(pora, podec);
-            const rotatedxy = rotate_point([x, y], props.fovAngle, [props.width / 2, props.height / 2]);
+            // rotate in the instrument frame about the selected origin, as get_fovz does
+            const [rdra, rddec] = rotate_point([dra, ddec] as any, -props.fovAngle, [sdra, sddec]) as unknown as [number, number];
+            const [pora, podec] = offset_to_world(ra, dec, rdra - sdra, rddec - sddec);
+            const rotatedxy = aladin.world2pix(pora, podec);
             const name = feature.properties?.name ?? 'Unknown';
 
             return {
@@ -105,14 +105,17 @@ export default function AladinViewer(props: Props) {
         if (!aladin || !props.contours || !props.contours.features) {
             return [];
         }
-        const [ra, dec] = get_offset_ra_dec();
+        const [ra, dec] = get_center_ra_dec();
+        const [sdra, sddec] = selPOOffset();
 
         const contours = props.contours.features.map((feature: GeoJSON.Feature<GeoJSON.MultiLineString>) => {
             const lines = feature.geometry.coordinates.map((lineseg: Position[]) => {
-                let [x1, y1] = aladin.world2pix(ra + lineseg[0][0] / 3600, dec + lineseg[0][1] / 3600) as Position[];
-                let [x2, y2] = aladin.world2pix(ra + lineseg[1][0] / 3600, dec + lineseg[1][1] / 3600) as Position[];
-                [x1, y1] = rotate_point([x1, y1], props.fovAngle + 180, [props.width / 2, props.height / 2]);
-                [x2, y2] = rotate_point([x2, y2], props.fovAngle + 180, [props.width / 2, props.height / 2]);
+                const to_pix = (pt: Position) => {
+                    const [rx, ry] = rotate_point(pt as any, -props.fovAngle, [sdra, sddec]) as unknown as [number, number];
+                    return aladin.world2pix(...offset_to_world(ra, dec, rx - sdra, ry - sddec)) as Position[];
+                }
+                const [x1, y1] = to_pix(lineseg[0]);
+                const [x2, y2] = to_pix(lineseg[1]);
                 const line = [[x1, y1], [x2, y2]];
                 return line;
             })
@@ -183,8 +186,8 @@ export default function AladinViewer(props: Props) {
 
     const update_shapes = async (aladin: any, updatefov = true, updateCompass = true) => {
         if (!aladin) return
-        const pointOfOrigin = props.selPO?.geometry.coordinates as [number, number] ?? [0, 0]
-        const [ra, dec] = get_offset_ra_dec();
+        const pointOfOrigin = selPOOffset()
+        const [ra, dec] = aladin.getRaDec() as [number, number]
 
         if (updatefov) {
             const fovz = await get_fovz(ra, dec, aladin, props.instrumentFOV, props.fovAngle, pointOfOrigin)

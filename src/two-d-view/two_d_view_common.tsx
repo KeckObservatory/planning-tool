@@ -65,8 +65,32 @@ export const hidate = (date: Date, timezone: string) => {
 
 export type ShapeCatagory = 'fov' | 'compass_rose' | 'pointing_origins' | 'laser_contours' | 'fsm' | 'trick_map'
 
+// `fov` has one FeatureCollection per instrument. Each feature is one shape (e.g. guider,
+// detector): a MultiPolygon of closed rings, with its own label, pointing origin offset and
+// in-FOV behaviour in its properties.
+export interface FovFeatureProperties {
+    type?: string // free-form label distinguishing the shapes, e.g. 'guider'
+    pointing_origin?: string // name of the pointing origin this shape is offset by; none means no offset
+    ignore_in_fov?: boolean // when true, catalog stars are not tested against this shape (default false)
+    tooltip?: string // text shown when hovering the shape's outline
+}
+
+export interface FovCollectionProperties {
+    instrument: string
+    dome: string
+    po_instrument?: string // instrument the POs are filed under, when it differs from `instrument`
+    po_default?: string // name of the PO selected when this FOV is loaded
+    po_preferred?: string // name of a second PO made available when this FOV is loaded
+    zoom: number
+    units: string
+}
+
+export interface FovCollection extends FeatureCollection<MultiPolygon, FovFeatureProperties> {
+    properties: FovCollectionProperties
+}
+
 interface ShapeCfgFile {
-    fov: FeatureCollection<MultiPolygon>
+    fov: FovCollection[]
     compass_rose: FeatureCollection<Polygon>
     pointing_origins: FeatureCollection<GeoJSON.Geometry>
     laser_contours: FeatureCollection<GeoJSON.MultiLineString>
@@ -83,9 +107,39 @@ const load_shapes = (): Promise<ShapeCfgFile> => {
     return shapesPromise
 }
 
-export const get_shapes = async (fcType: ShapeCatagory) => {
+export const get_shapes = async <K extends ShapeCatagory>(fcType: K): Promise<ShapeCfgFile[K]> => {
     const json = await load_shapes()
     return json[fcType]
+}
+
+export interface FovShape {
+    type?: string
+    tooltip?: string
+    ignoreInFov: boolean
+    rings: [number, number][][] // arcsec, PO offset already applied
+}
+
+// Shapes of one instrument with each shifted by its pointing origin.
+export const get_fov_shapes = (
+    collections: FovCollection[],
+    instrument: string,
+    pointingOrigins: FeatureCollection<GeoJSON.Geometry>
+): FovShape[] => {
+    return collections.filter((c) => c.properties.instrument === instrument).flatMap((collection) => {
+        const poInstrument = collection.properties.po_instrument ?? instrument
+        return collection.features.map((feature) => {
+            const { pointing_origin: poName, ignore_in_fov, type, tooltip } = feature.properties ?? {}
+            const po = poName
+                ? pointingOrigins.features.find((p) => p.properties?.instrument === poInstrument && p.properties?.name === poName)
+                : undefined
+            if (poName && !po) console.warn(`FOV ${instrument}: pointing origin '${poName}' not found`)
+            const [dx, dy] = (po?.geometry as GeoJSON.Point | undefined)?.coordinates ?? [0, 0]
+            const rings = feature.geometry.coordinates.flatMap((polygon) =>
+                polygon.map((ring) => ring.map(([x, y]) => [x + dx, y + dy] as [number, number]))
+            )
+            return { type, tooltip, ignoreInFov: ignore_in_fov ?? false, rings }
+        })
+    })
 }
 
 export const alt_az_observable = (alt: number, az: number, geoModel: GeoModel) => {

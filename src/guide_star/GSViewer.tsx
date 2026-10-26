@@ -307,12 +307,12 @@ export const GSViewer = (props: Props) => {
     const updateFOV = async () => {
       if (!props.instrumentFOV) return;
       try {
-        const featureCollection = await get_shapes('fov');
-        const features = featureCollection['features'].filter((feature: any) => {
-          return feature['properties'].type === 'FOV' && feature['properties'].instrument === props.instrumentFOV;
-        });
-        if (features.length > 0) {
-          setFOV(features[0]);
+        const collections = await get_shapes('fov');
+        // legacy viewer: draws only the first shape of the instrument, ignoring its pointing origin
+        const collection = collections.find((c) => c.properties.instrument === props.instrumentFOV);
+        if (collection && collection.features.length > 0) {
+          const rings = collection.features.flatMap((f) => f.geometry.coordinates.flatMap((polygon) => polygon));
+          setFOV({ geometry: { type: 'MultiPolygon', coordinates: rings } });
         }
       } catch (error) {
         console.error('Failed to fetch FOV shapes:', error);

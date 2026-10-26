@@ -42,7 +42,7 @@ export const is_guidestar_already_added = (
         }
         return (
             Math.abs(t.ra_deg - guidestar.ra_deg) < DUPLICATE_COORD_TOLERANCE_DEG &&
-            Math.abs(t.dec_deg - guidestar.dec_deg) < DUPLICATE_COORD_TOLERANCE_DEG 
+            Math.abs(t.dec_deg - guidestar.dec_deg) < DUPLICATE_COORD_TOLERANCE_DEG
         );
     });
 }
@@ -51,6 +51,7 @@ interface AddGuideStarButtonProps {
     guidestar: Partial<Target>;
     science_target_name?: string;
     useLaser?: boolean;
+    tags: string[]
 }
 
 const sanitize_guide_star = (guidestar: Partial<Target>) => {
@@ -69,14 +70,28 @@ const sanitize_guide_star = (guidestar: Partial<Target>) => {
         if (/^._mag$/.test(key) && typeof value === 'number' && value >= 99.9) {
             delete sanitizedGuideStar[key]
         }
+
+        if (key.includes('pm_dec')) {
+            delete sanitizedGuideStar[key]
+        }
+
+        if (key.includes('pm_ra')) {
+            delete sanitizedGuideStar[key]
+        }
     })
 
+    // Round separation and every *_mag to 2 decimals.
+    Object.entries(sanitizedGuideStar).forEach(([key, value]) => {
+        if ((key === 'separation' || /_mag$/.test(key)) && typeof value === 'number') {
+            sanitizedGuideStar[key] = Math.round(value * 100) / 100
+        }
+    })
 
     return sanitizedGuideStar
 }
 
 const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
-    const { guidestar, science_target_name } = props
+    const { guidestar, science_target_name, tags, useLaser } = props
 
     const context = useStateContext()
     const snackbarContext = useSnackbarContext()
@@ -100,8 +115,9 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
             newTarget = {
                 ...newTarget,
                 ...sanitizedGuideStar,
-                equinox: String(guidestar.equinox ?? '2000'),
+                equinox: String(guidestar.equinox ?? '2000.0'),
                 science_target: science_target_name,
+                tags
             }
             const resp = await submit_target([newTarget])
             if (resp.errors.length > 0) {
@@ -131,6 +147,30 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
                 newTargets.splice(index + 1, 0, addedTarget);
                 return newTargets;
             });
+
+            // The science target's laser setting follows how its guide star was chosen:
+            // lgs=1 when picked against the laser contours, lgs=0 against the FSM.
+            // A science target whose lgs is 'None' (or unset) is left alone.
+            const scienceTarget = science_target_name
+                ? context.targets?.find(tgt => (tgt.target_name ?? tgt._id) === science_target_name)
+                : undefined
+            console.log('science target', scienceTarget)
+
+            if ( scienceTarget && scienceTarget.lgs == null ){
+                const lgs = useLaser ? '1' : '0'
+                console.log('submitting target')
+                const lgsResp = await submit_target([{ ...scienceTarget, lgs }])
+                if (lgsResp.errors.length > 0) {
+                    console.error('error updating science target lgs')
+                    snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Error updating science target lgs' })
+                    snackbarContext.setSnackbarOpen(true);
+                } else {
+                    const updated = lgsResp.targets[0]
+                    context.setTargets && context.setTargets((oldTargets) =>
+                        (oldTargets ?? []).map(tgt => tgt._id === updated._id ? updated : tgt))
+                }
+            }
+
         } finally {
             isSubmittingRef.current = false;
             setIsSubmitting(false);
@@ -157,13 +197,14 @@ const AddGuideStarButton = (props: AddGuideStarButtonProps) => {
 interface Props {
     guidestars?: Partial<Target>[];
     science_target_name?: string;
+    tags: string[];
     selectedGuideStarName?: string;
     setSelectedGuideStarName?: (name: string) => void;
     useLaser?: boolean;
 }
 
 export default function GuideStarTable(props: Props) {
-    const { guidestars, selectedGuideStarName, setSelectedGuideStarName, science_target_name } = props;
+    const { guidestars, selectedGuideStarName, setSelectedGuideStarName, science_target_name, tags } = props;
     const context = useStateContext()
     const cfg = context.config
     const sortOrder = cfg.default_guide_star_table_columns;
@@ -242,6 +283,7 @@ export default function GuideStarTable(props: Props) {
                 key="add"
                 guidestar={row}
                 science_target_name={science_target_name}
+                tags={tags}
                 useLaser={props.useLaser}
             />
         ];
@@ -279,7 +321,7 @@ export default function GuideStarTable(props: Props) {
         ];
         return [...addColumns, ...cols];
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [sortOrder, science_target_name, props.useLaser]);
+    }, [sortOrder, science_target_name, props.useLaser, tags]);
 
     const visibleColumns = React.useMemo(() => Object.fromEntries(columns.map((col) => {
         return [col.field, sortOrder.includes(col.field)]

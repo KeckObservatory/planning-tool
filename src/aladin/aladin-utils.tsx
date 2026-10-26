@@ -1,6 +1,6 @@
 import { cosd, sind, r2d } from '../two-d-view/sky_view_util.tsx'
-import { Feature, FeatureCollection, MultiPolygon, Polygon, Position } from 'geojson'
-import { get_shapes } from "../two-d-view/two_d_view_common.tsx"
+import { FeatureCollection, Polygon, Position } from 'geojson'
+import { get_fov_shapes, get_shapes } from "../two-d-view/two_d_view_common.tsx"
 
 export const rotate_point = (point: Position[], angle: number, pnt=[0,0]) => {
         let [x, y] = point as unknown as [number, number]
@@ -28,9 +28,6 @@ const rotate_multipolygon = (coords: Position[][][], angle: number, pnt=[0,0]) =
 }
 
 const get_angle = (aladin: any) => {
-    //Compass rose is a euclidian object put onto a non-euclidian projection, 
-    //so we need to calculate the angle of two vectors that are small enough to be approximately euclidian
-    //usually 5 arcminutes is good enough
     const [ra, dec] = aladin.getRaDec() as [number, number]
     const dra = 5 / (24 * 60) //hours 5 minutes is probably good
     const ddec = 90 //deg
@@ -46,10 +43,6 @@ const get_angle = (aladin: any) => {
 
 export const get_compass = async (aladin: any, height: number, width: number, positionAngle: number) => {
     console.log('Getting compass for aladin', aladin, 'with height', height, 'and width', width, 'and positionAngle', positionAngle)
-    // get_shapes caches and returns the same FeatureCollection instance on every call,
-    // so features here must not be mutated - doing so would bake this call's absolute
-    // screen offset/rotation into the shared shape, compounding further on every
-    // subsequent pan/zoom-triggered recompute until the compass drifts off-screen.
     const fc = await get_shapes('compass_rose') as FeatureCollection<Polygon>
     const angle = 90 + get_angle(aladin) // rotate to match compass
     const aladinAngle = aladin.getViewCenter2NorthPoleAngle()
@@ -72,19 +65,24 @@ export const get_compass = async (aladin: any, height: number, width: number, po
     return { ...fc, features } as FeatureCollection<Polygon>
 }
 
+export const offset_to_world = (ra: number, dec: number, dx: number, dy: number): [number, number] => {
+    return [ra - dx / 3600, dec - dy / 3600]
+}
+
 export const get_fovz = async (ra: number, dec: number, aladin: any, instrumentFOV: string, angle: number, offset: [number, number]) => {
     const fc = await get_shapes('fov')
-    const features = fc['features'].filter((f: any) => f['properties'].type === 'FOV')
-    const feature = features.find((f: any) => f['properties'].instrument === instrumentFOV)
-    if (!feature) return { fov: [], zoom: 5 } 
-    const multipolygon = (feature as Feature<MultiPolygon>).geometry.coordinates
-    const rotPolygon = rotate_multipolygon(multipolygon, angle, offset )
+    const collection = fc.find((c) => c.properties.instrument === instrumentFOV)
+    if (!collection) return { fov: [], zoom: 5 }
+    const pointingOrigins = await get_shapes('pointing_origins')
+    // every shape of the instrument is drawn, each already shifted by its own pointing origin
+    const multipolygon = get_fov_shapes(fc, instrumentFOV, pointingOrigins).flatMap((shape) => shape.rings) as unknown as Position[][][]
+    // the guide star viewer turns the instrument frame by -angle
+    const rotPolygon = rotate_multipolygon(multipolygon, -angle, offset )
     const polygons = rotPolygon.map((polygon: Position[][]) => {
-        let absPolygon = [...polygon, polygon[0]]
-        absPolygon = absPolygon
+        const absPolygon = polygon // rings are already closed
             .map((point) => {
                 const [x, y] = point as unknown as [number, number]
-                return [x / 3600 + ra, y / 3600 + dec]
+                return offset_to_world(ra, dec, x - offset[0], y - offset[1])
             })
             .map((point) => {
                 const [x, y] = point as unknown as [number, number]
@@ -94,7 +92,7 @@ export const get_fovz = async (ra: number, dec: number, aladin: any, instrumentF
         return absPolygon
     })
 
-    const zoom = feature?.properties?.zoom ?? 1
+    const zoom = collection.properties.zoom ?? 1
     const out = { fov: polygons as Position[][][], zoom: zoom as number }
     return out 
 }

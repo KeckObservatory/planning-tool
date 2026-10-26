@@ -2,13 +2,13 @@ import { Target, useStateContext } from "../App"
 import React from "react"
 import * as d3 from "d3"
 import { useTheme } from "@mui/material/styles"
-import { get_shapes } from "../two-d-view/two_d_view_common.tsx"
+import { get_shapes, get_fov_shapes, FovShape } from "../two-d-view/two_d_view_common.tsx"
 import { POPointFeature, TelescopeContours } from "../two-d-view/pointing_origin_select"
 import { Feature, Point } from "geojson"
 import { PointingOriginMarkers, PointingOriginMarker } from "../aladin/pointing_origin_markers"
 import { ScaleBar } from "./scale_bar"
 import { CompassRose } from "./compass_rose"
-import { ZOOM_SPEED, ZOOM_MIN, ZOOM_MAX, MOSFIRE_ZOOM_DEFAULT, ZOOM_DEFAULT } from "../two-d-view/constants"
+import { ZOOM_SPEED, ZOOM_MIN, ZOOM_MAX, MOSFIRE_ZOOM_DEFAULT, ZOOM_DEFAULT, OSIRIS_FSM_TSS_ROTATION, NIRC2_FSM_TSS_PO } from "../two-d-view/constants"
 import IconButton from "@mui/material/IconButton"
 import Tooltip from "@mui/material/Tooltip"
 import DownloadIcon from '@mui/icons-material/Download'
@@ -48,6 +48,13 @@ const point_within_polygon = (point: [number, number], polygon: [number, number]
   return inside; //if even, then point is inside polygon
 };
 
+interface ContourLines {
+  name: string;
+  color: string;
+  tooltip: string;
+  lines: Array<Array<[number, number]>>
+}
+
 interface Props {
   imgUrl: string
   guideStars: Target[]
@@ -82,6 +89,7 @@ export const GSViewer = (props: Props) => {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const svgRef = React.useRef<SVGSVGElement | null>(null);
   const fovSvgRef = React.useRef<SVGSVGElement | null>(null);
+  const [mapTooltip, setMapTooltip] = React.useState<{ x: number; y: number; text: string } | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [zoom, setZoom] = React.useState<number>(initZoom); // 1 = no zoom
   const [panOffset, setPanOffset] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -91,8 +99,8 @@ export const GSViewer = (props: Props) => {
   const [brightness, setBrightness] = React.useState<number>(100);
   const [contrast, setContrast] = React.useState<number>(100);
   const degPerPixel = (props.size / props.width) / zoom // degrees per pixel, adjusted for zoom
-  const [fov, setFOV] = React.useState<any>(null)
-  const [laserContours, setLaserContours] = React.useState<Array<{ name: string; color: string; lines: Array<Array<[number, number]>> }>>([]);
+  const [fov, setFOV] = React.useState<FovShape[] | null>(null)
+  const [contourLines, setContourLines] = React.useState<Array<ContourLines>>([]);
   const [trickMapContours, setTrickMapContours] = React.useState<Array<{ name: string; color: string; lines: Array<Array<[number, number]>> }>>([]);
 
   // A pointing origin is where the telescope puts the target in the instrument's
@@ -115,11 +123,29 @@ export const GSViewer = (props: Props) => {
   // the opposite way from how the image used to.
   const overlayRotation = -(props.fovAngle || 0);
 
-  // The laser contours are defined in the telescope frame, but OSIRIS is physically
-  // mounted 45 degrees off that frame - the same offset already baked into its FOV
-  // and pointing origins in FEATURES.json - so its contours need that same 45 degree
-  // counter-clockwise correction to line up with the instrument.
-  const instrumentContourRotation = props.instrumentFOV === 'OSIRIS' ? -45 : 0;
+  const instrumentContourRotation = props.instrumentFOV === 'OSIRIS' ? OSIRIS_FSM_TSS_ROTATION : 0;
+  const instrumentContourPOName = props.instrumentFOV?.includes("NIRC2") ? NIRC2_FSM_TSS_PO : undefined
+
+  // Offset (arcseconds) of the pointing origin the FSM/TSS contours are drawn about,
+  // looked up in FEATURES.json so it doesn't depend on which origins are selected.
+  // The FOV is e.g. 'NIRC2Narrow', but its pointing origins belong to 'NIRC2'.
+  const [instrumentContourOffset, setInstrumentContourOffset] = React.useState<[number, number]>([0, 0]);
+  React.useEffect(() => {
+    if (!instrumentContourPOName || !props.instrumentFOV) {
+      setInstrumentContourOffset([0, 0]);
+      return;
+    }
+    let cancelled = false;
+    get_shapes('pointing_origins')
+      .then((collection: any) => {
+        const po = collection.features.find((f: any) =>
+          f.properties?.instrument === 'NIRC2' && f.properties?.name === instrumentContourPOName);
+        if (!po) console.warn(`NIRC2: FSM/TSS pointing origin '${instrumentContourPOName}' not found`);
+        if (!cancelled) setInstrumentContourOffset(po ? [po.geometry.coordinates[0], po.geometry.coordinates[1]] : [0, 0]);
+      })
+      .catch((error: unknown) => console.error('Failed to fetch FSM/TSS pointing origin:', error));
+    return () => { cancelled = true; };
+  }, [props.instrumentFOV, instrumentContourPOName]);
 
   // Rotate a pixel coordinate about the viewer center. Positive degrees are clockwise
   // on screen, matching the CSS rotate() applied to the FOV layer.
@@ -154,18 +180,19 @@ export const GSViewer = (props: Props) => {
     });
   }, [props.pointingOrigins, props.centerRA, props.centerDec, props.width, props.height, degPerPixel, props.selPO, zoom, props.fovAngle]);
 
-  // Convert laser contours to pixel coordinates
+  // Convert contours to pixel coordinates. props.contours is the laser contours when the
+  // laser is on, otherwise the FSM (field steering mirror) outline for the telescope.
   React.useEffect(() => {
 
-    if (!props.showLaser || !props.contours) {
-      setLaserContours([]);
+    if (!props.contours) {
+      setContourLines([]);
       return;
     }
 
     // Handle both FeatureCollection format and direct array format
     const features = (props.contours.features || props.contours) as any[];
     if (!features || features.length === 0) {
-      setLaserContours([]);
+      setContourLines([]);
       return;
     }
 
@@ -174,21 +201,23 @@ export const GSViewer = (props: Props) => {
         // Convert from arcseconds to pixel coordinates
         const [dra1, ddec1] = lineseg[0]; // arcseconds
         const [dra2, ddec2] = lineseg[1]; // arcseconds
-        const [x1, y1] = rotateAboutCenter(...arcsecToPixel(dra1, ddec1), instrumentContourRotation);
-        const [x2, y2] = rotateAboutCenter(...arcsecToPixel(dra2, ddec2), instrumentContourRotation);
+        const [x1, y1] = rotateAboutCenter(...arcsecToPixel(dra1 + instrumentContourOffset[0], ddec1 + instrumentContourOffset[1]), instrumentContourRotation);
+        const [x2, y2] = rotateAboutCenter(...arcsecToPixel(dra2 + instrumentContourOffset[0], ddec2 + instrumentContourOffset[1]), instrumentContourRotation);
         return [[x1, y1] as [number, number], [x2, y2] as [number, number]];
       });
       const name = feature.properties?.name ?? 'Unknown';
       const color = feature.properties?.color ?? 'magenta';
+      const tooltip = feature.properties?.tooltip ?? null;
       return {
         name,
         color,
-        lines
+        lines,
+        tooltip
       };
     });
 
-    setLaserContours(convertedContours);
-  }, [props.contours, props.showLaser, props.width, props.height, degPerPixel, zoom, props.selPO, instrumentContourRotation]);
+    setContourLines(convertedContours);
+  }, [props.contours, props.width, props.height, degPerPixel, zoom, props.selPO, instrumentContourRotation, instrumentContourOffset]);
 
   // Convert trick map to pixel coordinates
   React.useEffect(() => {
@@ -227,7 +256,7 @@ export const GSViewer = (props: Props) => {
     setTrickMapContours(convertedTrickMap);
   }, [props.trickMap, props.showTrickMap, props.width, props.height, degPerPixel, zoom, props.selPO]);
 
-  // Draw laser contours on SVG
+  // Draw contours (laser or FSM) on SVG
   React.useEffect(() => {
 
     // We'll add the contours to the FOV SVG layer
@@ -237,15 +266,15 @@ export const GSViewer = (props: Props) => {
     }
 
     // Remove previous contour lines (always clear first)
-    d3.select(fovSvg).selectAll('line.laser-contour').remove();
+    d3.select(fovSvg).selectAll('line.fsm-tss-contour').remove();
 
-    if (!laserContours || laserContours.length === 0) {
+    if (!contourLines || contourLines.length === 0) {
       return;
     }
 
 
     // Draw each contour
-    laserContours.forEach((contour) => {
+    contourLines.forEach((contour) => {
       contour.lines.forEach((line) => {
         const [x1, y1] = line[0];
         const [x2, y2] = line[1];
@@ -258,10 +287,27 @@ export const GSViewer = (props: Props) => {
           .attr('stroke', contour.color)
           .attr('stroke-width', 1.5)
           .attr('opacity', 0.7)
-          .attr('class', 'laser-contour');
+          .attr('class', 'fsm-tss-contour');
+
+        // The visible line is only 1.5px wide, so hover is caught by a wider invisible copy.
+        d3.select(fovSvg).append('line')
+          .attr('x1', x1)
+          .attr('y1', y1)
+          .attr('x2', x2)
+          .attr('y2', y2)
+          .attr('stroke', 'transparent')
+          .attr('stroke-width', 10)
+          .attr('class', 'fsm-tss-contour')
+          .style('pointer-events', 'stroke')
+          .on('mouseenter mousemove', (event: MouseEvent) => {
+            const rect = containerRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            setMapTooltip({ x: event.clientX - rect.left, y: event.clientY - rect.top, text: contour.tooltip ?? contour.name });
+          })
+          .on('mouseleave', () => setMapTooltip(null));
       });
     });
-  }, [laserContours, panOffset, zoom]);
+  }, [contourLines, panOffset, zoom]);
 
   // Draw trick map contours on SVG
   React.useEffect(() => {
@@ -291,9 +337,26 @@ export const GSViewer = (props: Props) => {
           .attr('x2', x2)
           .attr('y2', y2)
           .attr('stroke', contour.color)
-          .attr('stroke-width', 1.0)
+          .attr('stroke-width', 1.5)
           .attr('opacity', 0.5)
           .attr('class', 'trick-map-contour');
+
+        // The visible line is only 2px wide, so hover is caught by a wider invisible copy.
+        d3.select(fovSvg).append('line')
+          .attr('x1', x1)
+          .attr('y1', y1)
+          .attr('x2', x2)
+          .attr('y2', y2)
+          .attr('stroke', 'transparent')
+          .attr('stroke-width', 10)
+          .attr('class', 'trick-map-contour')
+          .style('pointer-events', 'stroke')
+          .on('mouseenter mousemove', (event: MouseEvent) => {
+            const rect = containerRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            setMapTooltip({ x: event.clientX - rect.left, y: event.clientY - rect.top, text: 'Trick map' });
+          })
+          .on('mouseleave', () => setMapTooltip(null));
       });
     });
   }, [trickMapContours, panOffset, zoom]);
@@ -325,19 +388,14 @@ export const GSViewer = (props: Props) => {
     };
   }, [props.imgUrl, props.guideStars]); // Redraw if image URL or objects change
 
+  // Shapes a catalog star is tested against; ones flagged ignore_in_fov are skipped.
   const fovPolygons = React.useMemo((): [number, number][][] => {
     if (!fov) return [];
-    const toPixel = (coord: [number, number]): [number, number] => {
-      const [dra, ddec] = coord; // arcseconds offset from the instrument origin
-      const [x, y] = arcsecToPixel(dra, ddec);
+    const toPixel = ([dra, ddec]: [number, number]): [number, number] => {
+      const [x, y] = arcsecToPixel(dra, ddec); // arcseconds offset from the instrument origin
       return rotateAboutCenter(x, y, overlayRotation);
     };
-    if (fov.geometry.type === 'MultiPolygon') {
-      return fov.geometry.coordinates.map((ring: [number, number][]) => ring.map(toPixel));
-    } else if (fov.geometry.type === 'Polygon') {
-      return [fov.geometry.coordinates[0].map(toPixel)];
-    }
-    return [];
+    return fov.filter((shape) => !shape.ignoreInFov).flatMap((shape) => shape.rings.map((ring) => ring.map(toPixel)));
   }, [fov, props.width, props.height, degPerPixel, overlayRotation, props.selPO]);
 
   React.useEffect(() => {
@@ -417,12 +475,10 @@ export const GSViewer = (props: Props) => {
     const updateFOV = async () => {
       if (!props.instrumentFOV) return;
       try {
-        const featureCollection = await get_shapes('fov');
-        const features = featureCollection['features'].filter((feature: any) => {
-          return feature['properties'].type === 'FOV' && feature['properties'].instrument === props.instrumentFOV;
-        });
-        if (features.length > 0) {
-          setFOV(features[0]);
+        const collections = await get_shapes('fov');
+        const shapes = get_fov_shapes(collections, props.instrumentFOV, await get_shapes('pointing_origins'));
+        if (shapes.length > 0) {
+          setFOV(shapes);
         }
       } catch (error) {
         console.error('Failed to fetch FOV shapes:', error);
@@ -440,55 +496,36 @@ export const GSViewer = (props: Props) => {
     // Clear previous FOV
     d3.select(fovSvg).selectAll('path').remove();
 
-    const feature = fov;
-    if (feature.geometry.type === 'MultiPolygon') {
-      const polygons = feature.geometry.coordinates; // array of polygons
+    // Every shape is drawn; its pointing origin offset is already applied to the rings.
+    fov.forEach((shape) => {
+      shape.rings.forEach((ring) => {
+        // Transform world coordinates (arcseconds) to pixel coordinates
+        const points = ring.map(([dra, ddec]) => arcsecToPixel(dra, ddec));
 
-      polygons.forEach((coordinates: [number, number][]) => {
-
-        // Transform world coordinates to pixel coordinates
-        const points = coordinates.map((coord: [number, number]) => {
-          const dra = coord[0]; // arcseconds offset from the instrument origin
-          const ddec = coord[1]; // arcseconds offset from the instrument origin
-          return arcsecToPixel(dra, ddec);
-        });
-
-        // Draw polygon
         d3.select(fovSvg).append('path')
-          .attr('d', () => {
-            const pathData = (points as Array<[number, number]>).map((p: [number, number], i: number) => {
-              return (i === 0 ? 'M' : 'L') + p[0] + ',' + p[1];
-            }).join(' ') + 'Z';
-            return pathData;
-          })
+          .attr('d', points.map((p, i) => (i === 0 ? 'M' : 'L') + p[0] + ',' + p[1]).join(' ') + 'Z')
           .attr('fill', 'none')
           .attr('stroke', 'cyan')
           .attr('stroke-width', 2)
           .attr('opacity', 0.7)
-      });
-    } else if (feature.geometry.type === 'Polygon') {
-      const coordinates = feature.geometry.coordinates[0]; // exterior ring
 
-      // Transform world coordinates to pixel coordinates
-      const points = coordinates.map((coord: [number, number]) => {
-        const dra = coord[0]; // arcseconds offset from the instrument origin
-        const ddec = coord[1]; // arcseconds offset from the instrument origin
-        return arcsecToPixel(dra, ddec);
+        // The visible outline is only 2px wide, so hover is caught by a wider invisible copy.
+        if (shape.tooltip) {
+          d3.select(fovSvg).append('path')
+            .attr('d', points.map((p, i) => (i === 0 ? 'M' : 'L') + p[0] + ',' + p[1]).join(' ') + 'Z')
+            .attr('fill', 'none')
+            .attr('stroke', 'transparent')
+            .attr('stroke-width', 10)
+            .style('pointer-events', 'stroke')
+            .on('mouseenter mousemove', (event: MouseEvent) => {
+              const rect = containerRef.current?.getBoundingClientRect();
+              if (!rect) return;
+              setMapTooltip({ x: event.clientX - rect.left, y: event.clientY - rect.top, text: shape.tooltip! });
+            })
+            .on('mouseleave', () => setMapTooltip(null));
+        }
       });
-
-      // Draw polygon
-      d3.select(fovSvg).append('path')
-        .attr('d', () => {
-          const pathData = (points as Array<[number, number]>).map((p: [number, number], i: number) => {
-            return (i === 0 ? 'M' : 'L') + p[0] + ',' + p[1];
-          }).join(' ') + 'Z';
-          return pathData;
-        })
-        .attr('fill', 'none')
-        .attr('stroke', 'cyan')
-        .attr('stroke-width', 2)
-        .attr('opacity', 0.7);
-    }
+    });
   }, [fov, props.centerRA, props.centerDec, props.width, props.height, degPerPixel, props.selPO, zoom, props.fovAngle]);
 
   const colorStretchFilter = `${props.invertImage !== false ? 'invert(1) ' : ''}brightness(${brightness}%) contrast(${contrast}%)`
@@ -782,6 +819,25 @@ export const GSViewer = (props: Props) => {
             textColor="#FFFFFF"   // White text
             markerColor="#FFFF00" // Yellow markers
           />
+        </div>
+      )}
+      {mapTooltip && (
+        <div
+          style={{
+            position: 'absolute',
+            left: mapTooltip.x + 12,
+            top: mapTooltip.y + 12,
+            padding: '2px 8px',
+            background: 'rgba(30,30,30,0.9)',
+            color: '#fff',
+            fontSize: 12,
+            borderRadius: 4,
+            pointerEvents: 'none',
+            zIndex: 3,
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {mapTooltip.text}
         </div>
       )}
       <ScaleBar width={props.width} height={props.height} degPerPixel={degPerPixel} invertImage={props.invertImage} />
