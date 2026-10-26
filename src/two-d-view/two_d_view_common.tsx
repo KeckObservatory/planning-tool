@@ -1,0 +1,194 @@
+/**
+ * Lightweight pieces shared by the 2D view, guide star, and starlist modules.
+ *
+ * These used to live in two_d_view.tsx and target_viz_chart.tsx, which pull in
+ * plotly and aladin-lite. Anything importing them dragged ~7MB of charting code
+ * into the initial bundle, so keep this module free of heavy imports.
+ */
+import React from 'react';
+import { FormControl, FormControlLabel, FormLabel, Radio, RadioGroup } from '@mui/material';
+import { createEnumParam } from 'use-query-params';
+import dayjs from 'dayjs';
+import { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
+import { FOVlink, MOON_WARNING_HEAVY_DEG, MOON_WARNING_LIGHT_DEG } from './constants.tsx';
+import type { GeoModel, Target } from '../App.tsx';
+import type { BlockReason, VizRow } from './viz_dialog.tsx';
+
+export type Dome = "Keck 1" | "Keck 2"
+
+export const DomeParam = createEnumParam<Dome>(['Keck 1', 'Keck 2'])
+
+export interface TargetView extends Target {
+    dome: Dome,
+    date: Date,
+    ra_deg: number,
+    dec_deg: number,
+    visibility: VizRow[],
+    visibilitySum: number
+}
+
+interface DomeSelectProps {
+    dome: Dome
+    setDome: (dome: Dome) => void
+    // e.g. the starlist submission dialog, where dome is set by picking a schedule
+    // row rather than chosen directly.
+    readOnly?: boolean
+}
+
+export const DomeSelect = (props: DomeSelectProps) => {
+    const { dome, setDome, readOnly } = props
+
+    const handleDomeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setDome(event.target.value as Dome)
+    }
+
+    return (
+        <FormControl>
+            <FormLabel id="dome-row-radio-buttons-group-label">Dome</FormLabel>
+            <RadioGroup
+                row
+                aria-labelledby="dome-row-radio-buttons-group-label"
+                name="dome-radio-buttons-group"
+                value={dome}
+                onChange={handleDomeChange}
+            >
+                <FormControlLabel value="Keck 1" control={<Radio />} label="Keck 1" disabled={readOnly} />
+                <FormControlLabel value="Keck 2" control={<Radio />} label="Keck 2" disabled={readOnly} />
+            </RadioGroup>
+        </FormControl>
+    )
+}
+
+export const hidate = (date: Date, timezone: string) => {
+    return dayjs(date).tz(timezone)
+}
+
+export type ShapeCatagory = 'fov' | 'compass_rose' | 'pointing_origins' | 'laser_contours' | 'fsm' | 'trick_map'
+
+// `fov` has one FeatureCollection per instrument. Each feature is one shape (e.g. guider,
+// detector): a MultiPolygon of closed rings, with its own label, pointing origin offset and
+// in-FOV behaviour in its properties.
+export interface FovFeatureProperties {
+    type?: string // free-form label distinguishing the shapes, e.g. 'guider'
+    pointing_origin?: string // name of the pointing origin this shape is offset by; none means no offset
+    ignore_in_fov?: boolean // when true, catalog stars are not tested against this shape (default false)
+    tooltip?: string // text shown when hovering the shape's outline
+}
+
+export interface FovCollectionProperties {
+    instrument: string
+    dome: string
+    po_instrument?: string // instrument the POs are filed under, when it differs from `instrument`
+    po_default?: string // name of the PO selected when this FOV is loaded
+    po_preferred?: string // name of a second PO made available when this FOV is loaded
+    zoom: number
+    units: string
+}
+
+export interface FovCollection extends FeatureCollection<MultiPolygon, FovFeatureProperties> {
+    properties: FovCollectionProperties
+}
+
+interface ShapeCfgFile {
+    fov: FovCollection[]
+    compass_rose: FeatureCollection<Polygon>
+    pointing_origins: FeatureCollection<GeoJSON.Geometry>
+    laser_contours: FeatureCollection<GeoJSON.MultiLineString>
+    fsm: FeatureCollection<GeoJSON.MultiLineString>
+    trick_map: FeatureCollection<GeoJSON.MultiLineString>
+}
+
+let shapesPromise: Promise<ShapeCfgFile> | null = null
+
+const load_shapes = (): Promise<ShapeCfgFile> => {
+    if (!shapesPromise) {
+        shapesPromise = fetch(FOVlink).then((resp) => resp.json())
+    }
+    return shapesPromise
+}
+
+export const get_shapes = async <K extends ShapeCatagory>(fcType: K): Promise<ShapeCfgFile[K]> => {
+    const json = await load_shapes()
+    return json[fcType]
+}
+
+export interface FovShape {
+    type?: string
+    tooltip?: string
+    ignoreInFov: boolean
+    rings: [number, number][][] // arcsec, PO offset already applied
+}
+
+// Shapes of one instrument with each shifted by its pointing origin.
+export const get_fov_shapes = (
+    collections: FovCollection[],
+    instrument: string,
+    pointingOrigins: FeatureCollection<GeoJSON.Geometry>
+): FovShape[] => {
+    return collections.filter((c) => c.properties.instrument === instrument).flatMap((collection) => {
+        const poInstrument = collection.properties.po_instrument ?? instrument
+        return collection.features.map((feature) => {
+            const { pointing_origin: poName, ignore_in_fov, type, tooltip } = feature.properties ?? {}
+            const po = poName
+                ? pointingOrigins.features.find((p) => p.properties?.instrument === poInstrument && p.properties?.name === poName)
+                : undefined
+            if (poName && !po) console.warn(`FOV ${instrument}: pointing origin '${poName}' not found`)
+            const [dx, dy] = (po?.geometry as GeoJSON.Point | undefined)?.coordinates ?? [0, 0]
+            const rings = feature.geometry.coordinates.flatMap((polygon) =>
+                polygon.map((ring) => ring.map(([x, y]) => [x + dx, y + dy] as [number, number]))
+            )
+            return { type, tooltip, ignoreInFov: ignore_in_fov ?? false, rings }
+        })
+    })
+}
+
+export const alt_az_observable = (alt: number, az: number, geoModel: GeoModel) => {
+    const minDeckAz = geoModel.t2
+    const maxDeckAz = geoModel.t3
+    const minAlt = geoModel.r1
+    const deckAlt = geoModel.r3
+    const trackLimit = geoModel.trackLimit
+
+    const reasons: Array<BlockReason> = []
+    //nasdeck is blocking the target?
+    const targetOverlapsDeck = az >= minDeckAz && az <= maxDeckAz
+    const targetBelowDeck = alt >= minAlt && alt <= deckAlt
+    const deckBlocking = targetOverlapsDeck && targetBelowDeck
+    deckBlocking && reasons.push('Deck Blocking')
+
+    //target is below telescope horizon?
+    const targetBelowHorizon = alt < minAlt
+    targetBelowHorizon && reasons.push('Below Horizon')
+
+    //target is above tracking limits?
+    const targetAboveTrackingLimits = alt > trackLimit
+    targetAboveTrackingLimits && reasons.push('Above Tracking Limits')
+
+    const observable = !deckBlocking && !targetBelowHorizon && !targetAboveTrackingLimits
+    return { observable, reasons }
+}
+
+export interface MoonWarning {
+    target_name: string
+    lunar_angle: number
+    level: 'light' | 'heavy'
+}
+
+// Closest lunar approach for each target, while it's actually observable that night.
+export const get_moon_warnings = (targetView: TargetView[]): MoonWarning[] => {
+    const warnings: MoonWarning[] = []
+    targetView.forEach((tgtv) => {
+        const observableRows = tgtv.visibility.filter((viz) => viz.observable)
+        if (observableRows.length === 0) return
+
+        const closest = observableRows.reduce((min, viz) => viz.lunar_angle < min.lunar_angle ? viz : min)
+        if (closest.lunar_angle >= MOON_WARNING_LIGHT_DEG) return
+
+        warnings.push({
+            target_name: tgtv.target_name ?? 'Target',
+            lunar_angle: closest.lunar_angle,
+            level: closest.lunar_angle < MOON_WARNING_HEAVY_DEG ? 'heavy' : 'light'
+        })
+    })
+    return warnings
+}

@@ -1,5 +1,5 @@
 import { DayViz, TargetViz, VizRow } from "./viz_dialog";
-import Plot from "react-plotly.js";
+import Plot from "./plotly_custom";
 import { useStateContext } from "../App";
 import dayjs from "dayjs";
 import { State } from "../App";
@@ -146,7 +146,6 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
                     units = "log10"
                     break
                 case 'moon_illuminance':
-                    //TODO: verify that this is correct
                     datum = moon_illuminance(phase_angle_moon)
                     break
                 case 'target_pathlength':
@@ -177,7 +176,7 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
 
     let titleText =  targetViz.target_name ?? 'Target'
     titleText += ` ${vizChart}`
-    const trace: Partial<Plotly.PlotData> = {
+    const trace: Partial<Plotly.Data> = {
         x,
         y,
         z,
@@ -190,10 +189,11 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
         },
         colorbar: {
             x: 1.05,
-            title: units,
+            title: {
+                text: units,
+            },
         },
         hovertemplate: '<b>%{text}</b> <extra></extra>', //disable to show xyz coords
-        textposition: 'top left',
         colorscale: 'Hot',
         reversescale: reverseAxis,
         type: 'contour',
@@ -202,7 +202,7 @@ export const make_contour_plot = (context: State, targetViz: TargetViz, vizChart
     }
     let traces = [trace]
 
-    const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.PlotData[]
+    const lightTraces = Object.values(create_dawn_dusk_traces(targetViz, context.config.date_time_format)) as Plotly.Data[]
     //@ts-ignore
     traces = [...traces, ...lightTraces]
     titleText = `<b>${titleText}</b>`
