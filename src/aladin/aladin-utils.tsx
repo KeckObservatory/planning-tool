@@ -1,0 +1,98 @@
+import { cosd, sind, r2d } from '../two-d-view/sky_view_util.tsx'
+import { FeatureCollection, Polygon, Position } from 'geojson'
+import { get_fov_shapes, get_shapes } from "../two-d-view/two_d_view_common.tsx"
+
+export const rotate_point = (point: Position[], angle: number, pnt=[0,0]) => {
+        let [x, y] = point as unknown as [number, number]
+        x -= pnt[0]
+        y -= pnt[1]
+        let newPoint = [
+            x * cosd(angle) - y * sind(angle),
+            x * sind(angle) + y * cosd(angle)
+        ]
+        newPoint[0] += pnt[0]
+        newPoint[1] += pnt[1]
+        return newPoint as unknown as Position[]
+}
+
+const rotate_multipolygon = (coords: Position[][][], angle: number, pnt=[0,0]) => {
+
+    const rotFOV = coords.map(shape => {
+        const newShape = shape.map(point => {
+            const rotatedPoint = rotate_point(point, angle, pnt)
+            return rotatedPoint
+        })
+        return newShape
+    })
+    return rotFOV
+}
+
+const get_angle = (aladin: any) => {
+    const [ra, dec] = aladin.getRaDec() as [number, number]
+    const dra = 5 / (24 * 60) //hours 5 minutes is probably good
+    const ddec = 90 //deg
+    // const dra = 5/(24*60) //hours 5 minutes is probably good
+    // const ddec = 5/60 //deg
+
+    const [x0, y0] = aladin.world2pix(ra, dec) // originate compass on center of screen
+    const [x1, y1] = aladin.world2pix(ra, dec + ddec) //point up 
+    const [x2, y2] = aladin.world2pix(ra + dra, dec) //point left 
+    const angle = r2d(Math.atan2((y2 - x0) * (x1 - x0) - (y1 - y0) * (x2 - x0), (x1 - x0) * (x2 - x0) + (y1 - y0) * (y2 - y0)))
+    return angle
+}
+
+export const get_compass = async (aladin: any, height: number, width: number, positionAngle: number) => {
+    console.log('Getting compass for aladin', aladin, 'with height', height, 'and width', width, 'and positionAngle', positionAngle)
+    const fc = await get_shapes('compass_rose') as FeatureCollection<Polygon>
+    const angle = 90 + get_angle(aladin) // rotate to match compass
+    const aladinAngle = aladin.getViewCenter2NorthPoleAngle()
+    // const wcs = aladin.getViewWCS()
+    const features = fc['features'].map((f) => {
+        let polygon = f.geometry.coordinates
+        const offsetx = f.properties?.offsetx
+        const offsety = f.properties?.offsety
+        const margin = f.properties?.margin ?? 50
+        polygon = [...polygon, polygon[0]]
+        polygon = polygon.map((point) => {
+            const [x, y] = point as unknown as [number, number]
+            return [x + width - margin + offsetx, y + height - margin + offsety] as unknown as Position[]
+        })
+        const rotPnt = [width - margin, height - margin ]
+        const compassAngle = -1 * (angle + positionAngle + aladinAngle)
+        polygon = rotate_multipolygon([polygon], compassAngle, rotPnt)[0]
+        return { ...f, geometry: { ...f.geometry, coordinates: polygon } }
+    })
+    return { ...fc, features } as FeatureCollection<Polygon>
+}
+
+export const offset_to_world = (ra: number, dec: number, dx: number, dy: number): [number, number] => {
+    return [ra - dx / 3600, dec - dy / 3600]
+}
+
+export const get_fovz = async (ra: number, dec: number, aladin: any, instrumentFOV: string, angle: number, offset: [number, number]) => {
+    const fc = await get_shapes('fov')
+    const collection = fc.find((c) => c.properties.instrument === instrumentFOV)
+    if (!collection) return { fov: [], zoom: 5 }
+    const pointingOrigins = await get_shapes('pointing_origins')
+    // every shape of the instrument is drawn, each already shifted by its own pointing origin
+    const multipolygon = get_fov_shapes(fc, instrumentFOV, pointingOrigins).flatMap((shape) => shape.rings) as unknown as Position[][][]
+    // the guide star viewer turns the instrument frame by -angle
+    const rotPolygon = rotate_multipolygon(multipolygon, -angle, offset )
+    const polygons = rotPolygon.map((polygon: Position[][]) => {
+        const absPolygon = polygon // rings are already closed
+            .map((point) => {
+                const [x, y] = point as unknown as [number, number]
+                return offset_to_world(ra, dec, x - offset[0], y - offset[1])
+            })
+            .map((point) => {
+                const [x, y] = point as unknown as [number, number]
+                const pix = aladin.world2pix(x, y)
+                return pix
+            })
+        return absPolygon
+    })
+
+    const zoom = collection.properties.zoom ?? 1
+    const out = { fov: polygons as Position[][][], zoom: zoom as number }
+    return out 
+}

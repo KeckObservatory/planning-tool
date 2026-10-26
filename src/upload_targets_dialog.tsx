@@ -1,28 +1,32 @@
 import React from 'react';
 import Button from '@mui/material/Button';
 import DialogContentText from '@mui/material/DialogContentText';
-import { MenuItem, Menu, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, MenuItem, Menu, Stack, Tooltip, Typography } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
-import { RotatorMode, Target, TelescopeWrap, useStateContext, useSnackbarContext } from './App';
+import { Target, useStateContext, useSnackbarContext } from './App';
 import target_schema from './target_schema.json'
 import { v4 as randomId } from 'uuid';
 import { format_string_array, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog';
 import { DialogComponent } from './dialog_component';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util';
-import { TARGET_NAME_LENGTH_PADDED } from './table_toolbar';
+import { TARGET_NAME_LENGTH_PADDED } from './two-d-view/constants';
 
 interface Props {
     setTargets: Function
 }
 
 interface UploadProps extends Props {
-    label: string
-    setLabel?: Function,
     setOpen?: Function
 }
 
 
 const targetProps = target_schema.properties as TargetProps
+
+const starlistToKeyMapping = Object.fromEntries(
+    Object.entries(targetProps)
+    .filter(([_key, prop]) => prop.starlist_key)
+    .map(([key, prop]) => [prop.starlist_key, key])
+)
 
 let hdrToKeyMapping = Object.fromEntries(Object.entries(targetProps).map(([key, value]: [keyof TargetProps, PropertyProps]) => {
     const desc = value.short_description ?? value.description
@@ -67,6 +71,7 @@ export const format_target_property = (key: keyof Target, value: unknown, props:
 export const format_targets = (tgts: UploadedTarget[], targetProps: TargetProps) => {
     const fmtTgts = tgts.map((tgt) => {
         Object.entries(tgt).forEach(([key, value]) => {
+            if (value === undefined || value === null) return
             const props = targetProps[key]
             if (!props) {
                 console.log('tgt', tgt)
@@ -82,39 +87,15 @@ export const format_targets = (tgts: UploadedTarget[], targetProps: TargetProps)
     return fmtTgts
 }
 
-interface StarListOptionalKeys {
-    gmag?: number,
-    jmag?: number,
-    equinox?: string,
-    raoffset?: number,
-    decoffset?: number,
-    pmra?: number,
-    pmdec?: number,
-    rotmode?: RotatorMode,
-    wrap?: TelescopeWrap,
-    dra?: number,
-    ddec?: number,
-}
+const parse_json = (filename: string, contents: string) => {
+    let tgts = JSON.parse(contents)
+    const filename_tag = `${filename}`
+    tgts = tgts.map( (tgt: Target) => {
+        tgt.tags = tgt.tags ? [filename_tag, ...tgt.tags ] : [filename_tag]
+        tgt.tags = [...new Set(tgt.tags)] //unique tags
+        return tgt
+    })
 
-let starlistToKeyMapping = {
-    'gmag': 'g_mag',
-    'jmag': 'j_mag',
-    'vmag': 'v_mag',
-    'equinox': 'equinox',
-    'raoffset': 'ra_offset',
-    'decoffset': 'dec_offset',
-    'pmra': 'pm_ra',
-    'pmdec': 'pm_dec',
-    'rotmode': 'rotator_mode',
-    'rotdest': 'rotator_pa',
-    'pa': 'rotator_pa',
-    'wrap': 'telescope_wrap',
-    'dra': 'd_ra',
-    'ddec': 'd_dec',
-}
-
-const parse_json = (contents: string) => {
-    const tgts = JSON.parse(contents)
     return tgts
 }
 
@@ -181,7 +162,7 @@ const csv_to_array = (text: string) => {
     return a;
 };
 
-const parse_csv = (contents: string) => {
+const parse_csv = (filename: string, contents: string) => {
     let [headerStr, ...lines] = contents.split('\n')
         .map(s => s.replace('\r', ''))
 
@@ -204,8 +185,15 @@ const parse_csv = (contents: string) => {
             //@ts-ignore
             key && (tgt[key] = value)
         });
+
+        const existingTags = typeof tgt.tags === 'string'
+            ? tgt.tags.split(',').map((t) => t.trim()).filter(Boolean)
+            : (tgt.tags as string[] | undefined) ?? []
+        tgt.tags = [...new Set([filename, ...existingTags])] //unique tags
+
         return tgt;
     }).filter((item) => item !== undefined) as UploadedTarget[];
+
     return tgts
 }
 
@@ -216,7 +204,7 @@ const split_at = (index: number, str: string) => {
     }
     if (tabidx > 0) { // tab(s) in target name
         console.log('tabs in target name: targetName', str.slice(0, tabidx))
-        const targetName = str.slice(0, tabidx - 1).replaceAll('\t', ' ').padEnd(TARGET_NAME_LENGTH_PADDED, ' ')
+        const targetName = str.slice(0, tabidx).replaceAll('\t', ' ').padEnd(TARGET_NAME_LENGTH_PADDED, ' ')
         const targetBody = str.slice(tabidx + 1).replaceAll('\t', ' ').trimStart()
         console.log('targetName', targetName, 'targetBody', targetBody)
         return [targetName, targetBody]
@@ -226,7 +214,7 @@ const split_at = (index: number, str: string) => {
     // older files may have names longer than be longer than the 15 char limit. This relaxes this constraint
     let sliceIdx = index
     let substr = str.slice(index - 1)
-    while (substr[0].trim() !== '' && substr.length > 0) {
+    while (substr.length > 0 && substr[0].trim() !== '') {
         substr = substr.slice(1)
         sliceIdx += 1
     }
@@ -238,33 +226,87 @@ const split_at = (index: number, str: string) => {
     return [targetName, targetBody]
 }
 
-const parse_txt = (contents: string, obsid: number) => {
+// pads the digits of a possibly-signed numeric string, keeping the sign in front (e.g. "-5" -> "-05")
+const pad_signed_digits = (val: string, len: number) => {
+    const sign = val[0] === '+' || val[0] === '-' ? val[0] : ''
+    const digits = sign ? val.slice(1) : val
+    return sign + digits.padStart(len, '0')
+}
+
+const parse_comments = (lines: string[]) => {
+
+    let semids = [] as string[]
+    let tags = [] as string[]
+    let comments = [] as string[]
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        const lower = line.toLowerCase()
+        // handle semids in comments (e.g. # semids: sem1, sem2)
+        if (lower.includes('semids:')) {
+            const semidLine = line.slice(lower.indexOf('semids:') + 'semids:'.length)
+            semids = [...semids, ...semidLine.split(', ').map((sem) => sem.trim())]
+        }
+        // handle tags in comments (e.g. # tags: tag1, tag2)
+        else if (lower.includes('tags:')) {
+            const tagLine = line.slice(lower.indexOf('tags:') + 'tags:'.length)
+            tags = [...tags, ...tagLine.split(', ').map((tag) => tag.trim())]
+        }
+        // handle comment lines that have 'comment:'
+        else if (lower.includes('comment:')) {
+            const commentLine = line.slice(lower.indexOf('comment:') + 'comment:'.length)
+            comments = [...comments, commentLine.trim()]
+        }
+        else {
+            comments = [...comments, line.replace('#', '').trim()]
+        }
+    }
+
+    return { semids, tags, comments }
+
+}
+
+
+const parse_txt = (filename: string, contents: string, obsid: number) => {
     let tgts = [] as UploadedTarget[]
-    contents.split(/\r\n|\n/).forEach((row) => {
-        if (row.startsWith('#')) return //skip comments
+    let skipped = [] as string[]
+    let commentLines: string[] = []
+    contents.split(/\r\n|\n/).forEach((row, index) => {
+        if (row.startsWith('#')) {
+            commentLines.push(row)
+            return //skip comments
+        }
         if (row.trim() === '' || !row) return //whitespace rows are ignored
         const [target_name, tail] = split_at(TARGET_NAME_LENGTH_PADDED, row)
-        let [rah, ram, ras, dech, decm, decs, equinox, ...opts] = tail.trimStart().replace(/\s\s+/g, ' ').split(' ')
+        const tailParts = tail.trimStart().replace(/\s\s+/g, ' ').split(' ')
+        if (tailParts.length < 7) {
+            console.warn('invalid starlist row (expected name, ra, dec, equinox)', row)
+            skipped.push(`Row ${index + 1}: expected name, ra, dec, equinox — "${row.trim()}"`)
+            commentLines = []
+            return
+        }
+        let [rah, ram, ras, dech, decm, decs, equinox, ...opts] = tailParts
         console.log(`tail:${tail}`, 'ras', ras, 'decs', decs)
         console.log('rah', rah, 'ram', ram, 'ras', ras, 'dech', dech, 'decm', decm, 'decs', decs)
         ras = ras.split('.')[0].padStart(2, '0') + '.' + (ras.split('.')[1] ?? '0')
         decs = decs.split('.')[0].padStart(2, '0') + '.' + (decs.split('.')[1] ?? '0')
-        const ra = `${rah.padStart(2, '0')}:${ram.padStart(2, '0')}:${ras}`
-        const dec = `${dech.padStart(2, '0')}:${decm.padStart(2, '0')}:${decs}`
+        const ra = `${pad_signed_digits(rah, 2)}:${ram.padStart(2, '0')}:${ras}`
+        const dec = `${pad_signed_digits(dech, 2)}:${decm.padStart(2, '0')}:${decs}`
         const coordValid = ra.match(targetProps.ra.pattern as string) && dec.match(targetProps.dec.pattern as string)
         if (!coordValid) {
             console.warn('ra', ra, 'dec', dec)
+            skipped.push(`Row ${index + 1}: invalid ra/dec ("${ra}", "${dec}") — "${row.trim()}"`)
+            commentLines=[]
             return
         }
         // ignore anything after # in the row
         //inline comments are added to comments field
-        const inlineComment = opts.findIndex((opt) => opt.startsWith('#'))
-        let comment: string = ''
-        if (inlineComment > 0 && opts.length > 0) {
-            opts = opts.slice(0, inlineComment)
-            comment = opts.slice(inlineComment).join(' ')
+        const inlineCommentIdx = opts.findIndex((opt) => opt.startsWith('#'))
+        if (inlineCommentIdx >= 0) {
+            const comment = opts.slice(inlineCommentIdx).join(' ').replace('#', '').trim()
+            opts = opts.slice(0, inlineCommentIdx)
+            commentLines.push(comment) // add inline comment to comment lines so it gets added to the comment field
         }
-        opts = opts.find((opt) => opt.startsWith('#')) ? opts.slice(0, opts.findIndex((opt) => opt.startsWith('#'))) : opts
+
         let tgt: UploadedTarget = {
             _id: randomId(),
             target_name: target_name.trimEnd().trimStart(),
@@ -273,29 +315,56 @@ const parse_txt = (contents: string, obsid: number) => {
             ra_deg: ra_dec_to_deg(ra),
             dec_deg: ra_dec_to_deg(dec, true),
             dec,
-            equinox,
+            tags: [filename]
         };
-        if (comment.length > 0) {
-            tgt.comment = comment
+        if (equinox) tgt.equinox = equinox
+        const { semids, tags, comments } = parse_comments(commentLines)
+
+        if (comments.length > 0) {
+            tgt.comment = comments.join(', ')
         }
+        if (semids.length > 0) {
+            tgt.semids = semids
+        }
+        if (tags.length > 0) {
+            tgt.tags = [...(tgt.tags as string[]), ...tags]
+        }
+
+        tgt.tags = [...new Set(tgt.tags as string[])] //unique tags
+
+        //reset comment lines after adding them to the target so they don't get added to the next target
+        commentLines = []
+
         opts.forEach((opt) => {
             if (!opt.includes('=')) return
             const [key, value] = opt.split('=')
-            const tgtKey = starlistToKeyMapping[key as keyof StarListOptionalKeys] as keyof Target
+            const tgtKey = Object.prototype.hasOwnProperty.call(starlistToKeyMapping, key.toLowerCase())
+                ? starlistToKeyMapping[key.toLowerCase()]
+                : undefined
             if (!tgtKey) {
                 console.warn('invalid key', key, value, opts, row)
                 return
             }
-            //@ts-ignore
-            tgt[tgtKey] = value.toLowerCase()
+            // enum-valued fields (lgs, rotator_mode, telescope_wrap, ...) are normalized to lowercase;
+            // free text fields (target name, tags, comment...) keep the case the observer wrote
+            const isEnum = !!targetProps[tgtKey]?.enum
+            const normalizedValue = isEnum ? value.toLowerCase() : value
+            if (tgtKey === 'tags') {
+                const optTags = normalizedValue.split(',').map((t) => t.trim()).filter(Boolean)
+                tgt.tags = [...new Set([...(tgt.tags as string[]), ...optTags])]
+            }
+            else {
+                //@ts-ignore
+                tgt[tgtKey] = normalizedValue
+            }
         })
         tgts.push(tgt);
     });
-    return tgts
+    return { tgts, skipped }
 }
 
 interface UploadedTarget {
-    [key: string]: string | number
+    [key: string]: string | number | string[]
 }
 
 export function UploadComponent(props: UploadProps) {
@@ -304,6 +373,8 @@ export function UploadComponent(props: UploadProps) {
     const snackbarContext = useSnackbarContext()
 
     const [starlistNames, setStarlistNames] = React.useState<string[]>([])
+    const [label, setLabel] = React.useState("Upload Targets");
+    const [skippedRowsList, setSkippedRowsList] = React.useState<string[]>([]);
 
     React.useEffect(() => {
         const fetchStarlistNames = async () => {
@@ -342,48 +413,55 @@ export function UploadComponent(props: UploadProps) {
 
     const handle_contents = (filename: string, contents: string, ext?: string) => {
         let uploadedTargets: UploadedTarget[] = []
+        let skippedRows: string[] = []
         switch (ext) {
             case 'json':
-                uploadedTargets = parse_json(contents)
+                uploadedTargets = parse_json(filename, contents)
                 break;
             case 'csv':
-                uploadedTargets = parse_csv(contents)
+                uploadedTargets = parse_csv(filename, contents)
                 break;
             case 'starlisttxt':
             case 'txt':
                 console.log('txt', contents, context.obsid)
-                uploadedTargets = parse_txt(contents, context.obsid)
+                ;({ tgts: uploadedTargets, skipped: skippedRows } = parse_txt(filename, contents, context.obsid))
                 break;
             default:
                 snackbarContext.setSnackbarMessage({ severity: 'warning', message: 'File type may not supported. Attempting to parse as .txt' })
                 snackbarContext.setSnackbarOpen(true);
                 try {
-                    uploadedTargets = parse_txt(contents, context.obsid)
+                    ;({ tgts: uploadedTargets, skipped: skippedRows } = parse_txt(filename, contents, context.obsid))
                 }
                 catch (e) {
                     console.error('file type not supported', e)
                     return
                 }
         }
+        setSkippedRowsList(skippedRows)
+        if (skippedRows.length > 0) {
+            const header = skippedRows.length === 1 ? '1 row was skipped:' : `${skippedRows.length} rows were skipped:`
+            snackbarContext.setSnackbarMessage({ severity: 'warning', message: `${header}\n${skippedRows.join('\n')}` })
+            snackbarContext.setSnackbarOpen(true);
+        }
         console.log('uploaded tgts', uploadedTargets)
-        props.setOpen && props.setOpen(false)
         const fmtTgts = format_targets(uploadedTargets, targetProps)
         const txt = `${ext === 'starlisttxt' ? 'Starlist: ' : 'Local File: '}${filename} Uploaded. (${fmtTgts.length} targets)`
-        props.setLabel && props.setLabel(txt)
+        setLabel && setLabel(txt)
         props.setTargets(fmtTgts)
     };
 
     const localFileLoad = (evt: React.ChangeEvent<HTMLInputElement>) => {
         let file: File = new File([], 'empty')
         evt.target?.files && (file = evt.target?.files[0])
-        props.setLabel && props.setLabel(`${file.name} Uploaded`)
-        const ext = file.name.split('.').pop()
+        setLabel && setLabel(`${file.name} Uploaded`)
+        const ext = file.name.split('.').pop()?.toLowerCase()
         const fileReader = new FileReader()
         fileReader.readAsText(file, "UTF-8");
         fileReader.onload = e => {
             const contents = e.target?.result as string
             handle_contents(file.name, contents, ext)
         };
+        evt.target.value = '' // allow re-selecting the same file to fire onChange again
     };
 
     return (
@@ -432,15 +510,26 @@ export function UploadComponent(props: UploadProps) {
                 </Menu>
             </Stack>
             <Typography variant="body2" color="text.secondary">
-                {props.label}
+                {label}
             </Typography>
+            {skippedRowsList.length > 0 && (
+                <Box sx={{ maxHeight: 150, overflowY: 'auto', width: '100%' }}>
+                    <Typography variant="body2" color="warning.main">
+                        {skippedRowsList.length === 1 ? '1 row was skipped:' : `${skippedRowsList.length} rows were skipped:`}
+                    </Typography>
+                    {skippedRowsList.map((reason, index) => (
+                        <Typography key={index} variant="caption" component="div" color="warning.main">
+                            {reason}
+                        </Typography>
+                    ))}
+                </Box>
+            )}
         </Stack>
     )
 }
 
 export default function UploadDialog(props: Props) {
     const [open, setOpen] = React.useState(false);
-    const [label, setLabel] = React.useState("Upload Targets");
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -465,17 +554,16 @@ export default function UploadDialog(props: Props) {
 
     const dialogActions = (
         <UploadComponent
-            label={label}
-            setLabel={setLabel}
             setOpen={setOpen}
-            setTargets={props.setTargets} />
+            setTargets={props.setTargets} 
+        />
     )
 
     return (
         <>
             <Tooltip title="Upload Targets from .json or .txt file">
                 <Button onClick={handleClickOpen} startIcon={<UploadIcon />}>
-                    {label}
+                    {'Set Targets'}
                 </Button>
             </Tooltip>
             <DialogComponent

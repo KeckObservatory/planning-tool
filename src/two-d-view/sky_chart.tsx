@@ -1,7 +1,7 @@
-import Plot from "react-plotly.js";
+import Plot from "./plotly_custom";
 import { useEffect, useState } from "react";
 import * as util from './sky_view_util.tsx'
-import { Dome, TargetView } from "./two_d_view";
+import { Dome, TargetView } from "./two_d_view_common.tsx";
 import { useStateContext } from "../App";
 import { reason_to_color_mapping } from "./target_viz_chart.tsx";
 import { DayViz, VizRow } from "./viz_dialog.tsx";
@@ -21,10 +21,12 @@ interface Props {
     targetView: TargetView[]
     chartType: SkyChart
     showMoon: boolean
+    showSchedule: boolean
     showCurrLoc: boolean
     showLimits: boolean
     times: Date[]
     time: Date
+    obsdate: Date
     dome: Dome
     width: number
     height: number
@@ -56,7 +58,7 @@ export const generateData = (tgtv: TargetView,
         chartType.includes('Lunar Angle') && (txt += `Moon Fraction: ${viz.moon_illumination.fraction.toFixed(2)}<br>`)
         txt += `Visible for: ${tgtv.visibilitySum.toFixed(2)} hours<br>`
         txt += viz.observable ? '' : `<br>Not Observable: ${viz.reasons.join(', ')}`
-        txt += tgtv.tags ? `<br>Tags: ${tgtv.tags.join(', ')}` : ''
+        txt += tgtv.tags && tgtv.tags.length > 0 ? `<br>Tags:<br>${tgtv.tags.join('<br>')}` : ''
         txt += tgtv.comment ? `<br>Notes: ${tgtv.comment}` : ''
         const datum = viz.moon_position ? util.get_chart_datum(tgtv.ra_deg, tgtv.dec_deg, viz, chartType, lngLatEl) : null
         data.push({
@@ -78,6 +80,9 @@ export const make_trace = (data: Datum[], target_name: string, lineColor?: strin
     }
 
     const showlegend = data.at(0) ? data[0].opacity === DEFAULT_OPACITY : false
+    // Each segment is already split at opacity boundaries (see split_into_segments), so
+    // a segment is uniformly observable or not - dot the line wherever it's translucent.
+    const dash: Plotly.Dash = data.at(0)?.opacity === DEFAULT_OPACITY ? 'solid' : 'dot'
     const trace: Plotly.Data = {
         x: data.map((datum: Datum) => datum.x),
         y: data.map((datum: Datum) => datum.y),
@@ -91,6 +96,7 @@ export const make_trace = (data: Datum[], target_name: string, lineColor?: strin
         line: {
             width: 5,
             color: lineColor,
+            dash,
         },
         textposition: 'top left',
         type: 'scatter',
@@ -105,18 +111,27 @@ export const split_into_segments = (data: Datum[]): Array<Datum[]> => {
     if (data.length < 2) { //no data to split
         return [data]
     }
-    let prevDatum = data[0]
-    let segment = [prevDatum]
+    const segments: Datum[][] = []
+    let segment: Datum[] = [data[0]]
     for (let idx = 1; idx < data.length; idx++) {
         const datum = data[idx]
-        segment.push(datum)
-        if (datum.opacity !== prevDatum.opacity) { //time for a new segment
-            const rightData = data.slice(idx)
-            return [segment, ...split_into_segments(rightData)]
+        const prevDatum = data[idx - 1]
+        if (datum.opacity === prevDatum.opacity) {
+            segment.push(datum)
+            continue
         }
-        prevDatum = datum
+        if (datum.opacity === DEFAULT_OPACITY) { //becoming observable: this point is the crossing
+            segment.push({ ...datum, opacity: prevDatum.opacity })
+            segments.push(segment)
+            segment = [datum]
+        }
+        else { //going non-observable: the previous point is the crossing
+            segments.push(segment)
+            segment = [{ ...prevDatum, opacity: datum.opacity }, datum]
+        }
     }
-    return [segment]  //no change in opacity means there is only one segment
+    segments.push(segment)
+    return segments
 }
 
 const make_layout = (chartType: SkyChart,
@@ -130,7 +145,9 @@ const make_layout = (chartType: SkyChart,
 
     //set yRange for airmass charts. order to reverse axis
     const yLower = Math.min(AIRMASS_LIMIT, maxAirmass)
-    const yRange = chartType.includes('Airmass') ? [yLower, .9] : undefined
+    let yRange: [number, number] | undefined = chartType.includes('Airmass') ? [yLower, .9] : undefined
+    yRange = chartType.includes("Elevation") ? [0, 90] : yRange
+
     const y2Axis: Partial<Plotly.LayoutAxis> = {
         title: { text: 'Altitude [deg]' },
         gridwidth: 0,
@@ -156,8 +173,16 @@ const make_layout = (chartType: SkyChart,
         return `${hst}[HST]<br>${ut}[UT]`
     })
 
+    let ylabel = 'Degrees'
+    if(chartType.includes('Airmass')) {
+        ylabel = 'Airmass'
+    }
+    else if (chartType.includes('Lunar Angle')) {
+        ylabel = 'Degrees from moon'
+    }
+
     const scyaxis: Partial<Plotly.LayoutAxis> = {
-        title: { text: chartType.includes('Airmass') ? 'Airmass' : 'Degrees' },
+        title: { text: ylabel },
         range: yRange,
     }
 
@@ -206,7 +231,7 @@ interface State {
 }
 
 export const SkyChart = (props: Props) => {
-    const { targetView, chartType, time, showCurrLoc, showLimits, width, height, dome, suncalcTimes } = props
+    const { targetView, chartType, time, obsdate, showCurrLoc, showLimits, width, height, dome, suncalcTimes, showSchedule } = props
 
     const context = useStateContext()
     const plotRef = useRef<any>(null);
@@ -215,27 +240,35 @@ export const SkyChart = (props: Props) => {
         chartType,
         context.config.tel_geometry[dome],
         false,
-        showLimits,)
+        showLimits)
 
     const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, 5, suncalcTimes, context.config.timezone);
     const [state, setState] = useState({ layout: scLayout, y2Axis: y2Axis } as State);
 
 
     useEffect(() => {
-        const shapes = util.get_shapes(suncalcTimes,
-            chartType,
-            context.config.tel_geometry[dome],
-            deckBlocking,
-            showLimits,)
 
-        console.log('chartType', chartType, dome)
+        const fun = async () => {
+            let schedShapes: Plotly.Shape[] = []
+            if (showSchedule) {
+                const telNr = Number(dome.at(dome.length - 1));
+                schedShapes = await util.get_schedule_shapes(dayjs(obsdate).tz(context.config.timezone).format('YYYY-MM-DD'), telNr)
+            }
+            let shapes = util.get_shapes(suncalcTimes,
+                chartType,
+                context.config.tel_geometry[dome],
+                deckBlocking,
+                showLimits)
+            shapes = [...shapes, ...schedShapes]
+            const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, maxAirmass, suncalcTimes, context.config.timezone);
+            setState({
+                layout: scLayout,
+                y2Axis,
+            });
+        }
 
-        const [scLayout, y2Axis] = make_layout(chartType, width, height, shapes, maxAirmass, suncalcTimes, context.config.timezone);
-        setState({
-            layout: scLayout,
-            y2Axis,
-        });
-    }, [chartType, dome, targetView, time, showLimits, suncalcTimes])
+    fun();
+    }, [chartType, dome, targetView, time, obsdate, showLimits, suncalcTimes, showSchedule, width, height])
 
     // useEffect(() => {
     //     debounced_elevation_axis_draw();
@@ -254,7 +287,6 @@ export const SkyChart = (props: Props) => {
         }
         const segmentedData = split_into_segments(data)
         let tgtTraces = segmentedData.map(segment => make_trace(segment, tgtv.target_name ?? "Target"))
-        //TODO: debug this.
         tgtTraces = tgtTraces.map((trace, idx) => {//allow only one legend per target
             if (idx > 0) {
                 //@ts-ignore
