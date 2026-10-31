@@ -6,7 +6,7 @@
         "target_name": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 15,
+            "maxLength": 16,
             "pattern": "[\\w\\-\\s]+",
             "short_description": "Target Name",
             "description": "Target Name. Alpha-numeric, hyphen, underscore, and space characters only"
@@ -181,14 +181,14 @@
             "type":  ["number", "string"],
             "starlist_key": "pmra",
             "short_description": "PM RA",
-            "description": "Proper Motion in arcseconds RA/second",
+            "description": "Right ascension proper motion in seconds time/year",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "pm_dec": {
             "type":  ["number", "string"],
             "starlist_key": "pmdec",
             "short_description": "PM Dec",
-            "description": "Proper Motion in arcseconds Dec/second",
+            "description": "Declincation proper motion in arcseconds/year",
             "pattern": "^[\\+\\-]?\\d+\\.?\\d*$|^[\\+\\-]?\\.\\d+$|^\\.\\d+$|^\\d+\\.\\d+$"
         },
         "ra_offset": {

@@ -49,7 +49,7 @@ const round_decimal = (value?: number | string, n = 2): number | string | undefi
 
 const convert_target_to_targetlist_row = (target: Target, includeComments = true) => {
   //required params
-  const name = (target.target_name ?? '').slice(0, TARGET_LENGTH).padEnd(TARGET_NAME_LENGTH_PADDED, " ") //columns 1-16 are text last column is a space
+  const name = (target.target_name ?? '').slice(0, TARGET_LENGTH + 1).padEnd(TARGET_NAME_LENGTH_PADDED + 1, " ") //columns 1-16 are text.
   const ra = target.ra ? round_ra_dec_seconds(target.ra).replaceAll(':', ' ') : ''
   const dec = target.dec ? round_ra_dec_seconds(target.dec, true).replaceAll(':', ' ') : ''
   const equinox = target.equinox ?? '2000'

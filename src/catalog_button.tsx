@@ -117,7 +117,7 @@ export const get_simbad_data = async (targetName: string): Promise<SimbadTargetD
         }
         else if (line.startsWith('Proper motions')) {
             const [pmRa, pmDec] = line.split(' ').slice(2, 4);
-            Number(pmRa) && (simbadData['pm_ra'] = Number(pmRa)/1000) //convert from mas/yr to arcsec/yr
+            Number(pmRa) && (simbadData['pm_ra'] = Number(pmRa)/(15 * 1000)) //convert from mas/yr to sec of time / yr
             Number(pmDec) && (simbadData['pm_dec'] = Number(pmDec)/1000) //convert from mas/yr to arcsec/yr
         }
         else if (identifiersSection) //only check if in identifiers section

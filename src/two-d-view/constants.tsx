@@ -58,7 +58,7 @@ export const OSIRIS_FSM_TSS_ROTATION = 48 // Osiris is rotated 48 degrees by def
 export const NIRC2_FSM_TSS_PO = 'NIRC2'
 
 export const TARGET_LENGTH = 15 // 15 characters for target name
-export const TARGET_NAME_LENGTH_PADDED = TARGET_LENGTH + 1 // 15 characters for target name, one space at the end
+export const TARGET_NAME_LENGTH_PADDED = TARGET_LENGTH // 15 characters for target name, one space at the end
 
 export const DEFAULT_OPACITY = 'FF' //Hex values appended to color
 export const NON_OBSERVABLE_OPACITY = '70' //Hex values appended to color
