@@ -211,7 +211,7 @@ const split_at = (index: number, str: string) => {
     }
 
 
-    // older files may have names longer than be longer than the 15 char limit. This relaxes this constraint
+    // older files may have names longer than be longer than the 16 char limit. This relaxes this constraint
     let sliceIdx = index
     let substr = str.slice(index - 1)
     while (substr.length > 0 && substr[0].trim() !== '') {

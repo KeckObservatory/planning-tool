@@ -50,7 +50,7 @@
             "description": "This is the name of the science target this guide star is for.",
             "short_description": "Science Target",
             "minLength": 1,
-            "maxLength": 15,
+            "maxLength": 16,
             "pattern": "[\\w\\-\\s]+",
             "starlist_key": "target"
         },

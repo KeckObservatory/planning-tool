@@ -17,7 +17,7 @@ import { create_new_target } from '../table_toolbar.tsx';
 import { submit_target } from '../api/api_root.tsx';
 import target_schema from '../target_schema.json';
 import { JSONSchemaType } from 'ajv/dist/2019';
-import { DUPLICATE_COORD_TOLERANCE_DEG } from '../two-d-view/constants.tsx';
+import { DUPLICATE_COORD_TOLERANCE_DEG, TARGET_LENGTH } from '../two-d-view/constants.tsx';
 
 export const is_guidestar_already_added = (
     guidestar: Partial<Target>,
@@ -27,9 +27,9 @@ export const is_guidestar_already_added = (
     if (!existingTargets) {
         return false;
     }
-    // target_name is truncated to 15 chars when a guide star is submitted, so
+    // target_name is truncated to 16 chars when a guide star is submitted, so
     // compare against the same truncated form.
-    const guidestarName = guidestar.target_name != null ? String(guidestar.target_name).slice(0, 15) : undefined;
+    const guidestarName = guidestar.target_name != null ? String(guidestar.target_name).slice(0, TARGET_LENGTH) : undefined;
     return existingTargets.some((t) => {
         if (t.science_target !== science_target_name) {
             return false;
@@ -57,9 +57,9 @@ interface AddGuideStarButtonProps {
 const sanitize_guide_star = (guidestar: Partial<Target>) => {
     //remove nulls
     const sanitizedGuideStar = Object.fromEntries(Object.entries(guidestar).filter(([_, v]) => v != null));
-    // target_name is capped at 15 chars per the schema.
+    // target_name is capped at 16 chars per the schema.
     if (guidestar.target_name != null) {
-        sanitizedGuideStar.target_name = String(guidestar.target_name).slice(0, 15)
+        sanitizedGuideStar.target_name = String(guidestar.target_name).slice(0, TARGET_LENGTH)
     } else {
         delete sanitizedGuideStar.target_name
     }
