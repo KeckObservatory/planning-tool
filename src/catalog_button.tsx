@@ -167,12 +167,19 @@ export default function CatalogButton(props: Props) {
         }
     }
 
-    const handleConfirm = async (magnitudeOnly: boolean) => {
+    const handleConfirm = async (magnitudeOnly: boolean, includeProperMotion: boolean) => {
         if (!targetName) return
         const catalogTargetInfo = await get_simbad_and_gaia_target_info(targetName, gaia_id)
-        const updateInfo = magnitudeOnly
+        let updateInfo = magnitudeOnly
             ? Object.fromEntries(Object.entries(catalogTargetInfo).filter(([key]) => /_mag$/i.test(key)))
             : catalogTargetInfo
+
+        if (!includeProperMotion) {
+            updateInfo = Object.fromEntries(
+                Object.entries(updateInfo).filter(([key]) => key !== 'pm_ra' && key !== 'pm_dec')
+            )
+        }
+
         setTarget((prev) => ({ ...prev, ...updateInfo, "state": 'ROW_EDITED', status: 'EDITED' }))
     }
 
