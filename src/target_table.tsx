@@ -322,6 +322,12 @@ export default function TargetTable(props: TargetTableProps) {
     })
   }
 
+  // TODO: out-of-order save replies can overwrite newer edits to the same row. If a second cell
+  // in a row is edited while a previous save is still in flight, the earlier reply (which only
+  // contains the first edit) replaces the whole row in `rows` and context, wiping the second
+  // edit until its own reply arrives (or permanently if it arrives first). Rare in practice
+  // since edits are slow. Fix: keep a per-row save version counter, bump it on each send, and
+  // skip applying a reply if a newer save for that row has been sent since.
   const submit_one_target = async (target: Target) => {
     const resp = await submit_target([target])
     if (resp.errors.length > 0) {

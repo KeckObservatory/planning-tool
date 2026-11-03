@@ -47,6 +47,15 @@ const round_decimal = (value?: number | string, n = 2): number | string | undefi
   return Number(value).toFixed(n)
 }
 
+const is_null_or_empty = (x: string | number | null | undefined) => {
+  return x == null || String(x).trim() === ""
+}
+
+// a magnitude of 0 is a placeholder, not a measurement
+const is_null_empty_or_zero = (x: string | number | null | undefined) => {
+  return is_null_or_empty(x) || Number(x) === 0
+}
+
 const convert_target_to_targetlist_row = (target: Target, includeComments = true) => {
   //required params
   const name = (target.target_name ?? '').slice(0, TARGET_NAME_LENGTH).padEnd(TARGET_NAME_LENGTH, " ") //columns 1-16 are text.
@@ -65,26 +74,26 @@ const convert_target_to_targetlist_row = (target: Target, includeComments = true
   if (target.lgs === '0') {
     row = row + ` lgs=0`
   }
-  row = target.v_mag ? row + ` vmag=${round_decimal(target.v_mag)}` : row
-  row = target.j_mag ? row + ` jmag=${round_decimal(target.j_mag)}` : row
-  row = target.g_mag ? row + ` gmag=${round_decimal(target.g_mag)}` : row
-  row = target.r_mag ? row + ` rmag=${round_decimal(target.r_mag)}` : row
-  row = target.b_mag ? row + ` bmag=${round_decimal(target.b_mag)}` : row
-  row = target.h_mag ? row + ` hmag=${round_decimal(target.h_mag)}` : row
-  row = target.k_mag ? row + ` kmag=${round_decimal(target.k_mag)}` : row
-  row = target.b_m_v_mag ? row + ` b-v=${round_decimal(target.b_m_v_mag)}` : row
-  row = target.b_m_r_mag ? row + ` b-r=${round_decimal(target.b_m_r_mag)}` : row
-  row = target.ra_offset != null && target.ra_offset !== '' ? row + ` raoffset=${target.ra_offset}` : row
-  row = target.dec_offset != null && target.dec_offset !== '' ? row + ` decoffset=${target.dec_offset}` : row
-  row = target.rotator_mode ? row + ` rotmode=${target.rotator_mode}` : row
-  row = target.rotator_pa != null && target.rotator_pa !== '' ? row + ` rotdest=${target.rotator_pa}` : row
-  row = target.telescope_wrap ? row + ` wrap=${target.telescope_wrap}` : row
-  row = target.d_dec != null && target.d_dec !== '' ? row + ` ddec=${target.d_dec}` : row
-  row = target.d_ra != null && target.d_ra !== '' ? row + ` dra=${target.d_ra}` : row
-  row = target.pm_ra != null ? row + ` pmra=${round_decimal(target.pm_ra, 4)}` : row
-  row = target.pm_dec != null ? row + ` pmdec=${round_decimal(target.pm_dec, 4)}` : row
-  row = target.science_target ? row + ` target=${target.science_target}` : row
-  row = target.separation != null ? row + ` sep=${round_decimal(target.separation, 2)}` : row
+  row = !is_null_empty_or_zero(target.v_mag) ? row + ` vmag=${round_decimal(target.v_mag)}` : row
+  row = !is_null_empty_or_zero(target.j_mag) ? row + ` jmag=${round_decimal(target.j_mag)}` : row
+  row = !is_null_empty_or_zero(target.g_mag) ? row + ` gmag=${round_decimal(target.g_mag)}` : row
+  row = !is_null_empty_or_zero(target.r_mag) ? row + ` rmag=${round_decimal(target.r_mag)}` : row
+  row = !is_null_empty_or_zero(target.b_mag) ? row + ` bmag=${round_decimal(target.b_mag)}` : row
+  row = !is_null_empty_or_zero(target.h_mag) ? row + ` hmag=${round_decimal(target.h_mag)}` : row
+  row = !is_null_empty_or_zero(target.k_mag) ? row + ` kmag=${round_decimal(target.k_mag)}` : row
+  row = !is_null_or_empty(target.b_m_v_mag) ? row + ` b-v=${round_decimal(target.b_m_v_mag)}` : row
+  row = !is_null_or_empty(target.b_m_r_mag) ? row + ` b-r=${round_decimal(target.b_m_r_mag)}` : row
+  row = !is_null_or_empty(target.ra_offset) ? row + ` raoffset=${target.ra_offset}` : row
+  row = !is_null_or_empty(target.dec_offset) ? row + ` decoffset=${target.dec_offset}` : row
+  row = !is_null_or_empty(target.rotator_mode) ? row + ` rotmode=${target.rotator_mode}` : row
+  row = !is_null_or_empty(target.rotator_pa) ? row + ` rotdest=${target.rotator_pa}` : row
+  row = !is_null_or_empty(target.telescope_wrap) ? row + ` wrap=${target.telescope_wrap}` : row
+  row = !is_null_or_empty(target.d_dec) ? row + ` ddec=${target.d_dec}` : row
+  row = !is_null_or_empty(target.d_ra) ? row + ` dra=${target.d_ra}` : row
+  row = !is_null_or_empty(target.pm_ra) ? row + ` pmra=${round_decimal(target.pm_ra, 4)}` : row
+  row = !is_null_or_empty(target.pm_dec) ? row + ` pmdec=${round_decimal(target.pm_dec, 4)}` : row
+  row = !is_null_or_empty(target.science_target) ? row + ` target=${target.science_target}` : row
+  row = !is_null_or_empty(target.separation) ? row + ` sep=${round_decimal(target.separation, 2)}` : row
   //comment and tags go before the row
   if (includeComments) {
     row = target.comment ? `# ${name} comment: ${target.comment}\n` + row : row
