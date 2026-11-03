@@ -363,8 +363,8 @@ export function EditToolbar(props: EditToolbarProps) {
 
   return (
     // <GridToolbarContainer sx={{ justifyContent: 'center' }}>
-    <GridToolbarContainer sx={{ justifyContent: 'space-between', p: 1 }}>
-      <Stack justifyContent={'left'} direction="row" spacing={1}>
+    <GridToolbarContainer sx={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, p: 1 }}>
+      <Stack justifyContent={'left'} direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
         <Button color="primary" startIcon={<AddIcon />} onClick={handleAddTarget} disabled={isAddingTarget}>
           Add Target
         </Button>
@@ -374,12 +374,12 @@ export function EditToolbar(props: EditToolbarProps) {
         <TargetWizardButton />
         <CustomExportButton exportTargets={exportTargets} />
       </Stack>
-      <Stack justifyContent={'center'} direction="row" spacing={1}>
+      <Stack justifyContent={'center'} direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
         <ViewTargetsDialogButton targets={props.selectedTargets} color='primary' />
         <TargetVizButton targets={vizTargets} />
         <GuideStarButton targets={vizTargets} />
       </Stack>
-      <Stack justifyContent={'right'} direction="row" spacing={1}>
+      <Stack justifyContent={'right'} direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
         <Tooltip title="Toggle On to show AO relavent columns">
           <FormControlLabel
             label="AO"
