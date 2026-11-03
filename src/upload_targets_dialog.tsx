@@ -9,7 +9,7 @@ import { v4 as randomId } from 'uuid';
 import { format_string_array, PropertyProps, raDecFormat, TargetProps } from './target_edit_dialog';
 import { DialogComponent } from './dialog_component';
 import { ra_dec_to_deg } from './two-d-view/sky_view_util';
-import { TARGET_NAME_LENGTH_PADDED } from './two-d-view/constants';
+import { TARGET_NAME_LENGTH } from './two-d-view/constants';
 
 interface Props {
     setTargets: Function
@@ -204,14 +204,14 @@ const split_at = (index: number, str: string) => {
     }
     if (tabidx > 0) { // tab(s) in target name
         console.log('tabs in target name: targetName', str.slice(0, tabidx))
-        const targetName = str.slice(0, tabidx).replaceAll('\t', ' ').padEnd(TARGET_NAME_LENGTH_PADDED, ' ')
+        const targetName = str.slice(0, tabidx).replaceAll('\t', ' ').padEnd(TARGET_NAME_LENGTH, ' ')
         const targetBody = str.slice(tabidx + 1).replaceAll('\t', ' ').trimStart()
         console.log('targetName', targetName, 'targetBody', targetBody)
         return [targetName, targetBody]
     }
 
 
-    // older files may have names longer than be longer than the 15 char limit. This relaxes this constraint
+    // older files may have names longer than be longer than the 16 char limit. This relaxes this constraint
     let sliceIdx = index
     let substr = str.slice(index - 1)
     while (substr.length > 0 && substr[0].trim() !== '') {
@@ -276,7 +276,7 @@ const parse_txt = (filename: string, contents: string, obsid: number) => {
             return //skip comments
         }
         if (row.trim() === '' || !row) return //whitespace rows are ignored
-        const [target_name, tail] = split_at(TARGET_NAME_LENGTH_PADDED, row)
+        const [target_name, tail] = split_at(TARGET_NAME_LENGTH, row)
         const tailParts = tail.trimStart().replace(/\s\s+/g, ' ').split(' ')
         if (tailParts.length < 7) {
             console.warn('invalid starlist row (expected name, ra, dec, equinox)', row)
