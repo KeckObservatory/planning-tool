@@ -322,12 +322,6 @@ export default function TargetTable(props: TargetTableProps) {
     })
   }
 
-  // TODO: out-of-order save replies can overwrite newer edits to the same row. If a second cell
-  // in a row is edited while a previous save is still in flight, the earlier reply (which only
-  // contains the first edit) replaces the whole row in `rows` and context, wiping the second
-  // edit until its own reply arrives (or permanently if it arrives first). Rare in practice
-  // since edits are slow. Fix: keep a per-row save version counter, bump it on each send, and
-  // skip applying a reply if a newer save for that row has been sent since.
   const submit_one_target = async (target: Target) => {
     const resp = await submit_target([target])
     if (resp.errors.length > 0) {
@@ -561,14 +555,17 @@ export default function TargetTable(props: TargetTableProps) {
 
     const debouncedHandleRowChange = useDebounceCallback(handleRowChange, 2000)
 
-    const externalSyncRef = React.useRef(false)
+    // Every row object copied in from `rows` by the re-sync below. A boolean flag can't do
+    // this: two syncs in a row collapse into one skip, and the second sync then looks like
+    // a user edit, queuing a debounced save of a copy that goes stale before it fires.
+    const syncedRowsRef = React.useRef(new WeakSet<Target>())
 
     React.useEffect(() => {
       // `row` is the authoritative copy in `rows`. Re-sync when it changes 
       if (row === editTargetRef.current || debouncedHandleRowChange.isPending()) {
         return
       }
-      externalSyncRef.current = true
+      syncedRowsRef.current.add(row)
       setEditTarget(row)
     }, [row])
 
@@ -581,8 +578,7 @@ export default function TargetTable(props: TargetTableProps) {
         hasMountedRef.current = true
         return
       }
-      if (externalSyncRef.current) { // not a user edit - nothing to save back
-        externalSyncRef.current = false
+      if (syncedRowsRef.current.has(editTarget)) { // not a user edit - nothing to save back
         return
       }
       debouncedHandleRowChange()
