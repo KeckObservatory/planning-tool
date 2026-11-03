@@ -9,7 +9,7 @@
             "maxLength": 16,
             "pattern": "[\\w\\-\\s]+",
             "short_description": "Target Name",
-            "description": "Target Name. Alpha-numeric, hyphen, underscore, and space characters only"
+            "description": "Target Name. Sixteen characters maximum that must be alpha-numeric, hyphen, underscore, or a space."
         },
         "priority": {
             "type": ["number", "string"],

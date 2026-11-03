@@ -5,7 +5,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Switch from '@mui/material/Switch';
 import Tooltip from '@mui/material/Tooltip';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DialogComponent } from './dialog_component';
 import { useQueryParam, withDefault } from 'use-query-params';
 import { ViewMode } from './App';
@@ -23,6 +23,10 @@ export default function CatalogDialog(props: CatalogDialogProps) {
     const [magnitudeOnly, setMagnitudeOnly] = useState(false)
     const [viewMode] = useQueryParam<ViewMode>('view_mode', withDefault(ViewParam, 'non_ao' as ViewMode))
     const [includeProperMotion, setIncludeProperMotion] = useState(viewMode === 'non_ao')
+
+    useEffect( () => {
+        setIncludeProperMotion(viewMode == 'non_ao')
+    }, [viewMode])
 
     const onMagnitudeResolverChange = (event: React.SyntheticEvent<Element, Event>) => {
         const value = (event.target as HTMLInputElement).checked
