@@ -28,7 +28,7 @@ import TagDialogButton from './tag_dialog.tsx';
 import SemidDialogButton from './semid_dialog.tsx';
 import { SemidSelect } from './semid_select.tsx';
 import { GuideStarButton } from './guide_star/guide_star_dialog.tsx';
-import { TARGET_LENGTH, TARGET_NAME_LENGTH_PADDED } from './two-d-view/constants.tsx';
+import { TARGET_NAME_LENGTH } from './two-d-view/constants.tsx';
 import { StarlistSubmissionDialog } from './starlist_submission/starlist_submission_dialog.tsx';
 
 
@@ -49,7 +49,7 @@ const round_decimal = (value?: number | string, n = 2): number | string | undefi
 
 const convert_target_to_targetlist_row = (target: Target, includeComments = true) => {
   //required params
-  const name = (target.target_name ?? '').slice(0, TARGET_LENGTH).padEnd(TARGET_NAME_LENGTH_PADDED, " ") //columns 1-16 are text.
+  const name = (target.target_name ?? '').slice(0, TARGET_NAME_LENGTH).padEnd(TARGET_NAME_LENGTH, " ") //columns 1-16 are text.
   const ra = target.ra ? round_ra_dec_seconds(target.ra).replaceAll(':', ' ') : ''
   const dec = target.dec ? round_ra_dec_seconds(target.dec, true).replaceAll(':', ' ') : ''
   const equinox = target.equinox ?? '2000'
