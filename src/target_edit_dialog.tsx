@@ -16,7 +16,7 @@ import target_schema from './target_schema.json'
 import { Status, Target } from './App';
 import { MuiChipsInput } from 'mui-chips-input';
 import { ra_dec_to_deg, deg_to_hms, deg_to_dms } from './two-d-view/sky_view_util';
-import { TARGET_LENGTH } from './two-d-view/constants';
+import { TARGET_NAME_LENGTH } from './two-d-view/constants';
 
 interface Props {
     target: Target
@@ -135,11 +135,11 @@ export const format_edit_entry = (key: string, value?: string | number, isNumber
     }
     if (value && key === 'target_name') {
         value = String(value).replace(/[^\w^\-^\s]+/g, '').replaceAll('^', '') //remove non alphanumeric characters
-        value = value.slice(0, TARGET_LENGTH) //truncate to 15 characters
+        value = value.slice(0, TARGET_NAME_LENGTH) //truncate to 16 characters
     }
     if (value && key === 'science_target') {
         value = String(value).replace(/[^\w^\-^\s]+/g, '').replaceAll('^', '') //remove non alphanumeric characters
-        value = value.slice(0, TARGET_LENGTH) //truncate to 15 characters
+        value = value.slice(0, TARGET_NAME_LENGTH) //truncate to 16 characters
     }
 
     value = String(value).replace(/\t/, '') //remove tabs

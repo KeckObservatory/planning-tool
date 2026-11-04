@@ -117,7 +117,7 @@ export const get_simbad_data = async (targetName: string): Promise<SimbadTargetD
         }
         else if (line.startsWith('Proper motions')) {
             const [pmRa, pmDec] = line.split(' ').slice(2, 4);
-            Number(pmRa) && (simbadData['pm_ra'] = Number(pmRa)/1000) //convert from mas/yr to arcsec/yr
+            Number(pmRa) && (simbadData['pm_ra'] = Number(pmRa)/(15 * 1000)) //convert from mas/yr to sec of time / yr
             Number(pmDec) && (simbadData['pm_dec'] = Number(pmDec)/1000) //convert from mas/yr to arcsec/yr
         }
         else if (identifiersSection) //only check if in identifiers section
@@ -167,12 +167,19 @@ export default function CatalogButton(props: Props) {
         }
     }
 
-    const handleConfirm = async (magnitudeOnly: boolean) => {
+    const handleConfirm = async (magnitudeOnly: boolean, includeProperMotion: boolean) => {
         if (!targetName) return
         const catalogTargetInfo = await get_simbad_and_gaia_target_info(targetName, gaia_id)
-        const updateInfo = magnitudeOnly
+        let updateInfo = magnitudeOnly
             ? Object.fromEntries(Object.entries(catalogTargetInfo).filter(([key]) => /_mag$/i.test(key)))
             : catalogTargetInfo
+
+        if (!includeProperMotion) {
+            updateInfo = Object.fromEntries(
+                Object.entries(updateInfo).filter(([key]) => key !== 'pm_ra' && key !== 'pm_dec')
+            )
+        }
+
         setTarget((prev) => ({ ...prev, ...updateInfo, "state": 'ROW_EDITED', status: 'EDITED' }))
     }
 

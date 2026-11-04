@@ -255,7 +255,8 @@ function App() {
                 marginTop: '12px',
                 padding: '6px',
                 maxWidth: '2000px',
-                minWidth: '1600px',
+                minWidth: 0,
+                width: '100%',
                 flexDirection: 'column',
               }}
             >
