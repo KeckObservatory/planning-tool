@@ -8,7 +8,7 @@ import { Feature, Point } from "geojson"
 import { PointingOriginMarkers, PointingOriginMarker } from "../aladin/pointing_origin_markers"
 import { ScaleBar } from "./scale_bar"
 import { CompassRose } from "./compass_rose"
-import { ZOOM_SPEED, ZOOM_MIN, ZOOM_MAX, MOSFIRE_ZOOM_DEFAULT, ZOOM_DEFAULT, OSIRIS_FSM_TSS_ROTATION, NIRC2_FSM_TSS_PO, DEFAULT_RA, DEFAULT_DEC } from "../two-d-view/constants"
+import { ZOOM_SPEED, ZOOM_MIN, ZOOM_MAX, MOSFIRE_ZOOM_DEFAULT, SCALES_ZOOM_DEFAULT, ZOOM_DEFAULT, OSIRIS_FSM_TSS_ROTATION, NIRC2_FSM_TSS_PO, DEFAULT_RA, DEFAULT_DEC } from "../two-d-view/constants"
 import { ra_dec_to_deg } from "../two-d-view/sky_view_util.tsx"
 import { get_catalog_image } from "../api/api_root"
 import IconButton from "@mui/material/IconButton"
@@ -112,7 +112,9 @@ export const GSViewer = (props: Props) => {
   const centerDec = hasCenter ? props.centerDec! : DEFAULT_CENTER_DEC;
   const imgUrl = props.imageCatalog ? get_catalog_image(props.imageCatalog, centerRA, centerDec, props.size) : '';
 
-  const initZoom = props.instrumentFOV === 'MOSFIRE' ? MOSFIRE_ZOOM_DEFAULT : ZOOM_DEFAULT
+  const initZoom = props.instrumentFOV === 'MOSFIRE' ? MOSFIRE_ZOOM_DEFAULT
+    : props.instrumentFOV?.includes('SCALES') ? SCALES_ZOOM_DEFAULT
+    : ZOOM_DEFAULT
 
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const svgRef = React.useRef<SVGSVGElement | null>(null);
@@ -120,6 +122,9 @@ export const GSViewer = (props: Props) => {
   const [mapTooltip, setMapTooltip] = React.useState<{ x: number; y: number; text: string } | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [zoom, setZoom] = React.useState<number>(initZoom); // 1 = no zoom
+  // The guide star dialog keeps this viewer mounted across instrument changes, so apply
+  // the new instrument's default zoom when it changes rather than only on first mount.
+  React.useEffect(() => { setZoom(initZoom) }, [initZoom]);
   const [panOffset, setPanOffset] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = React.useState<boolean>(false);
   const [dragStart, setDragStart] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });

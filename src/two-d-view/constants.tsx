@@ -54,9 +54,10 @@ export const TRICK_INSTRUMENTS: string[] = ['OSIRIS']
 //img catalog constants
 export const ZOOM_SPEED = 0.001;
 export const ZOOM_MIN = 0.5;
-export const ZOOM_MAX = 20;
+export const ZOOM_MAX = 150;
 export const ZOOM_DEFAULT = 3; //For the guide star viewer
 export const MOSFIRE_ZOOM_DEFAULT = 1.5; //For the guide star viewer
+export const SCALES_ZOOM_DEFAULT = 20; //For the guide star viewer; SCALES' FOV is only ~12"
 export const OSIRIS_FSM_TSS_ROTATION = 48 // Osiris is rotated 48 degrees by default
 export const NIRC2_FSM_TSS_PO = 'NIRC2'
 
