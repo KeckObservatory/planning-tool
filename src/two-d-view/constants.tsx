@@ -49,7 +49,7 @@ export const SKY_VIEW_DEFAULT_WINDOW_SIZE = 1 / 4 // degrees
 export const SKY_VIEW_MOSFIRE_WINDOW_SIZE = 1 / 2 // degrees
 export const DEFAULT_RA = "12:48:45.8623" //NGC4711
 export const DEFAULT_DEC = "+35:19:57.8810"  //NGC4711
-export const AO_INSTRUMENTS: string[] = [ 'OSIRISImg', 'OSIRISSpec', 'NIRC2' ] //instruments that can use AO guide stars
+export const AO_INSTRUMENTS: string[] = [ 'OSIRISImg', 'OSIRISSpec', 'NIRC2', 'SCALES' ] //instruments that can use AO guide stars
 export const TRICK_INSTRUMENTS: string[] = ['OSIRIS']
 //img catalog constants
 export const ZOOM_SPEED = 0.001;
