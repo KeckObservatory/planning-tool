@@ -22,7 +22,6 @@ export default defineConfig({
         // means a change to app code doesn't invalidate their browser cache.
         manualChunks(id) {
           if (id.includes('node_modules/plotly.js')) return 'plotly'
-          if (id.includes('node_modules/aladin-lite')) return 'aladin'
           if (id.includes('node_modules/html2canvas')) return 'html2canvas'
           if (id.includes('node_modules/@mui/x-data-grid')) return 'datagrid'
         },

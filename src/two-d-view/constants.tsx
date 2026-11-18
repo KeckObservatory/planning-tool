@@ -44,6 +44,9 @@ export const MOON_RADIUS = .52 // degrees
 export const MAG_RANGE = [1, 20] // mag range for guide star catalog queries
 export const DEFAULT_WINDOW_SIZE = 600 / 3600 // degrees, size of window to query for guide stars
 export const MOSFIRE_WINDOW_SIZE = 1200 / 3600 // degrees, size of window to query for guide stars
+// The 2D view's sky image plots all targets together, so it requests a wider field than the guide star dialog.
+export const SKY_VIEW_DEFAULT_WINDOW_SIZE = 1 / 4 // degrees
+export const SKY_VIEW_MOSFIRE_WINDOW_SIZE = 1 / 2 // degrees
 export const DEFAULT_RA = "12:48:45.8623" //NGC4711
 export const DEFAULT_DEC = "+35:19:57.8810"  //NGC4711
 export const AO_INSTRUMENTS: string[] = [ 'OSIRISImg', 'OSIRISSpec', 'NIRC2' ] //instruments that can use AO guide stars
