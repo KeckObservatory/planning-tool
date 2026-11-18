@@ -20,7 +20,7 @@ import { alt_az_observable, Dome, DomeParam, DomeSelect, get_moon_warnings, get_
 import { SkyChartDataSummary } from './sky_chart_data_summary.tsx';
 import { FOVSelect } from './fov_select.tsx';
 import { POPointFeature, POPointingOriginCollection, POSelect } from './pointing_origin_select.tsx';
-import { get_catalog_image, get_image_catalogs } from '../api/api_root';
+import { get_image_catalogs } from '../api/api_root';
 import { LazyFallback } from '../lazy_fallback';
 import { SKY_VIEW_DEFAULT_WINDOW_SIZE, SKY_VIEW_MOSFIRE_WINDOW_SIZE } from './constants';
 
@@ -139,12 +139,7 @@ const TwoDView = ({ targets }: Props) => {
     const [invertImage, setInvertImage] = useQueryParam('invert_image', withDefault(BooleanParam, false))
     const [showTargets, setShowTargets] = React.useState<boolean>(true)
 
-    // The sky image is centred on the first target with coordinates; other targets are
-    // plotted if they land on the image and skipped otherwise.
-    const centerRA = firstTarget?.ra_deg ?? util.ra_dec_to_deg(String(targets.at(0)?.ra ?? '0'))
-    const centerDec = firstTarget?.dec_deg ?? util.ra_dec_to_deg(String(targets.at(0)?.dec ?? '0'), true)
     const imgSize = instrumentFOV === 'MOSFIRE' ? SKY_VIEW_MOSFIRE_WINDOW_SIZE : SKY_VIEW_DEFAULT_WINDOW_SIZE
-    const imgUrl = imageCatalog ? get_catalog_image(imageCatalog, centerRA, centerDec, imgSize) : ''
 
     // Targets need degree coordinates to be placed on the image.
     const skyTargets = React.useMemo(() => targets
@@ -154,6 +149,10 @@ const TwoDView = ({ targets }: Props) => {
             ra_deg: tgt.ra_deg ?? util.ra_dec_to_deg(String(tgt.ra), false),
             dec_deg: tgt.dec_deg ?? util.ra_dec_to_deg(String(tgt.dec), true),
         })), [targets])
+
+    // The sky image is centred on the first target with coordinates (the viewer falls back to
+    // its own default with none); other targets are plotted if they land on the image.
+    const centerTarget = skyTargets.at(0)
 
     React.useEffect(() => {
         const fun = async () => {
@@ -168,10 +167,6 @@ const TwoDView = ({ targets }: Props) => {
         }
         fun()
     }, [])
-
-    React.useEffect(() => {
-        imgUrl && setImageLoading(true)
-    }, [imgUrl])
 
     React.useEffect(() => {
         const newSuncalcTimes = util.get_suncalc_times(lngLatEl, obsdate)
@@ -348,15 +343,17 @@ const TwoDView = ({ targets }: Props) => {
                     />
                     {
                         pointingOrigins && (
-                            <POSelect
-                                pointing_origins={pointingOrigins}
-                                instrument={instrumentFOV}
-                                selPointingOrigins={selPointingOrigins}
-                                setSelPointingOrigins={setSelPointingOrigins}
-                                selPO={selPO}
-                                setSelPO={setSelPO}
-                            />
-
+                            // POSelect renders two dropdowns as siblings; keep them side by side.
+                            <Stack direction='row' alignItems='flex-start'>
+                                <POSelect
+                                    pointing_origins={pointingOrigins}
+                                    instrument={instrumentFOV}
+                                    selPointingOrigins={selPointingOrigins}
+                                    setSelPointingOrigins={setSelPointingOrigins}
+                                    selPO={selPO}
+                                    setSelPO={setSelPO}
+                                />
+                            </Stack>
                         )
                     }
                     <Stack direction='row' spacing={1} justifyContent='left'>
@@ -473,13 +470,13 @@ const TwoDView = ({ targets }: Props) => {
                         <GSViewer
                             key={instrumentFOV} // reset zoom/pan to the instrument's default
                             markerMode='target'
-                            imgUrl={imgUrl}
+                            imageCatalog={imageCatalog}
                             guideStars={skyTargets}
                             height={height}
                             width={width}
                             size={imgSize} // in degrees
-                            centerRA={centerRA}
-                            centerDec={centerDec}
+                            centerRA={centerTarget?.ra_deg}
+                            centerDec={centerTarget?.dec_deg}
                             guideStarName={selTargetName}
                             setGuideStarName={setSelTargetName}
                             setImageLoading={setImageLoading}
