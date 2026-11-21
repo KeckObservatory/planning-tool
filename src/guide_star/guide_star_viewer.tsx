@@ -5,10 +5,12 @@ import { useTheme } from "@mui/material/styles"
 import { get_shapes, get_fov_shapes, FovShape } from "../two-d-view/two_d_view_common.tsx"
 import { POPointFeature, TelescopeContours } from "../two-d-view/pointing_origin_select"
 import { Feature, Point } from "geojson"
-import { PointingOriginMarkers, PointingOriginMarker } from "../aladin/pointing_origin_markers"
+import { PointingOriginMarkers, PointingOriginMarker } from "../pointing_origin_markers"
 import { ScaleBar } from "./scale_bar"
 import { CompassRose } from "./compass_rose"
-import { ZOOM_SPEED, ZOOM_MIN, ZOOM_MAX, MOSFIRE_ZOOM_DEFAULT, ZOOM_DEFAULT, OSIRIS_FSM_TSS_ROTATION, NIRC2_FSM_TSS_PO } from "../two-d-view/constants"
+import { ZOOM_SPEED, ZOOM_MIN, ZOOM_MAX, MOSFIRE_ZOOM_DEFAULT, SCALES_ZOOM_DEFAULT, ZOOM_DEFAULT, OSIRIS_FSM_TSS_ROTATION, NIRC2_FSM_TSS_PO, DEFAULT_RA, DEFAULT_DEC } from "../two-d-view/constants"
+import { ra_dec_to_deg } from "../two-d-view/sky_view_util.tsx"
+import { get_catalog_image } from "../api/api_root"
 import IconButton from "@mui/material/IconButton"
 import Tooltip from "@mui/material/Tooltip"
 import DownloadIcon from '@mui/icons-material/Download'
@@ -55,14 +57,34 @@ interface ContourLines {
   lines: Array<Array<[number, number]>>
 }
 
+// 'guideStar': catalog stars, coloured by selected/added state and drawn as x's when outside the FOV.
+// 'target': the science targets of the 2D sky view - all plotted together, and any that fall
+// outside the DSS image are not drawn at all.
+export type MarkerMode = 'guideStar' | 'target'
+
+// Angular offset (degrees, on-sky) of a source from the image center. RA is wrapped so
+// a field straddling RA 0/360 doesn't place sources a full circle away.
+const sky_offset = (centerRA: number, centerDec: number, ra: number, dec: number): [number, number] => {
+  let dRA = centerRA - ra
+  if (dRA > 180) dRA -= 360
+  if (dRA < -180) dRA += 360
+  // RA degrees must be scaled by cos(dec) to get true angular separation on the sky.
+  return [dRA * Math.cos(centerDec * Math.PI / 180), centerDec - dec]
+}
+
+// Where the view is centred when the caller has no coordinates to give it.
+export const DEFAULT_CENTER_RA = ra_dec_to_deg(DEFAULT_RA) // degrees
+export const DEFAULT_CENTER_DEC = ra_dec_to_deg(DEFAULT_DEC, true) // degrees
+
 interface Props {
-  imgUrl: string
-  guideStars: Target[]
+  imageCatalog?: string // image survey to fetch the background from; no image until it's set
+  guideStars: Target[] // the sources to mark: guide stars, or science targets in 'target' mode
+  markerMode?: MarkerMode // defaults to 'guideStar'
   height: number // in pixels
   width: number // in pixels
-  size: number // in degrees
-  centerRA: number // in degrees
-  centerDec: number // in degrees
+  size: number // in degrees; the image window requested and the span it is drawn across
+  centerRA?: number // in degrees, defaults to DEFAULT_CENTER_RA
+  centerDec?: number // in degrees, defaults to DEFAULT_CENTER_DEC
   guideStarName?: string
   setGuideStarName?: (name: string) => void
   setImageLoading: (loading: boolean) => void
@@ -83,8 +105,16 @@ export const GSViewer = (props: Props) => {
 
   const theme = useTheme();
   const context = useStateContext();
+  const markerMode: MarkerMode = props.markerMode ?? 'guideStar';
+  // A NaN (e.g. from unparsable coordinates) also falls back to the default.
+  const hasCenter = Number.isFinite(props.centerRA) && Number.isFinite(props.centerDec);
+  const centerRA = hasCenter ? props.centerRA! : DEFAULT_CENTER_RA;
+  const centerDec = hasCenter ? props.centerDec! : DEFAULT_CENTER_DEC;
+  const imgUrl = props.imageCatalog ? get_catalog_image(props.imageCatalog, centerRA, centerDec, props.size) : '';
 
-  const initZoom = props.instrumentFOV === 'MOSFIRE' ? MOSFIRE_ZOOM_DEFAULT : ZOOM_DEFAULT
+  const initZoom = props.instrumentFOV === 'MOSFIRE' ? MOSFIRE_ZOOM_DEFAULT
+    : props.instrumentFOV?.includes('SCALES') ? SCALES_ZOOM_DEFAULT
+    : ZOOM_DEFAULT
 
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const svgRef = React.useRef<SVGSVGElement | null>(null);
@@ -92,6 +122,9 @@ export const GSViewer = (props: Props) => {
   const [mapTooltip, setMapTooltip] = React.useState<{ x: number; y: number; text: string } | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [zoom, setZoom] = React.useState<number>(initZoom); // 1 = no zoom
+  // The guide star dialog keeps this viewer mounted across instrument changes, so apply
+  // the new instrument's default zoom when it changes rather than only on first mount.
+  React.useEffect(() => { setZoom(initZoom) }, [initZoom]);
   const [panOffset, setPanOffset] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = React.useState<boolean>(false);
   const [dragStart, setDragStart] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -178,7 +211,7 @@ export const GSViewer = (props: Props) => {
         position
       };
     });
-  }, [props.pointingOrigins, props.centerRA, props.centerDec, props.width, props.height, degPerPixel, props.selPO, zoom, props.fovAngle]);
+  }, [props.pointingOrigins, centerRA, centerDec, props.width, props.height, degPerPixel, props.selPO, zoom, props.fovAngle]);
 
   // Convert contours to pixel coordinates. props.contours is the laser contours when the
   // laser is on, otherwise the FSM (field steering mirror) outline for the telescope.
@@ -365,10 +398,11 @@ export const GSViewer = (props: Props) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx || !imgUrl) return;
 
+    props.setImageLoading(true);
     const image = new Image();
-    image.src = props.imgUrl;
+    image.src = imgUrl;
     image.crossOrigin = "Anonymous"; // Handle potential CORS issues if images are external
 
     image.onload = () => {
@@ -384,9 +418,9 @@ export const GSViewer = (props: Props) => {
 
     image.onerror = () => {
       // Image failed to load (e.g., 404), keep loading as true
-      console.error('Failed to load image:', props.imgUrl);
+      console.error('Failed to load image:', imgUrl);
     };
-  }, [props.imgUrl, props.guideStars]); // Redraw if image URL or objects change
+  }, [imgUrl]); // markers live on the SVG layers, so only a new image needs a redraw
 
   // Shapes a catalog star is tested against; ones flagged ignore_in_fov are skipped.
   const fovPolygons = React.useMemo((): [number, number][][] => {
@@ -418,13 +452,43 @@ export const GSViewer = (props: Props) => {
       }
     };
 
-    // RA degrees must be scaled by cos(dec) to get true angular separation on the sky.
-    const cosDec = Math.cos(props.centerDec * Math.PI / 180);
     const markerRadius = 5;
 
+    if (markerMode === 'target') {
+      // The image spans props.size degrees across, centred on (centerRA, centerDec).
+      const halfSize = props.size / 2;
+      props.guideStars.forEach((d: Target) => {
+        if (d.ra_deg === undefined || d.dec_deg === undefined) return;
+        const [dx, dy] = sky_offset(centerRA, centerDec, d.ra_deg, d.dec_deg);
+        if (Math.abs(dx) > halfSize || Math.abs(dy) > halfSize) return; // off the DSS image
+        const name = d.target_name ?? d._id ?? 'Unknown';
+        const selected = !!props.guideStarName && name === props.guideStarName;
+        d3.select(svg).append('circle')
+          .attr('cx', dx / degPerPixel + props.width / 2)
+          .attr('cy', dy / degPerPixel + props.height / 2)
+          .attr('r', markerRadius)
+          .attr('fill', 'none')
+          .attr('stroke', selected ? 'yellow' : 'lime')
+          .attr('stroke-width', 2)
+          .attr('cursor', 'pointer')
+          .on('mouseenter mousemove', (event: MouseEvent) => {
+            const rect = containerRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            setMapTooltip({ x: event.clientX - rect.left, y: event.clientY - rect.top, text: `${name}  RA: ${d.ra}  Dec: ${d.dec}` });
+          })
+          .on('mouseleave', () => setMapTooltip(null))
+          .on('click', (event: MouseEvent) => {
+            event.stopPropagation(); // Prevent pan from triggering
+            props.setGuideStarName?.(name);
+          });
+      });
+      return;
+    }
+
     props.guideStars.forEach((d: Target) => {
-      const cx = (props.centerRA - (d.ra_deg || 0)) * cosDec / degPerPixel + props.width / 2;
-      const cy = (props.centerDec - (d.dec_deg || 0)) / degPerPixel + props.height / 2;
+      const [dx, dy] = sky_offset(centerRA, centerDec, d.ra_deg || 0, d.dec_deg || 0);
+      const cx = dx / degPerPixel + props.width / 2;
+      const cy = dy / degPerPixel + props.height / 2;
       const selected = d.target_name === props.guideStarName;
       const alreadyAdded = is_guidestar_already_added(d, props.scienceTargetName, context.targets);
       // Yellow if selected, green if already added to the target list, red otherwise;
@@ -468,7 +532,7 @@ export const GSViewer = (props: Props) => {
       .attr('stroke', 'green')
       .attr('stroke-width', 2)
       .attr('fill', 'none');
-  }, [props.guideStars, props.centerRA, props.showCatalog, props.centerDec, props.width, props.height, degPerPixel, props.guideStarName, zoom, props.fovAngle, fovPolygons, props.scienceTargetName, context.targets, theme]);
+  }, [props.guideStars, centerRA, props.showCatalog, centerDec, props.width, props.height, props.size, degPerPixel, props.guideStarName, zoom, props.fovAngle, fovPolygons, props.scienceTargetName, context.targets, theme, markerMode]);
 
   // Fetch and update FOV shapes
   React.useEffect(() => {
@@ -526,7 +590,7 @@ export const GSViewer = (props: Props) => {
         }
       });
     });
-  }, [fov, props.centerRA, props.centerDec, props.width, props.height, degPerPixel, props.selPO, zoom, props.fovAngle]);
+  }, [fov, centerRA, centerDec, props.width, props.height, degPerPixel, props.selPO, zoom, props.fovAngle]);
 
   const colorStretchFilter = `${props.invertImage !== false ? 'invert(1) ' : ''}brightness(${brightness}%) contrast(${contrast}%)`
 
@@ -637,7 +701,7 @@ export const GSViewer = (props: Props) => {
     }
 
     const link = document.createElement('a')
-    link.download = `guide-star-${props.instrumentFOV ?? 'view'}.png`
+    link.download = `${markerMode === 'target' ? 'sky-view' : 'guide-star'}-${props.instrumentFOV ?? 'view'}.png`
     link.href = out.toDataURL('image/png')
     link.click()
   }

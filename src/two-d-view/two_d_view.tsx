@@ -2,7 +2,7 @@ import React from 'react';
 import * as util from './sky_view_util.tsx'
 import NightPicker from '../two-d-view/night_picker'
 import dayjs, { Dayjs } from 'dayjs';
-import { Box, Button, FormControl, FormControlLabel, FormLabel, Grid2, IconButton, Radio, RadioGroup, Stack, Switch, TextField, Tooltip, Typography } from '@mui/material';
+import { Autocomplete, Box, FormControl, FormControlLabel, FormLabel, Grid2, IconButton, Radio, RadioGroup, Stack, Switch, TextField, Tooltip, Typography } from '@mui/material';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import { useResizeObserver } from 'usehooks-ts';
@@ -13,15 +13,19 @@ import { SkyChart } from './sky_chart.tsx';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { VizRow } from './viz_dialog.tsx';
-import AladinViewer from '../aladin/aladin.tsx';
 import { MoonMarker } from './moon_marker.tsx';
 import * as SunCalc from "suncalc";
-import { StringParam, useQueryParam, withDefault } from 'use-query-params';
+import { BooleanParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
 import { alt_az_observable, Dome, DomeParam, DomeSelect, get_moon_warnings, get_shapes, hidate, TargetView } from './two_d_view_common.tsx';
-import html2canvas from 'html2canvas';
 import { SkyChartDataSummary } from './sky_chart_data_summary.tsx';
 import { FOVSelect } from './fov_select.tsx';
 import { POPointFeature, POPointingOriginCollection, POSelect } from './pointing_origin_select.tsx';
+import { get_image_catalogs } from '../api/api_root';
+import { LazyFallback } from '../lazy_fallback';
+import { SKY_VIEW_DEFAULT_WINDOW_SIZE, SKY_VIEW_MOSFIRE_WINDOW_SIZE } from './constants';
+
+// d3 lives behind this import, so keep it lazy as the guide star dialog does.
+const GSViewer = React.lazy(() => import('../guide_star/guide_star_viewer').then(m => ({ default: m.GSViewer })))
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -115,7 +119,6 @@ const TwoDView = ({ targets }: Props) => {
     const [showLimits, setShowLimits] = React.useState(true)
     const firstTarget = targets.find(t => t.ra_deg !== undefined && t.dec_deg !== undefined)
     const [rotatorAngle, setRotatorAngle] = React.useState(firstTarget?.rotator_pa ?? 0) // default to 0 if not provided
-    const [positionAngle] = React.useState(0)
     const lngLatEl = context.config.tel_lat_lng_el[dome]
     const [suncalcTimes, setSuncalcTimes] = React.useState(util.get_suncalc_times(lngLatEl, obsdate))
     const [times, setTimes] = React.useState(util.get_times_using_nadir(suncalcTimes.nadir))
@@ -127,14 +130,40 @@ const TwoDView = ({ targets }: Props) => {
     const [instrumentFOV, setInstrumentFOV] = useQueryParam('instrument_fov', withDefault(StringParam, 'MOSFIRE'))
     const [selPO, setSelPO] = React.useState<POPointFeature | undefined>(undefined)
     const [fullscreenChart, setFullscreenChart] = React.useState<FullscreenChart>(null)
+    const [imageCatalog, setImageCatalog] = React.useState<string | undefined>(undefined)
+    const [imageCatalogs, setImageCatalogs] = React.useState<string[]>([])
+    const [imageLoading, setImageLoading] = React.useState<boolean>(false)
+    const [selTargetName, setSelTargetName] = React.useState<string>('')
 
+    // Sky image overlay controls, mirroring the guide star dialog (and sharing its URL params).
+    const [invertImage, setInvertImage] = useQueryParam('invert_image', withDefault(BooleanParam, false))
+    const [showTargets, setShowTargets] = React.useState<boolean>(true)
 
+    const imgSize = instrumentFOV === 'MOSFIRE' ? SKY_VIEW_MOSFIRE_WINDOW_SIZE : SKY_VIEW_DEFAULT_WINDOW_SIZE
+
+    // Targets need degree coordinates to be placed on the image.
+    const skyTargets = React.useMemo(() => targets
+        .filter((tgt) => (tgt.ra_deg !== undefined || tgt.ra) && (tgt.dec_deg !== undefined || tgt.dec))
+        .map((tgt) => ({
+            ...tgt,
+            ra_deg: tgt.ra_deg ?? util.ra_dec_to_deg(String(tgt.ra), false),
+            dec_deg: tgt.dec_deg ?? util.ra_dec_to_deg(String(tgt.dec), true),
+        })), [targets])
+
+    // The sky image is centred on the first target with coordinates (the viewer falls back to
+    // its own default with none); other targets are plotted if they land on the image.
+    const centerTarget = skyTargets.at(0)
 
     React.useEffect(() => {
         const fun = async () => {
             const pos = await get_shapes('pointing_origins') as POPointingOriginCollection
             console.log('pointing origins', pos)
             setPointingOrigins(pos)
+            const imgCats = await get_image_catalogs()
+            if (imgCats) {
+                setImageCatalogs(imgCats)
+                setImageCatalog(imgCats.at(0))
+            }
         }
         fun()
     }, [])
@@ -211,25 +240,6 @@ const TwoDView = ({ targets }: Props) => {
         if (!newDate) return
         const newObsDate = hidate(newDate?.toDate(), context.config.timezone).toDate()
         newDate && setObsdate(newObsDate)
-    }
-
-    const save_img = () => {
-
-        const doc = document.getElementById('aladin-lite-div') as HTMLElement
-
-        console.log('doc', doc)
-        html2canvas(doc).then((canvas) => {
-            console.log('Canvas created')
-            if (canvas) {
-                console.log('saving canvas')
-                const link = document.createElement('a');
-                link.download = 'sky-chart.png';
-                link.href = canvas.toDataURL();
-                link.click();
-            }
-        }).finally(() => {
-            console.log('Canvas saving process completed');
-        });
     }
 
     const moonInfo = SunCalc.getMoonIllumination(time)
@@ -333,15 +343,17 @@ const TwoDView = ({ targets }: Props) => {
                     />
                     {
                         pointingOrigins && (
-                            <POSelect
-                                pointing_origins={pointingOrigins}
-                                instrument={instrumentFOV}
-                                selPointingOrigins={selPointingOrigins}
-                                setSelPointingOrigins={setSelPointingOrigins}
-                                selPO={selPO}
-                                setSelPO={setSelPO}
-                            />
-
+                            // POSelect renders two dropdowns as siblings; keep them side by side.
+                            <Stack direction='row' alignItems='flex-start'>
+                                <POSelect
+                                    pointing_origins={pointingOrigins}
+                                    instrument={instrumentFOV}
+                                    selPointingOrigins={selPointingOrigins}
+                                    setSelPointingOrigins={setSelPointingOrigins}
+                                    selPO={selPO}
+                                    setSelPO={setSelPO}
+                                />
+                            </Stack>
                         )
                     }
                     <Stack direction='row' spacing={1} justifyContent='left'>
@@ -354,15 +366,31 @@ const TwoDView = ({ targets }: Props) => {
                                 onChange={(event) => setRotatorAngle(Number(event.target.value))}
                             />
                         </Tooltip>
-                        <Tooltip title={'Save Image as a .png file'}>
-                            <Button
-                                sx={{ width: '200px', margin: '6px' }}
-                                onClick={save_img}
-                                variant='contained'
-                            >
-                                Save Image as .png
-                            </Button>
-                        </Tooltip>
+                        {imageCatalog && (
+                            <Tooltip title={'Select Image Catalog'}>
+                                <Autocomplete
+                                    disablePortal
+                                    id="two-d-view-image-catalog"
+                                    value={imageCatalog}
+                                    onChange={(_, value) => value && setImageCatalog(value)}
+                                    options={imageCatalogs}
+                                    sx={{ width: '200px', margin: '6px' }}
+                                    renderInput={(params) => <TextField {...params} label={'Image Catalog'} />}
+                                />
+                            </Tooltip>
+                        )}
+                    </Stack>
+                    <Stack direction='row' sx={{ flexWrap: 'wrap', paddingLeft: '6px' }}>
+                        <FormControlLabel
+                            label="Invert Image"
+                            control={<Switch checked={invertImage} />}
+                            onChange={(_, checked) => setInvertImage(checked)}
+                        />
+                        <FormControlLabel
+                            label="Show Targets"
+                            control={<Switch checked={showTargets} />}
+                            onChange={(_, checked) => setShowTargets(checked)}
+                        />
                     </Stack>
                 </Stack>
             </Grid2>
@@ -418,16 +446,49 @@ const TwoDView = ({ targets }: Props) => {
                 </Stack>
             </Grid2>
             <Grid2 size={{ xs: 4 }}>
-                <AladinViewer
-                    height={height}
-                    width={width}
-                    selPO={selPO}
-                    setSelPO={setSelPO}
-                    fovAngle={Number(rotatorAngle)}
-                    positionAngle={positionAngle}
-                    instrumentFOV={instrumentFOV}
-                    pointingOrigins={selPointingOrigins}
-                    targets={targets} />
+                <Box sx={{ position: 'relative', width, height }}>
+                    {imageLoading && (
+                        <Typography
+                            sx={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                fontSize: '24px',
+                                fontWeight: 'bold',
+                                color: 'white',
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                padding: '16px',
+                                borderRadius: '8px',
+                                zIndex: 10
+                            }}
+                        >
+                            Loading...
+                        </Typography>
+                    )}
+                    <React.Suspense fallback={<LazyFallback height={height} />}>
+                        <GSViewer
+                            key={instrumentFOV} // reset zoom/pan to the instrument's default
+                            markerMode='target'
+                            imageCatalog={imageCatalog}
+                            guideStars={skyTargets}
+                            height={height}
+                            width={width}
+                            size={imgSize} // in degrees
+                            centerRA={centerTarget?.ra_deg}
+                            centerDec={centerTarget?.dec_deg}
+                            guideStarName={selTargetName}
+                            setGuideStarName={setSelTargetName}
+                            setImageLoading={setImageLoading}
+                            instrumentFOV={instrumentFOV}
+                            fovAngle={Number(rotatorAngle)}
+                            selPO={selPO}
+                            pointingOrigins={selPointingOrigins}
+                            invertImage={invertImage}
+                            showCatalog={showTargets}
+                        />
+                    </React.Suspense>
+                </Box>
             </Grid2>
         </Grid2 >
     );

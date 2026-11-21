@@ -6,7 +6,7 @@ import { Target } from '../App';
 import { DialogComponent } from '../dialog_component';
 import { LazyFallback } from '../lazy_fallback';
 
-// plotly + aladin-lite live behind this import. Keep it lazy so they stay out of
+// plotly + d3 live behind this import. Keep it lazy so they stay out of
 // the initial bundle and only load when the dialog is first opened.
 const TwoDView = React.lazy(() => import('./two_d_view'));
 

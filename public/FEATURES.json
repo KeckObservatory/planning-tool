@@ -881,6 +881,164 @@
     {
       "type": "FeatureCollection",
       "properties": {
+        "instrument": "SCALES",
+        "dome": "Keck 2",
+        "po_instrument": "SCALES",
+        "zoom": 0.075,
+        "units": "arcsec",
+        "type": "FOV",
+        "source": "PROVISIONAL - published SCALES specs, centred on the optical axis. Replace with instrument team geometry and add SCALES pointing origins."
+      },
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {
+            "type": "guider",
+            "tooltip": "Guider Perimeter"
+          },
+          "geometry": {
+            "type": "MultiPolygon",
+            "coordinates": [
+              [
+                [
+                  [
+                    -68.608,
+                    -68.608
+                  ],
+                  [
+                    68.608,
+                    -68.608
+                  ],
+                  [
+                    68.608,
+                    68.608
+                  ],
+                  [
+                    -68.608,
+                    68.608
+                  ],
+                  [
+                    -68.608,
+                    -68.608
+                  ]
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "type": "img detector",
+            "tooltip": "Imager Detector Perimeter"
+          },
+          "geometry": {
+            "type": "MultiPolygon",
+            "coordinates": [
+              [
+                [
+                  [
+                    -6.1,
+                    -6.1
+                  ],
+                  [
+                    6.1,
+                    -6.1
+                  ],
+                  [
+                    6.1,
+                    6.1
+                  ],
+                  [
+                    -6.1,
+                    6.1
+                  ],
+                  [
+                    -6.1,
+                    -6.1
+                  ]
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "type": "ifs low-res",
+            "tooltip": "Low-Res IFS Perimeter"
+          },
+          "geometry": {
+            "type": "MultiPolygon",
+            "coordinates": [
+              [
+                [
+                  [
+                    -1.0,
+                    -1.0
+                  ],
+                  [
+                    1.0,
+                    -1.0
+                  ],
+                  [
+                    1.0,
+                    1.0
+                  ],
+                  [
+                    -1.0,
+                    1.0
+                  ],
+                  [
+                    -1.0,
+                    -1.0
+                  ]
+                ]
+              ]
+            ]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "type": "ifs med-res",
+            "tooltip": "Med-Res IFS Perimeter"
+          },
+          "geometry": {
+            "type": "MultiPolygon",
+            "coordinates": [
+              [
+                [
+                  [
+                    -0.17,
+                    -0.18
+                  ],
+                  [
+                    0.17,
+                    -0.18
+                  ],
+                  [
+                    0.17,
+                    0.18
+                  ],
+                  [
+                    -0.17,
+                    0.18
+                  ],
+                  [
+                    -0.17,
+                    -0.18
+                  ]
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "FeatureCollection",
+      "properties": {
         "instrument": "HIRES",
         "dome": "Keck 1",
         "po_instrument": "HIRES",

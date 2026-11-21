@@ -11,20 +11,19 @@ import GuideStarTable from './guide_star_table';
 import { ra_dec_to_deg } from '../catalog_button';
 import { deg_to_hms, deg_to_dms } from '../two-d-view/sky_view_util.tsx';
 import { FOVSelect } from '../two-d-view/fov_select';
-import { Dome, DomeParam, DomeSelect, get_shapes } from '../two-d-view/two_d_view_common.tsx';
+import { Dome, DomeParam, DomeSelect, get_shapes, is_ao_instrument, is_trick_instrument } from '../two-d-view/two_d_view_common.tsx';
 import { ArrayParam, BooleanParam, StringParam, useQueryParam, withDefault } from 'use-query-params';
-import { get_catalog_targets, get_catalogs, get_image_catalogs, get_catalog_image } from '../api/api_root';
+import { get_catalog_targets, get_catalogs, get_image_catalogs } from '../api/api_root';
 import UploadDialog from '../upload_targets_dialog';
 import { LaserContours, POPointFeature, POPointingOriginCollection, POSelect } from '../two-d-view/pointing_origin_select';
 import { LazyFallback } from '../lazy_fallback';
-// import AladinViewer from '../aladin/aladin';
 import { MagRangeSlider } from './mag_range_slider';
 import { DEFAULT_MAG_FILTER, MAG_KEYS, MagFilter, MagFilterSelect } from './mag_filter_select.tsx';
-import { GUIDESTAR_TUTORIAL_URL, MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE, DEFAULT_RA, DEFAULT_DEC, AO_INSTRUMENTS, TRICK_INSTRUMENTS } from '../two-d-view/constants';
+import { GUIDESTAR_TUTORIAL_URL, MOSFIRE_WINDOW_SIZE, DEFAULT_WINDOW_SIZE, DEFAULT_RA, DEFAULT_DEC } from '../two-d-view/constants';
 import AGTimeToLimit from './asterism_generator.tsx';
 
 
-// d3 + the aladin marker helpers live behind this import. Keep it lazy so they
+// d3 + the pointing origin marker helpers live behind this import. Keep it lazy so they
 // load when the guide star dialog is first opened, not at app startup.
 const GSViewer = React.lazy(() => import('./guide_star_viewer').then(m => ({ default: m.GSViewer })))
 
@@ -289,12 +288,8 @@ export const guidestar_to_target = (guidestar: AnyCatalogTarget, mapping: Catalo
     return tgt as Partial<Target>;
 }
 
-export const is_ao_instrument = (instrument: string) => {
-    return AO_INSTRUMENTS.some(aoinst => instrument.includes(aoinst))
-}
-export const is_trick_instrument = (instrument: string) => {
-    return TRICK_INSTRUMENTS.some(trickinst => instrument.includes(trickinst))
-}
+// Moved to two_d_view_common so the 2D view can use them without loading this module.
+export { is_ao_instrument, is_trick_instrument }
 
 export const GuideStarDialog = (props: VizDialogProps) => {
     // target must have ra dec and be defined
@@ -336,7 +331,6 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     const [target, setTarget] = useState<Target>(initTarget)
     const [guidestars, setGuideStars] = useState<Partial<Target>[]>([])
 
-    const [image, setImage] = useState<string | undefined>(undefined)
     const [imageLoading, setImageLoading] = useState<boolean>(false)
     const [catalogLoading, setCatalogLoading] = useState<boolean>(false)
 
@@ -458,15 +452,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                 setCatalogLoading(false)
 
             }
-            if (imageCatalog) {
-                setImageLoading(true)
-                const img = get_catalog_image(imageCatalog, ra, dec, imgSize)
-                setImage(img)
-            }
-
         }
         fun()
-    }, [catalog, target, imageCatalog, imgSize, enableMagRange])
+    }, [catalog, target, imgSize, enableMagRange])
 
     useEffect(() => {
         const fun = async () => {
@@ -535,8 +523,9 @@ export const GuideStarDialog = (props: VizDialogProps) => {
     )
 
     const telContours = contours?.find((feature) => feature.properties.telescope === dome)
-    const centerRa = target.ra_deg ?? ra_dec_to_deg(String(target.ra ?? 0))
-    const centerDec = target.dec_deg ?? ra_dec_to_deg(String(target.dec ?? 0), true)
+    // Left undefined when the target has no coordinates; the viewer falls back to its default center.
+    const centerRa = target.ra_deg ?? (target.ra ? ra_dec_to_deg(String(target.ra)) : undefined)
+    const centerDec = target.dec_deg ?? (target.dec ? ra_dec_to_deg(String(target.dec), true) : undefined)
 
     // Client-side refinement on top of whatever the backend already filtered by:
     // keep a guide star only if every magnitude column the user checked falls
@@ -712,7 +701,7 @@ export const GuideStarDialog = (props: VizDialogProps) => {
                     )}
                     <React.Suspense fallback={<LazyFallback height={600} />}>
                         < GSViewer
-                            imgUrl={image ?? ''}
+                            imageCatalog={imageCatalog}
                             guideStars={filteredGuideStars as Target[]}
                             height={600}
                             width={600}

@@ -97,6 +97,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     const [comments, setComments] = useState<string>("")
     const [schedule, setSchedule] = useState<ObserverSchedule[]>([])
     const [selectedSchedId, setSelectedSchedId] = useState<number | undefined>(undefined)
+    const [instrument, setInstrument] = useState<string>("")
     const context = useStateContext()
     const snackbarContext = useSnackbarContext()
 
@@ -104,6 +105,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     const onScheduleRowSelect = (entry: ObserverSchedule | TelSchedule) => {
         setSelectedSchedId(entry.SchedId)
         setPiName(entry.PiLastName)
+        setInstrument(entry.Instrument)
         setDate(dayjs(entry.Date))
         if (entry.TelNr === 1 || entry.TelNr === 2) {
             setDome(`Keck ${entry.TelNr}` as Dome)
@@ -225,6 +227,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
             piname: piName,
             comments: comments ?? "",
             semid: semid ?? "",
+            instrument: instrument ?? "",
             slist: (starListStrings ?? []).join('\n'),
         }
         const submit_status = await submit_starlist(form)
