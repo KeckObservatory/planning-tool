@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { Stack, TextField, List, Typography, Button } from '@mui/material';
+import { Stack, TextField, List, Typography, Button, Tooltip } from '@mui/material';
 import { DialogComponent } from '../dialog_component';
 import { Dome, DomeParam } from '../two-d-view/two_d_view_common.tsx';
 import { useQueryParam, withDefault } from 'use-query-params';
@@ -18,6 +18,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { Target } from '../App';
 import { config } from '../config.tsx';
 import { has_nonzero_value } from '../validation_check_dialog.tsx';
+import { QueuedSubmission, submission_key, SubmissionQueueTable } from './submission_queue_table';
 
 interface StarlistSubmissionDialogProps extends ExportProps {
     open: boolean,
@@ -98,6 +99,9 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     const [schedule, setSchedule] = useState<ObserverSchedule[]>([])
     const [selectedSchedId, setSelectedSchedId] = useState<number | undefined>(undefined)
     const [instrument, setInstrument] = useState<string>("")
+    // Nights queued to receive this same star list, sent one request each on Submit.
+    const [queue, setQueue] = useState<QueuedSubmission[]>([])
+    const [submitting, setSubmitting] = useState<boolean>(false)
     const context = useStateContext()
     const snackbarContext = useSnackbarContext()
 
@@ -200,17 +204,67 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     const isDateValid = date != null && date.isValid()
     const isPiNameValid = piName.trim().length > 0
 
+    const show_message = (severity: 'success' | 'warning' | 'error', message: string) => {
+        snackbarContext.setSnackbarMessage({ severity, message })
+        snackbarContext.setSnackbarOpen(true)
+    }
+
+    // The form fields for one night, or an error message if they aren't complete.
+    const current_form = (): Omit<SubmittedStarList, 'slist'> | string => {
+        if (date == null || !date.isValid()) return 'Please select a valid HST date.'
+        if (!isPiNameValid) return 'Please enter a PI name.'
+        return {
+            telescope: dome.slice(dome.length - 1),
+            hstDate: date.format('YYYY-MM-DD'),
+            piname: piName,
+            comments: comments ?? "",
+            semid: semid ?? "",
+            instrument: instrument ?? "",
+        }
+    }
+
+    const add_to_queue = () => {
+        const form = current_form()
+        if (typeof form === 'string') {
+            show_message('error', form)
+            return
+        }
+        const key = submission_key(form)
+        if (queue.some((entry) => entry.key === key)) {
+            show_message('warning', `${form.hstDate} on Keck ${form.telescope} for ${form.semid || 'this program'} is already in the list.`)
+            return
+        }
+        setQueue((q) => [...q, { key, form, status: 'pending' }])
+    }
+
+    const remove_from_queue = (key: string) => setQueue((q) => q.filter((entry) => entry.key !== key))
+
+    const set_entry_status = (key: string, status: QueuedSubmission['status'], message?: string) =>
+        setQueue((q) => q.map((entry) => entry.key === key ? { ...entry, status, message } : entry))
+
+    const submit_queue = async () => {
+        // Entries already sent are skipped, so pressing Submit again retries only the failures.
+        const toSend = queue.filter((entry) => entry.status !== 'sent')
+        const slist = (starListStrings ?? []).join('\n')
+        setSubmitting(true)
+        let failed = 0
+        for (const entry of toSend) { // one at a time, so each night gets its own clear result
+            set_entry_status(entry.key, 'sending')
+            const status = String(await submit_starlist({ ...entry.form, slist }) ?? 'No response')
+            const ok = status.includes('success')
+            if (!ok) failed += 1
+            set_entry_status(entry.key, ok ? 'sent' : 'failed', status)
+        }
+        setSubmitting(false)
+        if (failed === 0) {
+            show_message('success', `Submitted ${toSend.length} star list(s).`)
+            props.handleClose()
+        } else {
+            show_message('error', `${failed} of ${toSend.length} submission(s) failed - hover a status for details. Submit again to retry them.`)
+        }
+    }
+
     const submit_starlist_to_database = async () => {
-        if (!isDateValid) {
-            snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Please select a valid HST date before submitting.' })
-            snackbarContext.setSnackbarOpen(true)
-            return
-        }
-        if (!isPiNameValid) {
-            snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Please enter a PI name before submitting.' })
-            snackbarContext.setSnackbarOpen(true)
-            return
-        }
         if (hasMalformedTargets) {
             snackbarContext.setSnackbarMessage({ severity: 'error', message: 'Please fix the malformed targets before submitting.' })
             snackbarContext.setSnackbarOpen(true)
@@ -221,15 +275,16 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
             snackbarContext.setSnackbarOpen(true)
             return
         }
-        const form: SubmittedStarList = {
-            telescope: dome.slice(dome.length - 1),
-            hstDate: date.format('YYYY-MM-DD'),
-            piname: piName,
-            comments: comments ?? "",
-            semid: semid ?? "",
-            instrument: instrument ?? "",
-            slist: (starListStrings ?? []).join('\n'),
+        if (queue.length > 0) {
+            await submit_queue()
+            return
         }
+        const fields = current_form()
+        if (typeof fields === 'string') {
+            show_message('error', fields)
+            return
+        }
+        const form: SubmittedStarList = { ...fields, slist: (starListStrings ?? []).join('\n') }
         const submit_status = await submit_starlist(form)
         if (submit_status.includes("success")) {
             snackbarContext.setSnackbarMessage({severity: 'success', message:submit_status})
@@ -246,15 +301,34 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
         <span>LGS List Submission. Select the schedule row you want to submit.</span>
     )
 
+    const unsentCount = queue.filter((entry) => entry.status !== 'sent').length
+    // With a list, Submit sends the list (the form only feeds "Add to list"); without one, it
+    // sends the form as before.
+    const submitBlocked = hasMalformedTargets || hasNonzeroPM || submitting
+        || (queue.length > 0 ? unsentCount === 0 : (!isDateValid || !isPiNameValid))
+
     const dialogActions = (
-        <Button
-            variant="contained"
-            color="primary"
-            disabled={!isDateValid || !isPiNameValid || hasMalformedTargets || hasNonzeroPM}
-            onClick={submit_starlist_to_database}
-        >
-            Submit
-        </Button>
+        <Stack direction='row' spacing={1}>
+            <Tooltip title="Queue this night to receive the same star list">
+                <span>
+                    <Button
+                        variant="outlined"
+                        disabled={!isDateValid || !isPiNameValid || submitting}
+                        onClick={add_to_queue}
+                    >
+                        Add to list
+                    </Button>
+                </span>
+            </Tooltip>
+            <Button
+                variant="contained"
+                color="primary"
+                disabled={submitBlocked}
+                onClick={submit_starlist_to_database}
+            >
+                {submitting ? 'Submitting...' : queue.length > 0 ? `Submit ${unsentCount} night(s)` : 'Submit'}
+            </Button>
+        </Stack>
     )
     const dialogContent = (
         <Stack
@@ -302,6 +376,14 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
                 onChange={(e) => setComments(e.target.value)}
                 multiline
                 rows={4}
+            />
+            <Typography variant="subtitle1">
+                Nights to Submit
+            </Typography>
+            <SubmissionQueueTable
+                queue={queue}
+                onRemove={remove_from_queue}
+                disabled={submitting}
             />
             <Typography variant="subtitle1" sx={{ paddingTop: '16px' }}>
                 Star List
