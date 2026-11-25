@@ -2,7 +2,7 @@
  * Lightweight pieces shared by the 2D view, guide star, and starlist modules.
  *
  * These used to live in two_d_view.tsx and target_viz_chart.tsx, which pull in
- * plotly and aladin-lite. Anything importing them dragged ~7MB of charting code
+ * plotly and d3. Anything importing them dragged ~7MB of charting code
  * into the initial bundle, so keep this module free of heavy imports.
  */
 import React from 'react';
@@ -10,11 +10,18 @@ import { FormControl, FormControlLabel, FormLabel, Radio, RadioGroup } from '@mu
 import { createEnumParam } from 'use-query-params';
 import dayjs from 'dayjs';
 import { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
-import { FOVlink, MOON_WARNING_HEAVY_DEG, MOON_WARNING_LIGHT_DEG } from './constants.tsx';
+import { AO_INSTRUMENTS, FOVlink, MOON_WARNING_HEAVY_DEG, MOON_WARNING_LIGHT_DEG, TRICK_INSTRUMENTS } from './constants.tsx';
 import type { GeoModel, Target } from '../App.tsx';
 import type { BlockReason, VizRow } from './viz_dialog.tsx';
 
 export type Dome = "Keck 1" | "Keck 2"
+
+export const is_ao_instrument = (instrument: string) => {
+    return AO_INSTRUMENTS.some(aoinst => instrument.includes(aoinst))
+}
+export const is_trick_instrument = (instrument: string) => {
+    return TRICK_INSTRUMENTS.some(trickinst => instrument.includes(trickinst))
+}
 
 export const DomeParam = createEnumParam<Dome>(['Keck 1', 'Keck 2'])
 

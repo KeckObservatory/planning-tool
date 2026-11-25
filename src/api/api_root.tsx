@@ -177,6 +177,7 @@ export interface SubmittedStarList {
     piname: string,
     semid: string,
     comments: string,
+    instrument: string,
     slist: string,
 }
 

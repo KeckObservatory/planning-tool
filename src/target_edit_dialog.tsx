@@ -134,12 +134,10 @@ export const format_edit_entry = (key: string, value?: string | number, isNumber
         value = raDecFormat(value as string)
     }
     if (value && key === 'target_name') {
-        value = String(value).replace(/[^\w^\-^\s]+/g, '').replaceAll('^', '') //remove non alphanumeric characters
-        value = value.slice(0, TARGET_NAME_LENGTH) //truncate to 16 characters
+        value = String(value).slice(0, TARGET_NAME_LENGTH) //truncate to 16 characters
     }
     if (value && key === 'science_target') {
-        value = String(value).replace(/[^\w^\-^\s]+/g, '').replaceAll('^', '') //remove non alphanumeric characters
-        value = value.slice(0, TARGET_NAME_LENGTH) //truncate to 16 characters
+        value = String(value).slice(0, TARGET_NAME_LENGTH) //truncate to 16 characters
     }
 
     value = String(value).replace(/\t/, '') //remove tabs

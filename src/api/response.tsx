@@ -6,8 +6,32 @@ export function handleResponse(response: AxiosResponse) {
     return response;
 }
 
+// The JSON body of an error response, or undefined if there isn't one. A body that isn't JSON
+// (e.g. an HTML error page) is ignored, since a plain string would look like a successful
+// response to callers that expect text.
+const json_payload = (error: AxiosError): object | undefined => {
+    let data: unknown = error.response?.data
+    if (typeof data === 'string') {
+        try {
+            data = JSON.parse(data)
+        } catch {
+            return undefined
+        }
+    }
+    return data != null && typeof data === 'object' ? data : undefined
+}
+
 export function handleError(error: Error | AxiosError) {
     if (axios.isAxiosError(error)) {
+        // Any error response may carry the server's explanation in its JSON body. Prefer its
+        // `details`, wrapped in an Error so callers can't mistake it for a successful text
+        // response; otherwise pass on the whole payload, then the generic axios error.
+        const payload = json_payload(error)
+        const details = (payload as { details?: unknown } | undefined)?.details
+        if (details != null && details !== '') {
+            return new Error(typeof details === 'string' ? details : JSON.stringify(details))
+        }
+        if (payload) return payload
         return error.toJSON();
     }
     return error;

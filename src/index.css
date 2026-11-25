@@ -13,11 +13,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.aladin-popup {
-  color: black;
-  background-color: white;
-}
-
 a {
   font-weight: 500;
   color: #646cff;

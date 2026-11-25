@@ -6,7 +6,7 @@ interface Props {
 }
 
 /**
- * Placeholder shown while a lazily-loaded chart chunk (plotly, aladin-lite, d3)
+ * Placeholder shown while a lazily-loaded chart chunk (plotly, d3)
  * downloads. These libraries are ~7MB of the build, so they are split out of the
  * initial bundle and fetched the first time a dialog that needs them is opened.
  */
