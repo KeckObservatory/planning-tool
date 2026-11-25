@@ -7,9 +7,9 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 16,
-            "pattern": "[\\w\\-\\s]+",
+            "pattern": "^.+$",
             "short_description": "Target Name",
-            "description": "Target Name. Sixteen characters maximum that must be alpha-numeric, hyphen, underscore, or a space."
+            "description": "Target Name. Sixteen characters maximum."
         },
         "priority": {
             "type": ["number", "string"],
@@ -51,7 +51,7 @@
             "short_description": "Science Target",
             "minLength": 1,
             "maxLength": 16,
-            "pattern": "[\\w\\-\\s]+",
+            "pattern": "^.+$",
             "starlist_key": "target"
         },
         "rotator_mode": {

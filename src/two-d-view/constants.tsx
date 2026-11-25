@@ -44,16 +44,20 @@ export const MOON_RADIUS = .52 // degrees
 export const MAG_RANGE = [1, 20] // mag range for guide star catalog queries
 export const DEFAULT_WINDOW_SIZE = 600 / 3600 // degrees, size of window to query for guide stars
 export const MOSFIRE_WINDOW_SIZE = 1200 / 3600 // degrees, size of window to query for guide stars
+// The 2D view's sky image plots all targets together, so it requests a wider field than the guide star dialog.
+export const SKY_VIEW_DEFAULT_WINDOW_SIZE = 1 / 4 // degrees
+export const SKY_VIEW_MOSFIRE_WINDOW_SIZE = 1 / 2 // degrees
 export const DEFAULT_RA = "12:48:45.8623" //NGC4711
 export const DEFAULT_DEC = "+35:19:57.8810"  //NGC4711
-export const AO_INSTRUMENTS: string[] = [ 'OSIRISImg', 'OSIRISSpec', 'NIRC2' ] //instruments that can use AO guide stars
+export const AO_INSTRUMENTS: string[] = [ 'OSIRISImg', 'OSIRISSpec', 'NIRC2', 'SCALES' ] //instruments that can use AO guide stars
 export const TRICK_INSTRUMENTS: string[] = ['OSIRIS']
 //img catalog constants
 export const ZOOM_SPEED = 0.001;
 export const ZOOM_MIN = 0.5;
-export const ZOOM_MAX = 20;
+export const ZOOM_MAX = 150;
 export const ZOOM_DEFAULT = 3; //For the guide star viewer
 export const MOSFIRE_ZOOM_DEFAULT = 1.5; //For the guide star viewer
+export const SCALES_ZOOM_DEFAULT = 20; //For the guide star viewer; SCALES' FOV is only ~12"
 export const OSIRIS_FSM_TSS_ROTATION = 48 // Osiris is rotated 48 degrees by default
 export const NIRC2_FSM_TSS_PO = 'NIRC2'
 

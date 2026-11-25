@@ -4,7 +4,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import Tooltip from '@mui/material/Tooltip';
 import TagIcon from '@mui/icons-material/Tag';
-import { Target, useSnackbarContext } from './App';
+import { Target, to_display_string, useSnackbarContext } from './App';
 import { Button, IconButton, Stack } from '@mui/material';
 import { MuiChipsInput } from 'mui-chips-input';
 import { submit_target } from './api/api_root';
@@ -49,7 +49,7 @@ function TagDialog(props: TagDialogProps) {
         const resp = await submit_target(tgts)
         if (resp.errors && resp.errors.length > 0) {
             console.error('errors', resp.errors)
-            snackbarContext.setSnackbarMessage({ severity: 'error', message: `Error saving targets ${resp.errors}` })
+            snackbarContext.setSnackbarMessage({ severity: 'error', message: `Error saving targets ${resp.errors.map(to_display_string).join(", ")}` })
             snackbarContext.setSnackbarOpen(true);
         }
         else {

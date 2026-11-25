@@ -4,7 +4,7 @@ import { IconButton } from '@mui/material';
 import { useState } from 'react';
 import { GaiaParams, get_gaia, get_simbad } from './api/api_root';
 import ModeStandbyIcon from '@mui/icons-material/ModeStandby';
-import { Target } from './App';
+import { Target, useSnackbarContext } from './App';
 import CatalogDialog from './catalog_dialog';
 
 
@@ -75,7 +75,12 @@ export interface SimbadTargetData {
 }
 
 export const get_simbad_data = async (targetName: string): Promise<SimbadTargetData> => {
-    const simbad_output = await get_simbad(targetName)
+    const simbad_output: unknown = await get_simbad(targetName)
+    // On a failed request, get_simbad resolves with the error (see handleError), not the text.
+    // Throw so callers can catch it and show a snackbar warning.
+    if (typeof simbad_output !== 'string') {
+        throw new Error(`Simbad lookup failed for ${targetName}`)
+    }
     const simbadData: SimbadTargetData = {}
 
     const simbadLines = simbad_output.split('\n')
@@ -160,6 +165,7 @@ export default function CatalogButton(props: Props) {
     const targetName = target.target_name
     const gaia_id = target.gaia_id
     const [dialogOpen, setDialogOpen] = useState(false)
+    const snackbarContext = useSnackbarContext()
 
     const handleClick = () => {
         if (targetName) {
@@ -169,7 +175,15 @@ export default function CatalogButton(props: Props) {
 
     const handleConfirm = async (magnitudeOnly: boolean, includeProperMotion: boolean) => {
         if (!targetName) return
-        const catalogTargetInfo = await get_simbad_and_gaia_target_info(targetName, gaia_id)
+        let catalogTargetInfo: SimbadTargetData & GaiaParams
+        try {
+            catalogTargetInfo = await get_simbad_and_gaia_target_info(targetName, gaia_id)
+        } catch (err) {
+            console.error(err)
+            snackbarContext.setSnackbarMessage({ severity: 'warning', message: `Simbad lookup failed for ${targetName}. Target was not updated.` })
+            snackbarContext.setSnackbarOpen(true)
+            return
+        }
         let updateInfo = magnitudeOnly
             ? Object.fromEntries(Object.entries(catalogTargetInfo).filter(([key]) => /_mag$/i.test(key)))
             : catalogTargetInfo

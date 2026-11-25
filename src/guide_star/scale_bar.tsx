@@ -7,17 +7,20 @@ interface ScaleBarProps {
   degPerPixel: number; // degrees per pixel at the current zoom
 }
 
+const MAX_PX = 100; // longest the bar may be drawn
+const RIGHT_MARGIN = 30; // px between the bar's right end and the viewer edge
+
 export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height, degPerPixel, invertImage }) => {
 
-  const rawArcsec = 100 * (3600 * degPerPixel); // calculate the length in pixels that corresponds to 20 arcseconds
-  let scaleBarLengthArcsec = Math.floor(rawArcsec / 5) * 5; // Round down to nearest multiple of 10
-  scaleBarLengthArcsec = Math.max(scaleBarLengthArcsec, 5); // Minimum length of 5 arcseconds
-  if (scaleBarLengthArcsec <= 5) {
-      scaleBarLengthArcsec = Math.floor(rawArcsec / 1) * 1; // Round down to nearest multiple of 10
-      scaleBarLengthArcsec = Math.max(scaleBarLengthArcsec, 1); // Minimum length of 1 arcsecond
-  }
-
-  const scaleBarLengthPxl = scaleBarLengthArcsec / rawArcsec;
+  // Pick the longest 1-2-5 length (..., 0.5", 1", 2", 5", 10", ...) that fits in MAX_PX.
+  // There's no 1" floor, so at high zoom the bar drops to sub-arcsecond lengths instead of
+  // growing past MAX_PX and running off the edge.
+  const arcsecPerPixel = 3600 * degPerPixel;
+  const maxArcsec = MAX_PX * arcsecPerPixel;
+  const decade = Math.pow(10, Math.floor(Math.log10(maxArcsec)));
+  const scaleBarLengthArcsec = [5, 2, 1].map((m) => m * decade).find((len) => len <= maxArcsec) ?? decade;
+  const lengthPx = scaleBarLengthArcsec / arcsecPerPixel;
+  const label = `${Number(scaleBarLengthArcsec.toPrecision(2))}"`;
 
   return (
     <svg
@@ -30,13 +33,13 @@ export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height, degPerPixel, 
         pointerEvents: 'none'
       }}
     >
-      {/* Scale bar: 100 pixels = 20 arcseconds */}
-      <g transform={`translate(${width - 120}, ${height - 30})`}>
+      {/* Right end pinned RIGHT_MARGIN from the edge; the bar grows leftward */}
+      <g transform={`translate(${width - RIGHT_MARGIN - lengthPx}, ${height - 30})`}>
         {/* Horizontal line */}
         <line
           x1="0"
           y1="0"
-          x2={`${scaleBarLengthPxl * 100}`}
+          x2={lengthPx}
           y2="0"
           stroke= {invertImage ? "black" : "white"}
           strokeWidth="2"
@@ -52,23 +55,23 @@ export const ScaleBar: React.FC<ScaleBarProps> = ({ width, height, degPerPixel, 
         />
         {/* Right tick */}
         <line
-          x1={scaleBarLengthPxl * 100}
+          x1={lengthPx}
           y1="-6"
-          x2={scaleBarLengthPxl * 100}
+          x2={lengthPx}
           y2="6"
           stroke= {invertImage ? "black" : "white"}
           strokeWidth="4"
         />
         {/* Label */}
         <text
-          x="50"
+          x={lengthPx / 2}
           y="20"
           fontSize="16"
           textAnchor="middle"
           fontFamily="monospace"
           fill={invertImage ? "black" : "white"}
         >
-          {`${scaleBarLengthArcsec}"`}
+          {label}
         </text>
       </g>
     </svg>

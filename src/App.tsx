@@ -56,6 +56,27 @@ export interface SnackbarMessage {
   severity?: 'success' | 'error' | 'warning' | 'info';
 }
 
+// API helpers resolve with the error object on failure (see handleError), so a value typed as
+// a string can be an object at runtime. Turn anything into readable text for display.
+export const to_display_string = (value: unknown): string => {
+  if (typeof value === 'string') return value
+  if (value == null) return ''
+  if (value instanceof Error) return value.message
+  if (typeof value === 'object') {
+    // Error payloads from the server explain themselves in `details` (preferred) or `error`;
+    // show only that field when present.
+    const { details, error } = value as { details?: unknown, error?: unknown }
+    if (details != null && details !== '') return to_display_string(details)
+    if (error != null && error !== '') return to_display_string(error)
+    try {
+      return JSON.stringify(value, null, 2)
+    } catch {
+      return String(value) // e.g. circular references
+    }
+  }
+  return String(value)
+}
+
 export interface SnackbarContextProps {
   snackbarOpen: boolean;
   setSnackbarOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -237,7 +258,7 @@ function App() {
               variant="filled"
               sx={{ width: '100%', whiteSpace: 'pre-line' }}
             >
-              {snackbarMessage.message}
+              {to_display_string(snackbarMessage.message)}
             </Alert>
           </Snackbar>
           {/*
