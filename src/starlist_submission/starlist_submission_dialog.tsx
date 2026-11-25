@@ -25,7 +25,14 @@ interface StarlistSubmissionDialogProps extends ExportProps {
     handleClose: () => void
 }
 
-const moveItem = (rows: string[], from: number, to: number): string[] => {
+// Max targets allowed for a scheduled night: anything less than a full night gets the
+// half-night limit. With no schedule entry selected, the full-night limit applies.
+export const target_limit = (fractionOfNight?: number): number =>
+    fractionOfNight == null || fractionOfNight >= 1
+        ? config.full_night_target_limit
+        : config.half_night_target_limit
+
+const moveItem =(rows: string[], from: number, to: number): string[] => {
     const newRows = [...rows]
     const [row] = newRows.splice(from, 1)
     newRows.splice(to, 0, row)
@@ -99,6 +106,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     const [schedule, setSchedule] = useState<ObserverSchedule[]>([])
     const [selectedSchedId, setSelectedSchedId] = useState<number | undefined>(undefined)
     const [instrument, setInstrument] = useState<string>("")
+    const [fractionOfNight, setFractionOfNight] = useState<number | undefined>(undefined)
     // Nights queued to receive this same star list, sent one request each on Submit.
     const [queue, setQueue] = useState<QueuedSubmission[]>([])
     const [submitting, setSubmitting] = useState<boolean>(false)
@@ -110,6 +118,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
         setSelectedSchedId(entry.SchedId)
         setPiName(entry.PiLastName)
         setInstrument(entry.Instrument)
+        setFractionOfNight(entry.FractionOfNight)
         setDate(dayjs(entry.Date))
         if (entry.TelNr === 1 || entry.TelNr === 2) {
             setDome(`Keck ${entry.TelNr}` as Dome)
@@ -163,13 +172,6 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
         }
 
         warnings.push(...malformedTargetWarnings)
-
-        if (props.exportTargets.length > config.full_night_target_limit) {
-            warnings.push(
-                `${props.exportTargets.length} targets submitted - only ${config.full_night_target_limit} `
-                + `are allowed for a full night (${config.half_night_target_limit} for a half night).`
-            )
-        }
 
         if (warnings.length > 0) {
             snackbarContext.setSnackbarMessage({ severity: 'warning', message: warnings.join('\n') })
@@ -234,7 +236,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
             show_message('warning', `${form.hstDate} on Keck ${form.telescope} for ${form.semid || 'this program'} is already in the list.`)
             return
         }
-        setQueue((q) => [...q, { key, form, status: 'pending' }])
+        setQueue((q) => [...q, { key, form, status: 'pending', fractionOfNight }])
     }
 
     const remove_from_queue = (key: string) => setQueue((q) => q.filter((entry) => entry.key !== key))
@@ -304,11 +306,31 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
     const unsentCount = queue.filter((entry) => entry.status !== 'sent').length
     // With a list, Submit sends the list (the form only feeds "Add to list"); without one, it
     // sends the form as before.
-    const submitBlocked = hasMalformedTargets || hasNonzeroPM || submitting
+    // Each night being submitted must fit the star list within its own (full/half night) limit.
+    const nTargets = (starListStrings ?? []).length
+    const limit_warning = (fraction: number | undefined, night?: { telescope: string, hstDate: string }): string | undefined => {
+        const limit = target_limit(fraction)
+        if (nTargets <= limit) return undefined
+        const size = fraction == null ? 'night' : fraction >= 1 ? 'full night' : 'half night'
+        const where = night ? `${night.hstDate} on Keck ${night.telescope} (${size})` : `a ${size}`
+        return `${nTargets} targets exceed the ${limit}-target limit for ${where}.`
+    }
+    const targetLimitWarnings = (queue.length > 0
+        ? queue.filter((entry) => entry.status !== 'sent')
+            .map((entry) => limit_warning(entry.fractionOfNight, entry.form))
+        : [limit_warning(fractionOfNight, isDateValid ? { telescope: dome.slice(dome.length - 1), hstDate: date.format('YYYY-MM-DD') } : undefined)]
+    ).filter((w): w is string => !!w)
+    const exceedsTargetLimit = targetLimitWarnings.length > 0
+    const submitBlocked = hasMalformedTargets || hasNonzeroPM || submitting || exceedsTargetLimit
         || (queue.length > 0 ? unsentCount === 0 : (!isDateValid || !isPiNameValid))
 
     const dialogActions = (
-        <Stack direction='row' spacing={1}>
+        <Stack direction='row' spacing={1} alignItems='center'>
+            {exceedsTargetLimit && (
+                <Typography variant="body2" color="error" sx={{ whiteSpace: 'pre-line' }}>
+                    {targetLimitWarnings.join('\n')}
+                </Typography>
+            )}
             <Tooltip title="Queue this night to receive the same star list">
                 <span>
                     <Button

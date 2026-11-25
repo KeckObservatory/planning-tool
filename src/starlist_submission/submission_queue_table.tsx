@@ -11,6 +11,7 @@ export interface QueuedSubmission {
     form: Omit<SubmittedStarList, 'slist'>
     status: SubmissionStatus
     message?: string // the backend's response, shown on hover
+    fractionOfNight?: number // from the selected schedule entry; sets the target limit
 }
 
 export const submission_key = (form: Omit<SubmittedStarList, 'slist'>) =>
