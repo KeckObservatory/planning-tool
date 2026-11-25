@@ -249,20 +249,24 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
         const toSend = queue.filter((entry) => entry.status !== 'sent')
         const slist = (starListStrings ?? []).join('\n')
         setSubmitting(true)
-        let failed = 0
+        // The server's error message for each night that failed, shown together in the snackbar.
+        const failures: string[] = []
         for (const entry of toSend) { // one at a time, so each night gets its own clear result
             set_entry_status(entry.key, 'sending')
             const status = to_display_string(await submit_starlist({ ...entry.form, slist })) || 'No response'
             const ok = status.includes('success')
-            if (!ok) failed += 1
+            if (!ok) failures.push(`${entry.form.hstDate} on Keck ${entry.form.telescope}: ${status}`)
             set_entry_status(entry.key, ok ? 'sent' : 'failed', status)
         }
         setSubmitting(false)
-        if (failed === 0) {
+        if (failures.length === 0) {
             show_message('success', `Submitted ${toSend.length} star list(s).`)
             props.handleClose()
         } else {
-            show_message('error', `${failed} of ${toSend.length} submission(s) failed - hover a status for details. Submit again to retry them.`)
+            show_message('error', [
+                `${failures.length} of ${toSend.length} submission(s) failed. Submit again to retry them.`,
+                ...failures,
+            ].join('\n'))
         }
     }
 

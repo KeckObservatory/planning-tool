@@ -31,7 +31,7 @@ export function handleError(error: Error | AxiosError) {
         if (details != null && details !== '') {
             return new Error(typeof details === 'string' ? details : JSON.stringify(details))
         }
-        if (payload) return details ?? payload
+        if (payload) return payload
         return error.toJSON();
     }
     return error;
