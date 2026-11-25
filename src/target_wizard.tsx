@@ -42,6 +42,7 @@ function TargetSubmitter(props: LinearProgressProps &
     const generate_targets_from_list = async () => {
         setLabel('Loading Targets')
         const tgts: Target[] = []
+        const simbadFailures: string[] = []
         for (let idx = 0; idx < targets.length; idx++) {
             let tgt = targets[idx]
             const tgtName = tgt.target_name as string
@@ -49,10 +50,23 @@ function TargetSubmitter(props: LinearProgressProps &
             if (!tgtName) continue
             if (!open) break
 
-            const simbadData = useSimbad ? await get_simbad_data(tgtName) ?? {} : {}
+            let simbadData = {}
+            if (useSimbad) {
+                try {
+                    simbadData = await get_simbad_data(tgtName) ?? {}
+                } catch (err) { // keep the target without catalog info; warn once at the end
+                    console.error(err)
+                    simbadFailures.push(tgtName)
+                }
+            }
             tgt = { ...simbadData, ...tgt, obsid: context.obsid } as Target
             tgts.push(tgt)
             setProgress(((idx + 1) / targets.length) * 100)
+        }
+
+        if (simbadFailures.length > 0) {
+            snackbarContext.setSnackbarMessage({ severity: 'warning', message: `Simbad lookup failed for: ${simbadFailures.join(', ')}. These targets were created without Simbad info.` })
+            snackbarContext.setSnackbarOpen(true)
         }
 
         setProgress(100)
