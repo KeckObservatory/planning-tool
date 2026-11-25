@@ -2,7 +2,7 @@ import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import { Target, useSnackbarContext, useStateContext } from './App';
+import { Target, to_display_string, useSnackbarContext, useStateContext } from './App';
 import { DialogComponent } from './dialog_component';
 import { Button, Typography } from '@mui/material';
 import { delete_target, submit_target } from './api/api_root';
@@ -61,7 +61,7 @@ function DeleteTargets(props: { targets: Target[], setRows: Function, setRowSele
     const resp = await submit_target(deletedTargets)
     if (resp.errors.length>0) {
       console.error('error while undoing target delete', resp)
-      const msg = 'error when undoing deleted targets: ' + resp.errors.join(', ')
+      const msg = 'error when undoing deleted targets: ' + resp.errors.map(to_display_string).join(', ')
       snackbarContext.setSnackbarMessage({ severity: 'error', message: msg })
       snackbarContext.setSnackbarOpen(true)
       return

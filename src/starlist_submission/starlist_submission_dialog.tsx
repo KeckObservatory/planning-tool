@@ -5,7 +5,7 @@ import { DialogComponent } from '../dialog_component';
 import { Dome, DomeParam } from '../two-d-view/two_d_view_common.tsx';
 import { useQueryParam, withDefault } from 'use-query-params';
 import { ExportProps, getStarlist } from '../table_toolbar';
-import { useSnackbarContext, useStateContext } from '../App';
+import { to_display_string, useSnackbarContext, useStateContext } from '../App';
 import React from 'react';
 import { get_user_schedule, ObserverSchedule, submit_starlist, SubmittedStarList, TelSchedule } from '../api/api_root';
 import { TargetListItem } from './target_list_item';
@@ -252,7 +252,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
         let failed = 0
         for (const entry of toSend) { // one at a time, so each night gets its own clear result
             set_entry_status(entry.key, 'sending')
-            const status = String(await submit_starlist({ ...entry.form, slist }) ?? 'No response')
+            const status = to_display_string(await submit_starlist({ ...entry.form, slist })) || 'No response'
             const ok = status.includes('success')
             if (!ok) failed += 1
             set_entry_status(entry.key, ok ? 'sent' : 'failed', status)
@@ -287,7 +287,7 @@ export const StarlistSubmissionDialog = (props: StarlistSubmissionDialogProps) =
             return
         }
         const form: SubmittedStarList = { ...fields, slist: (starListStrings ?? []).join('\n') }
-        const submit_status = await submit_starlist(form)
+        const submit_status = to_display_string(await submit_starlist(form)) || 'No response'
         if (submit_status.includes("success")) {
             snackbarContext.setSnackbarMessage({severity: 'success', message:submit_status})
             snackbarContext.setSnackbarOpen(true)

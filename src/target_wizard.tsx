@@ -9,7 +9,7 @@ import { UploadComponent } from './upload_targets_dialog';
 import { get_simbad_data } from './catalog_button.tsx';
 import Tooltip from '@mui/material/Tooltip';
 import Stack from '@mui/material/Stack';
-import { useSnackbarContext, useStateContext } from './App.tsx';
+import { to_display_string, useSnackbarContext, useStateContext } from './App.tsx';
 // import { save_target } from './api/api_root';
 import LinearProgress, { LinearProgressProps } from '@mui/material/LinearProgress';
 import { Target } from './App.tsx'
@@ -89,7 +89,7 @@ function TargetSubmitter(props: LinearProgressProps &
         const resp = await submit_target(tgts)
         if (resp.errors && resp.errors.length > 0) {
             console.error('errors', resp.errors)
-            snackbarContext.setSnackbarMessage({ severity: 'error', message: `Error saving targets ${resp.errors}` })
+            snackbarContext.setSnackbarMessage({ severity: 'error', message: `Error saving targets ${resp.errors.map(to_display_string).join(", ")}` })
             snackbarContext.setSnackbarOpen(true);
         }
 
