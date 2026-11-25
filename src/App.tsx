@@ -63,6 +63,11 @@ export const to_display_string = (value: unknown): string => {
   if (value == null) return ''
   if (value instanceof Error) return value.message
   if (typeof value === 'object') {
+    // Error payloads from the server explain themselves in `details` (preferred) or `error`;
+    // show only that field when present.
+    const { details, error } = value as { details?: unknown, error?: unknown }
+    if (details != null && details !== '') return to_display_string(details)
+    if (error != null && error !== '') return to_display_string(error)
     try {
       return JSON.stringify(value, null, 2)
     } catch {
